@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { MdEdit, MdRestore } from "react-icons/md";
 import JSONCode from "./JSONCode";
 
-export default function AttributesSection({ attrs, setAttrs }) {
+export default function AttributesSection({ attrs, setAttrs, hasOverrides }) {
   const [edit, setEdit] = useState(false);
   const form = useForm({
     defaultValues: {
@@ -37,7 +37,7 @@ export default function AttributesSection({ attrs, setAttrs }) {
             }}
           />
         )}
-        {!edit && (
+        {!edit && hasOverrides && (
           <IconButton
             size="xs"
             variant="ghost"
@@ -46,7 +46,7 @@ export default function AttributesSection({ attrs, setAttrs }) {
             type="button"
             onClick={(e) => {
               e.preventDefault();
-              console.log("TODO: Revert");
+              setAttrs(null);
             }}
           />
         )}

@@ -12,25 +12,36 @@ import {
   getExperimentResults,
   getFeatures,
   whenGrowthBookExists,
-  setAttributes,
-  forceFeatureValue,
-  getForcedFeatures,
-  revertForcedFeature,
+  setAttributeOverrides,
+  setForcedFeatures,
+  setForcedVariations,
 } from "./controller";
+import { useSessionStorage } from "./util";
 
 function App() {
   const [feats, setFeats] = useState([]);
   const [exps, setExps] = useState([]);
   const [attrs, setAttrs] = useState({});
-  const [forcedFeatureValues, setForcedFeatureValues] = useState(new Map());
+  const [forcedFeatureValues, setForcedFeatureValues] = useSessionStorage("forcedFeatureValues",{});
+  const [forcedVars, setForcedVars] = useSessionStorage("forcedExperimentVariations", {});
+  const [attrOverrides, setAttrOverrides] = useSessionStorage("attributeOverrides", null);
 
   const [q, setQ] = useState("");
 
-  const updateFeats = useCallback(() => {
+  const refresh = useCallback(() => {
+    const forcedFeatureMap = new Map(Object.entries(forcedFeatureValues));
+
+    // Make sure page's GrowthBook instance is up-to-date with dev tool overrides
+    setAttributeOverrides(attrOverrides || {});
+    setForcedVariations(forcedVars);
+    setForcedFeatures(forcedFeatureMap);
+
+    // Get latest features, experiment results, and attributes from page's GrowthBook instance
     const features = getFeatures();
     const results = getExperimentResults();
     const attributes = getAttributes();
-    const forcedFeatures = getForcedFeatures();
+
+    // Local GrowthBook instance for debugging
     let log = [];
     const growthbook = new GrowthBook({
       attributes,
@@ -39,16 +50,20 @@ function App() {
       log: (msg, ctx) => {
         log.push([msg, ctx]);
       },
+      forcedVariations: forcedVars,
     });
-    growthbook.setForcedFeatures(forcedFeatures);
+    if (attrOverrides) {
+      growthbook.setAttributeOverrides(attrOverrides);
+    }
+    growthbook.setForcedFeatures(forcedFeatureMap);
 
-    setAttrs(() => attributes);
-    setForcedFeatureValues(() => forcedFeatures);
+    // Update local state of attributes, features, and experiments
+    setAttrs(attributes);
     setExps(() => {
       const experiments = [];
-      results.forEach(({ experiment, result }) => {
+      results.forEach(({ experiment }) => {
         growthbook.debug = true;
-        growthbook.run(experiment);
+        const result = growthbook.run(experiment);
         growthbook.debug = false;
 
         const debug = [...log];
@@ -62,7 +77,6 @@ function App() {
       });
       return experiments;
     });
-
     setFeats(() =>
       Object.keys(features).map((k) => {
         growthbook.debug = true;
@@ -80,9 +94,9 @@ function App() {
         };
       })
     );
-  }, []);
+  }, [attrOverrides, forcedFeatureValues, forcedVars]);
 
-  useEffect(() => whenGrowthBookExists(updateFeats), [updateFeats]);
+  useEffect(() => whenGrowthBookExists(refresh), [refresh]);
 
   return (
     <Stack p="5" spacing="5" maxW="container.lg" m="0 auto">
@@ -113,13 +127,17 @@ function App() {
                 result={result}
                 debug={debug}
                 forceValue={(val) => {
-                  forceFeatureValue(key, val);
-                  updateFeats();
+                  setForcedFeatureValues((forced) => {
+                    return {...forced, [key]: val}
+                  });
                 }}
-                isForced={forcedFeatureValues.has(key)}
+                isForced={key in forcedFeatureValues}
                 unforce={() => {
-                  revertForcedFeature(key);
-                  updateFeats();
+                  setForcedFeatureValues((forced) => {
+                    const newForced = {...forced};
+                    delete newForced[key];
+                    return newForced;
+                  });
                 }}
               />
             ))}
@@ -138,15 +156,31 @@ function App() {
                 experiment={experiment}
                 result={result}
                 debug={debug}
+                force={(variation) => {
+                  setForcedVars((vars) => {
+                    return {
+                      ...vars,
+                      [experiment.key]: variation,
+                    };
+                  });
+                }}
+                isForced={experiment.key in forcedVars}
+                unforce={() => {
+                  setForcedVars((existing) => {
+                    const newVars = { ...existing };
+                    delete newVars[experiment.key];
+                    return newVars;
+                  });
+                }}
               />
             ))}
         </Accordion>
       </div>
       <AttributesSection
         attrs={attrs}
+        hasOverrides={!!attrOverrides}
         setAttrs={(val) => {
-          setAttributes(val);
-          updateFeats();
+          setAttrOverrides(val);
         }}
       />
     </Stack>

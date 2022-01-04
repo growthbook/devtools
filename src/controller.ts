@@ -28,48 +28,30 @@ export function whenGrowthBookExists(callback: () => void) {
     clearTimeout(timer);
   };
 }
-
 export function getAttributes() {
   const gb = getGrowthBookInstance();
   return gb ? gb.getAttributes() : {};
 }
-
 export function getFeatures() {
   const gb = getGrowthBookInstance();
   return gb ? gb.getFeatures() : {};
 }
-
 export function getExperimentResults() {
   const gb = getGrowthBookInstance();
   return gb ? gb.getAllResults() : new Map();
 }
-
-export function getForcedFeatures() {
-  const gb = getGrowthBookInstance();
-  return gb ? gb.getForcedFeatures() : new Map();
-}
-
-export function revertForcedFeature(key: string) {
+export function setForcedFeatures(features: Map<string, any>) {
   const gb = getGrowthBookInstance();
   if(!gb) return;
-  gb.unforceFeature(key);
+  gb.setForcedFeatures(features);
 }
-
-export function setAttributes(attributes: Record<string, any>) {
+export function setForcedVariations(vars: Record<string, number>) {
   const gb = getGrowthBookInstance();
   if(!gb) return;
-  gb.setAttributes(attributes);
+  gb.setForcedVariations(vars);
 }
-
-export function forceVariation(key: string, variation: number) {
+export function setAttributeOverrides(overrides: Record<string, any>) {
   const gb = getGrowthBookInstance();
   if(!gb) return;
-  gb.forceVariation(key, variation);
+  gb.setAttributeOverrides(overrides);
 }
-
-export function forceFeatureValue(key: string, value: any) {
-  const gb = getGrowthBookInstance();
-  if(!gb) return;
-  gb.forceFeature(key, value);
-}
-

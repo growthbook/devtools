@@ -75,7 +75,7 @@ export default function Feature({
                   }}
                 />
               )}
-              {isForced && (
+              {isForced && !edit && (
                 <IconButton
                   size="xs"
                   variant="ghost"

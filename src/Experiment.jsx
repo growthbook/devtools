@@ -4,12 +4,21 @@ import {
   AccordionItem,
   AccordionPanel,
 } from "@chakra-ui/accordion";
+import { IconButton } from "@chakra-ui/button";
 import { Badge, Box, HStack, Stack, Text } from "@chakra-ui/layout";
 import stringify from "json-stringify-pretty-compact";
+import { MdHistory } from "react-icons/md";
 import DebugLog from "./DebugLog";
 import JSONCode from "./JSONCode";
 
-export default function Experiment({ result, experiment, debug }) {
+export default function Experiment({
+  result,
+  experiment,
+  debug,
+  force,
+  unforce,
+  isForced,
+}) {
   const { variations, key, ...other } = experiment;
 
   return (
@@ -17,6 +26,9 @@ export default function Experiment({ result, experiment, debug }) {
       <AccordionButton _expanded={{ bg: "purple.100" }}>
         <HStack spacing="4" flex="1">
           <Badge colorScheme="purple">{key}</Badge>
+          {isForced && (
+            <Box w="8px" h="8px" bgColor="blue.500" rounded="full" />
+          )}
           <Text isTruncated opacity={0.6} fontSize="sm">
             {JSON.stringify(result.value)}
           </Text>
@@ -26,7 +38,22 @@ export default function Experiment({ result, experiment, debug }) {
       <AccordionPanel bgColor="purple.50">
         <Stack spacing={3} ml={3}>
           <Box>
-            <Text fontWeight="bold">Variations</Text>
+            <HStack>
+              <Text fontWeight="bold">Variations</Text>
+              {isForced && (
+                <IconButton
+                  size="xs"
+                  variant="ghost"
+                  icon={<MdHistory size="16px" />}
+                  aria-label="Revert Override"
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    unforce();
+                  }}
+                />
+              )}
+            </HStack>
             <Stack spacing={0} mb={3}>
               {variations.map((v, i) => {
                 const isSelected = result.variationId === i;
@@ -36,6 +63,10 @@ export default function Experiment({ result, experiment, debug }) {
                     bgColor={isSelected ? "blue.300" : "white"}
                     borderWidth={1}
                     p={2}
+                    cursor="pointer"
+                    onClick={() => {
+                      force(i);
+                    }}
                   >
                     {stringify(v)}
                   </Box>
