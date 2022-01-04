@@ -1,6 +1,6 @@
 import { Accordion } from "@chakra-ui/accordion";
 import { Input } from "@chakra-ui/input";
-import { Heading, Stack } from "@chakra-ui/layout";
+import { Heading, HStack, Stack } from "@chakra-ui/layout";
 import { GrowthBook } from "@growthbook/growthbook";
 import React, { useCallback, useEffect, useState } from "react";
 import GrowthBookApp from "./GrowthBookApp";
@@ -16,15 +16,16 @@ import {
   setForcedFeatures,
   setForcedVariations,
 } from "./controller";
-import { useSessionStorage } from "./util";
+import { IconButton } from "@chakra-ui/button";
+import { MdHistory, MdRefresh } from "react-icons/md";
 
 function App() {
   const [feats, setFeats] = useState([]);
   const [exps, setExps] = useState([]);
   const [attrs, setAttrs] = useState({});
-  const [forcedFeatureValues, setForcedFeatureValues] = useSessionStorage("forcedFeatureValues",{});
-  const [forcedVars, setForcedVars] = useSessionStorage("forcedExperimentVariations", {});
-  const [attrOverrides, setAttrOverrides] = useSessionStorage("attributeOverrides", null);
+  const [forcedFeatureValues, setForcedFeatureValues] = useState({});
+  const [forcedVars, setForcedVars] = useState({});
+  const [attrOverrides, setAttrOverrides] = useState(null);
 
   const [q, setQ] = useState("");
 
@@ -101,9 +102,25 @@ function App() {
   return (
     <Stack p="5" spacing="5" maxW="container.lg" m="0 auto">
       <GrowthBookApp />
-      <Heading as="h1" size="xl">
-        GrowthBook Dev Tools
-      </Heading>
+      <HStack>
+        <Heading as="h1" size="xl">
+          GrowthBook Dev Tools
+        </Heading>
+
+        <IconButton
+          size="sm"
+          variant="ghost"
+          ml={2}
+          icon={<MdRefresh size="18px" />}
+          aria-label="Refresh Data"
+          title="Refresh Data"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            refresh();
+          }}
+        />
+      </HStack>
       <Input
         placeholder="Filter by key..."
         type="search"
@@ -113,9 +130,27 @@ function App() {
         }}
       />
       <div>
-        <Heading as="h2" size="md" mb="2">
-          Features
-        </Heading>
+        <HStack>
+          <Heading as="h2" size="md" mb="2">
+            Features
+          </Heading>
+
+          {Object.keys(forcedFeatureValues).length > 0 && (
+            <IconButton
+              size="xs"
+              variant="ghost"
+              ml={2}
+              icon={<MdHistory size="18px" />}
+              aria-label="Revert Feature Overrides"
+              title="Revert Feature Overrides"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                setForcedFeatureValues({});
+              }}
+            />
+          )}
+        </HStack>
         <Accordion allowToggle>
           {feats
             .filter((f) => !q || f.key.includes(q))
@@ -128,13 +163,13 @@ function App() {
                 debug={debug}
                 forceValue={(val) => {
                   setForcedFeatureValues((forced) => {
-                    return {...forced, [key]: val}
+                    return { ...forced, [key]: val };
                   });
                 }}
                 isForced={key in forcedFeatureValues}
                 unforce={() => {
                   setForcedFeatureValues((forced) => {
-                    const newForced = {...forced};
+                    const newForced = { ...forced };
                     delete newForced[key];
                     return newForced;
                   });
@@ -144,9 +179,27 @@ function App() {
         </Accordion>
       </div>
       <div>
-        <Heading as="h2" size="md" mb="2">
-          Experiments
-        </Heading>
+        <HStack>
+          <Heading as="h2" size="md" mb="2">
+            Experiments
+          </Heading>
+
+          {Object.keys(forcedVars).length > 0 && (
+            <IconButton
+              size="xs"
+              variant="ghost"
+              ml={2}
+              icon={<MdHistory size="18px" />}
+              aria-label="Revert Experiment Overrides"
+              title="Revert Experiment Overrides"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                setForcedVars({});
+              }}
+            />
+          )}
+        </HStack>
         <Accordion allowToggle>
           {exps
             .filter((e) => !q || e.experiment.key.includes(q))

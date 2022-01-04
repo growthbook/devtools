@@ -46,7 +46,7 @@ export default function Feature({
         <HStack spacing="2" flex="1">
           <Badge colorScheme="purple">{id}</Badge>
           {isForced && (
-            <Box w="8px" h="8px" bgColor="blue.500" rounded="full" />
+            <Box w="8px" h="8px" bgColor="blue.500" rounded="full" title="Overridden" />
           )}
           <Text isTruncated opacity={0.6} fontSize="sm">
             {JSON.stringify(result.value)}
@@ -65,6 +65,7 @@ export default function Feature({
                   variant="ghost"
                   icon={<MdEdit size="16px" />}
                   aria-label="Edit User Attributes"
+                  title="Edit User Attributes"
                   type="button"
                   onClick={(e) => {
                     e.preventDefault();
@@ -81,6 +82,7 @@ export default function Feature({
                   variant="ghost"
                   icon={<MdHistory size="16px" />}
                   aria-label="Revert Override"
+                  title="Revert Override"
                   type="button"
                   onClick={(e) => {
                     e.preventDefault();

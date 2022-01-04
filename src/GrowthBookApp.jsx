@@ -1,10 +1,12 @@
-import { Badge, Box } from "@chakra-ui/layout";
-import {GrowthBook} from "@growthbook/growthbook";
+import { Button } from "@chakra-ui/button";
+import { Badge, Box, HStack, Text } from "@chakra-ui/layout";
+import { GrowthBook } from "@growthbook/growthbook";
 import {
   GrowthBookProvider,
   useExperiment,
   useFeature,
 } from "@growthbook/growthbook-react";
+import { useEffect, useState } from "react";
 
 const gb = new GrowthBook({
   features: {
@@ -16,11 +18,11 @@ const gb = new GrowthBook({
       rules: [
         {
           condition: {
-            country: "UK"
+            country: "UK",
           },
-          force: "blue"
-        }
-      ]
+          force: "blue",
+        },
+      ],
     },
     "show-exclamation": {
       defaultValue: false,
@@ -30,7 +32,7 @@ const gb = new GrowthBook({
     id: "123",
     url: window.location.pathname,
     country: "US",
-  }
+  },
 });
 
 function Component() {
@@ -40,11 +42,11 @@ function Component() {
   const { value } = useExperiment({
     key: "my-experiment",
     variations: ["control", "variation"],
-    weights: [0.2, 0.8]
+    weights: [0.2, 0.8],
   });
 
   return (
-    <div>
+    <div style={{flex: 1}}>
       <h3 style={{ color: color.value }}>{title.value}</h3>
       {show.on && <div>I Love You!</div>}
       <div>Experiment: {value}</div>
@@ -53,11 +55,33 @@ function Component() {
 }
 
 export default function GrowthBookApp() {
+  const [userId, setUserId] = useState("123");
+  useEffect(() => {
+    gb.setAttributes({
+      ...gb.getAttributes(),
+      id: userId
+    });
+  }, [userId]);
+  
   return (
     <GrowthBookProvider growthbook={gb}>
       <Box bgColor="gray.100" borderWidth={1} p={3}>
         <Badge colorScheme="red">TEMPORARY</Badge>
-        <Component />
+        <HStack>
+          <Component />
+          <Box textAlign="center">
+            <Button
+              colorScheme="green"
+              onClick={() => {
+                setUserId(Math.round(Math.random() * 1000) + "");
+              }}
+              type="button"
+            >
+              Randomize User Id
+            </Button>
+            <Text fontSize="sm" color="gray.500">{userId}</Text>
+          </Box>
+        </HStack>
       </Box>
     </GrowthBookProvider>
   );

@@ -27,6 +27,7 @@ export default function AttributesSection({ attrs, setAttrs, hasOverrides }) {
             ml={2}
             icon={<MdEdit size="18px"  />}
             aria-label="Edit User Attributes"
+            title="Edit User Attributes"
             type="button"
             onClick={(e) => {
               e.preventDefault();
@@ -43,6 +44,7 @@ export default function AttributesSection({ attrs, setAttrs, hasOverrides }) {
             variant="ghost"
             icon={<MdRestore size="18px" />}
             aria-label="Restore User Attributes"
+            title="Restore User Attributes"
             type="button"
             onClick={(e) => {
               e.preventDefault();
