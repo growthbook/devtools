@@ -70,7 +70,7 @@ export default function AttributesSection({ attrs, setAttrs }) {
               {error}
             </Alert>
           )}
-          <Textarea {...form.register("attrs")} rows={12} mb={2} />
+          <Textarea {...form.register("attrs")} rows={12} mb={2} autoFocus />
           <HStack spacing={5}>
             <Button colorScheme="purple" type="submit">
               Save

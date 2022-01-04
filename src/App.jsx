@@ -7,33 +7,44 @@ import GrowthBookApp from "./GrowthBookApp";
 import Feature from "./Feature";
 import AttributesSection from "./AttributesSection";
 import Experiment from "./Experiment";
+import {
+  getAttributes,
+  getExperimentResults,
+  getFeatures,
+  whenGrowthBookExists,
+  setAttributes,
+  forceFeatureValue,
+  getForcedFeatures,
+  revertForcedFeature,
+} from "./controller";
 
 function App() {
   const [feats, setFeats] = useState([]);
   const [exps, setExps] = useState([]);
   const [attrs, setAttrs] = useState({});
+  const [forcedFeatureValues, setForcedFeatureValues] = useState(new Map());
 
   const [q, setQ] = useState("");
 
   const updateFeats = useCallback(() => {
-    if (window._growthbook) {
-      const gb = window._growthbook;
-      if (!gb) return;
-      const features = gb.getFeatures();
-      const results = gb.getAllResults();
-      const attributes = gb.getAttributes();
-      let log = [];
-      const growthbook = new GrowthBook({
-        attributes,
-        features,
-        noWindowRef: true,
-        log: (msg, ctx) => {
-          log.push([msg, ctx]);
-        },
-      });
+    const features = getFeatures();
+    const results = getExperimentResults();
+    const attributes = getAttributes();
+    const forcedFeatures = getForcedFeatures();
+    let log = [];
+    const growthbook = new GrowthBook({
+      attributes,
+      features,
+      noWindowRef: true,
+      log: (msg, ctx) => {
+        log.push([msg, ctx]);
+      },
+    });
+    growthbook.setForcedFeatures(forcedFeatures);
 
-      setAttrs(() => attributes);
-
+    setAttrs(() => attributes);
+    setForcedFeatureValues(() => forcedFeatures);
+    setExps(() => {
       const experiments = [];
       results.forEach(({ experiment, result }) => {
         growthbook.debug = true;
@@ -49,50 +60,32 @@ function App() {
           debug,
         });
       });
-      setExps(experiments);
+      return experiments;
+    });
 
-      setFeats(() =>
-        Object.keys(features).map((k) => {
-          growthbook.debug = true;
-          const result = growthbook.feature(k);
-          growthbook.debug = false;
+    setFeats(() =>
+      Object.keys(features).map((k) => {
+        growthbook.debug = true;
+        const result = growthbook.feature(k);
+        growthbook.debug = false;
 
-          const debug = [...log];
-          log = [];
+        const debug = [...log];
+        log = [];
 
-          return {
-            key: k,
-            feature: features[k],
-            result,
-            debug,
-          };
-        })
-      );
-    }
+        return {
+          key: k,
+          feature: features[k],
+          result,
+          debug,
+        };
+      })
+    );
   }, []);
 
-  // Poll for global window._growthbook to exist
-  useEffect(() => {
-    let cancel = false;
-    let timer;
-    const cb = () => {
-      if (cancel) return;
-      if (window._growthbook) {
-        updateFeats();
-      } else {
-        timer = window.setTimeout(cb, 200);
-      }
-    };
-    cb();
-
-    return () => {
-      cancel = true;
-      clearTimeout(timer);
-    };
-  }, [updateFeats]);
+  useEffect(() => whenGrowthBookExists(updateFeats), [updateFeats]);
 
   return (
-    <Stack p="5" spacing="5">
+    <Stack p="5" spacing="5" maxW="container.lg" m="0 auto">
       <GrowthBookApp />
       <Heading as="h1" size="xl">
         GrowthBook Dev Tools
@@ -119,6 +112,15 @@ function App() {
                 feature={feature}
                 result={result}
                 debug={debug}
+                forceValue={(val) => {
+                  forceFeatureValue(key, val);
+                  updateFeats();
+                }}
+                isForced={forcedFeatureValues.has(key)}
+                unforce={() => {
+                  revertForcedFeature(key);
+                  updateFeats();
+                }}
               />
             ))}
         </Accordion>
@@ -143,7 +145,7 @@ function App() {
       <AttributesSection
         attrs={attrs}
         setAttrs={(val) => {
-          window._growthbook?.setAttributes(val);
+          setAttributes(val);
           updateFeats();
         }}
       />
