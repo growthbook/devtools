@@ -4,9 +4,22 @@
   "version": "1.0",
   "manifest_version": 3,
   "devtools_page": "devtools.html",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["static/js/content.js"]
+    }
+  ], 
+  "web_accessible_resources": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "resources": ["static/js/page.js"]
+    }
+  ],
   "icons": {
-      "16": "logo192.png",
-      "48": "logo192.png",
-      "128": "logo192.png"
+    "16": "logo192.png",
+    "48": "logo192.png",
+    "128": "logo192.png"
   }
 }

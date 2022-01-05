@@ -6,8 +6,17 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { MdEdit, MdRestore } from "react-icons/md";
 import JSONCode from "./JSONCode";
+import {Attributes} from "@growthbook/growthbook";
 
-export default function AttributesSection({ attrs, setAttrs, hasOverrides }) {
+export default function AttributesSection({
+  attrs,
+  setAttrs,
+  hasOverrides,
+}: {
+  attrs: Attributes;
+  setAttrs: (attrs: Attributes|null) => void;
+  hasOverrides: boolean;
+}) {
   const [edit, setEdit] = useState(false);
   const form = useForm({
     defaultValues: {
@@ -25,7 +34,7 @@ export default function AttributesSection({ attrs, setAttrs, hasOverrides }) {
             size="xs"
             variant="ghost"
             ml={2}
-            icon={<MdEdit size="18px"  />}
+            icon={<MdEdit size="18px" />}
             aria-label="Edit User Attributes"
             title="Edit User Attributes"
             type="button"
@@ -61,7 +70,7 @@ export default function AttributesSection({ attrs, setAttrs, hasOverrides }) {
               setAttrs(parsed);
               setError("");
               setEdit(false);
-            } catch (e) {
+            } catch (e: any) {
               setError(e.message);
             }
           })}

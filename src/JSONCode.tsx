@@ -5,7 +5,7 @@ import stringify from "json-stringify-pretty-compact";
 codeTheme['pre[class*="language-"]'].padding = "0.25em 0.5em";
 codeTheme['pre[class*="language-"]'].margin = "0";
 
-export default function JSONCode({code}) {
+export default function JSONCode({code}: {code: any}) {
   return (
     <SyntaxHighlighter
     language="json"

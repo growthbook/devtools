@@ -1,7 +1,8 @@
 import { Box } from "@chakra-ui/layout";
 import stringify from "json-stringify-pretty-compact";
+import { DebugLogs } from "./types";
 
-export default function DebugLog({ debug }) {
+export default function DebugLog({debug}: { debug: DebugLogs; }) {
   return (
     <Box
       bgColor="gray.700"

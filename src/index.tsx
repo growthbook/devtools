@@ -1,19 +1,46 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import { ChakraProvider } from '@chakra-ui/react'
+import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+import { ChakraProvider } from "@chakra-ui/react";
+import { Container, Text } from "@chakra-ui/layout";
+import { Spinner } from "@chakra-ui/spinner";
+import { onGrowthBookData, requestRefresh } from "./controller";
+import { RefreshMessage } from "./types";
+
+function WaitForGrowthBook() {
+  const [data, setData] = useState<RefreshMessage | null>(null);
+
+  useEffect(() => {
+    const remove = onGrowthBookData((data) => {
+      setData(data);
+    });
+    requestRefresh();
+    return remove;
+  }, []);
+
+  if (!data) {
+    return (
+      <Container textAlign="center" p={5}>
+        <Spinner />
+        <Text>Trying to connect to page's GrowthBook SDK</Text>
+      </Container>
+    );
+  }
+
+  return (
+    <App
+      features={data.features}
+      experiments={data.experiments}
+      attributes={data.attributes}
+    />
+  );
+}
 
 ReactDOM.render(
   <React.StrictMode>
     <ChakraProvider>
-      <App />
+      <WaitForGrowthBook />
     </ChakraProvider>
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

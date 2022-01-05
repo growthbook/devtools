@@ -1,54 +1,58 @@
 import { Accordion } from "@chakra-ui/accordion";
 import { Input } from "@chakra-ui/input";
 import { Heading, HStack, Stack } from "@chakra-ui/layout";
-import { GrowthBook } from "@growthbook/growthbook";
-import React, { useCallback, useEffect, useState } from "react";
-import GrowthBookApp from "./GrowthBookApp";
+import {
+  GrowthBook,
+  Experiment as ExperimentInterface,
+  FeatureDefinition,
+  Attributes,
+} from "@growthbook/growthbook";
+import React, { useEffect, useMemo, useState } from "react";
 import Feature from "./Feature";
 import AttributesSection from "./AttributesSection";
 import Experiment from "./Experiment";
-import {
-  getAttributes,
-  getExperimentResults,
-  getFeatures,
-  whenGrowthBookExists,
-  setAttributeOverrides,
-  setForcedFeatures,
-  setForcedVariations,
-} from "./controller";
 import { IconButton } from "@chakra-ui/button";
 import { MdHistory, MdRefresh } from "react-icons/md";
+import { DebugLogs } from "./types";
+import { requestRefresh, setOverrides } from "./controller";
 
-function App() {
-  const [feats, setFeats] = useState([]);
-  const [exps, setExps] = useState([]);
-  const [attrs, setAttrs] = useState({});
-  const [forcedFeatureValues, setForcedFeatureValues] = useState({});
-  const [forcedVars, setForcedVars] = useState({});
-  const [attrOverrides, setAttrOverrides] = useState(null);
+export interface Props {
+  features: Record<string, FeatureDefinition>;
+  experiments: Record<string, ExperimentInterface>;
+  attributes: Record<string, any>;
+}
 
+function App(props: Props) {
+  // GrowthBook Overrides
+  const [forcedFeatureValues, setForcedFeatureValues] = useState<Record<string, any>>({});
+  const [forcedVars, setForcedVars] = useState<Record<string, number>>({});
+  const [attrOverrides, setAttrOverrides] = useState<Attributes|null>(null);
+
+  // Filter search term
   const [q, setQ] = useState("");
 
-  const refresh = useCallback(() => {
+  // When overrides change, update the page
+  useEffect(() => {
+    setOverrides({
+      attributes: attrOverrides||{},
+      features: forcedFeatureValues,
+      variations: forcedVars
+    });
+  }, [forcedFeatureValues, forcedVars, attrOverrides])
+
+  // Build list of features, experiments, and attributes data based on props and overrides
+  const {features, experiments, attributes} = useMemo(() => {
     const forcedFeatureMap = new Map(Object.entries(forcedFeatureValues));
 
-    // Make sure page's GrowthBook instance is up-to-date with dev tool overrides
-    setAttributeOverrides(attrOverrides || {});
-    setForcedVariations(forcedVars);
-    setForcedFeatures(forcedFeatureMap);
-
-    // Get latest features, experiment results, and attributes from page's GrowthBook instance
-    const features = getFeatures();
-    const results = getExperimentResults();
-    const attributes = getAttributes();
+    const { features, experiments, attributes } = props;
 
     // Local GrowthBook instance for debugging
-    let log = [];
+    let log: DebugLogs = [];
     const growthbook = new GrowthBook({
       attributes,
       features,
       noWindowRef: true,
-      log: (msg, ctx) => {
+      log: (msg: string, ctx: any) => {
         log.push([msg, ctx]);
       },
       forcedVariations: forcedVars,
@@ -58,28 +62,24 @@ function App() {
     }
     growthbook.setForcedFeatures(forcedFeatureMap);
 
-    // Update local state of attributes, features, and experiments
-    setAttrs(attributes);
-    setExps(() => {
-      const experiments = [];
-      results.forEach(({ experiment }) => {
+    return {
+      attributes,
+      experiments: Object.keys(experiments).map((key) => {
+        const experiment = experiments[key];
         growthbook.debug = true;
         const result = growthbook.run(experiment);
         growthbook.debug = false;
-
+  
         const debug = [...log];
         log = [];
-
-        experiments.push({
+  
+        return ({
           experiment,
           result,
           debug,
         });
-      });
-      return experiments;
-    });
-    setFeats(() =>
-      Object.keys(features).map((k) => {
+      }),
+      features: Object.keys(features).map((k) => {
         growthbook.debug = true;
         const result = growthbook.feature(k);
         growthbook.debug = false;
@@ -94,14 +94,11 @@ function App() {
           debug,
         };
       })
-    );
-  }, [attrOverrides, forcedFeatureValues, forcedVars]);
-
-  useEffect(() => whenGrowthBookExists(refresh), [refresh]);
+    }
+  }, [props, forcedVars, forcedFeatureValues, attrOverrides]);
 
   return (
     <Stack p="5" spacing="5" maxW="container.lg" m="0 auto">
-      <GrowthBookApp />
       <HStack>
         <Heading as="h1" size="xl">
           GrowthBook Dev Tools
@@ -117,7 +114,7 @@ function App() {
           type="button"
           onClick={(e) => {
             e.preventDefault();
-            refresh();
+            requestRefresh();
           }}
         />
       </HStack>
@@ -152,7 +149,7 @@ function App() {
           )}
         </HStack>
         <Accordion allowToggle>
-          {feats
+          {features
             .filter((f) => !q || f.key.includes(q))
             .map(({ key, feature, result, debug }) => (
               <Feature
@@ -201,7 +198,7 @@ function App() {
           )}
         </HStack>
         <Accordion allowToggle>
-          {exps
+          {experiments
             .filter((e) => !q || e.experiment.key.includes(q))
             .map(({ experiment, result, debug }) => (
               <Experiment
@@ -230,7 +227,7 @@ function App() {
         </Accordion>
       </div>
       <AttributesSection
-        attrs={attrs}
+        attrs={attributes}
         hasOverrides={!!attrOverrides}
         setAttrs={(val) => {
           setAttrOverrides(val);

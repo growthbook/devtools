@@ -1,57 +1,52 @@
-import { GrowthBook } from "@growthbook/growthbook";
+import { Message, RefreshMessage, SetOverridesMessage } from "./types";
 
-declare global {
-  interface Window {
-    _growthbook?: GrowthBook;
+// Send message to content script
+function sendMessage(msg: Message) {
+  chrome.tabs &&
+    chrome.tabs.query(
+      {
+        active: true,
+        currentWindow: true,
+      },
+      (tabs) => {
+        console.log(
+          "sending message to content script",
+          tabs[0].id,
+          msg.type,
+          msg
+        );
+        chrome.tabs.sendMessage(tabs[0].id || 0, msg);
+      }
+    );
+}
+
+// Listen for updates from content script and forward to any listeners
+let refreshListeners: Set<(data: RefreshMessage) => void> = new Set();
+export function onGrowthBookData(cb: (data: RefreshMessage)=>void) {
+  refreshListeners.add(cb);
+  return () => {
+    refreshListeners.delete(cb);
   }
 }
+chrome.runtime.onMessage.addListener((msg: RefreshMessage) => {
+  console.log("received message in devtools", msg.type, msg);
 
-function getGrowthBookInstance(): GrowthBook|null {
-  return window._growthbook ?? null;
+  if(msg.type === "GB_REFRESH") {
+    refreshListeners.forEach((cb) => {
+      cb(msg);
+    })
+  }
+});
+
+export function requestRefresh() {
+  sendMessage({
+    type: "GB_REQUEST_REFRESH"
+  });
 }
 
-export function whenGrowthBookExists(callback: () => void) {
-  let cancel = false;
-  let timer: number;
-  const cb = () => {
-    if (cancel) return;
-    if (getGrowthBookInstance()) {
-      callback();
-    } else {
-      timer = window.setTimeout(cb, 200);
-    }
-  };
-  cb();
-
-  return () => {
-    cancel = true;
-    clearTimeout(timer);
-  };
-}
-export function getAttributes() {
-  const gb = getGrowthBookInstance();
-  return gb ? gb.getAttributes() : {};
-}
-export function getFeatures() {
-  const gb = getGrowthBookInstance();
-  return gb ? gb.getFeatures() : {};
-}
-export function getExperimentResults() {
-  const gb = getGrowthBookInstance();
-  return gb ? gb.getAllResults() : new Map();
-}
-export function setForcedFeatures(features: Map<string, any>) {
-  const gb = getGrowthBookInstance();
-  if(!gb) return;
-  gb.setForcedFeatures(features);
-}
-export function setForcedVariations(vars: Record<string, number>) {
-  const gb = getGrowthBookInstance();
-  if(!gb) return;
-  gb.setForcedVariations(vars);
-}
-export function setAttributeOverrides(overrides: Record<string, any>) {
-  const gb = getGrowthBookInstance();
-  if(!gb) return;
-  gb.setAttributeOverrides(overrides);
+export function setOverrides(data: Omit<SetOverridesMessage, "type">) {
+  sendMessage({
+    type: "GB_SET_OVERRIDES",
+    ...data
+  });
 }

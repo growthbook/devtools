@@ -22,6 +22,18 @@ import { useForm } from "react-hook-form";
 import { MdEdit, MdHistory } from "react-icons/md";
 import DebugLog from "./DebugLog";
 import JSONCode from "./JSONCode";
+import {FeatureResult, FeatureDefinition, FeatureRule} from "@growthbook/growthbook";
+import { DebugLogs } from "./types";
+
+export interface Props {
+  result: FeatureResult;
+  feature: FeatureDefinition;
+  debug: DebugLogs;
+  id: string;
+  forceValue: (value: any) => void;
+  isForced: boolean;
+  unforce: () => void;
+}
 
 export default function Feature({
   result,
@@ -31,7 +43,7 @@ export default function Feature({
   forceValue,
   isForced,
   unforce
-}) {
+}: Props) {
   const [edit, setEdit] = useState(false);
   const [error, setError] = useState("");
   const form = useForm({
@@ -99,7 +111,7 @@ export default function Feature({
                     forceValue(parsed);
                     setEdit(false);
                     setError("");
-                  } catch (e) {
+                  } catch (e: any) {
                     setError(e.message);
                   }
                 })}
@@ -145,7 +157,7 @@ export default function Feature({
             <Box>
               <Text fontWeight="bold">Override Rules</Text>
               <OrderedList>
-                {feature.rules?.map((rule, i) => {
+                {feature.rules?.map((rule: FeatureRule, i: number) => {
                   const { condition, ...other } = rule;
                   return (
                     <ListItem key={i} mb={3}>

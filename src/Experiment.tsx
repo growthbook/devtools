@@ -10,6 +10,17 @@ import stringify from "json-stringify-pretty-compact";
 import { MdHistory } from "react-icons/md";
 import DebugLog from "./DebugLog";
 import JSONCode from "./JSONCode";
+import type {Result, Experiment as ExperimentInterface} from "@growthbook/growthbook";
+import { DebugLogs } from "./types";
+
+export interface Props {
+  result: Result;
+  experiment: ExperimentInterface;
+  debug: DebugLogs;
+  force: (variation: number) => void;
+  unforce: () => void;
+  isForced: boolean;
+}
 
 export default function Experiment({
   result,
@@ -18,7 +29,7 @@ export default function Experiment({
   force,
   unforce,
   isForced,
-}) {
+}: Props) {
   const { variations, key, ...other } = experiment;
 
   return (
@@ -56,7 +67,7 @@ export default function Experiment({
               )}
             </HStack>
             <Stack spacing={0} mb={3}>
-              {variations.map((v, i) => {
+              {variations.map((v: any, i: number) => {
                 const isSelected = result.variationId === i;
                 return (
                   <Box
