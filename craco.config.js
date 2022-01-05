@@ -1,6 +1,12 @@
 module.exports = {
   webpack: {
     configure: (webpackConfig, { env, paths }) => {
+      webpackConfig.plugins.forEach(plugin => {
+        // Compile app in dev mode (so we can get GrowthBook debug messages)
+        if(plugin.definitions && plugin.definitions['process.env']) {
+          plugin.definitions['process.env']['NODE_ENV'] = JSON.stringify("dev");
+        }
+      })
       return {
         ...webpackConfig,
         entry: {

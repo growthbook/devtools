@@ -108,12 +108,11 @@ function App(props: Props) {
 
   return (
     <Stack p="5" spacing="2" maxW="container.lg" m="0 auto">
-      <HStack>
+      <HStack justifyContent="center">
         <Image
           src={logo}
           alt="GrowthBook"
-          w="180px"
-          pb="2%"
+          w="190px"
         />
 
         <Heading as="h1" size="lg" color="gray.500">
