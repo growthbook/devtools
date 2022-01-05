@@ -9,12 +9,6 @@ function sendMessage(msg: Message) {
         currentWindow: true,
       },
       (tabs) => {
-        console.log(
-          "sending message to content script",
-          tabs[0].id,
-          msg.type,
-          msg
-        );
         chrome.tabs.sendMessage(tabs[0].id || 0, msg);
       }
     );
@@ -29,8 +23,6 @@ export function onGrowthBookData(cb: (data: RefreshMessage)=>void) {
   }
 }
 chrome.runtime.onMessage.addListener((msg: RefreshMessage) => {
-  console.log("received message in devtools", msg.type, msg);
-
   if(msg.type === "GB_REFRESH") {
     refreshListeners.forEach((cb) => {
       cb(msg);

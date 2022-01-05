@@ -1,6 +1,6 @@
 import { Accordion } from "@chakra-ui/accordion";
 import { Input } from "@chakra-ui/input";
-import { Heading, HStack, Stack } from "@chakra-ui/layout";
+import { Box, Heading, HStack, Stack, Text } from "@chakra-ui/layout";
 import {
   GrowthBook,
   Experiment as ExperimentInterface,
@@ -12,9 +12,11 @@ import Feature from "./Feature";
 import AttributesSection from "./AttributesSection";
 import Experiment from "./Experiment";
 import { IconButton } from "@chakra-ui/button";
-import { MdHistory, MdRefresh } from "react-icons/md";
+import { MdHistory, MdSync } from "react-icons/md";
 import { DebugLogs } from "./types";
 import { requestRefresh, setOverrides } from "./controller";
+import { Image } from "@chakra-ui/image";
+import logo from "./logo.svg";
 
 export interface Props {
   features: Record<string, FeatureDefinition>;
@@ -24,9 +26,11 @@ export interface Props {
 
 function App(props: Props) {
   // GrowthBook Overrides
-  const [forcedFeatureValues, setForcedFeatureValues] = useState<Record<string, any>>({});
+  const [forcedFeatureValues, setForcedFeatureValues] = useState<
+    Record<string, any>
+  >({});
   const [forcedVars, setForcedVars] = useState<Record<string, number>>({});
-  const [attrOverrides, setAttrOverrides] = useState<Attributes|null>(null);
+  const [attrOverrides, setAttrOverrides] = useState<Attributes | null>(null);
 
   // Filter search term
   const [q, setQ] = useState("");
@@ -34,14 +38,14 @@ function App(props: Props) {
   // When overrides change, update the page
   useEffect(() => {
     setOverrides({
-      attributes: attrOverrides||{},
+      attributes: attrOverrides || {},
       features: forcedFeatureValues,
-      variations: forcedVars
+      variations: forcedVars,
     });
-  }, [forcedFeatureValues, forcedVars, attrOverrides])
+  }, [forcedFeatureValues, forcedVars, attrOverrides]);
 
   // Build list of features, experiments, and attributes data based on props and overrides
-  const {features, experiments, attributes} = useMemo(() => {
+  const { features, experiments, attributes } = useMemo(() => {
     const forcedFeatureMap = new Map(Object.entries(forcedFeatureValues));
 
     const { features, experiments, attributes } = props;
@@ -69,15 +73,15 @@ function App(props: Props) {
         growthbook.debug = true;
         const result = growthbook.run(experiment);
         growthbook.debug = false;
-  
+
         const debug = [...log];
         log = [];
-  
-        return ({
+
+        return {
           experiment,
           result,
           debug,
-        });
+        };
       }),
       features: Object.keys(features).map((k) => {
         growthbook.debug = true;
@@ -93,27 +97,44 @@ function App(props: Props) {
           result,
           debug,
         };
-      })
-    }
+      }),
+    };
   }, [props, forcedVars, forcedFeatureValues, attrOverrides]);
 
+  const filteredFeatures = features.filter((f) => !q || f.key.includes(q));
+  const filteredExperiments = experiments.filter(
+    (e) => !q || e.experiment.key.includes(q)
+  );
+
   return (
-    <Stack p="5" spacing="5" maxW="container.lg" m="0 auto">
+    <Stack p="5" spacing="2" maxW="container.lg" m="0 auto">
       <HStack>
-        <Heading as="h1" size="xl">
-          GrowthBook Dev Tools
+        <Image
+          src={logo}
+          alt="GrowthBook"
+          w="180px"
+          pb="2%"
+        />
+
+        <Heading as="h1" size="lg" color="gray.500">
+          DevTools
         </Heading>
 
         <IconButton
           size="sm"
           variant="ghost"
           ml={2}
-          icon={<MdRefresh size="18px" />}
-          aria-label="Refresh Data"
-          title="Refresh Data"
+          icon={<MdSync size="18px" />}
+          aria-label="Sync with Page"
+          title="Sync with Page"
           type="button"
           onClick={(e) => {
             e.preventDefault();
+            setOverrides({
+              attributes: attrOverrides || {},
+              features: forcedFeatureValues,
+              variations: forcedVars,
+            });
             requestRefresh();
           }}
         />
@@ -126,7 +147,7 @@ function App(props: Props) {
           setQ(e.target.value);
         }}
       />
-      <div>
+      <Box pb={4}>
         <HStack>
           <Heading as="h2" size="md" mb="2">
             Features
@@ -149,33 +170,34 @@ function App(props: Props) {
           )}
         </HStack>
         <Accordion allowToggle>
-          {features
-            .filter((f) => !q || f.key.includes(q))
-            .map(({ key, feature, result, debug }) => (
-              <Feature
-                key={key}
-                id={key}
-                feature={feature}
-                result={result}
-                debug={debug}
-                forceValue={(val) => {
-                  setForcedFeatureValues((forced) => {
-                    return { ...forced, [key]: val };
-                  });
-                }}
-                isForced={key in forcedFeatureValues}
-                unforce={() => {
-                  setForcedFeatureValues((forced) => {
-                    const newForced = { ...forced };
-                    delete newForced[key];
-                    return newForced;
-                  });
-                }}
-              />
-            ))}
+          {filteredFeatures.map(({ key, feature, result, debug }) => (
+            <Feature
+              key={key}
+              id={key}
+              feature={feature}
+              result={result}
+              debug={debug}
+              forceValue={(val) => {
+                setForcedFeatureValues((forced) => {
+                  return { ...forced, [key]: val };
+                });
+              }}
+              isForced={key in forcedFeatureValues}
+              unforce={() => {
+                setForcedFeatureValues((forced) => {
+                  const newForced = { ...forced };
+                  delete newForced[key];
+                  return newForced;
+                });
+              }}
+            />
+          ))}
+          {!filteredFeatures.length && (
+            <Text color="gray.500">No Features</Text>
+          )}
         </Accordion>
-      </div>
-      <div>
+      </Box>
+      <Box pb={4}>
         <HStack>
           <Heading as="h2" size="md" mb="2">
             Experiments
@@ -198,34 +220,35 @@ function App(props: Props) {
           )}
         </HStack>
         <Accordion allowToggle>
-          {experiments
-            .filter((e) => !q || e.experiment.key.includes(q))
-            .map(({ experiment, result, debug }) => (
-              <Experiment
-                key={experiment.key}
-                experiment={experiment}
-                result={result}
-                debug={debug}
-                force={(variation) => {
-                  setForcedVars((vars) => {
-                    return {
-                      ...vars,
-                      [experiment.key]: variation,
-                    };
-                  });
-                }}
-                isForced={experiment.key in forcedVars}
-                unforce={() => {
-                  setForcedVars((existing) => {
-                    const newVars = { ...existing };
-                    delete newVars[experiment.key];
-                    return newVars;
-                  });
-                }}
-              />
-            ))}
+          {filteredExperiments.map(({ experiment, result, debug }) => (
+            <Experiment
+              key={experiment.key}
+              experiment={experiment}
+              result={result}
+              debug={debug}
+              force={(variation) => {
+                setForcedVars((vars) => {
+                  return {
+                    ...vars,
+                    [experiment.key]: variation,
+                  };
+                });
+              }}
+              isForced={experiment.key in forcedVars}
+              unforce={() => {
+                setForcedVars((existing) => {
+                  const newVars = { ...existing };
+                  delete newVars[experiment.key];
+                  return newVars;
+                });
+              }}
+            />
+          ))}
+          {!filteredExperiments.length && (
+            <Text color="gray.500">No Experiments</Text>
+          )}
         </Accordion>
-      </div>
+      </Box>
       <AttributesSection
         attrs={attributes}
         hasOverrides={!!attrOverrides}

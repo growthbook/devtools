@@ -1,9 +1,4 @@
 module.exports = {
-  devServer: {
-	devMiddleware: {
-      	writeToDisk: true,
-    }
-  },
   webpack: {
     configure: (webpackConfig, { env, paths }) => {
       return {

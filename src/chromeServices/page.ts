@@ -7,18 +7,29 @@ declare global {
   }
 }
 
+function getValidGrowthBookInstance() {
+  if(!window._growthbook) return;
+  if(!window._growthbook.setAttributeOverrides) {
+    console.error("GrowthBook devtools requires a newer version of the javascript or React SDK");
+    return;
+  }
+  return window._growthbook;
+}
+
 // Wait for window._growthbook to be available
 function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
-  if(window._growthbook) {
-    console.log('window._growthbook already exists');
-    cb(window._growthbook);
+  const gb = getValidGrowthBookInstance();
+  if(gb) {
+    //console.log('window._growthbook already exists');
+    cb(gb);
   }
   else {
-    console.log('wait for gbloaded event');
+    //console.log('wait for gbloaded event');
     document.addEventListener("gbloaded", () => {
-      console.log('gbloaded event fired');
-      if(window._growthbook) {
-        cb(window._growthbook);
+      //console.log('gbloaded event fired');
+      const gb = getValidGrowthBookInstance();
+      if(gb) {
+        cb(gb);
       }
     }, false);
   }
@@ -38,7 +49,7 @@ function requestRefresh() {
         features: gb.getFeatures(),
         experiments
       }
-      console.log("Sending refresh from page", msg);
+      //console.log("Sending refresh from page", msg);
       window.postMessage(msg, '*');
   });
 }
@@ -52,7 +63,7 @@ window.addEventListener("message", function(msg: MessageEvent<Message>) {
   }
   else if(data.type === "GB_SET_OVERRIDES") {
     onGrowthBookLoad((gb) => {
-      console.log("setting overrides in window._growthbook")
+      //console.log("setting overrides in window._growthbook")
       gb.setForcedFeatures(new Map(Object.entries(data.features || {})));
       gb.setForcedVariations(data.variations || {});
       gb.setAttributeOverrides(data.attributes || {});
