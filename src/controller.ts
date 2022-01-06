@@ -1,4 +1,9 @@
-import { Message, RefreshMessage, SetOverridesMessage } from "./types";
+import {
+  ErrorMessage,
+  Message,
+  RefreshMessage,
+  SetOverridesMessage,
+} from "./types";
 
 // Send message to content script
 function sendMessage(msg: Message) {
@@ -15,30 +20,37 @@ function sendMessage(msg: Message) {
 }
 
 // Listen for updates from content script and forward to any listeners
-let refreshListeners: Set<(data: RefreshMessage) => void> = new Set();
-export function onGrowthBookData(cb: (data: RefreshMessage)=>void) {
+let refreshListeners: Set<(err: string, data: RefreshMessage | null) => void> =
+  new Set();
+export function onGrowthBookData(
+  cb: (err: string, data: RefreshMessage | null) => void
+) {
   refreshListeners.add(cb);
   return () => {
     refreshListeners.delete(cb);
-  }
+  };
 }
-chrome.runtime.onMessage.addListener((msg: RefreshMessage) => {
-  if(msg.type === "GB_REFRESH") {
+chrome.runtime.onMessage.addListener((msg: RefreshMessage | ErrorMessage) => {
+  if (msg.type === "GB_REFRESH") {
     refreshListeners.forEach((cb) => {
-      cb(msg);
-    })
+      cb("", msg);
+    });
+  } else if (msg.type === "GB_ERROR") {
+    refreshListeners.forEach((cb) => {
+      cb(msg.error, null);
+    });
   }
 });
 
 export function requestRefresh() {
   sendMessage({
-    type: "GB_REQUEST_REFRESH"
+    type: "GB_REQUEST_REFRESH",
   });
 }
 
 export function setOverrides(data: Omit<SetOverridesMessage, "type">) {
   sendMessage({
     type: "GB_SET_OVERRIDES",
-    ...data
+    ...data,
   });
 }

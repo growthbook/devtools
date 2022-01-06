@@ -20,7 +20,13 @@ export type RefreshMessage = {
   attributes: Record<string, any>;
 };
 
+export type ErrorMessage = {
+  type: "GB_ERROR";
+  error: string;
+};
+
 export type Message =
   | RequestRefreshMessage
   | SetOverridesMessage
-  | RefreshMessage;
+  | RefreshMessage
+  | ErrorMessage;

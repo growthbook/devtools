@@ -10,11 +10,15 @@
       "matches": ["http://*/*", "https://*/*"],
       "js": ["static/js/content.js"]
     }
-  ], 
+  ],
   "web_accessible_resources": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "resources": ["static/js/page.js"]
+      "resources": [
+        "static/js/page.js",
+        "static/js/page.js.map",
+        "static/js/content.js.map"
+      ]
     }
   ],
   "icons": {
