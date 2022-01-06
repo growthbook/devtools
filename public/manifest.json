@@ -14,11 +14,7 @@
   "web_accessible_resources": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "resources": [
-        "static/js/page.js",
-        "static/js/page.js.map",
-        "static/js/content.js.map"
-      ]
+      "resources": ["static/js/page.js"]
     }
   ],
   "icons": {
