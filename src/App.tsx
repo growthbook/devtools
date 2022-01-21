@@ -4,6 +4,7 @@ import { Box, Heading, HStack, Text } from "@chakra-ui/layout";
 import {
   GrowthBook,
   Experiment as ExperimentInterface,
+  ExperimentOverride,
   FeatureDefinition,
   Attributes,
 } from "@growthbook/growthbook";
@@ -18,6 +19,7 @@ import { setOverrides } from "./controller";
 import Layout from "./Layout";
 
 export interface Props {
+  overrides: Record<string, ExperimentOverride>;
   features: Record<string, FeatureDefinition>;
   experiments: Record<string, ExperimentInterface>;
   attributes: Record<string, any>;
@@ -47,13 +49,14 @@ function App(props: Props) {
   const { features, experiments, attributes } = useMemo(() => {
     const forcedFeatureMap = new Map(Object.entries(forcedFeatureValues));
 
-    const { features, experiments, attributes } = props;
+    const { features, experiments, attributes, overrides } = props;
 
     // Local GrowthBook instance for debugging
     let log: DebugLogs = [];
     const growthbook = new GrowthBook({
       attributes,
       features,
+      overrides,
       noWindowRef: true,
       log: (msg: string, ctx: any) => {
         log.push([msg, ctx]);
@@ -198,6 +201,7 @@ function App(props: Props) {
               experiment={experiment}
               result={result}
               debug={debug}
+              override={props.overrides[experiment.key]}
               force={(variation) => {
                 setForcedVars((vars) => {
                   return {

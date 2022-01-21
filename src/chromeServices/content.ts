@@ -24,7 +24,11 @@ chrome.runtime.onMessage.addListener((msg: Message) => {
 });
 
 // Inject page script
-const script = document.createElement('script');
-script.async = true;
-script.src = chrome.runtime.getURL('static/js/page.js');
-document.body.appendChild(script);
+const SCRIPT_ID = 'gbdevtools-page-script';
+if(!document.getElementById(SCRIPT_ID)) {
+  const script = document.createElement('script');
+  script.id = SCRIPT_ID;
+  script.async = true;
+  script.src = chrome.runtime.getURL('static/js/page.js');
+  document.body.appendChild(script);
+}

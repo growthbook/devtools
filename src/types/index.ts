@@ -1,4 +1,4 @@
-import type { Experiment, FeatureDefinition } from "@growthbook/growthbook";
+import type { Experiment, FeatureDefinition, ExperimentOverride } from "@growthbook/growthbook";
 
 export type DebugLogs = [string, any][];
 
@@ -18,6 +18,7 @@ export type RefreshMessage = {
   features: Record<string, FeatureDefinition>;
   experiments: Record<string, Experiment>;
   attributes: Record<string, any>;
+  overrides: Record<string, ExperimentOverride>;
 };
 
 export type ErrorMessage = {

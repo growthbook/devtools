@@ -10,12 +10,13 @@ import stringify from "json-stringify-pretty-compact";
 import { MdHistory } from "react-icons/md";
 import DebugLog from "./DebugLog";
 import JSONCode from "./JSONCode";
-import type {Result, Experiment as ExperimentInterface} from "@growthbook/growthbook";
+import type {Result, Experiment as ExperimentInterface, ExperimentOverride} from "@growthbook/growthbook";
 import { DebugLogs } from "./types";
 
 export interface Props {
   result: Result;
   experiment: ExperimentInterface;
+  override?: ExperimentOverride;
   debug: DebugLogs;
   force: (variation: number) => void;
   unforce: () => void;
@@ -25,6 +26,7 @@ export interface Props {
 export default function Experiment({
   result,
   experiment,
+  override,
   debug,
   force,
   unforce,
@@ -88,8 +90,14 @@ export default function Experiment({
           </Box>
           {Object.keys(other).length > 0 && (
             <Box>
-              <Text fontWeight="bold">Configuration</Text>
+              <Text fontWeight="bold">Definition</Text>
               <JSONCode code={other} />
+            </Box>
+          )}
+          {override && (
+            <Box>
+              <Text fontWeight="bold">Client Override</Text>
+              <JSONCode code={override}/>
             </Box>
           )}
           {debug?.length > 0 && (
