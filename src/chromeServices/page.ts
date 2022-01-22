@@ -43,7 +43,6 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
   );
 }
 
-
 function getRefreshMessage(gb: GrowthBook): RefreshMessage {
   let experiments: Record<string, Experiment> = {};
   gb.getAllResults().forEach((v, k) => {
@@ -63,10 +62,10 @@ function getRefreshMessage(gb: GrowthBook): RefreshMessage {
 
 // Sync changes to devtools if there are any
 let lastMsg: string = "";
-function syncToDevtools(gb: GrowthBook) {
+function syncToDevtools(gb: GrowthBook, force?: boolean) {
   const msg = getRefreshMessage(gb);
   const hash = JSON.stringify(msg);
-  if (hash !== lastMsg) {
+  if (force || hash !== lastMsg) {
     lastMsg = hash;
     window.postMessage(msg, "*");
   }
@@ -75,7 +74,7 @@ function syncToDevtools(gb: GrowthBook) {
 // Send a refresh message back to content script
 function requestRefresh() {
   onGrowthBookLoad((gb) => {
-    syncToDevtools(gb);
+    syncToDevtools(gb, true);
   });
 }
 

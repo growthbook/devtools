@@ -32,7 +32,6 @@ export function onGrowthBookData(
 }
 chrome.runtime.onMessage.addListener((msg: RefreshMessage | ErrorMessage) => {
   if (msg.type === "GB_REFRESH") {
-    console.log('GB_REFRESH', msg);
     refreshListeners.forEach((cb) => {
       cb("", msg);
     });

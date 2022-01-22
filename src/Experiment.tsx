@@ -10,7 +10,11 @@ import stringify from "json-stringify-pretty-compact";
 import { MdHistory } from "react-icons/md";
 import DebugLog from "./DebugLog";
 import JSONCode from "./JSONCode";
-import type {Result, Experiment as ExperimentInterface, ExperimentOverride} from "@growthbook/growthbook";
+import type {
+  Result,
+  Experiment as ExperimentInterface,
+  ExperimentOverride,
+} from "@growthbook/growthbook";
 import { DebugLogs } from "./types";
 
 export interface Props {
@@ -40,7 +44,13 @@ export default function Experiment({
         <HStack spacing="4" flex="1">
           <Badge colorScheme="purple">{key}</Badge>
           {isForced && (
-            <Box w="8px" h="8px" bgColor="blue.500" rounded="full" title="Overridden" />
+            <Box
+              w="8px"
+              h="8px"
+              bgColor="blue.500"
+              rounded="full"
+              title="Overridden"
+            />
           )}
           <Text isTruncated opacity={0.6} fontSize="sm">
             {JSON.stringify(result.value)}
@@ -74,7 +84,11 @@ export default function Experiment({
                 return (
                   <Box
                     key={i}
+                    transition="background-color 0.3s"
                     bgColor={isSelected ? "blue.300" : "white"}
+                    _hover={{
+                      bgColor: isSelected ? "blue.300" : "blue.100",
+                    }}
                     borderWidth={1}
                     p={2}
                     cursor="pointer"
@@ -97,7 +111,7 @@ export default function Experiment({
           {override && (
             <Box>
               <Text fontWeight="bold">Client Override</Text>
-              <JSONCode code={override}/>
+              <JSONCode code={override} />
             </Box>
           )}
           {debug?.length > 0 && (
