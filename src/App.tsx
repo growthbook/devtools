@@ -109,11 +109,13 @@ function App(props: Props) {
   );
 
   return (
-    <Layout overrides={{
-      attributes: attrOverrides || {},
-      features: forcedFeatureValues,
-      variations: forcedVars,
-    }}>
+    <Layout
+      overrides={{
+        attributes: attrOverrides || {},
+        features: forcedFeatureValues,
+        variations: forcedVars,
+      }}
+    >
       <Input
         placeholder="Filter by key..."
         type="search"
@@ -167,10 +169,8 @@ function App(props: Props) {
               }}
             />
           ))}
-          {!filteredFeatures.length && (
-            <Text color="gray.500">No Features</Text>
-          )}
         </Accordion>
+        {!filteredFeatures.length && <Text color="gray.500">No Features</Text>}
       </Box>
       <Box pb={4}>
         <HStack>
@@ -220,10 +220,10 @@ function App(props: Props) {
               }}
             />
           ))}
-          {!filteredExperiments.length && (
-            <Text color="gray.500">No Experiments</Text>
-          )}
         </Accordion>
+        {!filteredExperiments.length && (
+          <Text color="gray.500">No Experiments</Text>
+        )}
       </Box>
       <AttributesSection
         attrs={attributes}

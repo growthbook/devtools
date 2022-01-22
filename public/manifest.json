@@ -1,7 +1,7 @@
 {
   "name": "GrowthBook DevTools",
-  "description": "A better developer experience when using GrowthBook feature flags and experiments.",
-  "version": "0.1.0",
+  "description": "QA and debug feature flags and experiments from GrowthBook's js/react SDKs",
+  "version": "0.1.1",
   "manifest_version": 3,
   "devtools_page": "devtools.html",
   "permissions": ["activeTab"],

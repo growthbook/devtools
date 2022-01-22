@@ -61,7 +61,7 @@ export default function Feature({
 
   return (
     <AccordionItem>
-      <AccordionButton _expanded={{ bg: "purple.100" }}>
+      <AccordionButton _expanded={{ bg: "gray.100" }}>
         <HStack spacing="2" flex="1">
           <Badge colorScheme="purple">{id}</Badge>
           {isForced && (
@@ -79,7 +79,7 @@ export default function Feature({
         </HStack>
         <AccordionIcon />
       </AccordionButton>
-      <AccordionPanel bgColor="purple.50">
+      <AccordionPanel bgColor="gray.50">
         <Stack spacing={3} ml={3}>
           <Box>
             <Text fontWeight="bold">
