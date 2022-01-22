@@ -1,5 +1,5 @@
 import { Button, IconButton } from "@chakra-ui/button";
-import { Heading, HStack } from "@chakra-ui/layout";
+import { Heading, HStack, Text } from "@chakra-ui/layout";
 import { Textarea } from "@chakra-ui/react";
 import { AlertIcon, Alert } from "@chakra-ui/alert";
 import { useState } from "react";
@@ -24,6 +24,8 @@ export default function AttributesSection({
     },
   });
   const [error, setError] = useState("");
+
+  const hasAttributes = Object.keys(attrs).length > 0;
 
   return (
     <div>
@@ -97,8 +99,10 @@ export default function AttributesSection({
             </Button>
           </HStack>
         </form>
-      ) : (
+      ) : hasAttributes ? (
         <JSONCode code={attrs} />
+      ) : (
+        <Text color="gray.500">No Attributes</Text>
       )}
     </div>
   );

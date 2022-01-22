@@ -66,6 +66,7 @@ function WaitForGrowthBook() {
       features={data.features}
       experiments={data.experiments}
       attributes={data.attributes}
+      overrides={data.overrides || {}}
     />
   );
 }

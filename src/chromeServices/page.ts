@@ -43,21 +43,38 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
   );
 }
 
+function getRefreshMessage(gb: GrowthBook): RefreshMessage {
+  let experiments: Record<string, Experiment> = {};
+  gb.getAllResults().forEach((v, k) => {
+    experiments[k] = v.experiment;
+  });
+
+  const msg: RefreshMessage = {
+    type: "GB_REFRESH",
+    attributes: gb.getAttributes(),
+    features: gb.getFeatures(),
+    overrides: (gb as any).context?.overrides || {},
+    experiments,
+  };
+
+  return msg;
+}
+
+// Sync changes to devtools if there are any
+let lastMsg: string = "";
+function syncToDevtools(gb: GrowthBook, force?: boolean) {
+  const msg = getRefreshMessage(gb);
+  const hash = JSON.stringify(msg);
+  if (force || hash !== lastMsg) {
+    lastMsg = hash;
+    window.postMessage(msg, "*");
+  }
+}
+
 // Send a refresh message back to content script
 function requestRefresh() {
   onGrowthBookLoad((gb) => {
-    let experiments: Record<string, Experiment> = {};
-    gb.getAllResults().forEach((v, k) => {
-      experiments[k] = v.experiment;
-    });
-
-    const msg: RefreshMessage = {
-      type: "GB_REFRESH",
-      attributes: gb.getAttributes(),
-      features: gb.getFeatures(),
-      experiments,
-    };
-    window.postMessage(msg, "*");
+    syncToDevtools(gb, true);
   });
 }
 
@@ -71,8 +88,17 @@ window.addEventListener("message", function (msg: MessageEvent<Message>) {
       gb.setForcedFeatures(new Map(Object.entries(data.features || {})));
       gb.setForcedVariations(data.variations || {});
       gb.setAttributeOverrides(data.attributes || {});
+
+      syncToDevtools(gb);
     });
   }
+});
+
+// Sync changes to devtools every second
+onGrowthBookLoad((gb) => {
+  window.setInterval(() => {
+    syncToDevtools(gb);
+  }, 1000);
 });
 
 // Request a refresh on load

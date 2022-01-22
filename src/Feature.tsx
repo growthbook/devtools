@@ -22,8 +22,13 @@ import { useForm } from "react-hook-form";
 import { MdEdit, MdHistory } from "react-icons/md";
 import DebugLog from "./DebugLog";
 import JSONCode from "./JSONCode";
-import {FeatureResult, FeatureDefinition, FeatureRule} from "@growthbook/growthbook";
+import {
+  FeatureResult,
+  FeatureDefinition,
+  FeatureRule,
+} from "@growthbook/growthbook";
 import { DebugLogs } from "./types";
+import { Switch } from "@chakra-ui/react";
 
 export interface Props {
   result: FeatureResult;
@@ -42,7 +47,7 @@ export default function Feature({
   id,
   forceValue,
   isForced,
-  unforce
+  unforce,
 }: Props) {
   const [edit, setEdit] = useState(false);
   const [error, setError] = useState("");
@@ -52,13 +57,21 @@ export default function Feature({
     },
   });
 
+  const isBoolean = result.value === true || result.value === false;
+
   return (
     <AccordionItem>
-      <AccordionButton _expanded={{ bg: "purple.100" }}>
+      <AccordionButton _expanded={{ bg: "gray.100" }}>
         <HStack spacing="2" flex="1">
           <Badge colorScheme="purple">{id}</Badge>
           {isForced && (
-            <Box w="8px" h="8px" bgColor="blue.500" rounded="full" title="Overridden" />
+            <Box
+              w="8px"
+              h="8px"
+              bgColor="blue.500"
+              rounded="full"
+              title="Overridden"
+            />
           )}
           <Text isTruncated opacity={0.6} fontSize="sm">
             {JSON.stringify(result.value)}
@@ -66,12 +79,12 @@ export default function Feature({
         </HStack>
         <AccordionIcon />
       </AccordionButton>
-      <AccordionPanel bgColor="purple.50">
+      <AccordionPanel bgColor="gray.50">
         <Stack spacing={3} ml={3}>
           <Box>
             <Text fontWeight="bold">
               Current Value
-              {!edit && (
+              {!edit && !isBoolean && (
                 <IconButton
                   size="xs"
                   variant="ghost"
@@ -145,12 +158,23 @@ export default function Feature({
                 </HStack>
               </form>
             ) : (
-                <JSONCode code={result.value} />
+              <>
+                {isBoolean ? (
+                  <Switch
+                    colorScheme="purple"
+                    isChecked={result.value === true}
+                    onChange={(e) => {
+                      forceValue(e.target.checked);
+                    }}
+                  />
+                ) : (
+                  <JSONCode code={result.value} />
+                )}
+              </>
             )}
           </Box>
           <Box>
             <Text fontWeight="bold">Default Value</Text>
-
             <JSONCode code={feature.defaultValue} />
           </Box>
           {feature.rules?.length > 0 && (
