@@ -16,7 +16,7 @@ export type SetOverridesMessage = {
 export type RefreshMessage = {
   type: "GB_REFRESH";
   features: Record<string, FeatureDefinition>;
-  experiments: Record<string, Experiment>;
+  experiments: Record<string, Experiment<any>>;
   attributes: Record<string, any>;
   overrides: Record<string, ExperimentOverride>;
 };

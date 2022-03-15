@@ -44,7 +44,7 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
 }
 
 function getRefreshMessage(gb: GrowthBook): RefreshMessage {
-  let experiments: Record<string, Experiment> = {};
+  let experiments: Record<string, Experiment<any>> = {};
   gb.getAllResults().forEach((v, k) => {
     experiments[k] = v.experiment;
   });
