@@ -177,7 +177,7 @@ export default function Feature({
             <Text fontWeight="bold">Default Value</Text>
             <JSONCode code={feature.defaultValue} />
           </Box>
-          {feature.rules?.length > 0 && (
+          {feature.rules && feature.rules.length > 0 && (
             <Box>
               <Text fontWeight="bold">Override Rules</Text>
               <OrderedList>

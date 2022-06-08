@@ -21,7 +21,7 @@ import Layout from "./Layout";
 export interface Props {
   overrides: Record<string, ExperimentOverride>;
   features: Record<string, FeatureDefinition>;
-  experiments: Record<string, ExperimentInterface>;
+  experiments: Record<string, ExperimentInterface<any>>;
   attributes: Record<string, any>;
 }
 
@@ -57,7 +57,7 @@ function App(props: Props) {
       attributes,
       features,
       overrides,
-      noWindowRef: true,
+      disableDevTools: true,
       log: (msg: string, ctx: any) => {
         log.push([msg, ctx]);
       },

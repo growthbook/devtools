@@ -1771,10 +1771,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@growthbook/growthbook@^0.15.1":
-  version "0.15.1"
-  resolved "https://registry.yarnpkg.com/@growthbook/growthbook/-/growthbook-0.15.1.tgz#3cf2a429b4951f6579096b81f5fbea3947ac4f8c"
-  integrity sha512-AKmiuhkZdYkA2HVsy7k4HnoGNDQEw9Y86qqKWwRK3kl0q27IoV9RyDCRTxFbnsZ05I4D5e6Hc2cs0wkczNRMUg==
+"@growthbook/growthbook@^0.18.0":
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/@growthbook/growthbook/-/growthbook-0.18.0.tgz#7ce599a6d9eaacaef1fdc5340aeeb8730345b25c"
+  integrity sha512-Z7ydUgVdYN9Qcu3KIfmkcL2CnnIMyscd4EuFaDJ7oi/TJ+v3VrJer0pZzZ9MZlUaQU+j4Z7MDOCB2NBKENXLkQ==
 
 "@humanwhocodes/config-array@^0.9.2":
   version "0.9.2"

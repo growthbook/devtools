@@ -14,7 +14,7 @@ window.addEventListener("message", function (msg: MessageEvent<Message>) {
 });
 
 // On message from devtools
-chrome.runtime.onMessage.addListener((msg: Message) => {
+chrome.runtime.onMessage.addListener(async (msg: Message) => {
   // Forward onto page
   if (msg.type === "GB_REQUEST_REFRESH") {
     window.postMessage(msg, "*");

@@ -18,8 +18,8 @@ import { DebugLogs } from "./types";
 import stringify from "json-stringify-pretty-compact";
 
 export interface Props {
-  result: Result;
-  experiment: ExperimentInterface;
+  result: Result<any>;
+  experiment: ExperimentInterface<any>;
   override?: ExperimentOverride;
   debug: DebugLogs;
   force: (variation: number) => void;
