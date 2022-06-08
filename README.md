@@ -11,3 +11,25 @@ Features
 - Create visual experiments from within the devtools (**Coming Soon**)
 
 ![DevTools Screenshot](/devtools-screenshot.png)
+
+## Build and Release
+
+To build and use this extension locally:
+
+1. Run `yarn` to install dependencies
+2. Run `yarn build` to create a new build
+3. In Chrome, go to chrome://extensions
+   - Make sure the "Developer Mode" toggle is on
+   - Remove any existing GrowthBook devtool extensions
+   - Click "Load Unpacked Extension" and select the `build` directory
+4. Make changes and run `yarn build` again and it should update in Chrome automatically
+
+To release a new version of the extension to the Chrome Web Store:
+
+1. Increment the version in `public/manifest.json`
+2. Run `yarn build` to make a production build
+3. Run `yarn package` to create a `build.zip` file
+4. On the Chrome Web Store Developer Dashboard, go to Packages and upload the `build.zip` file
+5. Add a changelog entry to the description describing your changes
+6. Save the draft and submit for review
+7. Make sure to commit and push the changes to GitHub as well
