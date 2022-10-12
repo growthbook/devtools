@@ -28,7 +28,8 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
   let timer = window.setTimeout(() => {
     const msg: ErrorMessage = {
       type: "GB_ERROR",
-      error: "Timed out waiting for GrowthBook SDK instance",
+      error:
+        "Unable to locate GrowthBook SDK instance. Please ensure you are using the either the React or Javascript SDK and Dev Mode is enabled.",
     };
     window.postMessage(msg, "*");
   }, 5000);
