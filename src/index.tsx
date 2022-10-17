@@ -6,7 +6,6 @@ import {
   Alert,
   AlertDescription,
   AlertIcon,
-  AlertTitle,
 } from "@chakra-ui/alert";
 import { Box, Text } from "@chakra-ui/layout";
 import { Spinner } from "@chakra-ui/spinner";
@@ -35,7 +34,6 @@ function WaitForGrowthBook() {
           <Box>
             <Alert status="error">
               <AlertIcon />
-              <AlertTitle mr={2}>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
             <Box mt={3} textAlign="center">
