@@ -27,9 +27,8 @@ To build and use this extension locally:
 To release a new version of the extension to the Chrome Web Store:
 
 1. Increment the version in `public/manifest.json`
-2. Run `yarn build` to make a production build
-3. Run `yarn package` to create a `build.zip` file
-4. On the Chrome Web Store Developer Dashboard, go to Packages and upload the `build.zip` file
-5. Add a changelog entry to the description describing your changes
-6. Save the draft and submit for review
-7. Make sure to commit and push the changes to GitHub as well
+2. Run `yarn package` to create a `build.zip` file
+3. On the Chrome Web Store Developer Dashboard, go to Packages and upload the `build.zip` file
+4. Add a changelog entry to the description describing your changes
+5. Save the draft and submit for review
+6. Make sure to commit and push the changes to GitHub as well

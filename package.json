@@ -29,9 +29,11 @@
   },
   "scripts": {
     "start": "BROWSER=none react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false INLINE_RUNTIME_CHUNK=false craco build",
+    "build": "yarn clean && GENERATE_SOURCEMAP=false INLINE_RUNTIME_CHUNK=false craco build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "clean": "rm -rf build",
+    "package": "yarn build && cd build && zip -r build.zip . && mv build.zip ../"
   },
   "eslintConfig": {
     "extends": [
