@@ -1,25 +1,38 @@
 {
+  "manifest_version": 3,
+
   "name": "GrowthBook DevTools",
   "description": "QA and debug feature flags and experiments from GrowthBook's js/react SDKs",
-  "version": "0.1.3",
-  "manifest_version": 3,
-  "devtools_page": "devtools.html",
-  "permissions": ["activeTab"],
+  "version": "0.2.3",
+
+  "options_ui": {
+    "page": "options.html"
+  },
+
+  "action": {
+    "default_popup": "popup.html"
+  },
+
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*"],
-      "js": ["static/js/content.js"]
+      "matches": ["<all_urls>"],
+      "js": ["js/vendor.js", "js/content_script.js"]
     }
   ],
-  "web_accessible_resources": [
-    {
-      "matches": ["http://*/*", "https://*/*"],
-      "resources": ["static/js/page.js"]
-    }
-  ],
+
+  "background": {
+    "service_worker": "js/background.js"
+  },
+
+  "permissions": ["storage", "activeTab"],
+
+  "host_permissions": ["<all_urls>"],
+
   "icons": {
     "16": "logo192.png",
     "48": "logo192.png",
     "128": "logo192.png"
-  }
+  },
+
+  "devtools_page": "devtools.html"
 }
