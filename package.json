@@ -15,15 +15,24 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^2.4.9",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
     "@growthbook/growthbook": "^0.20.1",
+    "framer-motion": "^8.4.3",
+    "json-stringify-pretty-compact": "^4.0.0",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "react-hook-form": "^7.42.1",
+    "react-icons": "^4.7.1",
+    "react-syntax-highlighter": "^15.5.0"
   },
   "devDependencies": {
+    "@svgr/webpack": "^6.5.1",
     "@types/chrome": "0.0.158",
     "@types/jest": "^27.0.2",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "@types/react-syntax-highlighter": "^15.5.6",
     "autoprefixer": "^10.4.13",
     "copy-webpack-plugin": "^9.0.1",
     "css-loader": "^6.7.3",

@@ -8,9 +8,9 @@ module.exports = {
     popup: path.join(srcDir, "popup.tsx"),
     options: path.join(srcDir, "options.tsx"),
     content_script: path.join(srcDir, "content_script.ts"),
-    devtools: path.join(srcDir, "devtools", "index.ts"),
+    devtools_init: path.join(srcDir, "devtools", "init.ts"),
     // devtools_content_script: path.join(srcDir, "devtools", "content_script.ts"),
-    devtools_panel: path.join(srcDir, "devtools", "panel.tsx"),
+    devtools_panel: path.join(srcDir, "devtools", "react", "index.tsx"),
   },
   output: {
     path: path.join(__dirname, "../dist/js"),
@@ -34,6 +34,10 @@ module.exports = {
       {
         test: /\.css$/,
         use: ["style-loader", "css-loader", "postcss-loader"],
+      },
+      {
+        test: /\.svg$/,
+        use: ["@svgr/webpack"],
       },
     ],
   },
