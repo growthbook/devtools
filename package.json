@@ -14,6 +14,7 @@
     "url": "https://github.com/growthbook/devtools"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.4.9",
     "@growthbook/growthbook": "^0.20.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"

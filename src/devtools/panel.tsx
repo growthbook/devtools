@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import "./global.css";
+import "../global.css";
 
 const Popup = () => {
   return (
@@ -9,7 +9,7 @@ const Popup = () => {
       <ul className="list-disc pl-4 text-xl">
         <li>
           <a href="#" className="hover:underline">
-            This works!
+            This still works!
           </a>
         </li>
       </ul>

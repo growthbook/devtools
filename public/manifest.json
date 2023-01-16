@@ -20,10 +20,6 @@
     }
   ],
 
-  "background": {
-    "service_worker": "js/background.js"
-  },
-
   "permissions": ["storage", "activeTab"],
 
   "host_permissions": ["<all_urls>"],

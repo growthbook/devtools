@@ -1,5 +1,5 @@
 import type { Experiment, GrowthBook } from "@growthbook/growthbook";
-import type { ErrorMessage, Message, RefreshMessage } from "../devtools";
+import type { ErrorMessage, Message, RefreshMessage } from "../../devtools";
 
 declare global {
   interface Window {

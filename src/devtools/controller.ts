@@ -3,7 +3,7 @@ import {
   Message,
   RefreshMessage,
   SetOverridesMessage,
-} from "../devtools";
+} from "../../devtools";
 
 // Send message to content script
 function sendMessage(msg: Message) {

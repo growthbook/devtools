@@ -1,4 +1,5 @@
 import type { Message } from "../devtools";
+import "./devtools/content_script";
 
 // On message from page
 window.addEventListener("message", function (msg: MessageEvent<Message>) {

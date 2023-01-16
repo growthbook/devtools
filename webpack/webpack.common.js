@@ -7,11 +7,10 @@ module.exports = {
   entry: {
     popup: path.join(srcDir, "popup.tsx"),
     options: path.join(srcDir, "options.tsx"),
-    background: path.join(srcDir, "background.ts"),
     content_script: path.join(srcDir, "content_script.ts"),
-    devtools: path.join(srcDir, "devtools.ts"),
-    // devtools_panel: path.join(srcDir, "devtools_panel.tsx"),
-    devtools_content_script: path.join(srcDir, "devtools_content_script.ts"),
+    devtools: path.join(srcDir, "devtools", "index.ts"),
+    // devtools_content_script: path.join(srcDir, "devtools", "content_script.ts"),
+    devtools_panel: path.join(srcDir, "devtools", "panel.tsx"),
   },
   output: {
     path: path.join(__dirname, "../dist/js"),
