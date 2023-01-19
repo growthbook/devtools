@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import * as ReactDOM from "react-dom/client";
 import App from "./App";
 import { ChakraProvider } from "@chakra-ui/react";
 import { Alert, AlertDescription, AlertIcon } from "@chakra-ui/alert";
@@ -65,11 +65,14 @@ function WaitForGrowthBook() {
   );
 }
 
-ReactDOM.render(
+const container = document.getElementById("root");
+
+const root = ReactDOM.createRoot(container!);
+
+root.render(
   <React.StrictMode>
     <ChakraProvider>
       <WaitForGrowthBook />
     </ChakraProvider>
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 );

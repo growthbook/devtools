@@ -30,6 +30,7 @@ export function onGrowthBookData(
     refreshListeners.delete(cb);
   };
 }
+
 chrome.runtime.onMessage.addListener(
   async (msg: RefreshMessage | ErrorMessage) => {
     if (msg.type === "GB_REFRESH") {

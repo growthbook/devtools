@@ -9,8 +9,8 @@ module.exports = {
     options: path.join(srcDir, "options.tsx"),
     content_script: path.join(srcDir, "content_script.ts"),
     devtools_init: path.join(srcDir, "devtools", "init.ts"),
-    // devtools_content_script: path.join(srcDir, "devtools", "content_script.ts"),
-    devtools_panel: path.join(srcDir, "devtools", "react", "index.tsx"),
+    devtools_embed_script: path.join(srcDir, "devtools", "embed_script.ts"),
+    devtools_panel: path.join(srcDir, "devtools", "ui", "index.tsx"),
   },
   output: {
     path: path.join(__dirname, "../dist/js"),
@@ -37,7 +37,7 @@ module.exports = {
       },
       {
         test: /\.svg$/,
-        use: ["@svgr/webpack"],
+        use: "@svgr/webpack",
       },
     ],
   },

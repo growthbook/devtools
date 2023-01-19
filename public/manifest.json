@@ -20,6 +20,13 @@
     }
   ],
 
+  "web_accessible_resources": [
+    {
+      "matches": ["<all_urls>"],
+      "resources": ["js/devtools_embed_script.js"]
+    }
+  ],
+
   "permissions": ["storage", "activeTab"],
 
   "host_permissions": ["<all_urls>"],

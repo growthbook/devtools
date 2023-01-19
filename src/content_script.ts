@@ -1,7 +1,6 @@
 import type { Message } from "../devtools";
-import "./devtools/content_script";
 
-// On message from page
+// On message from embed_script
 window.addEventListener("message", function (msg: MessageEvent<Message>) {
   const data = msg.data;
 
@@ -15,7 +14,7 @@ window.addEventListener("message", function (msg: MessageEvent<Message>) {
 
 // On message from devtools
 chrome.runtime.onMessage.addListener(async (msg: Message) => {
-  // Forward onto page
+  // Forward onto embed_script
   if (msg.type === "GB_REQUEST_REFRESH") {
     window.postMessage(msg, "*");
   } else if (msg.type === "GB_SET_OVERRIDES") {
@@ -23,12 +22,12 @@ chrome.runtime.onMessage.addListener(async (msg: Message) => {
   }
 });
 
-// Inject page script
+// Inject embed_script script
 const SCRIPT_ID = "gbdevtools-page-script";
 if (!document.getElementById(SCRIPT_ID)) {
   const script = document.createElement("script");
   script.id = SCRIPT_ID;
   script.async = true;
-  script.src = chrome.runtime.getURL("js/devtools_content_script.js");
+  script.src = chrome.runtime.getURL("js/devtools_embed_script.js");
   document.body.appendChild(script);
 }
