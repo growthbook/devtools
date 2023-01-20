@@ -3,8 +3,7 @@ import { useApiEndpoint } from "./hooks";
 
 const FeaturesList: FC<{ apiKey: string }> = ({ apiKey }) => {
   const { data, loading } = useApiEndpoint<{ features: Array<any> }>(
-    "/features",
-    apiKey
+    "/features"
   );
 
   return (

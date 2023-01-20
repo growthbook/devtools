@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
-import { loadApiKey, saveApiKey, clearApiKey } from "../../storage";
+import {
+  loadApiKey,
+  saveApiKey,
+  clearApiKey,
+  saveApiHost,
+  loadApiHost,
+} from "../../storage";
 
-const API_HOST =
+const DEFAULT_API_HOST =
   process.env.NODE_ENV === "production"
     ? "https://api.growthbook.io"
     : "http://localhost:3100";
@@ -9,13 +15,14 @@ const API_HOST =
 export const useApiKey = () => {
   const [loading, setLoading] = useState(true);
   const [apiKey, setApiKey] = useState<string | null>(null);
+  const [apiHost, setApiHost] = useState<string | null>(DEFAULT_API_HOST);
 
   const _loadApiKey = async () => {
-    setLoading(true);
-
     setApiKey(await loadApiKey());
+  };
 
-    setLoading(false);
+  const _loadApiHost = async () => {
+    setApiHost(await loadApiHost());
   };
 
   const _saveApiKey = async (apiKey: string) => {
@@ -23,6 +30,15 @@ export const useApiKey = () => {
 
     await saveApiKey(apiKey);
     setApiKey(apiKey);
+
+    setLoading(false);
+  };
+
+  const _saveApiHost = async (apiHost: string) => {
+    setLoading(true);
+
+    await saveApiHost(apiHost);
+    setApiHost(apiHost);
 
     setLoading(false);
   };
@@ -37,18 +53,25 @@ export const useApiKey = () => {
   };
 
   useEffect(() => {
+    setLoading(true);
+
     _loadApiKey();
+    _loadApiHost();
+
+    setLoading(false);
   }, []);
 
   return {
     apiKey,
+    apiHost,
     loading,
     saveApiKey: _saveApiKey,
+    saveApiHost: _saveApiHost,
     clearApiKey: _clearApiKey,
   };
 };
 
-export const useApiEndpoint = <T>(endpoint: string, apiKey: string) => {
+export const useApiEndpoint = <T>(endpoint: string) => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<T | null>(null);
 
@@ -56,7 +79,10 @@ export const useApiEndpoint = <T>(endpoint: string, apiKey: string) => {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_HOST}/api/v1/${endpoint}`, {
+      const apiHost = await loadApiHost();
+      const apiKey = await loadApiKey();
+
+      const res = await fetch(`${apiHost}/api/v1/${endpoint}`, {
         headers: {
           Authorization: `Basic ${btoa(apiKey + ":")}`,
         },

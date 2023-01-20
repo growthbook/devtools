@@ -15,7 +15,8 @@ const LoadingOverlay = ({ isLoading }: { isLoading: boolean }) => (
 );
 
 const Popup = () => {
-  const { apiKey, saveApiKey, clearApiKey, loading } = useApiKey();
+  const { apiKey, apiHost, saveApiKey, saveApiHost, clearApiKey, loading } =
+    useApiKey();
 
   return (
     <>
@@ -34,7 +35,13 @@ const Popup = () => {
           ) : null}
         </div>
 
-        {!apiKey ? <ApiKeyForm saveApiKey={saveApiKey} /> : null}
+        {!apiKey ? (
+          <ApiKeyForm
+            apiHost={apiHost}
+            saveApiKey={saveApiKey}
+            saveApiHost={saveApiHost}
+          />
+        ) : null}
 
         {apiKey ? <FeaturesList apiKey={apiKey} /> : null}
       </div>

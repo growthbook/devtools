@@ -1,26 +1,43 @@
 import React, { FC, useEffect, useState } from "react";
 
 const ApiKeyInput: FC<{
+  apiHost: string | null;
   saveApiKey: (apiKey: string) => void;
-}> = ({ saveApiKey }) => {
+  saveApiHost: (apiHost: string) => void;
+}> = ({ saveApiKey, apiHost, saveApiHost }) => {
   const [_apiKey, _setApiKey] = useState("");
+  const [_apiHost, _setApiHost] = useState(apiHost || "");
   return (
     <form
       className="flex flex-col"
       onSubmit={(_e) => {
         saveApiKey(_apiKey);
+        saveApiHost(_apiHost);
       }}
     >
       <div className="text-md mb-2">
-        Please enter an API Key to connect your GrowthBook account
+        Please enter your API credentials to connect to your GrowthBook account
       </div>
-      <input
-        placeholder="API Key"
-        className="border p-2 rounded mb-2"
-        type="text"
-        value={_apiKey}
-        onChange={(e) => _setApiKey(e.target.value)}
-      />
+      <label className="flex flex-col">
+        <span className="text-xs px-1">API Host</span>
+        <input
+          placeholder="https://api.growthbook.io"
+          className="border p-2 rounded mb-2"
+          type="text"
+          value={_apiHost}
+          onChange={(e) => _setApiHost(e.target.value)}
+        />
+      </label>
+      <label className="flex flex-col">
+        <span className="text-xs px-1">API Secret</span>
+        <input
+          placeholder="secret_xyz..."
+          className="border p-2 rounded mb-2"
+          type="text"
+          value={_apiKey}
+          onChange={(e) => _setApiKey(e.target.value)}
+        />
+      </label>
       <input type="submit" className="p-2 bg-blue-300" value="Submit" />
     </form>
   );
