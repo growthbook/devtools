@@ -11,35 +11,3 @@ export const loadApiKey = async () => {
 
 export const saveApiKey = (apiKey: string) =>
   chrome.storage.sync.set({ [API_KEY]: apiKey });
-
-export const useApiKey = () => {
-  const [loading, setLoading] = useState(true);
-  const [apiKey, setApiKey] = useState<string | null>(null);
-
-  const _loadApiKey = async () => {
-    setLoading(true);
-
-    setApiKey(await loadApiKey());
-
-    setLoading(false);
-  };
-
-  const _saveApiKey = async (apiKey: string) => {
-    setLoading(true);
-
-    await saveApiKey(apiKey);
-    setApiKey(apiKey);
-
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    _loadApiKey();
-  }, []);
-
-  return {
-    apiKey,
-    loading,
-    saveApiKey: _saveApiKey,
-  };
-};

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import * as ReactDOM from "react-dom/client";
 import clsx from "clsx";
-import { useApiKey } from "../storage";
+import { useApiKey } from "./hooks";
 import ApiKeyForm from "./ApiKeyForm";
 import "../global.css";
+import FeaturesList from "./FeaturesList";
 
 const LoadingOverlay = ({ isLoading }: { isLoading: boolean }) => (
   <div
@@ -24,6 +25,8 @@ const Popup = () => {
         <div className="text-2xl mb-4">GrowthBook DevTools v2</div>
 
         {!apiKey && <ApiKeyForm saveApiKey={saveApiKey} />}
+
+        {apiKey && <FeaturesList apiKey={apiKey} />}
       </div>
     </>
   );
