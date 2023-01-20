@@ -11,3 +11,5 @@ export const loadApiKey = async () => {
 
 export const saveApiKey = (apiKey: string) =>
   chrome.storage.sync.set({ [API_KEY]: apiKey });
+
+export const clearApiKey = () => chrome.storage.sync.remove([API_KEY]);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { loadApiKey, saveApiKey } from "../../storage";
+import { loadApiKey, saveApiKey, clearApiKey } from "../../storage";
 
 const API_HOST =
   process.env.NODE_ENV === "production"
@@ -27,6 +27,15 @@ export const useApiKey = () => {
     setLoading(false);
   };
 
+  const _clearApiKey = async () => {
+    setLoading(true);
+
+    await clearApiKey();
+    setApiKey(null);
+
+    setLoading(false);
+  };
+
   useEffect(() => {
     _loadApiKey();
   }, []);
@@ -35,6 +44,7 @@ export const useApiKey = () => {
     apiKey,
     loading,
     saveApiKey: _saveApiKey,
+    clearApiKey: _clearApiKey,
   };
 };
 

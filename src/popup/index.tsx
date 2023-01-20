@@ -15,18 +15,28 @@ const LoadingOverlay = ({ isLoading }: { isLoading: boolean }) => (
 );
 
 const Popup = () => {
-  const { apiKey, saveApiKey, loading } = useApiKey();
+  const { apiKey, saveApiKey, clearApiKey, loading } = useApiKey();
 
   return (
     <>
       <LoadingOverlay isLoading={loading} />
 
       <div className="w-96 p-4">
-        <div className="text-2xl mb-4">GrowthBook DevTools v2</div>
+        <div className="mb-2">
+          <div className="text-2xl mb-1">GrowthBook DevTools v2</div>
+          {apiKey ? (
+            <div
+              className="text-xs text-blue-400 underline cursor-pointer"
+              onClick={clearApiKey}
+            >
+              Disconnect
+            </div>
+          ) : null}
+        </div>
 
-        {!apiKey && <ApiKeyForm saveApiKey={saveApiKey} />}
+        {!apiKey ? <ApiKeyForm saveApiKey={saveApiKey} /> : null}
 
-        {apiKey && <FeaturesList apiKey={apiKey} />}
+        {apiKey ? <FeaturesList apiKey={apiKey} /> : null}
       </div>
     </>
   );
