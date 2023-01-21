@@ -1,11 +1,12 @@
 import React, { FC, useEffect, useState } from "react";
 
 const ApiKeyInput: FC<{
+  apiKey: string | null;
   apiHost: string | null;
   saveApiKey: (apiKey: string) => void;
   saveApiHost: (apiHost: string) => void;
-}> = ({ saveApiKey, apiHost, saveApiHost }) => {
-  const [_apiKey, _setApiKey] = useState("");
+}> = ({ saveApiKey, apiHost, saveApiHost, apiKey }) => {
+  const [_apiKey, _setApiKey] = useState(apiKey || "");
   const [_apiHost, _setApiHost] = useState(apiHost || "");
   return (
     <form

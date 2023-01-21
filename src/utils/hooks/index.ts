@@ -5,7 +5,7 @@ import {
   clearApiKey,
   saveApiHost,
   loadApiHost,
-} from "../../storage";
+} from "../storage";
 
 const DEFAULT_API_HOST =
   process.env.NODE_ENV === "production"
@@ -53,12 +53,12 @@ export const useApiKey = () => {
   };
 
   useEffect(() => {
-    setLoading(true);
-
-    _loadApiKey();
-    _loadApiHost();
-
-    setLoading(false);
+    const load = async () => {
+      setLoading(true);
+      await Promise.all([_loadApiKey(), _loadApiHost()]);
+      setLoading(false);
+    };
+    load();
   }, []);
 
   return {

@@ -1,7 +1,7 @@
 import React, { FC, useEffect } from "react";
-import { useApiEndpoint } from "./hooks";
+import { useApiEndpoint } from "../utils/hooks";
 
-const FeaturesList: FC<{ apiKey: string }> = ({ apiKey }) => {
+const FeaturesList: FC<{}> = () => {
   const { data, loading } = useApiEndpoint<{ features: Array<any> }>(
     "/features"
   );
