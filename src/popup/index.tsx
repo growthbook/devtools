@@ -22,7 +22,7 @@ const Popup = () => {
             >
               here
             </a>{" "}
-            to connect the extention with your GrwothBook account.
+            to connect the extension with your GrowthBook account.
           </div>
         )}
         {apiKey ? <FeaturesList /> : null}
