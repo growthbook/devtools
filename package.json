@@ -18,6 +18,7 @@
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@growthbook/growthbook": "^0.20.1",
+    "clsx": "^1.2.1",
     "framer-motion": "^8.4.3",
     "json-stringify-pretty-compact": "^4.0.0",
     "react": "^18.2.0",
