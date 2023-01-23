@@ -7,13 +7,13 @@ import "../global.css";
 const Options = () => {
   const { apiKey, apiHost, saveApiKey, saveApiHost, loading } = useApiKey();
 
+  const onSave = () => {
+    window.close();
+  };
+
   return (
     <>
       <div className="w-96 p-4">
-        <div className="mb-2">
-          <div className="text-2xl mb-1">GrowthBook DevTools v2</div>
-        </div>
-
         {loading ? (
           <div className="text-gray-500">Loading...</div>
         ) : (
@@ -22,6 +22,7 @@ const Options = () => {
             apiHost={apiHost}
             saveApiKey={saveApiKey}
             saveApiHost={saveApiHost}
+            onSave={onSave}
           />
         )}
       </div>

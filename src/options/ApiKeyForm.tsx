@@ -5,7 +5,8 @@ const ApiKeyInput: FC<{
   apiHost: string | null;
   saveApiKey: (apiKey: string) => void;
   saveApiHost: (apiHost: string) => void;
-}> = ({ saveApiKey, apiHost, saveApiHost, apiKey }) => {
+  onSave: () => void;
+}> = ({ saveApiKey, apiHost, saveApiHost, apiKey, onSave }) => {
   const [_apiKey, _setApiKey] = useState(apiKey || "");
   const [_apiHost, _setApiHost] = useState(apiHost || "");
   return (
@@ -14,6 +15,7 @@ const ApiKeyInput: FC<{
       onSubmit={(_e) => {
         saveApiKey(_apiKey);
         saveApiHost(_apiHost);
+        onSave();
       }}
     >
       <div className="text-md mb-2">

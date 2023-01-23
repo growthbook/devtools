@@ -13,7 +13,7 @@ const Popup = () => {
       <div className="mb-2">
         <div className="text-2xl mb-1">GrowthBook DevTools v2</div>
 
-        {!apiKey && (
+        {!apiKey ? (
           <div className="text-lg">
             Please supply your API credentials{" "}
             <a
@@ -24,6 +24,13 @@ const Popup = () => {
             </a>{" "}
             to connect the extension with your GrowthBook account.
           </div>
+        ) : (
+          <a
+            className="text-blue-500 cursor-pointer underline"
+            onClick={() => chrome.runtime.openOptionsPage()}
+          >
+            Options
+          </a>
         )}
         {apiKey ? <FeaturesList /> : null}
       </div>
