@@ -1,12 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import * as ReactDOM from "react-dom/client";
-import clsx from "clsx";
 import { useApiKey } from "../utils/hooks";
 import "../global.css";
 import FeaturesList from "./FeaturesList";
 
 const Popup = () => {
   const { apiKey } = useApiKey();
+
+  const sendMessage = () => {
+    chrome.tabs &&
+      chrome.tabs.query(
+        {
+          active: true,
+          currentWindow: true,
+        },
+        (tabs) => {
+          chrome.tabs.sendMessage(tabs[0].id || 0, {
+            type: "GB_ENABLE_VISUAL_EDITOR",
+          });
+        }
+      );
+  };
 
   return (
     <div className="w-96 p-4">
@@ -32,7 +46,15 @@ const Popup = () => {
             Options
           </a>
         )}
+
         {apiKey ? <FeaturesList /> : null}
+
+        <button
+          className="p-2 text-white bg-blue-500 mt-4"
+          onClick={sendMessage}
+        >
+          Toggle Visual Editor
+        </button>
       </div>
     </div>
   );

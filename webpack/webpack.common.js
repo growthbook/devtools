@@ -11,6 +11,7 @@ module.exports = {
     devtools_init: path.join(srcDir, "devtools", "init.ts"),
     devtools_embed_script: path.join(srcDir, "devtools", "embed_script.ts"),
     devtools_panel: path.join(srcDir, "devtools", "ui", "index.tsx"),
+    visual_editor: path.join(srcDir, "visual_editor", "index.tsx"),
   },
   output: {
     path: path.join(__dirname, "../dist/js"),
@@ -20,7 +21,7 @@ module.exports = {
     splitChunks: {
       name: "vendor",
       chunks(chunk) {
-        return chunk.name !== "background";
+        return chunk.name !== "background" && chunk.name !== "visual_editor";
       },
     },
   },

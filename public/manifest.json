@@ -23,7 +23,7 @@
   "web_accessible_resources": [
     {
       "matches": ["<all_urls>"],
-      "resources": ["js/devtools_embed_script.js"]
+      "resources": ["js/devtools_embed_script.js", "js/visual_editor.js"]
     }
   ],
 

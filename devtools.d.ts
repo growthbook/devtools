@@ -30,8 +30,18 @@ export type ErrorMessage = {
   error: string;
 };
 
+type EnableVisualEditorMessage = {
+  type: "GB_ENABLE_VISUAL_EDITOR";
+};
+
+type DisableVisualEditorMessage = {
+  type: "GB_DISABLE_VISUAL_EDITOR";
+};
+
 export type Message =
   | RequestRefreshMessage
   | SetOverridesMessage
   | RefreshMessage
-  | ErrorMessage;
+  | ErrorMessage
+  | EnableVisualEditorMessage
+  | DisableVisualEditorMessage;
