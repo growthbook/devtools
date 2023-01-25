@@ -1,7 +1,8 @@
 import React, { FC, useEffect, useState } from "react";
 import * as ReactDOM from "react-dom/client";
+// @ts-expect-error ts-loader does not understand .css imports
+import VisualEditorCss from "./index.css";
 import Toolbar from "./Toolbar";
-import "../global.css";
 
 const VisualEditor: FC<{}> = () => {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -22,8 +23,24 @@ const VisualEditor: FC<{}> = () => {
   return <>{isEnabled ? <Toolbar /> : null}</>;
 };
 
-const container = document.getElementById("visual-editor-container");
-const root = ReactDOM.createRoot(container!);
+const container = document.createElement("div");
+
+const shadowRoot = container?.attachShadow({ mode: "open" });
+
+if (shadowRoot) {
+  console.log("attachShadow");
+  shadowRoot.innerHTML = `
+    <style>${VisualEditorCss}</style>
+    <div id="visual-editor-root"></div>
+  `;
+}
+
+document.body.appendChild(container);
+
+const root = ReactDOM.createRoot(
+  shadowRoot.querySelector("#visual-editor-root")!
+);
+
 root.render(
   <React.StrictMode>
     <VisualEditor />

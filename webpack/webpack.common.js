@@ -34,11 +34,18 @@ module.exports = {
       },
       {
         test: /\.css$/,
+        // visual editor css loaded separately
+        exclude: [path.join(srcDir, "visual_editor", "index.css")],
         use: ["style-loader", "css-loader", "postcss-loader"],
       },
       {
         test: /\.svg$/,
         use: "@svgr/webpack",
+      },
+      {
+        include: path.join(srcDir, "visual_editor", "index.css"),
+        type: "asset/source",
+        loader: "postcss-loader",
       },
     ],
   },
