@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, SetStateAction, useState } from "react";
 import {
   RxCursorArrow,
   RxSection,
@@ -8,7 +8,12 @@ import {
 } from "react-icons/rx";
 import clsx from "clsx";
 
-type ToolbarMode = "normal" | "selection" | "css" | "mutation" | "screenshot";
+export type ToolbarMode =
+  | "normal"
+  | "selection"
+  | "css"
+  | "mutation"
+  | "screenshot";
 
 const modeToIcon = {
   normal: RxCursorArrow,
@@ -30,7 +35,9 @@ const ToolbarButton = ({
   const Icon = modeToIcon[mode];
   return (
     <button
-      className={clsx("flex-1 p-4 h-full", { "bg-slate-200": isActive })}
+      className={clsx("flex-1 p-4 h-full hover:bg-slate-100/75", {
+        "bg-slate-200": isActive,
+      })}
       onClick={enable}
     >
       <Icon />
@@ -38,10 +45,12 @@ const ToolbarButton = ({
   );
 };
 
-const Toolbar: FC<{}> = () => {
-  const [mode, setMode] = useState<ToolbarMode>("normal");
+const Toolbar: FC<{
+  mode: ToolbarMode;
+  setMode: (mode: ToolbarMode) => void;
+}> = ({ mode, setMode }) => {
   return (
-    <div className="fixed top-6 left-6 bg-slate-300 rounded shadow-xl">
+    <div className="fixed top-6 left-6 bg-slate-300 rounded shadow-xl z-max">
       <div className="flex flex-row">
         <ToolbarButton
           isActive={mode === "normal"}

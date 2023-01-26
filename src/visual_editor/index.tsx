@@ -1,11 +1,24 @@
 import React, { FC, useEffect, useState } from "react";
 import * as ReactDOM from "react-dom/client";
-// @ts-expect-error ts-loader does not understand .css imports
+import Toolbar, { ToolbarMode } from "./Toolbar";
+import {
+  toggleNormalMode,
+  toggleSelectionMode,
+  toggleCssMode,
+  toggleMutationMode,
+  toggleScreenshotMode,
+} from "./lib/modes";
+// @ts-expect-error ts-loader does not understand this .css import
 import VisualEditorCss from "./index.css";
-import Toolbar from "./Toolbar";
+import "./targetPage.css";
 
 const VisualEditor: FC<{}> = () => {
-  const [isEnabled, setIsEnabled] = useState(false);
+  // TODO Set this to false before shipping to prod!!!!!!!!!!!!!!
+  // TODO I repeat, DO NOT SHIP!!!!!!!
+  const [isEnabled, setIsEnabled] = useState(true);
+  // TODO Set this to "normal" before shipping to prod!!!!!!!!!!!!!!
+  // TODO I repeat, DO NOT SHIP!!!!!!!
+  const [mode, setMode] = useState<ToolbarMode>("selection");
 
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
@@ -16,15 +29,24 @@ const VisualEditor: FC<{}> = () => {
         setIsEnabled(false);
       }
     };
+
     window.addEventListener("message", messageHandler);
+
     return () => window.removeEventListener("message", messageHandler);
   }, []);
 
-  return <>{isEnabled ? <Toolbar /> : null}</>;
+  useEffect(() => {
+    toggleNormalMode(mode === "normal");
+    toggleSelectionMode(mode === "selection");
+    toggleCssMode(mode === "css");
+    toggleMutationMode(mode === "mutation");
+    toggleScreenshotMode(mode === "screenshot");
+  }, [mode]);
+
+  return <>{isEnabled ? <Toolbar mode={mode} setMode={setMode} /> : null}</>;
 };
 
 const container = document.createElement("div");
-
 const shadowRoot = container?.attachShadow({ mode: "open" });
 
 if (shadowRoot) {
