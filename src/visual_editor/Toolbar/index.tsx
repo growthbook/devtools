@@ -1,4 +1,4 @@
-import React, { FC, SetStateAction, useState } from "react";
+import React, { FC, SetStateAction, useEffect, useState } from "react";
 import {
   RxCursorArrow,
   RxSection,
@@ -7,6 +7,7 @@ import {
   RxCamera,
 } from "react-icons/rx";
 import clsx from "clsx";
+import GripHandle from "./GripHandle";
 
 export type ToolbarMode =
   | "normal"
@@ -49,9 +50,21 @@ const Toolbar: FC<{
   mode: ToolbarMode;
   setMode: (mode: ToolbarMode) => void;
 }> = ({ mode, setMode }) => {
+  // x, y position of floating toolbar
+  const [x, setX] = useState(24); // pixels
+  const [y, setY] = useState(24); // pixels
+
   return (
-    <div className="fixed top-6 left-6 bg-slate-300 rounded shadow-xl z-max">
+    <div
+      className="fixed bg-slate-300 rounded rounded-l-lg shadow-xl z-max"
+      style={{
+        top: `${y}px`,
+        left: `${x}px`,
+      }}
+    >
       <div className="flex flex-row">
+        <GripHandle x={x} y={y} setX={setX} setY={setY} />
+
         <ToolbarButton
           isActive={mode === "normal"}
           mode="normal"

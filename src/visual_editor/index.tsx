@@ -15,7 +15,6 @@ import VisualEditorCss from "./index.css";
 
 const VisualEditor: FC<{}> = () => {
   const [isEnabled, setIsEnabled] = useState(
-    // TODO Obv get rid of this before shipping
     window.location.href.includes("localhost:3001")
   );
   const [mode, setMode] = useState<ToolbarMode>("selection");
@@ -23,6 +22,7 @@ const VisualEditor: FC<{}> = () => {
     null
   );
 
+  // listen for messages from popup menu
   useEffect(() => {
     const messageHandler = (event: MessageEvent<Message>) => {
       const data = event.data;
@@ -60,7 +60,6 @@ const container = document.createElement("div");
 const shadowRoot = container?.attachShadow({ mode: "open" });
 
 if (shadowRoot) {
-  console.log("attachShadow");
   shadowRoot.innerHTML = `
     <style>${VisualEditorCss}</style>
     <div id="visual-editor-root"></div>

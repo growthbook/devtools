@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.bg-grip-handle {
+  @apply bg-slate-300;
+  @apply rounded-l-lg;
+  background-image: radial-gradient(#aaa 1px, transparent 1px);
+  background-position: 0 0, 2px 2px;
+  background-size: 4px 4px;
+}
