@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
 import * as ReactDOM from "react-dom/client";
+import { Message } from "../../devtools";
 import Toolbar, { ToolbarMode } from "./Toolbar";
 import {
   toggleNormalMode,
@@ -8,20 +9,22 @@ import {
   toggleMutationMode,
   toggleScreenshotMode,
 } from "./lib/modes";
+import "./targetPage.css";
 // @ts-expect-error ts-loader does not understand this .css import
 import VisualEditorCss from "./index.css";
-import "./targetPage.css";
 
 const VisualEditor: FC<{}> = () => {
-  // TODO Set this to false before shipping to prod!!!!!!!!!!!!!!
-  // TODO I repeat, DO NOT SHIP!!!!!!!
-  const [isEnabled, setIsEnabled] = useState(true);
-  // TODO Set this to "normal" before shipping to prod!!!!!!!!!!!!!!
-  // TODO I repeat, DO NOT SHIP!!!!!!!
+  const [isEnabled, setIsEnabled] = useState(
+    // TODO Obv get rid of this before shipping
+    window.location.href.includes("localhost:3001")
+  );
   const [mode, setMode] = useState<ToolbarMode>("selection");
+  const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(
+    null
+  );
 
   useEffect(() => {
-    const messageHandler = (event: MessageEvent) => {
+    const messageHandler = (event: MessageEvent<Message>) => {
       const data = event.data;
       if (data.type === "GB_ENABLE_VISUAL_EDITOR") {
         setIsEnabled(true);
@@ -29,23 +32,30 @@ const VisualEditor: FC<{}> = () => {
         setIsEnabled(false);
       }
     };
-
     window.addEventListener("message", messageHandler);
-
     return () => window.removeEventListener("message", messageHandler);
   }, []);
 
   useEffect(() => {
+    if (!isEnabled) return;
     toggleNormalMode(mode === "normal");
     toggleSelectionMode(mode === "selection");
     toggleCssMode(mode === "css");
     toggleMutationMode(mode === "mutation");
     toggleScreenshotMode(mode === "screenshot");
-  }, [mode]);
+  }, [isEnabled, mode]);
 
-  return <>{isEnabled ? <Toolbar mode={mode} setMode={setMode} /> : null}</>;
+  if (!isEnabled) return null;
+
+  return (
+    <>
+      <Toolbar mode={mode} setMode={setMode} />{" "}
+      {mode === "selection" && selectedElement ? <div></div> : null}
+    </>
+  );
 };
 
+// mounting the visual editor
 const container = document.createElement("div");
 const shadowRoot = container?.attachShadow({ mode: "open" });
 

@@ -1,16 +1,5 @@
 [gb-selection-mode-highlighted] {
-  outline: 1px dashed red;
-  animation: outline-pulse infinite;
-}
-
-@keyframes outline-pulse {
-  0% {
-    outline-color: red;
-  }
-  50% {
-    outline-color: transparent;
-  }
-  100% {
-    outline-color: red;
-  }
+  outline: 4px dashed #7c45ea;
+  outline-offset: 2px;
+  cursor: crosshair;
 }

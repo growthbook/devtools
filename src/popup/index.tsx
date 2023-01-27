@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import * as ReactDOM from "react-dom/client";
 import { useApiKey } from "../utils/hooks";
-import "../global.css";
+import "./index.css";
 import FeaturesList from "./FeaturesList";
 
 const Popup = () => {
