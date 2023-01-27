@@ -12,6 +12,7 @@ import {
 import "./targetPage.css";
 // @ts-expect-error ts-loader does not understand this .css import
 import VisualEditorCss from "./index.css";
+import ElementDetails from "./ElementDetails";
 
 const VisualEditor: FC<{}> = () => {
   const [isEnabled, setIsEnabled] = useState(
@@ -39,18 +40,27 @@ const VisualEditor: FC<{}> = () => {
   useEffect(() => {
     if (!isEnabled) return;
     toggleNormalMode(mode === "normal");
-    toggleSelectionMode(mode === "selection");
+    toggleSelectionMode({
+      isEnabled: mode === "selection",
+      selectedElement,
+      setSelectedElement,
+    });
     toggleCssMode(mode === "css");
     toggleMutationMode(mode === "mutation");
     toggleScreenshotMode(mode === "screenshot");
-  }, [isEnabled, mode]);
+  }, [isEnabled, mode, selectedElement, setSelectedElement]);
 
   if (!isEnabled) return null;
 
   return (
     <>
       <Toolbar mode={mode} setMode={setMode} />{" "}
-      {mode === "selection" && selectedElement ? <div></div> : null}
+      {mode === "selection" && selectedElement ? (
+        <ElementDetails
+          element={selectedElement}
+          clearElement={() => setSelectedElement(null)}
+        />
+      ) : null}
     </>
   );
 };
