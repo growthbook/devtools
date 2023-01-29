@@ -1,9 +1,11 @@
 import { InputElementProps } from "@chakra-ui/react";
+import clsx from "clsx";
 import React, { FC, useState } from "react";
+import { RxPencil1 } from "react-icons/rx";
 
 const DetailsRow = ({
   label,
-  value,
+  value = "",
   inputType = "text",
   readOnly = true,
 }: {
@@ -11,18 +13,33 @@ const DetailsRow = ({
   value: string;
   inputType?: HTMLInputElement["type"];
   readOnly?: boolean;
-}) => (
-  <label className="flex mb-2 items-center">
-    <div style={{ flex: 1 }}>{label}</div>
-    <input
-      style={{ flex: 2 }}
-      className="ml-4 p-2 rounded bg-slate-200"
-      type={inputType}
-      readOnly={readOnly}
-      value={value}
-    />
-  </label>
-);
+}) => {
+  const [editing, setIsEditing] = useState(false);
+  const [_value, _setValue] = useState<string>(value);
+  return (
+    <label className="flex mb-2 items-center">
+      <div style={{ flex: 1 }}>{label}</div>
+      <input
+        style={{ flex: 2 }}
+        className={clsx("ml-4 p-2 rounded", {
+          "bg-white": editing,
+          "bg-slate-200": !editing,
+        })}
+        type={inputType}
+        readOnly={readOnly}
+        value={_value}
+        onChange={(e) => _setValue(e.target.value)}
+      />
+      <div className="flex-1 flex justify-center">
+        {!readOnly ? (
+          <button onClick={() => setIsEditing(true)}>
+            <RxPencil1 />
+          </button>
+        ) : null}
+      </div>
+    </label>
+  );
+};
 
 const ElementDetails: FC<{
   element: HTMLElement;

@@ -55,7 +55,8 @@ export const toggleSelectionMode = ({
   }
 
   if (isEnabled) {
-    document.addEventListener("mousemove", mouseMoveHandler);
+    if (!selectedElement)
+      document.addEventListener("mousemove", mouseMoveHandler);
     document.addEventListener("mousedown", clickHandler);
   } else {
     clearHighlights();
