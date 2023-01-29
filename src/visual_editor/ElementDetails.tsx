@@ -1,6 +1,6 @@
 import { InputElementProps } from "@chakra-ui/react";
 import clsx from "clsx";
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { RxPencil1 } from "react-icons/rx";
 
 const DetailsRow = ({
@@ -16,6 +16,11 @@ const DetailsRow = ({
 }) => {
   const [editing, setIsEditing] = useState(false);
   const [_value, _setValue] = useState<string>(value);
+
+  useEffect(() => {
+    _setValue(value);
+  }, [value]);
+
   return (
     <label className="flex mb-2 items-center">
       <div style={{ flex: 1 }}>{label}</div>
@@ -49,6 +54,7 @@ const ElementDetails: FC<{
   const [y, setY] = useState(24);
   const name = element.tagName;
   const html = element.innerHTML;
+  console.log("DEBUG element details", element);
   return (
     <div
       className="fixed bg-slate-300 rounded rounded-l-lg shadow-xl z-max px-4"

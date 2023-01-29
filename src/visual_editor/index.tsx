@@ -5,6 +5,7 @@ import Toolbar, { ToolbarMode } from "./Toolbar";
 import {
   toggleNormalMode,
   toggleSelectionMode,
+  updateSelectedElement,
   toggleCssMode,
   toggleMutationMode,
   toggleScreenshotMode,
@@ -38,19 +39,30 @@ const VisualEditor: FC<{}> = () => {
   }, []);
 
   useEffect(() => {
-    if (!isEnabled) return;
-    toggleNormalMode(mode === "normal");
+    toggleNormalMode(!isEnabled ? isEnabled : mode === "normal");
     toggleSelectionMode({
-      isEnabled: mode === "selection",
+      isEnabled: !isEnabled ? isEnabled : mode === "selection",
       selectedElement,
       setSelectedElement,
     });
-    toggleCssMode(mode === "css");
-    toggleMutationMode(mode === "mutation");
-    toggleScreenshotMode(mode === "screenshot");
-  }, [isEnabled, mode, selectedElement, setSelectedElement]);
+    toggleCssMode(!isEnabled ? isEnabled : mode === "css");
+    toggleMutationMode(!isEnabled ? isEnabled : mode === "mutation");
+    toggleScreenshotMode(!isEnabled ? isEnabled : mode === "screenshot");
+  }, [isEnabled, mode]);
+
+  useEffect(() => {
+    if (!isEnabled) return;
+    if (mode !== "selection") return;
+
+    updateSelectedElement({
+      selectedElement,
+      setSelectedElement,
+    });
+  }, [selectedElement, setSelectedElement, isEnabled, mode]);
 
   if (!isEnabled) return null;
+
+  console.log("DEBUG render visual-editor index", selectedElement);
 
   return (
     <>
@@ -67,7 +79,8 @@ const VisualEditor: FC<{}> = () => {
 
 // mounting the visual editor
 const container = document.createElement("div");
-const shadowRoot = container?.attachShadow({ mode: "open" });
+container.id = "visual-editor-container";
+export const shadowRoot = container?.attachShadow({ mode: "open" });
 
 if (shadowRoot) {
   shadowRoot.innerHTML = `

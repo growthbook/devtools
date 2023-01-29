@@ -1,16 +1,17 @@
-const highlightAttribute = "gb-selection-mode-highlighted";
-const selectedAttribute = "gb-selection-mode-selected";
+import { shadowRoot } from "..";
 
-const clearSelected = () => {
-  const selected = document.querySelectorAll(`[${selectedAttribute}]`)?.[0];
-  selected?.removeAttribute(selectedAttribute);
+const highlightedAttributeName = "gb-selection-mode-highlighted";
+const selectedAttributeName = "gb-selection-mode-selected";
+
+const clearSelectedElementAttr = () => {
+  const selected = document.querySelectorAll(`[${selectedAttributeName}]`)?.[0];
+  selected?.removeAttribute(selectedAttributeName);
 };
 
-const clearHighlights = () => {
-  const highlights = document.querySelectorAll(`[${highlightAttribute}]`);
-
+const clearHighlightedElementAttr = () => {
+  const highlights = document.querySelectorAll(`[${highlightedAttributeName}]`);
   highlights.forEach((highlight) => {
-    highlight.removeAttribute(highlightAttribute);
+    highlight.removeAttribute(highlightedAttributeName);
   });
 };
 
@@ -20,9 +21,53 @@ const mouseMoveHandler = (event: MouseEvent) => {
   const { clientX: x, clientY: y } = event;
   const domNode = document.elementFromPoint(x, y);
   if (!domNode || domNode === _prevDomNode) return;
-  clearHighlights();
-  domNode.setAttribute(highlightAttribute, "");
+  clearHighlightedElementAttr();
+  domNode.setAttribute(highlightedAttributeName, "");
   _prevDomNode = domNode;
+};
+
+let _selectedElement: HTMLElement | null;
+let _setSelectedElement: ((element: HTMLElement | null) => void) | null;
+
+const clickHandler = (event: MouseEvent) => {
+  // don't intercept cilcks on the visual editor itself
+  if ((event.target as HTMLElement).id === "visual-editor-container") return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  const element = event.target as HTMLElement;
+  _setSelectedElement?.(element);
+};
+
+const teardown = () => {
+  _selectedElement = null;
+  _setSelectedElement = null;
+  clearHighlightedElementAttr();
+  clearSelectedElementAttr();
+  document.removeEventListener("mousemove", mouseMoveHandler);
+  document.removeEventListener("click", clickHandler, true);
+};
+
+export const updateSelectedElement = ({
+  selectedElement,
+  setSelectedElement,
+}: {
+  selectedElement: HTMLElement | null;
+  setSelectedElement: (element: HTMLElement | null) => void;
+}) => {
+  _selectedElement = selectedElement;
+  _setSelectedElement = setSelectedElement;
+
+  if (!_selectedElement) {
+    clearSelectedElementAttr();
+    document.addEventListener("mousemove", mouseMoveHandler);
+  } else {
+    clearSelectedElementAttr();
+    clearHighlightedElementAttr();
+    _selectedElement.setAttribute(selectedAttributeName, "");
+    document.removeEventListener("mousemove", mouseMoveHandler);
+  }
 };
 
 export const toggleSelectionMode = ({
@@ -32,36 +77,14 @@ export const toggleSelectionMode = ({
 }: {
   isEnabled: boolean;
   selectedElement: HTMLElement | null;
-  setSelectedElement: (element: HTMLElement) => void;
+  setSelectedElement: (element: HTMLElement | null) => void;
 }) => {
-  const clickHandler = (event: MouseEvent) => {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    clearSelected();
-    clearHighlights();
-
-    const element = event.target as HTMLElement;
-
-    element.setAttribute(selectedAttribute, "");
-
-    setSelectedElement(element);
-
-    document.removeEventListener("mousemove", mouseMoveHandler);
-  };
-
-  if (!selectedElement) {
-    clearSelected();
-  }
-
   if (isEnabled) {
-    if (!selectedElement)
-      document.addEventListener("mousemove", mouseMoveHandler);
-    document.addEventListener("mousedown", clickHandler);
+    _selectedElement = selectedElement;
+    _setSelectedElement = setSelectedElement;
+    document.addEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("click", clickHandler, true);
   } else {
-    clearHighlights();
-    clearSelected();
-    document.removeEventListener("mousemove", mouseMoveHandler);
-    document.removeEventListener("mousedown", clickHandler);
+    teardown();
   }
 };
