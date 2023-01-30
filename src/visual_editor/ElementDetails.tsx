@@ -54,10 +54,11 @@ const ElementDetails: FC<{
   const [y, setY] = useState(24);
   const name = element.tagName;
   const html = element.innerHTML;
-  console.log("DEBUG element details", element);
+  // @ts-expect-error image elements are not typed correctly
+  const src = element.src;
   return (
     <div
-      className="fixed bg-slate-300 rounded rounded-l-lg shadow-xl z-max px-4"
+      className="fixed bg-slate-300 rounded rounded-l-lg shadow-xl z-max px-4 w-96"
       style={{ bottom: `${y}px`, left: `${x}px` }}
     >
       <div className="text-right py-2">
@@ -75,6 +76,7 @@ const ElementDetails: FC<{
       <div className="flex flex-col">
         <DetailsRow label="Tag name" value={name} />
         <DetailsRow label="HTML" value={html} readOnly={false} />
+        <DetailsRow label="Source" value={src} readOnly={false} />
       </div>
     </div>
   );

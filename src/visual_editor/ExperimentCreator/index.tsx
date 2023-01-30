@@ -1,61 +1,41 @@
-import html2canvas from "html2canvas";
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import GripHandle from "../Toolbar/GripHandle";
 // @ts-expect-error ts-loader can't handle png files yet
 import GBLogo from "../../../public/logo192.png";
 import clsx from "clsx";
+import { Experiment } from "..";
 
-interface ExperimentVariation {
-  canvas?: HTMLCanvasElement;
-}
-
-interface Experiment {
-  variations?: ExperimentVariation[];
-}
-
-const ExperimentCreator: FC = () => {
-  // x, y position of floating toolbar
+const ExperimentCreator: FC<{
+  experiment: Experiment | null;
+  createExperiment: () => void;
+  createVariation: () => void;
+}> = ({ experiment, createExperiment, createVariation }) => {
   const [x, setX] = useState(24); // pixels
   const [y, setY] = useState(24); // pixels
-  const [experiment, setExperiment] = useState<Experiment | null>(null);
   const [selectedVariationIndex, setSelectedVariationIndex] = useState(1);
+  const prevVariationsCount = useRef(1);
 
-  const isEditingControl = selectedVariationIndex === 0;
-
+  // select most recently created variation
   useEffect(() => {
-    const initExperiment = async () => {
-      // TODO DRY
-      const canvas = await html2canvas(document.body, { scale: 0.125 });
-      setExperiment({
-        ...experiment,
-        variations: [{ canvas }, { canvas }],
-      });
-    };
-    initExperiment();
-  }, []);
-
-  const appendVariation = () => {
-    const addVariation = async () => {
-      // TODO DRY
-      const canvas = await html2canvas(document.body, { scale: 0.125 });
-      setExperiment({
-        ...experiment,
-        variations: [...(experiment?.variations ?? []), { canvas }],
-      });
-      setSelectedVariationIndex(experiment?.variations?.length ?? 0);
-    };
-    addVariation();
-  };
+    if (!experiment) return;
+    const { variations } = experiment;
+    if (!variations?.length) return;
+    const lastVarIndex = variations.length - 1;
+    if (lastVarIndex !== prevVariationsCount.current) {
+      setSelectedVariationIndex(lastVarIndex);
+      prevVariationsCount.current = lastVarIndex;
+    }
+  }, [experiment]);
 
   return (
     <div
-      className="fixed rounded-xl shadow-xl z-max logo-bg w-96 cursor-default"
+      className="fixed rounded-xl shadow-xl z-max w-96 cursor-default exp-creator"
       style={{
         top: `${y}px`,
         right: `${x}px`,
       }}
     >
-      <div className="flex px-4 h-12 items-center justify-center">
+      <div className="flex px-4 h-12 items-center justify-center rounded-t-xl logo-bg ">
         <div className="h-8">
           <img src={GBLogo} alt="GB Logo" className="w-auto h-full mr-1" />
         </div>
@@ -71,7 +51,7 @@ const ExperimentCreator: FC = () => {
               <div
                 key={i}
                 className={clsx(
-                  "relative w-32 h-32 m-4 bg-slate-100 rounded overflow-hidden flex justify-center items-center cursor-pointer",
+                  "relative w-32 h-32 m-4 bg-slate-100 rounded overflow-hidden flex justify-center items-center cursor-pointer hover:scale-105 transition-transform duration-500",
                   {
                     "outline outline-4 outline-amber-300":
                       i === selectedVariationIndex,
@@ -100,14 +80,14 @@ const ExperimentCreator: FC = () => {
             ))}
             <div
               className="w-32 h-32 m-4 border-4 border-slate-300 border-dashed rounded flex items-center text-slate-300 text-xl font-semibold text-center cursor-pointer hover:border-slate-100 hover:text-slate-100"
-              onClick={() => appendVariation()}
+              onClick={() => createVariation()}
             >
               + Add Variation
             </div>
           </div>
         ) : (
           <div className="flex justify-center">
-            <button className="p-2 text-xl" onClick={() => setExperiment({})}>
+            <button className="p-2 text-xl" onClick={() => createExperiment()}>
               + New Experiment
             </button>
           </div>

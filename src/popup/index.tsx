@@ -18,6 +18,7 @@ const Popup = () => {
           chrome.tabs.sendMessage(tabs[0].id || 0, {
             type: "GB_ENABLE_VISUAL_EDITOR",
           });
+          window.close();
         }
       );
   };

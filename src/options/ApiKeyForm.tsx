@@ -36,7 +36,7 @@ const ApiKeyInput: FC<{
         <input
           placeholder="secret_xyz..."
           className="border p-2 rounded mb-2"
-          type="text"
+          type="password"
           value={_apiKey}
           onChange={(e) => _setApiKey(e.target.value)}
         />

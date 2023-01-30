@@ -1,4 +1,5 @@
-import React, { FC, useEffect, useState } from "react";
+import html2canvas from "html2canvas";
+import React, { FC, useCallback, useEffect, useState } from "react";
 import * as ReactDOM from "react-dom/client";
 import { Message } from "../../devtools";
 import Toolbar, { ToolbarMode } from "./Toolbar";
@@ -15,15 +16,56 @@ import "./targetPage.css";
 import VisualEditorCss from "./index.css";
 import ElementDetails from "./ElementDetails";
 import ExperimentCreator from "./ExperimentCreator";
+import GlobalCSSEditor from "./GlobalCSSEditor";
+
+export type DomMutations = Array<{ type: string }>;
+
+interface ExperimentVariation {
+  canvas?: HTMLCanvasElement;
+  domMutations: DomMutations;
+}
+
+export interface Experiment {
+  variations?: ExperimentVariation[];
+}
+
+const captureCanvas = () => html2canvas(document.body, { scale: 0.125 });
 
 const VisualEditor: FC<{}> = () => {
   const [isEnabled, setIsEnabled] = useState(
     window.location.href.includes("localhost:3001")
   );
-  const [mode, setMode] = useState<ToolbarMode>("selection");
+  const [mode, setMode] = useState<ToolbarMode>("normal");
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(
     null
   );
+  const [experiment, setExperiment] = useState<Experiment | null>(null);
+  const [domMutations, setDomMutations] = useState<any[]>([]);
+
+  const createExperiment = useCallback(async () => {
+    const canvas = await captureCanvas();
+    setExperiment({
+      variations: [
+        { canvas, domMutations: [] },
+        { canvas, domMutations: [] },
+      ],
+    });
+  }, [setExperiment]);
+
+  const createVariation = useCallback(async () => {
+    console.log("createVariation");
+    // TODO reset to control dom mutations here
+    const canvas = await captureCanvas();
+    setExperiment({
+      ...experiment,
+      variations: [
+        ...(experiment?.variations ?? []),
+        { canvas, domMutations: [] },
+      ],
+    });
+  }, [experiment, setExperiment]);
+
+  console.log("DEBUG experiment", experiment);
 
   // listen for messages from popup menu
   useEffect(() => {
@@ -65,11 +107,26 @@ const VisualEditor: FC<{}> = () => {
 
   return (
     <>
-      <Toolbar mode={mode} setMode={setMode} /> <ExperimentCreator />
+      {experiment ? <Toolbar mode={mode} setMode={setMode} /> : null}
+
+      <ExperimentCreator
+        experiment={experiment}
+        createExperiment={createExperiment}
+        createVariation={createVariation}
+      />
+
       {mode === "selection" && selectedElement ? (
         <ElementDetails
           element={selectedElement}
           clearElement={() => setSelectedElement(null)}
+        />
+      ) : null}
+
+      {mode === "css" ? (
+        <GlobalCSSEditor
+          appendDomMutation={(mutation) =>
+            setDomMutations([...domMutations, mutation])
+          }
         />
       ) : null}
     </>

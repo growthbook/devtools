@@ -25,3 +25,18 @@
     background-position: 0% 50%;
   }
 }
+
+.exp-creator {
+  animation: appear 500ms ease-in-out;
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
