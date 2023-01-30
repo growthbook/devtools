@@ -14,6 +14,7 @@ import "./targetPage.css";
 // @ts-expect-error ts-loader does not understand this .css import
 import VisualEditorCss from "./index.css";
 import ElementDetails from "./ElementDetails";
+import ExperimentCreator from "./ExperimentCreator";
 
 const VisualEditor: FC<{}> = () => {
   const [isEnabled, setIsEnabled] = useState(
@@ -62,11 +63,9 @@ const VisualEditor: FC<{}> = () => {
 
   if (!isEnabled) return null;
 
-  console.log("DEBUG render visual-editor index", selectedElement);
-
   return (
     <>
-      <Toolbar mode={mode} setMode={setMode} />{" "}
+      <Toolbar mode={mode} setMode={setMode} /> <ExperimentCreator />
       {mode === "selection" && selectedElement ? (
         <ElementDetails
           element={selectedElement}

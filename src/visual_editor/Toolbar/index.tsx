@@ -63,7 +63,13 @@ const Toolbar: FC<{
       }}
     >
       <div className="flex flex-row">
-        <GripHandle x={x} y={y} setX={setX} setY={setY} />
+        <GripHandle
+          className="w-4 bg-slate-300 rounded-l-lg"
+          x={x}
+          y={y}
+          setX={setX}
+          setY={setY}
+        />
 
         <ToolbarButton
           isActive={mode === "normal"}

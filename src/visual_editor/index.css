@@ -3,9 +3,25 @@
 @tailwind utilities;
 
 .bg-grip-handle {
-  @apply bg-slate-300;
-  @apply rounded-l-lg;
-  background-image: radial-gradient(#aaa 1px, transparent 1px);
+  background-image: radial-gradient(#777 1px, transparent 1px);
   background-position: 0 0, 2px 2px;
-  background-size: 4px 4px;
+  background-size: 5px 5px;
+}
+
+.logo-bg {
+  background: linear-gradient(135deg, #c111dd, #81d, #350e47);
+  animation: gradient 5s ease infinite;
+  background-size: 200% 200%;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }

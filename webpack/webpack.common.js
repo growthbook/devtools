@@ -16,6 +16,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, "../dist/js"),
     filename: "[name].js",
+    assetModuleFilename: "[name][ext]",
   },
   optimization: {
     splitChunks: {
@@ -46,6 +47,10 @@ module.exports = {
         include: path.join(srcDir, "visual_editor", "index.css"),
         type: "asset/source",
         loader: "postcss-loader",
+      },
+      {
+        test: /\.png$/i,
+        type: "asset/resource",
       },
     ],
   },

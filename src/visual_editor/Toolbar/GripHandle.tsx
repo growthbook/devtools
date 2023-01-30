@@ -1,4 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from "react";
+import { clsx } from "clsx";
 
 // used to determine x y delta of mouse movement
 let originX: number | undefined;
@@ -9,7 +10,9 @@ const GripHandle: FC<{
   y: number;
   setX: (x: number) => void;
   setY: (y: number) => void;
-}> = ({ x, y, setX, setY }) => {
+  className?: string;
+  reverseX?: boolean;
+}> = ({ x, y, setX, setY, className = "", reverseX = false }) => {
   const [isDragging, setIsDragging] = useState(false);
 
   // the following 1) useEffect and 2) useCallback need to be in this order
@@ -28,7 +31,7 @@ const GripHandle: FC<{
       const { clientX, clientY } = e;
       const dx = clientX - originX!;
       const dy = clientY - originY!;
-      setX(x + dx);
+      setX(reverseX ? x - dx : x + dx);
       setY(y + dy);
     },
     [isDragging]
@@ -46,7 +49,7 @@ const GripHandle: FC<{
 
   return (
     <div
-      className="cursor-move w-4 bg-grip-handle"
+      className={clsx("cursor-move bg-grip-handle", className)}
       onMouseDown={(e) => {
         e.preventDefault();
         originX = e.clientX;
