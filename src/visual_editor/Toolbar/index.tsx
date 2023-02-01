@@ -7,7 +7,7 @@ import {
   RxCamera,
 } from "react-icons/rx";
 import clsx from "clsx";
-import GripHandle from "./GripHandle";
+import GripHandle from "../GripHandle";
 
 export type ToolbarMode =
   | "normal"

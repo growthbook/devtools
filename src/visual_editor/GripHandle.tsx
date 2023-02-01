@@ -12,7 +12,16 @@ const GripHandle: FC<{
   setY: (y: number) => void;
   className?: string;
   reverseX?: boolean;
-}> = ({ x, y, setX, setY, className = "", reverseX = false }) => {
+  reverseY?: boolean;
+}> = ({
+  x,
+  y,
+  setX,
+  setY,
+  className = "",
+  reverseX = false,
+  reverseY = false,
+}) => {
   const [isDragging, setIsDragging] = useState(false);
 
   // the following 1) useEffect and 2) useCallback need to be in this order
@@ -32,7 +41,7 @@ const GripHandle: FC<{
       const dx = clientX - originX!;
       const dy = clientY - originY!;
       setX(reverseX ? x - dx : x + dx);
-      setY(y + dy);
+      setY(reverseY ? y - dy : y + dy);
     },
     [isDragging]
   );

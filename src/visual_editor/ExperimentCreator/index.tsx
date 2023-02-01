@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useRef, useState } from "react";
-import GripHandle from "../Toolbar/GripHandle";
+import GripHandle from "../GripHandle";
 // @ts-expect-error ts-loader can't handle png files yet
 import GBLogo from "../../../public/logo192.png";
 import clsx from "clsx";

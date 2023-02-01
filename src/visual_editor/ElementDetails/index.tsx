@@ -3,6 +3,7 @@ import { finder } from "@medv/finder";
 import React, { FC, useEffect, useState } from "react";
 import { RxPencil1 } from "react-icons/rx";
 import DetailsRow from "./DetailsRow";
+import GripHandle from "../GripHandle";
 
 const ElementDetails: FC<{
   element: HTMLElement;
@@ -17,7 +18,7 @@ const ElementDetails: FC<{
   const selector = finder(element, { seedMinLength: 5 });
   return (
     <div
-      className="fixed bg-slate-300 rounded rounded-l-lg shadow-xl z-max"
+      className="fixed bg-slate-300 rounded-lg shadow-xl z-max"
       style={{ bottom: `${y}px`, left: `${x}px`, width: "36rem" }}
     >
       <div className="text-right py-2 mr-2">
@@ -38,6 +39,15 @@ const ElementDetails: FC<{
         <DetailsRow label="HTML" value={html} />
         <DetailsRow label="Source" value={src} />
       </div>
+
+      <GripHandle
+        reverseY
+        className="w-full h-4 bg-slate-300 rounded-b-lg"
+        x={x}
+        y={y}
+        setX={setX}
+        setY={setY}
+      />
     </div>
   );
 };
