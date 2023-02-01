@@ -2,8 +2,9 @@ import clsx from "clsx";
 import { finder } from "@medv/finder";
 import React, { FC, useEffect, useState } from "react";
 import { RxPencil1 } from "react-icons/rx";
-import DetailsRow from "./DetailsRow";
 import GripHandle from "../GripHandle";
+import DetailsRow from "./DetailsRow";
+import ClassNamesEdit from "./ClassNamesEdit";
 
 const ElementDetails: FC<{
   element: HTMLElement;
@@ -26,10 +27,19 @@ const ElementDetails: FC<{
     element.src = src;
   };
 
+  const setClassNames = (classNames: string) => {
+    element.className = classNames;
+  };
+
   return (
     <div
-      className="fixed bg-slate-300 rounded-lg shadow-xl z-max"
-      style={{ bottom: `${y}px`, left: `${x}px`, width: "36rem" }}
+      className="fixed bg-slate-300 rounded-lg shadow-xl z-max overflow-y-auto"
+      style={{
+        bottom: `${y}px`,
+        left: `${x}px`,
+        width: "36rem",
+        maxHeight: "36rem",
+      }}
     >
       <div className="text-right py-2 mr-2">
         <a
@@ -46,8 +56,11 @@ const ElementDetails: FC<{
       <div className="flex flex-col ml-4">
         <DetailsRow label="Selector" value={selector} readOnly />
         <DetailsRow label="Tag name" value={name} readOnly />
-        <DetailsRow label="HTML" value={html} onSave={setHTML} />
-        <DetailsRow label="Source" value={src} onSave={setSource} />
+        <DetailsRow label="Inner HTML" value={html} onSave={setHTML} />
+        {src ? (
+          <DetailsRow label="Source" value={src} onSave={setSource} />
+        ) : null}
+        <ClassNamesEdit element={element} setClassNames={setClassNames} />
       </div>
 
       <GripHandle

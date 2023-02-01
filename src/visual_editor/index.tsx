@@ -115,7 +115,7 @@ const VisualEditor: FC<{}> = () => {
   // TODO Remove this - only used for debugging
   useEffect(() => {
     createExperiment();
-    const imgElem = document.querySelector("#hero-img");
+    const imgElem = document.querySelector("#img-container");
     setSelectedElement(imgElem as HTMLElement);
   }, []);
 
