@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { finder } from "@medv/finder";
 import React, { FC, useEffect, useState } from "react";
 import { RxPencil1 } from "react-icons/rx";
 import DetailsRow from "./DetailsRow";
@@ -13,6 +14,7 @@ const ElementDetails: FC<{
   const html = element.innerHTML;
   // @ts-expect-error image elements are not typed correctly
   const src = element.src;
+  const selector = finder(element, { seedMinLength: 5 });
   return (
     <div
       className="fixed bg-slate-300 rounded rounded-l-lg shadow-xl z-max"
@@ -31,6 +33,7 @@ const ElementDetails: FC<{
       </div>
 
       <div className="flex flex-col ml-4">
+        <DetailsRow label="Selector" value={selector} readOnly />
         <DetailsRow label="Tag name" value={name} readOnly />
         <DetailsRow label="HTML" value={html} />
         <DetailsRow label="Source" value={src} />

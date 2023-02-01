@@ -16,6 +16,7 @@ import "./targetPage.css";
 import VisualEditorCss from "./index.css";
 import ElementDetails from "./ElementDetails";
 import ExperimentCreator from "./ExperimentCreator";
+import HighlightedElementSelectorDisplay from "./HighlightedElementSelectorDisplay";
 import GlobalCSSEditor from "./GlobalCSSEditor";
 
 export type DomMutations = Array<{ type: string }>;
@@ -33,6 +34,7 @@ const captureCanvas = () => html2canvas(document.body, { scale: 0.125 });
 
 const VisualEditor: FC<{}> = () => {
   const [isEnabled, setIsEnabled] = useState(
+    // TODO set to false
     window.location.href.includes("localhost:3001")
   );
   // TODO Make default === "normal"
@@ -41,7 +43,9 @@ const VisualEditor: FC<{}> = () => {
     null
   );
   const [experiment, setExperiment] = useState<Experiment | null>(null);
-  const [domMutations, setDomMutations] = useState<any[]>([]);
+  const [highlightedElementSelector, setHighlightedElementSelector] = useState<
+    string | null
+  >(null);
 
   const createExperiment = useCallback(async () => {
     const canvas = await captureCanvas();
@@ -54,8 +58,6 @@ const VisualEditor: FC<{}> = () => {
   }, [setExperiment]);
 
   const createVariation = useCallback(async () => {
-    console.log("createVariation");
-    // TODO reset to control dom mutations here
     const canvas = await captureCanvas();
     setExperiment({
       ...experiment,
@@ -65,8 +67,6 @@ const VisualEditor: FC<{}> = () => {
       ],
     });
   }, [experiment, setExperiment]);
-
-  console.log("DEBUG experiment", experiment);
 
   // listen for messages from popup menu
   useEffect(() => {
@@ -88,6 +88,7 @@ const VisualEditor: FC<{}> = () => {
       isEnabled: !isEnabled ? isEnabled : mode === "selection",
       selectedElement,
       setSelectedElement,
+      setHighlightedElementSelector,
     });
     toggleCssMode(!isEnabled ? isEnabled : mode === "css");
     toggleMutationMode(!isEnabled ? isEnabled : mode === "mutation");
@@ -101,10 +102,17 @@ const VisualEditor: FC<{}> = () => {
     updateSelectedElement({
       selectedElement,
       setSelectedElement,
+      setHighlightedElementSelector,
     });
-  }, [selectedElement, setSelectedElement, isEnabled, mode]);
+  }, [
+    selectedElement,
+    setSelectedElement,
+    setHighlightedElementSelector,
+    isEnabled,
+    mode,
+  ]);
 
-  // TODO Remove this
+  // TODO Remove this - only used for debugging
   useEffect(() => {
     createExperiment();
     const imgElem = document.querySelector("#hero-img");
@@ -129,12 +137,9 @@ const VisualEditor: FC<{}> = () => {
           clearElement={() => setSelectedElement(null)}
         />
       ) : null}
-
-      {mode === "css" ? (
-        <GlobalCSSEditor
-          appendDomMutation={(mutation) =>
-            setDomMutations([...domMutations, mutation])
-          }
+      {mode === "selection" ? (
+        <HighlightedElementSelectorDisplay
+          selector={highlightedElementSelector}
         />
       ) : null}
     </>
