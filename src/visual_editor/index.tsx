@@ -35,7 +35,8 @@ const VisualEditor: FC<{}> = () => {
   const [isEnabled, setIsEnabled] = useState(
     window.location.href.includes("localhost:3001")
   );
-  const [mode, setMode] = useState<ToolbarMode>("normal");
+  // TODO Make default === "normal"
+  const [mode, setMode] = useState<ToolbarMode>("selection");
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(
     null
   );
@@ -102,6 +103,13 @@ const VisualEditor: FC<{}> = () => {
       setSelectedElement,
     });
   }, [selectedElement, setSelectedElement, isEnabled, mode]);
+
+  // TODO Remove this
+  useEffect(() => {
+    createExperiment();
+    const imgElem = document.querySelector("#hero-img");
+    setSelectedElement(imgElem as HTMLElement);
+  }, []);
 
   if (!isEnabled) return null;
 

@@ -21,6 +21,7 @@ const mouseMoveHandler = (event: MouseEvent) => {
   const { clientX: x, clientY: y } = event;
   const domNode = document.elementFromPoint(x, y);
   if (!domNode || domNode === _prevDomNode) return;
+  console.log("domNode.selector", domNode);
   clearHighlightedElementAttr();
   domNode.setAttribute(highlightedAttributeName, "");
   _prevDomNode = domNode;
