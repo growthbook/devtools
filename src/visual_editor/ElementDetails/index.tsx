@@ -16,6 +16,16 @@ const ElementDetails: FC<{
   // @ts-expect-error image elements are not typed correctly
   const src = element.src;
   const selector = finder(element, { seedMinLength: 5 });
+
+  const setHTML = (html: string) => {
+    element.innerHTML = html;
+  };
+
+  const setSource = (src: string) => {
+    // @ts-expect-error image elements are not typed correctly
+    element.src = src;
+  };
+
   return (
     <div
       className="fixed bg-slate-300 rounded-lg shadow-xl z-max"
@@ -36,8 +46,8 @@ const ElementDetails: FC<{
       <div className="flex flex-col ml-4">
         <DetailsRow label="Selector" value={selector} readOnly />
         <DetailsRow label="Tag name" value={name} readOnly />
-        <DetailsRow label="HTML" value={html} />
-        <DetailsRow label="Source" value={src} />
+        <DetailsRow label="HTML" value={html} onSave={setHTML} />
+        <DetailsRow label="Source" value={src} onSave={setSource} />
       </div>
 
       <GripHandle

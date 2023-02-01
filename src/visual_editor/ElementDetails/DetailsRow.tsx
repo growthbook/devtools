@@ -38,12 +38,22 @@ const DetailsRow = ({
   value = "",
   inputType = "text",
   readOnly = false,
-}: {
-  label: string;
-  value: string;
-  inputType?: HTMLInputElement["type"];
-  readOnly?: boolean;
-}) => {
+  onSave = () => {},
+}:
+  | {
+      label: string;
+      value: string;
+      inputType?: HTMLInputElement["type"];
+      readOnly: true;
+      onSave?: never;
+    }
+  | {
+      label: string;
+      value: string;
+      inputType?: HTMLInputElement["type"];
+      readOnly?: false;
+      onSave: (value: string) => void;
+    }) => {
   const [editing, setIsEditing] = useState(false);
   const [_value, _setValue] = useState<string>(value);
 
@@ -53,6 +63,11 @@ const DetailsRow = ({
 
   const cancelEdit = () => {
     _setValue(value);
+    setIsEditing(false);
+  };
+
+  const saveEdit = () => {
+    onSave(_value);
     setIsEditing(false);
   };
 
@@ -75,7 +90,7 @@ const DetailsRow = ({
           <EditAndSaveButtons
             isEditing={editing}
             toggleEditing={() => setIsEditing(!editing)}
-            onSave={() => {}}
+            onSave={saveEdit}
             onCancel={cancelEdit}
           />
         ) : null}
