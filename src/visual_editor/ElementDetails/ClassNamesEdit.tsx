@@ -22,6 +22,7 @@ const AddClassNameInput: FC<{ onAdd: (className: string) => void }> = ({
           <input
             type="text"
             className="rounded px-2 text-sm"
+            placeholder="Enter class name"
             value={newClassName}
             onChange={(e) => setNewClassName(e.target.value)}
           />
@@ -34,7 +35,10 @@ const AddClassNameInput: FC<{ onAdd: (className: string) => void }> = ({
             <button className="text-green-700" onClick={onSave}>
               <RxCheck className="w-4 h-4" strokeWidth={2} />
             </button>
-            <button className="text-rose-600 ml-1" onClick={onCancel}>
+            <button
+              className="text-rose-500 hover:text-rose-700 ml-1"
+              onClick={onCancel}
+            >
               <RxCross2 className="w-4 h-4" strokeWidth={2} />
             </button>
           </div>
@@ -49,14 +53,16 @@ const AddClassNameInput: FC<{ onAdd: (className: string) => void }> = ({
 };
 
 const ClassNameToken: FC<{
-  key: number;
   className: string;
   onRemove: () => void;
-}> = ({ key, className, onRemove }) => {
+}> = ({ className, onRemove }) => {
   return (
-    <div key={key} className="flex rounded bg-slate-200 text-sm px-2 mr-2 mb-2">
+    <div className="flex rounded bg-slate-200 text-sm px-2 mr-2 my-1">
       {className}
-      <button className="text-red-700 ml-1" onClick={onRemove}>
+      <button
+        className="text-rose-500 hover:text-rose-700 ml-1"
+        onClick={onRemove}
+      >
         <RxCross2 className="w-4 h-4" />
       </button>
     </div>
@@ -65,33 +71,48 @@ const ClassNameToken: FC<{
 
 const ClassNamesEdit: FC<{
   element: HTMLElement;
-  setClassNames: (classNames: string) => void;
-}> = ({ element, setClassNames }) => {
-  const [classNames, _setClassNames] = useState<string[]>(
+  onSave: (classNames: string) => void;
+}> = ({ element, onSave: _onSave }) => {
+  const [classNames, setClassNames] = useState<string[]>(
     element.className.split(" ").filter(Boolean)
   );
 
   useEffect(() => {
-    _setClassNames(element.className.split(" ").filter(Boolean));
+    setClassNames(element.className.split(" ").filter(Boolean));
   }, [element]);
 
-  const removeClassName = (className: string) => {
-    const newClassNames = classNames.filter((c) => c !== className);
-    _setClassNames(newClassNames);
-    setClassNames(newClassNames.join(" "));
-  };
+  const onSave = useCallback(
+    (classNames: string[]) => {
+      setClassNames(classNames);
+      _onSave(classNames.join(" "));
+    },
+    [setClassNames, _onSave]
+  );
 
-  const onAdd = (newClassName: string) => {
-    const newClassNames = new Set([...classNames, ...newClassName.split(" ")]);
-    _setClassNames([...newClassNames]);
-    setClassNames([...newClassNames].join(" "));
-  };
+  const removeClassName = useCallback(
+    (className: string) => {
+      const newClassNames = classNames.filter((c) => c !== className);
+      onSave(newClassNames);
+    },
+    [onSave]
+  );
+
+  const onAdd = useCallback(
+    (newClassName: string) => {
+      const newClassNames = new Set([
+        ...classNames,
+        ...newClassName.split(" "),
+      ]);
+      onSave([...newClassNames]);
+    },
+    [onSave]
+  );
 
   return (
     <div className="flex mb-2 items-start mr-2 -ml-2 p-2 rounded-lg bg-slate-400">
       <div className="w-24 text-white">Class names</div>
 
-      <div className="flex-1 flex flex-wrap ml-4">
+      <div className="flex-1 flex flex-wrap items-center ml-4">
         {classNames.map((className, index) => (
           <ClassNameToken
             key={index}

@@ -1,8 +1,8 @@
 import { finder } from "@medv/finder";
 import { shadowRoot } from "..";
 
-const highlightedAttributeName = "gb-selection-mode-highlighted";
-const selectedAttributeName = "gb-selection-mode-selected";
+export const highlightedAttributeName = "gb-selection-mode-highlighted";
+export const selectedAttributeName = "gb-selection-mode-selected";
 
 const clearSelectedElementAttr = () => {
   const selected = document.querySelectorAll(`[${selectedAttributeName}]`)?.[0];

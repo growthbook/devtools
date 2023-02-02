@@ -5,6 +5,7 @@ import { RxPencil1 } from "react-icons/rx";
 import GripHandle from "../GripHandle";
 import DetailsRow from "./DetailsRow";
 import ClassNamesEdit from "./ClassNamesEdit";
+import AttributeEdit from "./AttributeEdit";
 
 const ElementDetails: FC<{
   element: HTMLElement;
@@ -14,21 +15,24 @@ const ElementDetails: FC<{
   const [y, setY] = useState(24);
   const name = element.tagName;
   const html = element.innerHTML;
-  // @ts-expect-error image elements are not typed correctly
-  const src = element.src;
   const selector = finder(element, { seedMinLength: 5 });
 
   const setHTML = (html: string) => {
     element.innerHTML = html;
   };
 
-  const setSource = (src: string) => {
-    // @ts-expect-error image elements are not typed correctly
-    element.src = src;
-  };
-
   const setClassNames = (classNames: string) => {
     element.className = classNames;
+  };
+
+  const setAttributes = (attrs: Record<string, string>[]) => {
+    const existing = element.attributes;
+    [...existing].forEach((attr) => {
+      element.removeAttribute(attr.name);
+    });
+    attrs.forEach((attr) => {
+      element.setAttribute(attr.name, attr.value);
+    });
   };
 
   return (
@@ -57,10 +61,8 @@ const ElementDetails: FC<{
         <DetailsRow label="Selector" value={selector} readOnly />
         <DetailsRow label="Tag name" value={name} readOnly />
         <DetailsRow label="Inner HTML" value={html} onSave={setHTML} />
-        {src ? (
-          <DetailsRow label="Source" value={src} onSave={setSource} />
-        ) : null}
-        <ClassNamesEdit element={element} setClassNames={setClassNames} />
+        <ClassNamesEdit element={element} onSave={setClassNames} />
+        <AttributeEdit element={element} onSave={setAttributes} />
       </div>
 
       <GripHandle
