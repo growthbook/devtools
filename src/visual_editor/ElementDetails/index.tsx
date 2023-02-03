@@ -1,11 +1,9 @@
-import clsx from "clsx";
 import { finder } from "@medv/finder";
-import React, { FC, useEffect, useState } from "react";
-import { RxPencil1 } from "react-icons/rx";
+import React, { FC, useCallback, useEffect, useState } from "react";
 import GripHandle from "../GripHandle";
 import DetailsRow from "./DetailsRow";
 import ClassNamesEdit from "./ClassNamesEdit";
-import AttributeEdit from "./AttributeEdit";
+import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
 
 const ElementDetails: FC<{
   element: HTMLElement;
@@ -13,27 +11,44 @@ const ElementDetails: FC<{
 }> = ({ element, clearElement }) => {
   const [x, setX] = useState(24);
   const [y, setY] = useState(24);
+
   const name = element.tagName;
   const html = element.innerHTML;
   const selector = finder(element, { seedMinLength: 5 });
 
-  const setHTML = (html: string) => {
-    element.innerHTML = html;
-  };
+  const setHTML = useCallback(
+    (html: string) => {
+      element.innerHTML = html;
+    },
+    [element]
+  );
 
-  const setClassNames = (classNames: string) => {
-    element.className = classNames;
-  };
+  const setClassNames = useCallback(
+    (classNames: string) => {
+      element.className = classNames;
+    },
+    [element]
+  );
 
-  const setAttributes = (attrs: Record<string, string>[]) => {
-    const existing = element.attributes;
-    [...existing].forEach((attr) => {
-      element.removeAttribute(attr.name);
-    });
-    attrs.forEach((attr) => {
-      element.setAttribute(attr.name, attr.value);
-    });
-  };
+  const setAttributes = useCallback(
+    (attrs: Attribute[]) => {
+      const existing = [...element.attributes];
+      const removed = existing.filter(
+        (e) =>
+          !attrs.find((a) => a.name === e.name) &&
+          !IGNORED_ATTRS.includes(e.name)
+      );
+      const changed = attrs.filter(
+        (attr) => attr.value !== element.getAttribute(attr.name)
+      );
+      removed.forEach((attr) => element.removeAttribute(attr.name));
+      changed.forEach((attr) => {
+        element.removeAttribute(attr.name);
+        element.setAttribute(attr.name, attr.value);
+      });
+    },
+    [element]
+  );
 
   return (
     <div

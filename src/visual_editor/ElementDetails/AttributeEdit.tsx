@@ -5,68 +5,101 @@ import {
   selectedAttributeName,
 } from "../lib/selectionMode";
 
-const IGNORED_ATTRS = [
+export const IGNORED_ATTRS = [
   "class",
   highlightedAttributeName,
   selectedAttributeName,
 ];
+
+export interface Attribute {
+  name: string;
+  value: string;
+}
 
 const normalizeAttrs = (attrs: NamedNodeMap) =>
   [...attrs]
     .map(({ name, value }) => ({ name, value }))
     .filter((attr) => !IGNORED_ATTRS.includes(attr.name));
 
-const AddAttributeInput: FC<{
-  onAdd: (attr: { name: string; value: string }) => void;
-}> = ({ onAdd: _onAdd }) => {
-  const [isAdding, setIsAdding] = useState(false);
-  const [name, setName] = useState("");
-  const [value, setValue] = useState("");
+const EditAttributeInput: FC<{
+  name?: string;
+  value?: string;
+  onSubmit: ({ name, value }: Attribute) => void;
+  onCancel: () => void;
+}> = ({
+  name: _name = "",
+  value: _value = "",
+  onSubmit: _onSubmit,
+  onCancel: _onCancel,
+}) => {
+  const [name, setName] = useState(_name);
+  const [value, setValue] = useState(_value);
   const onCancel = useCallback(() => {
-    setIsAdding(false);
     setName("");
     setValue("");
-  }, [setIsAdding, setName, setValue]);
-  const onAdd = useCallback(() => {
-    _onAdd({ name, value });
+    _onCancel();
+  }, [setName, setValue]);
+  const onSubmit = useCallback(() => {
+    _onSubmit({ name, value });
     onCancel();
-  }, [name, value, _onAdd]);
+  }, [name, value, _onSubmit, onCancel]);
+  return (
+    <div className="flex items-center rounded bg-slate-200 text-sm pl-2 mr-2 my-1">
+      <div className="mr-1 font-semibold">
+        <input
+          type="text"
+          className="rounded px-2 text-sm w-16"
+          placeholder="Key"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </div>
+
+      <div className="flex-1 bg-indigo-700 text-white py-1 px-2 m-1 rounded cursor-pointer">
+        <input
+          type="text"
+          className="rounded py-0 px-2 text-sm text-black"
+          placeholder="Value"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
+      </div>
+
+      <div>
+        <button className="text-green-700" onClick={onSubmit}>
+          <RxCheck className="w-4 h-4" strokeWidth={2} />
+        </button>
+        <button
+          className="text-rose-500 hover:text-rose-700 ml-1"
+          onClick={onCancel}
+        >
+          <RxCross2 className="w-4 h-4" strokeWidth={2} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const AddAttributeInput: FC<{
+  onAdd: (attr: Attribute) => void;
+}> = ({ onAdd: _onAdd }) => {
+  const [isAdding, setIsAdding] = useState(false);
+  const onCancel = useCallback(() => {
+    setIsAdding(false);
+  }, [setIsAdding]);
+  const onAdd = useCallback(
+    ({ name, value }: Attribute) => {
+      if (!IGNORED_ATTRS.includes(name)) {
+        _onAdd({ name, value });
+      }
+      onCancel();
+    },
+    [_onAdd, onCancel]
+  );
   return (
     <>
       {isAdding ? (
-        <div className="flex items-center rounded bg-slate-200 text-sm pl-2 mr-2 my-1">
-          <div className="mr-1 font-semibold">
-            <input
-              type="text"
-              className="rounded px-2 text-sm w-16"
-              placeholder="Key"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-
-          <div className="flex-1 bg-indigo-700 text-white py-1 px-2 m-1 rounded transition-transform hover:scale-105 cursor-pointer">
-            <input
-              type="text"
-              className="rounded py-0 px-2 text-sm text-black"
-              placeholder="Value"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <button className="text-green-700" onClick={onAdd}>
-              <RxCheck className="w-4 h-4" strokeWidth={2} />
-            </button>
-            <button
-              className="text-rose-500 hover:text-rose-700 ml-1"
-              onClick={onCancel}
-            >
-              <RxCross2 className="w-4 h-4" strokeWidth={2} />
-            </button>
-          </div>
-        </div>
+        <EditAttributeInput onSubmit={onAdd} onCancel={onCancel} />
       ) : (
         <button
           className="text-indigo-900 h-7"
@@ -79,42 +112,69 @@ const AddAttributeInput: FC<{
   );
 };
 
-const AttributeToken: FC<{
-  name: string;
-  value: string;
-  onRemove: () => void;
-}> = ({ name, value, onRemove }) => (
-  <div className="flex items-center rounded bg-slate-200 text-sm pl-2 mr-2 my-1">
-    <div className="mr-1 font-semibold">
-      {name}
-      {value ? ":" : null}
-    </div>
+const AttributeToken: FC<
+  Attribute & {
+    onRemove: () => void;
+    onEdit: (attr: Attribute) => void;
+  }
+> = ({ name, value, onRemove, onEdit }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const onCancel = useCallback(() => {
+    setIsEditing(false);
+  }, [setIsEditing]);
+  const onSubmit = useCallback(
+    (attr: Attribute) => {
+      onEdit(attr);
+      onCancel();
+    },
+    [onEdit, onCancel]
+  );
+  if (isEditing) {
+    return (
+      <EditAttributeInput
+        name={name}
+        value={value}
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+      />
+    );
+  }
+  return (
+    <div className="flex items-center rounded bg-slate-200 text-sm pl-2 mr-2 my-1">
+      <div className="mr-1 font-semibold">
+        {name}
+        {value ? ":" : null}
+      </div>
 
-    {value ? (
-      <button className="flex-1 bg-indigo-700 text-white px-2 m-1 rounded cursor-pointer break-all text-left">
-        {value}
+      {value ? (
+        <button
+          className="flex-1 bg-indigo-700 text-white px-2 m-1 rounded cursor-pointer break-all text-left"
+          onClick={() => setIsEditing(true)}
+        >
+          {value}
+        </button>
+      ) : null}
+
+      <button
+        className="text-rose-500 hover:text-rose-700 mx-1"
+        onClick={onRemove}
+      >
+        <RxCross2 className="w-4 h-4" />
       </button>
-    ) : null}
-
-    <button
-      className="text-rose-500 hover:text-rose-700 mx-1"
-      onClick={onRemove}
-    >
-      <RxCross2 className="w-4 h-4" />
-    </button>
-  </div>
-);
+    </div>
+  );
+};
 
 const AttributeEdit: FC<{
   element: HTMLElement;
-  onSave: (attributes: Record<string, string>[]) => void;
+  onSave: (attributes: Attribute[]) => void;
 }> = ({ element, onSave: _onSave }) => {
-  const [attributes, setAttributes] = useState<Record<string, string>[]>(
+  const [attributes, setAttributes] = useState<Attribute[]>(
     normalizeAttrs(element.attributes)
   );
 
   const onSave = useCallback(
-    (newAttrs: Record<string, string>[]) => {
+    (newAttrs: Attribute[]) => {
       setAttributes(newAttrs);
       _onSave(newAttrs);
     },
@@ -129,8 +189,18 @@ const AttributeEdit: FC<{
   );
 
   const addAttr = useCallback(
-    ({ name, value }: { name: string; value: string }) => {
-      onSave([...attributes, { name, value }]);
+    ({ name, value }: Attribute) => {
+      const deduped = attributes.filter((a) => a.name !== name);
+      onSave([...deduped, { name, value }]);
+    },
+    [onSave, attributes]
+  );
+
+  const editAttr = useCallback(
+    ({ name, value }: Attribute) => {
+      onSave([
+        ...attributes.map((a) => (a.name === name ? { name, value } : a)),
+      ]);
     },
     [onSave, attributes]
   );
@@ -145,14 +215,13 @@ const AttributeEdit: FC<{
 
       <div className="flex-1 flex flex-wrap ml-4 items-center">
         {attributes.map(({ name, value }, index) => (
-          <>
-            <AttributeToken
-              key={index}
-              name={name}
-              value={value}
-              onRemove={() => removeAttr(name)}
-            />
-          </>
+          <AttributeToken
+            key={index}
+            name={name}
+            value={value}
+            onEdit={editAttr}
+            onRemove={() => removeAttr(name)}
+          />
         ))}
         <AddAttributeInput onAdd={addAttr} />
       </div>
