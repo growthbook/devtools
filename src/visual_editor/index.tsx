@@ -1,5 +1,6 @@
-import html2canvas from "html2canvas";
-import React, { FC, useCallback, useEffect, useState } from "react";
+import mutate, { DeclarativeMutation } from "dom-mutator";
+import qs from "query-string";
+import React, { FC, useCallback, useEffect, useRef, useState } from "react";
 import * as ReactDOM from "react-dom/client";
 import { Message } from "../../devtools";
 import Toolbar, { ToolbarMode } from "./Toolbar";
@@ -12,61 +13,97 @@ import {
   toggleScreenshotMode,
 } from "./lib/modes";
 import "./targetPage.css";
-// @ts-expect-error ts-loader does not understand this .css import
-import VisualEditorCss from "./index.css";
 import ElementDetails from "./ElementDetails";
 import ExperimentCreator from "./ExperimentCreator";
 import HighlightedElementSelectorDisplay from "./HighlightedElementSelectorDisplay";
 import GlobalCSSEditor from "./GlobalCSSEditor";
+// @ts-expect-error ts-loader does not understand this .css import
+import VisualEditorCss from "./index.css";
+import DOMMutationList from "./DOMMutationList";
+import { useApiEndpoint } from "../utils/hooks";
 
-export type DomMutations = Array<{ type: string }>;
-
-interface ExperimentVariation {
+export interface ExperimentVariation {
   canvas?: HTMLCanvasElement;
-  domMutations: DomMutations;
+  domMutations: DeclarativeMutation[];
 }
 
+// TODO Replace with interface in API payload
 export interface Experiment {
   variations?: ExperimentVariation[];
 }
 
-const captureCanvas = () => html2canvas(document.body, { scale: 0.125 });
-
 const VisualEditor: FC<{}> = () => {
-  const [isEnabled, setIsEnabled] = useState(
-    // TODO set to false
-    window.location.href.includes("localhost:3001")
-  );
-  // TODO Make default === "normal"
+  const params = qs.parse(window.location.search);
+  const experimentId = params["visual-exp-id"] as string;
+  // TODO use api
+  // const { data: experiment } = useApiEndpoint<Experiment>(
+  //   `/experiments/${experimentId}`
+  // );
+  const experiment = { variations: [{ domMutations: [] }] };
+  const [isVisualEditorEnabled, setIsEnabled] = useState(false);
+  const [variations, setVariations] = useState<ExperimentVariation[]>([]);
   const [mode, setMode] = useState<ToolbarMode>("selection");
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(
     null
   );
-  const [experiment, setExperiment] = useState<Experiment | null>(null);
+  const [selectedVariationIndex, setSelectedVariationIndex] =
+    useState<number>(1);
   const [highlightedElementSelector, setHighlightedElementSelector] = useState<
     string | null
   >(null);
 
-  const createExperiment = useCallback(async () => {
-    const canvas = await captureCanvas();
-    setExperiment({
-      variations: [
-        { canvas, domMutations: [] },
-        { canvas, domMutations: [] },
-      ],
-    });
-  }, [setExperiment]);
+  const mutateRevert = useRef<(() => void) | null>(null);
+
+  const selectedVariation =
+    experiment?.variations?.[selectedVariationIndex] ?? null;
 
   const createVariation = useCallback(async () => {
-    const canvas = await captureCanvas();
-    setExperiment({
-      ...experiment,
-      variations: [
-        ...(experiment?.variations ?? []),
-        { canvas, domMutations: [] },
-      ],
-    });
-  }, [experiment, setExperiment]);
+    setVariations([...variations, { domMutations: [] }]);
+  }, [variations, setVariations]);
+
+  const addDomMutation = useCallback(
+    (domMutation: DeclarativeMutation) => {
+      setVariations([
+        ...(variations?.map((variation, index) => {
+          if (index === selectedVariationIndex) {
+            return {
+              ...variation,
+              domMutations: [...variation.domMutations, domMutation],
+            };
+          }
+          return variation;
+        }) ?? []),
+      ]);
+    },
+    [selectedVariation, setVariations]
+  );
+
+  const removeDomMutation = useCallback(
+    (domMutation: DeclarativeMutation) => {
+      setVariations([
+        ...(variations?.map((variation, index) => {
+          if (index === selectedVariationIndex) {
+            return {
+              ...variation,
+              domMutations: variation.domMutations.filter(
+                // TODO use an id or something :/
+                (mutation) => mutation !== domMutation
+              ),
+            };
+          }
+          return variation;
+        }) ?? []),
+      ]);
+    },
+    [selectedVariation, setVariations]
+  );
+
+  // on load experiment we toggle on visual editor
+  useEffect(() => {
+    if (!experiment) return;
+    setIsEnabled(true);
+    setVariations(experiment.variations ?? []);
+  }, [experiment]);
 
   // listen for messages from popup menu
   useEffect(() => {
@@ -82,21 +119,33 @@ const VisualEditor: FC<{}> = () => {
     return () => window.removeEventListener("message", messageHandler);
   }, []);
 
+  // handle mode selection
   useEffect(() => {
-    toggleNormalMode(!isEnabled ? isEnabled : mode === "normal");
+    toggleNormalMode(
+      !isVisualEditorEnabled ? isVisualEditorEnabled : mode === "normal"
+    );
     toggleSelectionMode({
-      isEnabled: !isEnabled ? isEnabled : mode === "selection",
+      isEnabled: !isVisualEditorEnabled
+        ? isVisualEditorEnabled
+        : mode === "selection",
       selectedElement,
       setSelectedElement,
       setHighlightedElementSelector,
     });
-    toggleCssMode(!isEnabled ? isEnabled : mode === "css");
-    toggleMutationMode(!isEnabled ? isEnabled : mode === "mutation");
-    toggleScreenshotMode(!isEnabled ? isEnabled : mode === "screenshot");
-  }, [isEnabled, mode]);
+    toggleCssMode(
+      !isVisualEditorEnabled ? isVisualEditorEnabled : mode === "css"
+    );
+    toggleMutationMode(
+      !isVisualEditorEnabled ? isVisualEditorEnabled : mode === "mutation"
+    );
+    toggleScreenshotMode(
+      !isVisualEditorEnabled ? isVisualEditorEnabled : mode === "screenshot"
+    );
+  }, [isVisualEditorEnabled, mode]);
 
+  // selection mode - update on select
   useEffect(() => {
-    if (!isEnabled) return;
+    if (!isVisualEditorEnabled) return;
     if (mode !== "selection") return;
 
     updateSelectedElement({
@@ -108,35 +157,53 @@ const VisualEditor: FC<{}> = () => {
     selectedElement,
     setSelectedElement,
     setHighlightedElementSelector,
-    isEnabled,
+    isVisualEditorEnabled,
     mode,
   ]);
 
-  // TODO Remove this - only used for debugging
+  // run dom mutations when experiment is updated or selected variation changes
   useEffect(() => {
-    createExperiment();
-    const imgElem = document.querySelector("#img-container");
-    setSelectedElement(imgElem as HTMLElement);
-  }, []);
+    if (mutateRevert?.current) mutateRevert.current();
 
-  if (!isEnabled) return null;
+    const callbacks: Array<() => void> = [];
+
+    selectedVariation?.domMutations.forEach((mutation) => {
+      console.log("running mutation", mutation);
+      const controller = mutate.declarative(mutation);
+      callbacks.push(controller.revert);
+    });
+
+    mutateRevert.current = () => {
+      callbacks.forEach((callback) => callback());
+    };
+  }, [selectedVariation]);
+
+  if (!isVisualEditorEnabled) return null;
 
   return (
     <>
       {experiment ? <Toolbar mode={mode} setMode={setMode} /> : null}
 
+      <DOMMutationList
+        mutations={selectedVariation?.domMutations ?? []}
+        removeDomMutation={removeDomMutation}
+      />
+
       <ExperimentCreator
         experiment={experiment}
-        createExperiment={createExperiment}
         createVariation={createVariation}
+        selectedVariationIndex={selectedVariationIndex}
+        setSelectedVariationIndex={setSelectedVariationIndex}
       />
 
       {mode === "selection" && selectedElement ? (
         <ElementDetails
           element={selectedElement}
           clearElement={() => setSelectedElement(null)}
+          addMutation={addDomMutation}
         />
       ) : null}
+
       {mode === "selection" ? (
         <HighlightedElementSelectorDisplay
           selector={highlightedElementSelector}
@@ -147,8 +214,11 @@ const VisualEditor: FC<{}> = () => {
 };
 
 // mounting the visual editor
+export const CONTAINER_ID = "__gb_visual_editor";
+
 const container = document.createElement("div");
-container.id = "visual-editor-container";
+container.id = CONTAINER_ID;
+
 export const shadowRoot = container?.attachShadow({ mode: "open" });
 
 if (shadowRoot) {

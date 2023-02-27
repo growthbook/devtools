@@ -31,7 +31,7 @@
     }
   ],
 
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["storage", "activeTab", "desktopCapture"],
 
   "host_permissions": ["<all_urls>"],
 

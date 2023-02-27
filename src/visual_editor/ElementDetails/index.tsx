@@ -1,16 +1,22 @@
 import { finder } from "@medv/finder";
+import { DeclarativeMutation } from "dom-mutator";
 import React, { FC, useCallback, useEffect, useState } from "react";
 import GripHandle from "../GripHandle";
 import DetailsRow from "./DetailsRow";
 import ClassNamesEdit from "./ClassNamesEdit";
 import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
+import useFixedPositioning from "../lib/hooks/useFixedPositioning";
 
 const ElementDetails: FC<{
   element: HTMLElement;
   clearElement: () => void;
-}> = ({ element, clearElement }) => {
-  const [x, setX] = useState(24);
-  const [y, setY] = useState(24);
+  addMutation: (mutation: DeclarativeMutation) => void;
+}> = ({ addMutation, element, clearElement }) => {
+  const { x, y, setX, setY, parentStyles } = useFixedPositioning({
+    x: 24,
+    y: 24,
+    bottomAligned: true,
+  });
 
   const name = element.tagName;
   const html = element.innerHTML;
@@ -18,16 +24,26 @@ const ElementDetails: FC<{
 
   const setHTML = useCallback(
     (html: string) => {
-      element.innerHTML = html;
+      addMutation({
+        action: "set",
+        attribute: "html",
+        value: html,
+        selector,
+      });
     },
     [element]
   );
 
   const setClassNames = useCallback(
     (classNames: string) => {
-      element.className = classNames;
+      addMutation({
+        action: "set",
+        attribute: "class",
+        value: classNames,
+        selector,
+      });
     },
-    [element]
+    [element, addMutation]
   );
 
   const setAttributes = useCallback(
@@ -41,21 +57,31 @@ const ElementDetails: FC<{
       const changed = attrs.filter(
         (attr) => attr.value !== element.getAttribute(attr.name)
       );
-      removed.forEach((attr) => element.removeAttribute(attr.name));
+      removed.forEach((attr) => {
+        addMutation({
+          action: "remove",
+          attribute: attr.name,
+          selector,
+          value: attr.value,
+        });
+      });
       changed.forEach((attr) => {
-        element.removeAttribute(attr.name);
-        element.setAttribute(attr.name, attr.value);
+        addMutation({
+          action: element.hasAttribute(attr.name) ? "set" : "append",
+          attribute: attr.name,
+          selector,
+          value: attr.value,
+        });
       });
     },
-    [element]
+    [element, addMutation]
   );
 
   return (
     <div
-      className="fixed bg-slate-300 rounded-lg shadow-xl z-max overflow-y-auto"
+      className="bg-slate-300 rounded-lg shadow-xl z-max overflow-y-auto"
       style={{
-        bottom: `${y}px`,
-        left: `${x}px`,
+        ...parentStyles,
         width: "36rem",
         maxHeight: "36rem",
       }}

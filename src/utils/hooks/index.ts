@@ -97,8 +97,9 @@ export const useApiEndpoint = <T>(endpoint: string) => {
   };
 
   useEffect(() => {
+    if (!endpoint) return;
     fetchEndpoint();
-  }, []);
+  }, [endpoint]);
 
   return {
     data,

@@ -4,15 +4,24 @@ import GripHandle from "../GripHandle";
 import GBLogo from "../../../public/logo192.png";
 import clsx from "clsx";
 import { Experiment } from "..";
+import useFixedPositioning from "../lib/hooks/useFixedPositioning";
 
 const ExperimentCreator: FC<{
   experiment: Experiment | null;
-  createExperiment: () => void;
   createVariation: () => void;
-}> = ({ experiment, createExperiment, createVariation }) => {
-  const [x, setX] = useState(24); // pixels
-  const [y, setY] = useState(24); // pixels
-  const [selectedVariationIndex, setSelectedVariationIndex] = useState(1);
+  selectedVariationIndex: number;
+  setSelectedVariationIndex: (i: number) => void;
+}> = ({
+  experiment,
+  createVariation,
+  selectedVariationIndex,
+  setSelectedVariationIndex,
+}) => {
+  const { x, y, setX, setY, parentStyles } = useFixedPositioning({
+    x: 24,
+    y: 24,
+    rightAligned: true,
+  });
   const prevVariationsCount = useRef(1);
 
   // select most recently created variation
@@ -27,12 +36,13 @@ const ExperimentCreator: FC<{
     }
   }, [experiment]);
 
+  if (!experiment) return null;
+
   return (
     <div
-      className="fixed rounded-xl shadow-xl z-max w-96 cursor-default exp-creator"
+      className="rounded-xl shadow-xl z-max w-96 cursor-default exp-creator"
       style={{
-        top: `${y}px`,
-        right: `${x}px`,
+        ...parentStyles,
       }}
     >
       <div className="flex px-4 h-12 items-center justify-center rounded-t-xl logo-bg ">
@@ -45,53 +55,45 @@ const ExperimentCreator: FC<{
       </div>
 
       <div className="relative bg-slate-800 py-4 text-white flex justify-center">
-        {experiment ? (
-          <div className="flex flex-wrap justify-start w-10/12">
-            {experiment.variations?.map((variation, i) => (
+        <div className="flex flex-wrap justify-start w-10/12">
+          {experiment.variations?.map((variation, i) => (
+            <div
+              key={i}
+              className={clsx(
+                "relative w-32 h-32 m-4 bg-slate-100 rounded overflow-hidden flex justify-center items-center cursor-pointer hover:scale-105 transition-transform duration-500",
+                {
+                  "outline outline-4 outline-amber-300":
+                    i === selectedVariationIndex,
+                }
+              )}
+              onClick={() => setSelectedVariationIndex(i)}
+            >
+              <img
+                className="min-w-full min-h-full object-cover"
+                src={variation.canvas?.toDataURL()}
+                alt="Variation"
+              />
               <div
-                key={i}
                 className={clsx(
-                  "relative w-32 h-32 m-4 bg-slate-100 rounded overflow-hidden flex justify-center items-center cursor-pointer hover:scale-105 transition-transform duration-500",
+                  "absolute inset-0 text-xl font-semibold flex justify-center items-center",
                   {
-                    "outline outline-4 outline-amber-300":
-                      i === selectedVariationIndex,
+                    "bg-slate-500/75": i !== selectedVariationIndex,
+                    "text-slate-700": i === selectedVariationIndex,
+                    "text-white": i !== selectedVariationIndex,
                   }
                 )}
-                onClick={() => setSelectedVariationIndex(i)}
               >
-                <img
-                  className="min-w-full min-h-full object-cover"
-                  src={variation.canvas?.toDataURL()}
-                  alt="Variation"
-                />
-                <div
-                  className={clsx(
-                    "absolute inset-0 text-xl font-semibold flex justify-center items-center",
-                    {
-                      "bg-slate-500/75": i !== selectedVariationIndex,
-                      "text-slate-700": i === selectedVariationIndex,
-                      "text-white": i !== selectedVariationIndex,
-                    }
-                  )}
-                >
-                  {i === 0 ? "Control" : `Variation ${i}`}
-                </div>
+                {i === 0 ? "Control" : `Variation ${i}`}
               </div>
-            ))}
-            <div
-              className="w-32 h-32 m-4 border-4 border-slate-300 border-dashed rounded flex items-center text-slate-300 text-xl font-semibold text-center cursor-pointer hover:border-slate-100 hover:text-slate-100"
-              onClick={() => createVariation()}
-            >
-              + Add Variation
             </div>
+          ))}
+          <div
+            className="w-32 h-32 m-4 border-4 border-slate-300 border-dashed rounded flex items-center text-slate-300 text-xl font-semibold text-center cursor-pointer hover:border-slate-100 hover:text-slate-100"
+            onClick={() => createVariation()}
+          >
+            + Add Variation
           </div>
-        ) : (
-          <div className="flex justify-center">
-            <button className="p-2 text-xl" onClick={() => createExperiment()}>
-              + New Experiment
-            </button>
-          </div>
-        )}
+        </div>
       </div>
 
       <GripHandle

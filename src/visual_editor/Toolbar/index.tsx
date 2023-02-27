@@ -8,6 +8,7 @@ import {
 } from "react-icons/rx";
 import clsx from "clsx";
 import GripHandle from "../GripHandle";
+import useFixedPositioning from "../lib/hooks/useFixedPositioning";
 
 export type ToolbarMode =
   | "normal"
@@ -50,16 +51,16 @@ const Toolbar: FC<{
   mode: ToolbarMode;
   setMode: (mode: ToolbarMode) => void;
 }> = ({ mode, setMode }) => {
-  // x, y position of floating toolbar
-  const [x, setX] = useState(24); // pixels
-  const [y, setY] = useState(24); // pixels
+  const { x, y, setX, setY, parentStyles } = useFixedPositioning({
+    x: 24,
+    y: 24,
+  });
 
   return (
     <div
-      className="fixed bg-slate-300 rounded rounded-l-lg shadow-xl z-max"
+      className="bg-slate-300 rounded rounded-l-lg shadow-xl z-max"
       style={{
-        top: `${y}px`,
-        left: `${x}px`,
+        ...parentStyles,
       }}
     >
       <div className="flex flex-row">

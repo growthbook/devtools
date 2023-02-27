@@ -1,5 +1,5 @@
 import { finder } from "@medv/finder";
-import { shadowRoot } from "..";
+import { shadowRoot, CONTAINER_ID } from "..";
 
 export const highlightedAttributeName = "gb-selection-mode-highlighted";
 export const selectedAttributeName = "gb-selection-mode-selected";
@@ -34,7 +34,7 @@ let _setHighlightedElementSelector: ((selector: string) => void) | null;
 
 const clickHandler = (event: MouseEvent) => {
   // don't intercept cilcks on the visual editor itself
-  if ((event.target as HTMLElement).id === "visual-editor-container") return;
+  if ((event.target as HTMLElement).id === CONTAINER_ID) return;
 
   event.preventDefault();
   event.stopPropagation();
