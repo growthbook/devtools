@@ -38,10 +38,22 @@ type DisableVisualEditorMessage = {
   type: "GB_DISABLE_VISUAL_EDITOR";
 };
 
+type RequestApiCreds = {
+  type: "GB_REQUEST_API_CREDS";
+};
+
+type ResponseApiCreds = {
+  type: "GB_RESPONSE_API_CREDS";
+  apiKey: string | null;
+  apiHost: string | null;
+};
+
 export type Message =
   | RequestRefreshMessage
   | SetOverridesMessage
   | RefreshMessage
   | ErrorMessage
   | EnableVisualEditorMessage
-  | DisableVisualEditorMessage;
+  | DisableVisualEditorMessage
+  | RequestApiCreds
+  | ResponseApiCreds;

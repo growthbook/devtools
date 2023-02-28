@@ -3,16 +3,16 @@ import GripHandle from "../GripHandle";
 // @ts-expect-error ts-loader can't handle png files yet
 import GBLogo from "../../../public/logo192.png";
 import clsx from "clsx";
-import { Experiment } from "..";
+import { Experiment, ExperimentVariation } from "..";
 import useFixedPositioning from "../lib/hooks/useFixedPositioning";
 
 const ExperimentCreator: FC<{
-  experiment: Experiment | null;
+  variations: ExperimentVariation[];
   createVariation: () => void;
   selectedVariationIndex: number;
   setSelectedVariationIndex: (i: number) => void;
 }> = ({
-  experiment,
+  variations,
   createVariation,
   selectedVariationIndex,
   setSelectedVariationIndex,
@@ -26,17 +26,13 @@ const ExperimentCreator: FC<{
 
   // select most recently created variation
   useEffect(() => {
-    if (!experiment) return;
-    const { variations } = experiment;
     if (!variations?.length) return;
     const lastVarIndex = variations.length - 1;
     if (lastVarIndex !== prevVariationsCount.current) {
       setSelectedVariationIndex(lastVarIndex);
       prevVariationsCount.current = lastVarIndex;
     }
-  }, [experiment]);
-
-  if (!experiment) return null;
+  }, [variations]);
 
   return (
     <div
@@ -56,7 +52,7 @@ const ExperimentCreator: FC<{
 
       <div className="relative bg-slate-800 py-4 text-white flex justify-center">
         <div className="flex flex-wrap justify-start w-10/12">
-          {experiment.variations?.map((variation, i) => (
+          {variations?.map((variation, i) => (
             <div
               key={i}
               className={clsx(

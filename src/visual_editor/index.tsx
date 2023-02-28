@@ -16,11 +16,9 @@ import "./targetPage.css";
 import ElementDetails from "./ElementDetails";
 import ExperimentCreator from "./ExperimentCreator";
 import HighlightedElementSelectorDisplay from "./HighlightedElementSelectorDisplay";
-import GlobalCSSEditor from "./GlobalCSSEditor";
 // @ts-expect-error ts-loader does not understand this .css import
 import VisualEditorCss from "./index.css";
 import DOMMutationList from "./DOMMutationList";
-import { useApiEndpoint } from "../utils/hooks";
 
 export interface ExperimentVariation {
   canvas?: HTMLCanvasElement;
@@ -35,11 +33,10 @@ export interface Experiment {
 const VisualEditor: FC<{}> = () => {
   const params = qs.parse(window.location.search);
   const experimentId = params["visual-exp-id"] as string;
-  // TODO use api
-  // const { data: experiment } = useApiEndpoint<Experiment>(
-  //   `/experiments/${experimentId}`
-  // );
-  const experiment = { variations: [{ domMutations: [] }] };
+  const [apiCreds, setApiCreds] = useState<{
+    apiKey?: string;
+    apiHost?: string;
+  }>({});
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
   const [variations, setVariations] = useState<ExperimentVariation[]>([]);
   const [mode, setMode] = useState<ToolbarMode>("selection");
@@ -54,8 +51,7 @@ const VisualEditor: FC<{}> = () => {
 
   const mutateRevert = useRef<(() => void) | null>(null);
 
-  const selectedVariation =
-    experiment?.variations?.[selectedVariationIndex] ?? null;
+  const selectedVariation = variations?.[selectedVariationIndex] ?? null;
 
   const createVariation = useCallback(async () => {
     setVariations([...variations, { domMutations: [] }]);
@@ -98,12 +94,59 @@ const VisualEditor: FC<{}> = () => {
     [selectedVariation, setVariations]
   );
 
-  // on load experiment we toggle on visual editor
   useEffect(() => {
-    if (!experiment) return;
-    setIsEnabled(true);
-    setVariations(experiment.variations ?? []);
-  }, [experiment]);
+    window.postMessage(
+      {
+        type: "GB_REQUEST_API_CREDS",
+      },
+      "*"
+    );
+
+    window.addEventListener("message", function (event: MessageEvent<Message>) {
+      const data = event.data;
+      if (
+        data.type === "GB_RESPONSE_API_CREDS" &&
+        data.apiKey &&
+        data.apiHost
+      ) {
+        setApiCreds({
+          apiKey: data.apiKey,
+          apiHost: data.apiHost,
+        });
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    const { apiHost, apiKey } = apiCreds;
+
+    if (!experimentId) return;
+    if (!apiHost || !apiKey) return;
+
+    const fetchExperiment = async () => {
+      const response = await fetch(
+        `${apiHost}/api/v1/experiments/${experimentId}`,
+        {
+          headers: {
+            Authorization: `Basic ${btoa(apiKey + ":")}`,
+          },
+        }
+      );
+
+      const res = await response.json();
+      const { experiment } = res;
+
+      setVariations(
+        experiment.variations.map((v: any) => ({
+          ...v,
+          domMutations: [],
+        }))
+      );
+      setIsEnabled(true);
+    };
+
+    fetchExperiment();
+  }, [experimentId, apiCreds]);
 
   // listen for messages from popup menu
   useEffect(() => {
@@ -182,7 +225,7 @@ const VisualEditor: FC<{}> = () => {
 
   return (
     <>
-      {experiment ? <Toolbar mode={mode} setMode={setMode} /> : null}
+      {variations.length > 0 ? <Toolbar mode={mode} setMode={setMode} /> : null}
 
       <DOMMutationList
         mutations={selectedVariation?.domMutations ?? []}
@@ -190,7 +233,7 @@ const VisualEditor: FC<{}> = () => {
       />
 
       <ExperimentCreator
-        experiment={experiment}
+        variations={variations}
         createVariation={createVariation}
         selectedVariationIndex={selectedVariationIndex}
         setSelectedVariationIndex={setSelectedVariationIndex}

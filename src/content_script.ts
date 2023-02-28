@@ -1,12 +1,23 @@
 import type { Message } from "../devtools";
+import { loadApiHost, loadApiKey } from "./utils/storage";
 
 // Pass along messages from content script -----> devtools, popup, etc.
 window.addEventListener("message", function (msg: MessageEvent<Message>) {
   const data = msg.data;
   const devtoolsMessages = ["GB_REFRESH", "GB_ERROR"];
+  const visualEditorMessages = ["GB_REQUEST_API_CREDS"];
 
   if (devtoolsMessages.includes(data.type)) {
     chrome.runtime.sendMessage(data);
+  }
+
+  if (visualEditorMessages.includes(data.type)) {
+    Promise.all([loadApiKey(), loadApiHost()]).then(([apiKey, apiHost]) => {
+      window.postMessage(
+        { type: "GB_RESPONSE_API_CREDS", apiKey, apiHost },
+        "*"
+      );
+    });
   }
 });
 
