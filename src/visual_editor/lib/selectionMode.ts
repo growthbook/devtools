@@ -62,8 +62,6 @@ export const updateSelectedElement = ({
   setSelectedElement: (element: HTMLElement | null) => void;
   setHighlightedElementSelector: (selector: string) => void;
 }) => {
-  console.log("DEBUG updateSelectedElement");
-
   _selectedElement = selectedElement;
   _setSelectedElement = setSelectedElement;
   _setHighlightedElementSelector = setHighlightedElementSelector;

@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useState } from "react";
+import React, { FC, useCallback, useState } from "react";
 import { RxCross2, RxPlus, RxCheck } from "react-icons/rx";
 import {
   highlightedAttributeName,
@@ -168,18 +168,8 @@ const AttributeToken: FC<
 const AttributeEdit: FC<{
   element: HTMLElement;
   onSave: (attributes: Attribute[]) => void;
-}> = ({ element, onSave: _onSave }) => {
-  const [attributes, setAttributes] = useState<Attribute[]>(
-    normalizeAttrs(element.attributes)
-  );
-
-  const onSave = useCallback(
-    (newAttrs: Attribute[]) => {
-      setAttributes(newAttrs);
-      _onSave(newAttrs);
-    },
-    [setAttributes, _onSave]
-  );
+}> = ({ element, onSave }) => {
+  const attributes = normalizeAttrs(element.attributes);
 
   const removeAttr = useCallback(
     (name: string) => {
@@ -204,10 +194,6 @@ const AttributeEdit: FC<{
     },
     [onSave, attributes]
   );
-
-  useEffect(() => {
-    setAttributes(normalizeAttrs(element.attributes));
-  }, [element]);
 
   return (
     <div className="flex mb-2 items-start mr-2 -ml-2 p-2 rounded-lg bg-slate-400">

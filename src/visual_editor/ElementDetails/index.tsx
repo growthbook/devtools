@@ -1,6 +1,6 @@
 import { finder } from "@medv/finder";
 import { DeclarativeMutation } from "dom-mutator";
-import React, { FC, useCallback, useEffect, useMemo, useState } from "react";
+import React, { FC, useCallback, useMemo } from "react";
 import GripHandle from "../GripHandle";
 import DetailsRow from "./DetailsRow";
 import ClassNamesEdit from "./ClassNamesEdit";

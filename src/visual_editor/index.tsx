@@ -246,8 +246,10 @@ const VisualEditor: FC<{}> = () => {
       callbacks.forEach((callback) => callback());
     };
 
+    // This sucks. But necessary, since dom-mutator may make DOM changes after
+    // re-render. We re-render post-DOMmutator so we retrieve updated values.
     setTimeout(() => {
-      console.log("DEBUG forceUpdate");
+      // console.log("DEBUG - forceUpdate");
       forceUpdate();
     }, 100);
   }, [variations, selectedVariation]);
