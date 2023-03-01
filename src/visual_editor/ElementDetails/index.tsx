@@ -1,17 +1,19 @@
 import { finder } from "@medv/finder";
 import { DeclarativeMutation } from "dom-mutator";
-import React, { FC, useCallback, useEffect, useState } from "react";
+import React, { FC, useCallback, useEffect, useMemo, useState } from "react";
 import GripHandle from "../GripHandle";
 import DetailsRow from "./DetailsRow";
 import ClassNamesEdit from "./ClassNamesEdit";
 import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
 import useFixedPositioning from "../lib/hooks/useFixedPositioning";
+import BreadcrumbsView from "./BreadcrumbsView";
 
 const ElementDetails: FC<{
   element: HTMLElement;
+  setElement: (element: HTMLElement) => void;
   clearElement: () => void;
   addMutation: (mutation: DeclarativeMutation) => void;
-}> = ({ addMutation, element, clearElement }) => {
+}> = ({ addMutation, element, setElement, clearElement }) => {
   const { x, y, setX, setY, parentStyles } = useFixedPositioning({
     x: 24,
     y: 24,
@@ -20,7 +22,10 @@ const ElementDetails: FC<{
 
   const name = element.tagName;
   const html = element.innerHTML;
-  const selector = finder(element, { seedMinLength: 5 });
+  const selector = useMemo(
+    () => finder(element, { seedMinLength: 5 }),
+    [element]
+  );
 
   const setHTML = useCallback(
     (html: string) => {
@@ -31,7 +36,7 @@ const ElementDetails: FC<{
         selector,
       });
     },
-    [element]
+    [element, addMutation]
   );
 
   const addClassNames = useCallback(
@@ -58,18 +63,7 @@ const ElementDetails: FC<{
     [element, addMutation]
   );
 
-  const setClassNames = useCallback(
-    (classNames: string) => {
-      addMutation({
-        action: "set",
-        attribute: "class",
-        value: classNames,
-        selector,
-      });
-    },
-    [element, addMutation]
-  );
-
+  // TODO Change to add/remove only
   const setAttributes = useCallback(
     (attrs: Attribute[]) => {
       const existing = [...element.attributes];
@@ -110,7 +104,8 @@ const ElementDetails: FC<{
         maxHeight: "36rem",
       }}
     >
-      <div className="text-right py-2 mr-2">
+      <div className="flex justify-between py-2 mr-2">
+        <BreadcrumbsView element={element} setElement={setElement} />
         <a
           className="text-grey-200 underline cursor-pointer"
           onClick={(e) => {

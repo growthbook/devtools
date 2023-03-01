@@ -273,6 +273,7 @@ const VisualEditor: FC<{}> = () => {
       {mode === "selection" && selectedElement ? (
         <ElementDetails
           element={selectedElement}
+          setElement={setSelectedElement}
           clearElement={() => setSelectedElement(null)}
           addMutation={addDomMutation}
         />
