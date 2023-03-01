@@ -1,26 +1,64 @@
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC, useEffect, useRef } from "react";
 import GripHandle from "../GripHandle";
 // @ts-expect-error ts-loader can't handle png files yet
 import GBLogo from "../../../public/logo192.png";
-import clsx from "clsx";
-import { Experiment, ExperimentVariation } from "..";
+import { ExperimentVariation } from "..";
 import useFixedPositioning from "../lib/hooks/useFixedPositioning";
+import Toolbar from "../Toolbar";
+import { ToolbarMode } from "../Toolbar";
+
+const VariationSelector: FC<{
+  variations: ExperimentVariation[];
+  selectedVariationIndex: number;
+  setSelectedVariationIndex: (i: number) => void;
+  createVariation: () => void;
+}> = ({
+  variations,
+  selectedVariationIndex,
+  setSelectedVariationIndex,
+  createVariation,
+}) => {
+  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = Number(e.target.value);
+    if (value === -1) return createVariation();
+    setSelectedVariationIndex(value);
+  };
+  return (
+    <div className="w-full text-xl p-4">
+      <select
+        className="w-full p-2 border border-gray-300 rounded"
+        value={selectedVariationIndex}
+        onChange={onChange}
+      >
+        {variations.map((variation, index) => (
+          <option key={index} value={index}>
+            {index === 0 ? "Control" : `Variation ${index}`}
+          </option>
+        ))}
+        <option value={-1}>+ Add variation</option>
+      </select>
+    </div>
+  );
+};
 
 const ExperimentCreator: FC<{
   variations: ExperimentVariation[];
   createVariation: () => void;
   selectedVariationIndex: number;
   setSelectedVariationIndex: (i: number) => void;
+  mode: ToolbarMode;
+  setMode: (mode: ToolbarMode) => void;
 }> = ({
   variations,
   createVariation,
   selectedVariationIndex,
   setSelectedVariationIndex,
+  mode,
+  setMode,
 }) => {
   const { x, y, setX, setY, parentStyles } = useFixedPositioning({
     x: 24,
     y: 24,
-    rightAligned: true,
   });
   const prevVariationsCount = useRef(1);
 
@@ -36,7 +74,7 @@ const ExperimentCreator: FC<{
 
   return (
     <div
-      className="rounded-xl shadow-xl z-max w-96 cursor-default exp-creator"
+      className="rounded-xl shadow-xl z-max w-96 cursor-default exp-creator bg-slate-800"
       style={{
         ...parentStyles,
       }}
@@ -50,50 +88,16 @@ const ExperimentCreator: FC<{
         </div>
       </div>
 
-      <div className="relative bg-slate-800 py-4 text-white flex justify-center">
-        <div className="flex flex-wrap justify-start w-10/12">
-          {variations?.map((variation, i) => (
-            <div
-              key={i}
-              className={clsx(
-                "relative w-32 h-32 m-4 bg-slate-100 rounded overflow-hidden flex justify-center items-center cursor-pointer hover:scale-105 transition-transform duration-500",
-                {
-                  "outline outline-4 outline-amber-300":
-                    i === selectedVariationIndex,
-                }
-              )}
-              onClick={() => setSelectedVariationIndex(i)}
-            >
-              <img
-                className="min-w-full min-h-full object-cover"
-                src={variation.canvas?.toDataURL()}
-                alt="Variation"
-              />
-              <div
-                className={clsx(
-                  "absolute inset-0 text-xl font-semibold flex justify-center items-center",
-                  {
-                    "bg-slate-500/75": i !== selectedVariationIndex,
-                    "text-slate-700": i === selectedVariationIndex,
-                    "text-white": i !== selectedVariationIndex,
-                  }
-                )}
-              >
-                {i === 0 ? "Control" : `Variation ${i}`}
-              </div>
-            </div>
-          ))}
-          <div
-            className="w-32 h-32 m-4 border-4 border-slate-300 border-dashed rounded flex items-center text-slate-300 text-xl font-semibold text-center cursor-pointer hover:border-slate-100 hover:text-slate-100"
-            onClick={() => createVariation()}
-          >
-            + Add Variation
-          </div>
-        </div>
-      </div>
+      <VariationSelector
+        variations={variations}
+        selectedVariationIndex={selectedVariationIndex}
+        setSelectedVariationIndex={setSelectedVariationIndex}
+        createVariation={createVariation}
+      />
+
+      <Toolbar mode={mode} setMode={setMode} />
 
       <GripHandle
-        reverseX
         className="bg-slate-800 h-5 w-full rounded-b-xl"
         x={x}
         y={y}

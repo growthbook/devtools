@@ -37,9 +37,12 @@ const ToolbarButton = ({
   const Icon = modeToIcon[mode];
   return (
     <button
-      className={clsx("flex-1 p-4 h-full hover:bg-slate-100/75", {
-        "bg-slate-200": isActive,
-      })}
+      className={clsx(
+        "flex-1 p-4 h-full hover:bg-slate-600/75 flex justify-center text-white",
+        {
+          "bg-slate-700": isActive,
+        }
+      )}
       onClick={enable}
     >
       <Icon />
@@ -51,27 +54,9 @@ const Toolbar: FC<{
   mode: ToolbarMode;
   setMode: (mode: ToolbarMode) => void;
 }> = ({ mode, setMode }) => {
-  const { x, y, setX, setY, parentStyles } = useFixedPositioning({
-    x: 24,
-    y: 24,
-  });
-
   return (
-    <div
-      className="bg-slate-300 rounded rounded-l-lg shadow-xl z-max"
-      style={{
-        ...parentStyles,
-      }}
-    >
+    <div className="bg-slate-800 z-max">
       <div className="flex flex-row">
-        <GripHandle
-          className="w-4 bg-slate-300 rounded-l-lg"
-          x={x}
-          y={y}
-          setX={setX}
-          setY={setY}
-        />
-
         <ToolbarButton
           isActive={mode === "normal"}
           mode="normal"
@@ -92,11 +77,12 @@ const Toolbar: FC<{
           mode="mutation"
           enable={() => setMode("mutation")}
         />
+        {/*
         <ToolbarButton
           isActive={mode === "screenshot"}
           mode="screenshot"
           enable={() => setMode("screenshot")}
-        />
+          />*/}
       </div>
     </div>
   );

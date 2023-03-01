@@ -265,14 +265,14 @@ const VisualEditor: FC<{}> = () => {
 
   return (
     <>
-      {variations.length > 0 ? <Toolbar mode={mode} setMode={setMode} /> : null}
-
       <DOMMutationList
         mutations={selectedVariation?.domMutations ?? []}
         removeDomMutation={removeDomMutation}
       />
 
       <ExperimentCreator
+        mode={mode}
+        setMode={setMode}
         variations={variations}
         createVariation={createVariation}
         selectedVariationIndex={selectedVariationIndex}
