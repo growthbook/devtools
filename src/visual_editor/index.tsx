@@ -28,6 +28,7 @@ import HighlightedElementSelectorDisplay from "./HighlightedElementSelectorDispl
 import VisualEditorCss from "./index.css";
 import DOMMutationList from "./DOMMutationList";
 import GlobalCSSEditor from "./GlobalCSSEditor";
+import DOMMutationEditor from "./DOMMutationEditor";
 
 export interface ExperimentVariation {
   css?: string;
@@ -315,15 +316,19 @@ const VisualEditor: FC<{}> = () => {
         />
       ) : null}
 
-      {mode === "css" && (
-        <GlobalCSSEditor css={selectedVariation.css} setCss={setGlobalCSS} />
-      )}
-
       {mode === "selection" ? (
         <HighlightedElementSelectorDisplay
           selector={highlightedElementSelector}
         />
       ) : null}
+
+      {mode === "css" && (
+        <GlobalCSSEditor css={selectedVariation.css} setCss={setGlobalCSS} />
+      )}
+
+      {mode === "mutation" && (
+        <DOMMutationEditor addMutation={addDomMutation} />
+      )}
     </>
   );
 };

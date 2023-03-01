@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import GripHandle from "./GripHandle";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
 
