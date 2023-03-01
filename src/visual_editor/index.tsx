@@ -252,14 +252,22 @@ const VisualEditor: FC<{}> = () => {
     mutateRevert.current = () => {
       callbacks.forEach((callback) => callback());
     };
-
-    // This sucks. But necessary, since dom-mutator may make DOM changes after
-    // re-render. We re-render post-DOMmutator so we retrieve updated values.
-    setTimeout(() => {
-      // console.log("DEBUG - forceUpdate");
-      forceUpdate();
-    }, 100);
   }, [variations, selectedVariation]);
+
+  // Upon any DOM change, trigger a refresh of visual editor to keep it in sync
+  useEffect(() => {
+    const observer = new MutationObserver(() =>
+      setTimeout(() => forceUpdate(), 0)
+    );
+
+    observer.observe(document.body, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   if (!isVisualEditorEnabled) return null;
 
