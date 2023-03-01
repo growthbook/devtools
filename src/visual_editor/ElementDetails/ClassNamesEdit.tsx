@@ -79,9 +79,9 @@ const ClassNamesEdit: FC<{
   const onAdd = useCallback(
     (classNames: string) => {
       const newClassNames = new Set([...classNames.split(" ")]);
-      _onAdd([...newClassNames].join(" "));
+      _onAdd(Array.from(newClassNames).join(" "));
     },
-    [_onAdd]
+    [classNames, _onAdd]
   );
 
   return (

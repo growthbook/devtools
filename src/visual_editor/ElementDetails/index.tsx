@@ -13,7 +13,8 @@ const ElementDetails: FC<{
   setElement: (element: HTMLElement) => void;
   clearElement: () => void;
   addMutation: (mutation: DeclarativeMutation) => void;
-}> = ({ addMutation, element, setElement, clearElement }) => {
+  addMutations: (mutations: DeclarativeMutation[]) => void;
+}> = ({ addMutation, addMutations, element, setElement, clearElement }) => {
   const { x, y, setX, setY, parentStyles } = useFixedPositioning({
     x: 24,
     y: 24,
@@ -41,12 +42,14 @@ const ElementDetails: FC<{
 
   const addClassNames = useCallback(
     (classNames: string) => {
-      addMutation({
-        action: "append",
-        attribute: "class",
-        value: classNames,
-        selector,
-      });
+      addMutations(
+        classNames.split(" ").map((className) => ({
+          action: "append",
+          attribute: "class",
+          value: className,
+          selector,
+        }))
+      );
     },
     [element, addMutation]
   );

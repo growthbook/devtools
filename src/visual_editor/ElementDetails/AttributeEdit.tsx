@@ -1,3 +1,4 @@
+import { validAttributeName } from "dom-mutator";
 import React, { FC, useCallback, useState } from "react";
 import { RxCross2, RxPlus, RxCheck } from "react-icons/rx";
 import {
@@ -11,6 +12,12 @@ export const IGNORED_ATTRS = [
   selectedAttributeName,
 ];
 
+const isValidAttrName = (attrName: string) => {
+  if (IGNORED_ATTRS.includes(attrName)) return false;
+  if (!validAttributeName.test(attrName)) return false;
+  return true;
+};
+
 export interface Attribute {
   name: string;
   value: string;
@@ -19,7 +26,7 @@ export interface Attribute {
 const normalizeAttrs = (attrs: NamedNodeMap) =>
   [...attrs]
     .map(({ name, value }) => ({ name, value }))
-    .filter((attr) => !IGNORED_ATTRS.includes(attr.name));
+    .filter((attr) => isValidAttrName(attr.name));
 
 const EditAttributeInput: FC<{
   name?: string;
@@ -89,7 +96,7 @@ const AddAttributeInput: FC<{
   }, [setIsAdding]);
   const onAdd = useCallback(
     ({ name, value }: Attribute) => {
-      if (!IGNORED_ATTRS.includes(name)) {
+      if (isValidAttrName(name)) {
         _onAdd({ name, value });
       }
       onCancel();

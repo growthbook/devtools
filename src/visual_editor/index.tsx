@@ -65,14 +65,14 @@ const VisualEditor: FC<{}> = () => {
     setVariations([...variations, { domMutations: [] }]);
   }, [variations, setVariations]);
 
-  const addDomMutation = useCallback(
-    (domMutation: DeclarativeMutation) => {
+  const addDomMutations = useCallback(
+    (domMutations: DeclarativeMutation[]) => {
       setVariations([
         ...(variations?.map((variation, index) => {
           if (index === selectedVariationIndex) {
             return {
               ...variation,
-              domMutations: [...variation.domMutations, domMutation],
+              domMutations: [...variation.domMutations, ...domMutations],
             };
           }
           return variation;
@@ -80,6 +80,13 @@ const VisualEditor: FC<{}> = () => {
       ]);
     },
     [variations, selectedVariation, setVariations, selectedVariationIndex]
+  );
+
+  const addDomMutation = useCallback(
+    (domMutation: DeclarativeMutation) => {
+      addDomMutations([domMutation]);
+    },
+    [addDomMutations]
   );
 
   const removeDomMutation = useCallback(
@@ -278,6 +285,7 @@ const VisualEditor: FC<{}> = () => {
           setElement={setSelectedElement}
           clearElement={() => setSelectedElement(null)}
           addMutation={addDomMutation}
+          addMutations={addDomMutations}
         />
       ) : null}
 
