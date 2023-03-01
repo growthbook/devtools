@@ -34,6 +34,30 @@ const ElementDetails: FC<{
     [element]
   );
 
+  const addClassNames = useCallback(
+    (classNames: string) => {
+      addMutation({
+        action: "append",
+        attribute: "class",
+        value: classNames,
+        selector,
+      });
+    },
+    [element, addMutation]
+  );
+
+  const removeClassNames = useCallback(
+    (classNames: string) => {
+      addMutation({
+        action: "remove",
+        attribute: "class",
+        value: classNames,
+        selector,
+      });
+    },
+    [element, addMutation]
+  );
+
   const setClassNames = useCallback(
     (classNames: string) => {
       addMutation({
@@ -102,7 +126,11 @@ const ElementDetails: FC<{
         <DetailsRow label="Selector" value={selector} readOnly />
         <DetailsRow label="Tag name" value={name} readOnly />
         <DetailsRow label="Inner HTML" value={html} onSave={setHTML} />
-        <ClassNamesEdit element={element} onSave={setClassNames} />
+        <ClassNamesEdit
+          element={element}
+          onRemove={removeClassNames}
+          onAdd={addClassNames}
+        />
         <AttributeEdit element={element} onSave={setAttributes} />
       </div>
 

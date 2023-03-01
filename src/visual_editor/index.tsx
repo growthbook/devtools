@@ -1,6 +1,13 @@
 import mutate, { DeclarativeMutation } from "dom-mutator";
 import qs from "query-string";
-import React, { FC, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  FC,
+  useCallback,
+  useEffect,
+  useRef,
+  useReducer,
+  useState,
+} from "react";
 import * as ReactDOM from "react-dom/client";
 import { Message } from "../../devtools";
 import Toolbar, { ToolbarMode } from "./Toolbar";
@@ -48,6 +55,7 @@ const VisualEditor: FC<{}> = () => {
   const [highlightedElementSelector, setHighlightedElementSelector] = useState<
     string | null
   >(null);
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const mutateRevert = useRef<(() => void) | null>(null);
 
@@ -71,11 +79,11 @@ const VisualEditor: FC<{}> = () => {
         }) ?? []),
       ]);
     },
-    [selectedVariation, setVariations]
+    [variations, selectedVariation, setVariations, selectedVariationIndex]
   );
 
   const removeDomMutation = useCallback(
-    (domMutation: DeclarativeMutation) => {
+    (domMutationIndex: number) => {
       setVariations([
         ...(variations?.map((variation, index) => {
           if (index === selectedVariationIndex) {
@@ -83,7 +91,9 @@ const VisualEditor: FC<{}> = () => {
               ...variation,
               domMutations: variation.domMutations.filter(
                 // TODO use an id or something :/
-                (mutation) => mutation !== domMutation
+                (mutation, i) => {
+                  return i !== domMutationIndex;
+                }
               ),
             };
           }
@@ -91,9 +101,10 @@ const VisualEditor: FC<{}> = () => {
         }) ?? []),
       ]);
     },
-    [selectedVariation, setVariations]
+    [variations, selectedVariation, setVariations, selectedVariationIndex]
   );
 
+  // get ahold of api credentials. requires talking to the "other side"
   useEffect(() => {
     window.postMessage(
       {
@@ -117,6 +128,7 @@ const VisualEditor: FC<{}> = () => {
     });
   }, []);
 
+  // fetch experiment from api once we have credentials
   useEffect(() => {
     const { apiHost, apiKey } = apiCreds;
 
@@ -136,12 +148,28 @@ const VisualEditor: FC<{}> = () => {
       const res = await response.json();
       const { experiment } = res;
 
+      if (!experiment) return;
+
       setVariations(
         experiment.variations.map((v: any) => ({
           ...v,
           domMutations: [],
         }))
       );
+
+      // TODO enable on prod
+      // window.history.replaceState(
+      //   null,
+      //   "",
+      //   qs.stringifyUrl({
+      //     url: window.location.href,
+      //     query: {
+      //       ...params,
+      //       "visual-exp-id": undefined,
+      //     },
+      //   })
+      // );
+
       setIsEnabled(true);
     };
 
@@ -204,14 +232,12 @@ const VisualEditor: FC<{}> = () => {
     mode,
   ]);
 
-  // run dom mutations when experiment is updated or selected variation changes
   useEffect(() => {
     if (mutateRevert?.current) mutateRevert.current();
 
     const callbacks: Array<() => void> = [];
 
     selectedVariation?.domMutations.forEach((mutation) => {
-      console.log("running mutation", mutation);
       const controller = mutate.declarative(mutation);
       callbacks.push(controller.revert);
     });
@@ -219,7 +245,12 @@ const VisualEditor: FC<{}> = () => {
     mutateRevert.current = () => {
       callbacks.forEach((callback) => callback());
     };
-  }, [selectedVariation]);
+
+    setTimeout(() => {
+      console.log("DEBUG forceUpdate");
+      forceUpdate();
+    }, 100);
+  }, [variations, selectedVariation]);
 
   if (!isVisualEditorEnabled) return null;
 

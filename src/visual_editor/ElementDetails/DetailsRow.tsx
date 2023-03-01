@@ -23,7 +23,7 @@ const EditAndSaveButtons = ({
 
   return (
     <>
-      <button className="text-rose-500 hover:text-rose-700" onClick={onSave}>
+      <button className="text-green-500 hover:text-green-700" onClick={onSave}>
         <RxCheck className="w-6 h-6" />
       </button>
       <button className="text-rose-500 hover:text-rose-700" onClick={onCancel}>

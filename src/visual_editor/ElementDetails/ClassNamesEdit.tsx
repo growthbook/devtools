@@ -71,41 +71,17 @@ const ClassNameToken: FC<{
 
 const ClassNamesEdit: FC<{
   element: HTMLElement;
-  onSave: (classNames: string) => void;
-}> = ({ element, onSave: _onSave }) => {
-  const [classNames, setClassNames] = useState<string[]>(
-    element.className.split(" ").filter(Boolean)
-  );
-
-  useEffect(() => {
-    setClassNames(element.className.split(" ").filter(Boolean));
-  }, [element]);
-
-  const onSave = useCallback(
-    (classNames: string[]) => {
-      setClassNames(classNames);
-      _onSave(classNames.join(" "));
-    },
-    [setClassNames, _onSave]
-  );
-
-  const removeClassName = useCallback(
-    (className: string) => {
-      const newClassNames = classNames.filter((c) => c !== className);
-      onSave(newClassNames);
-    },
-    [onSave]
-  );
+  onRemove: (classNames: string) => void;
+  onAdd: (classNames: string) => void;
+}> = ({ element, onRemove, onAdd: _onAdd }) => {
+  const classNames = element.className.split(" ").filter(Boolean);
 
   const onAdd = useCallback(
-    (newClassName: string) => {
-      const newClassNames = new Set([
-        ...classNames,
-        ...newClassName.split(" "),
-      ]);
-      onSave([...newClassNames]);
+    (classNames: string) => {
+      const newClassNames = new Set([...classNames.split(" ")]);
+      _onAdd([...newClassNames].join(" "));
     },
-    [onSave]
+    [_onAdd]
   );
 
   return (
@@ -117,7 +93,7 @@ const ClassNamesEdit: FC<{
           <ClassNameToken
             key={index}
             className={className}
-            onRemove={() => removeClassName(className)}
+            onRemove={() => onRemove(className)}
           />
         ))}
         <AddClassNameInput onAdd={onAdd} />
