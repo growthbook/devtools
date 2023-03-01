@@ -7,6 +7,7 @@ import React, {
   useRef,
   useReducer,
   useState,
+  useMemo,
 } from "react";
 import * as ReactDOM from "react-dom/client";
 import { Message } from "../../devtools";
@@ -26,9 +27,10 @@ import HighlightedElementSelectorDisplay from "./HighlightedElementSelectorDispl
 // @ts-expect-error ts-loader does not understand this .css import
 import VisualEditorCss from "./index.css";
 import DOMMutationList from "./DOMMutationList";
+import GlobalCSSEditor from "./GlobalCSSEditor";
 
 export interface ExperimentVariation {
-  canvas?: HTMLCanvasElement;
+  css?: string;
   domMutations: DeclarativeMutation[];
 }
 
@@ -36,6 +38,8 @@ export interface ExperimentVariation {
 export interface Experiment {
   variations?: ExperimentVariation[];
 }
+
+let _globalStyleTag: HTMLStyleElement | null = null;
 
 const VisualEditor: FC<{}> = () => {
   const params = qs.parse(window.location.search);
@@ -61,18 +65,26 @@ const VisualEditor: FC<{}> = () => {
 
   const selectedVariation = variations?.[selectedVariationIndex] ?? null;
 
+  const globalStyleTag = useMemo(() => {
+    if (_globalStyleTag) document.head.removeChild(_globalStyleTag);
+    _globalStyleTag = document.createElement("style");
+    document.head.appendChild(_globalStyleTag);
+    _globalStyleTag.innerHTML = selectedVariation?.css ?? "";
+    return _globalStyleTag;
+  }, [selectedVariation]);
+
   const createVariation = useCallback(async () => {
     setVariations([...variations, { domMutations: [] }]);
   }, [variations, setVariations]);
 
-  const addDomMutations = useCallback(
-    (domMutations: DeclarativeMutation[]) => {
+  const updateSelectedVariation = useCallback(
+    (updates: Partial<ExperimentVariation>) => {
       setVariations([
         ...(variations?.map((variation, index) => {
           if (index === selectedVariationIndex) {
             return {
               ...variation,
-              domMutations: [...variation.domMutations, ...domMutations],
+              ...updates,
             };
           }
           return variation;
@@ -80,6 +92,15 @@ const VisualEditor: FC<{}> = () => {
       ]);
     },
     [variations, selectedVariation, setVariations, selectedVariationIndex]
+  );
+
+  const addDomMutations = useCallback(
+    (domMutations: DeclarativeMutation[]) => {
+      updateSelectedVariation({
+        domMutations: [...selectedVariation.domMutations, ...domMutations],
+      });
+    },
+    [updateSelectedVariation, selectedVariation]
   );
 
   const addDomMutation = useCallback(
@@ -91,24 +112,21 @@ const VisualEditor: FC<{}> = () => {
 
   const removeDomMutation = useCallback(
     (domMutationIndex: number) => {
-      setVariations([
-        ...(variations?.map((variation, index) => {
-          if (index === selectedVariationIndex) {
-            return {
-              ...variation,
-              domMutations: variation.domMutations.filter(
-                // TODO use an id or something :/
-                (mutation, i) => {
-                  return i !== domMutationIndex;
-                }
-              ),
-            };
-          }
-          return variation;
-        }) ?? []),
-      ]);
+      updateSelectedVariation({
+        domMutations: selectedVariation.domMutations.filter(
+          (mutation, i) => i !== domMutationIndex
+        ),
+      });
     },
-    [variations, selectedVariation, setVariations, selectedVariationIndex]
+    [updateSelectedVariation, selectedVariation]
+  );
+
+  const setGlobalCSS = useCallback(
+    (css: string) => {
+      updateSelectedVariation({ css });
+      globalStyleTag.innerHTML = css;
+    },
+    [updateSelectedVariation]
   );
 
   // get ahold of api credentials. requires talking to the "other side"
@@ -296,6 +314,10 @@ const VisualEditor: FC<{}> = () => {
           addMutations={addDomMutations}
         />
       ) : null}
+
+      {mode === "css" && (
+        <GlobalCSSEditor css={selectedVariation.css} setCss={setGlobalCSS} />
+      )}
 
       {mode === "selection" ? (
         <HighlightedElementSelectorDisplay
