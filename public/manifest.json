@@ -5,14 +5,6 @@
   "description": "QA and debug feature flags and experiments from GrowthBook's js/react SDKs",
   "version": "0.2.3",
 
-  "options_ui": {
-    "page": "options.html"
-  },
-
-  "action": {
-    "default_popup": "popup.html"
-  },
-
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
