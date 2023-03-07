@@ -25,6 +25,7 @@ const mouseMoveHandler = (event: MouseEvent) => {
   clearHighlightedElementAttr();
   domNode.setAttribute(highlightedAttributeName, "");
   _prevDomNode = domNode;
+  // use finder w/out config since this is for display only
   _setHighlightedElementSelector?.(finder(domNode));
 };
 

@@ -1,4 +1,4 @@
-import { finder } from "@medv/finder";
+import getSelector from "../lib/getSelector";
 import { DeclarativeMutation } from "dom-mutator";
 import React, { FC, useCallback, useMemo } from "react";
 import GripHandle from "../GripHandle";
@@ -23,10 +23,7 @@ const ElementDetails: FC<{
 
   const name = element.tagName;
   const html = element.innerHTML;
-  const selector = useMemo(
-    () => finder(element, { seedMinLength: 5 }),
-    [element]
-  );
+  const selector = useMemo(() => getSelector(element), [element]);
 
   const setHTML = useCallback(
     (html: string) => {
