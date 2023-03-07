@@ -41,7 +41,11 @@ module.exports = {
       },
       {
         test: /\.svg$/,
-        use: "@svgr/webpack",
+        use: [
+          {
+            loader: "url-loader",
+          },
+        ],
       },
       {
         include: path.join(srcDir, "visual_editor", "index.css"),

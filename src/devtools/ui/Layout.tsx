@@ -4,8 +4,7 @@ import { Heading, HStack, Stack } from "@chakra-ui/layout";
 import React, { ReactNode } from "react";
 import { MdSync } from "react-icons/md";
 import { requestRefresh, setOverrides } from "../controller";
-// TODO Fix imports for SVGs
-// import logo from "./logo.svg";
+import logo from "./logo.svg";
 
 export interface Props {
   children: ReactNode;
@@ -20,7 +19,7 @@ export default function Layout({ children, overrides }: Props) {
   return (
     <Stack p="5" spacing="2" maxW="container.lg" m="0 auto">
       <HStack justifyContent="center">
-        {/* <Image src={logo} alt="GrowthBook" w="190px" /> */}
+        <Image src={logo} alt="GrowthBook" w="190px" />
 
         <Heading as="h1" size="lg" color="gray.500">
           DevTools v2

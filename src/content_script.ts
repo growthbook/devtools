@@ -32,6 +32,7 @@ chrome.runtime.onMessage.addListener(async (msg: Message) => {
   }
 });
 
+
 // Inject devtools content script
 const DEVTOOLS_SCRIPT_ID = "gbdevtools-page-script";
 if (!document.getElementById(DEVTOOLS_SCRIPT_ID)) {

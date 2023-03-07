@@ -30,6 +30,7 @@ export type ErrorMessage = {
   error: string;
 };
 
+
 type EnableVisualEditorMessage = {
   type: "GB_ENABLE_VISUAL_EDITOR";
 };
