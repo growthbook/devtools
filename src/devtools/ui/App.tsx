@@ -14,8 +14,8 @@ import AttributesSection from "./AttributesSection";
 import Experiment from "./Experiment";
 import { IconButton } from "@chakra-ui/button";
 import { MdHistory } from "react-icons/md";
-import { DebugLogs } from "./types";
-import { setOverrides } from "./controller";
+import { DebugLogs } from "../../../devtools";
+import { setOverrides } from "../controller";
 import Layout from "./Layout";
 
 export interface Props {

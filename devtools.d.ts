@@ -1,4 +1,8 @@
-import type { Experiment, FeatureDefinition, ExperimentOverride } from "@growthbook/growthbook";
+import type {
+  Experiment,
+  FeatureDefinition,
+  ExperimentOverride,
+} from "@growthbook/growthbook";
 
 export type DebugLogs = [string, any][];
 

@@ -2,11 +2,11 @@ import { Button, IconButton } from "@chakra-ui/button";
 import { Heading, HStack, Text } from "@chakra-ui/layout";
 import { Textarea } from "@chakra-ui/react";
 import { AlertIcon, Alert } from "@chakra-ui/alert";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { MdEdit, MdRestore } from "react-icons/md";
 import JSONCode from "./JSONCode";
-import {Attributes} from "@growthbook/growthbook";
+import { Attributes } from "@growthbook/growthbook";
 
 export default function AttributesSection({
   attrs,
@@ -14,7 +14,7 @@ export default function AttributesSection({
   hasOverrides,
 }: {
   attrs: Attributes;
-  setAttrs: (attrs: Attributes|null) => void;
+  setAttrs: (attrs: Attributes | null) => void;
   hasOverrides: boolean;
 }) {
   const [edit, setEdit] = useState(false);

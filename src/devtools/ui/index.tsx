@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import * as ReactDOM from "react-dom/client";
 import App from "./App";
 import { ChakraProvider } from "@chakra-ui/react";
-import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-} from "@chakra-ui/alert";
+import { Alert, AlertDescription, AlertIcon } from "@chakra-ui/alert";
 import { Box, Text } from "@chakra-ui/layout";
 import { Spinner } from "@chakra-ui/spinner";
-import { onGrowthBookData, requestRefresh } from "./controller";
-import { RefreshMessage } from "./types";
+import { onGrowthBookData, requestRefresh } from "../controller";
+import { RefreshMessage } from "../../../devtools";
 import { Button } from "@chakra-ui/button";
 import Layout from "./Layout";
 
@@ -39,7 +35,7 @@ function WaitForGrowthBook() {
             <Box mt={3} textAlign="center">
               <Button
                 colorScheme="blue"
-                onClick={(e) => {
+                onClick={(_e) => {
                   setError("");
                   requestRefresh();
                 }}
@@ -69,11 +65,14 @@ function WaitForGrowthBook() {
   );
 }
 
-ReactDOM.render(
+const container = document.getElementById("root");
+
+const root = ReactDOM.createRoot(container!);
+
+root.render(
   <React.StrictMode>
     <ChakraProvider>
       <WaitForGrowthBook />
     </ChakraProvider>
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 );

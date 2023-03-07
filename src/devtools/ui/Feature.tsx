@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/layout";
 import { Textarea } from "@chakra-ui/textarea";
 import stringify from "json-stringify-pretty-compact";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { MdEdit, MdHistory } from "react-icons/md";
 import DebugLog from "./DebugLog";
@@ -27,7 +27,7 @@ import {
   FeatureDefinition,
   FeatureRule,
 } from "@growthbook/growthbook";
-import { DebugLogs } from "./types";
+import { DebugLogs } from "../../../devtools";
 import { Switch } from "@chakra-ui/react";
 
 export interface Props {

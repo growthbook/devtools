@@ -1,9 +1,9 @@
 import { IconButton } from "@chakra-ui/button";
 import { Image } from "@chakra-ui/image";
 import { Heading, HStack, Stack } from "@chakra-ui/layout";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { MdSync } from "react-icons/md";
-import { requestRefresh, setOverrides } from "./controller";
+import { requestRefresh, setOverrides } from "../controller";
 import logo from "./logo.svg";
 
 export interface Props {
@@ -22,7 +22,7 @@ export default function Layout({ children, overrides }: Props) {
         <Image src={logo} alt="GrowthBook" w="190px" />
 
         <Heading as="h1" size="lg" color="gray.500">
-          DevTools
+          DevTools v2
         </Heading>
 
         <IconButton

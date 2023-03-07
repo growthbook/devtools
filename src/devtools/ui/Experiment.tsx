@@ -1,3 +1,4 @@
+import React from "react";
 import {
   AccordionButton,
   AccordionIcon,
@@ -14,7 +15,7 @@ import type {
   Experiment as ExperimentInterface,
   ExperimentOverride,
 } from "@growthbook/growthbook";
-import { DebugLogs } from "./types";
+import { DebugLogs } from "../../../devtools";
 import stringify from "json-stringify-pretty-compact";
 
 export interface Props {
@@ -96,7 +97,7 @@ export default function Experiment({
             </HStack>
             <Stack spacing={0} mb={3}>
               <HStack spacing={0} mb={2} overflowX="hidden">
-                {variations.map((v: any, i: number) => {
+                {variations.map((_v: any, i: number) => {
                   const isSelected = result.variationId === i;
                   const weight = weights?.[i] ?? 1 / variations.length;
                   const color = COLORS[i % COLORS.length];
@@ -126,7 +127,7 @@ export default function Experiment({
                 const isSelected = result.variationId === i;
                 const color = COLORS[i % COLORS.length];
                 return (
-                  <Flex key={i} spacing={0}>
+                  <Flex key={i}>
                     <Box
                       w="6px"
                       bg={`${color}.500`}

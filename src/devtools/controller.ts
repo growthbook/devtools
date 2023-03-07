@@ -3,7 +3,7 @@ import {
   Message,
   RefreshMessage,
   SetOverridesMessage,
-} from "./types";
+} from "../../devtools";
 
 // Send message to content script
 function sendMessage(msg: Message) {
@@ -30,17 +30,20 @@ export function onGrowthBookData(
     refreshListeners.delete(cb);
   };
 }
-chrome.runtime.onMessage.addListener(async (msg: RefreshMessage | ErrorMessage) => {
-  if (msg.type === "GB_REFRESH") {
-    refreshListeners.forEach((cb) => {
-      cb("", msg);
-    });
-  } else if (msg.type === "GB_ERROR") {
-    refreshListeners.forEach((cb) => {
-      cb(msg.error, null);
-    });
+
+chrome.runtime.onMessage.addListener(
+  async (msg: RefreshMessage | ErrorMessage) => {
+    if (msg.type === "GB_REFRESH") {
+      refreshListeners.forEach((cb) => {
+        cb("", msg);
+      });
+    } else if (msg.type === "GB_ERROR") {
+      refreshListeners.forEach((cb) => {
+        cb(msg.error, null);
+      });
+    }
   }
-});
+);
 
 export function requestRefresh() {
   sendMessage({
