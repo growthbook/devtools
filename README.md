@@ -41,3 +41,11 @@ Some notes
 - HTML files go into `public/` and are **copied** by the build into `dist/`
 - TS/TSX files go into `src/` and are **compiled** by the build and put into `dist/`
 - Other assets such as icons, images, and the `manifest.json` are kept in `public/` and also copied into `dist/` on build
+
+### Storybook
+
+You can run the following command to run the Storybook:
+
+    yarn storybook
+
+This will allow you to build your component in isolation faster. None of the Chrome extension API's will be available in Storybook so you'll need to architect your components in a way to not depend on these API's.
