@@ -5,7 +5,7 @@ import { GrowthBookDevToolsHeader } from "./GrowthBookDevToolsHeader";
 
 export default {
   component: GrowthBookDevToolsHeader,
-  title: "TODO Add Section/GrowthBookDevToolsHeader",
+  title: "Branding/GrowthBookDevToolsHeader",
 };
 
 export const Default = () => {
