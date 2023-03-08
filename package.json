@@ -7,7 +7,9 @@
     "build": "webpack --config webpack/webpack.prod.js",
     "clean": "rimraf dist",
     "test": "npx jest",
-    "style": "prettier --write \"src/**/*.{ts,tsx}\""
+    "style": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "license": "MIT",
   "repository": {
@@ -29,12 +31,22 @@
     "react-syntax-highlighter": "^15.5.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.21.0",
+    "@storybook/addon-actions": "^6.5.16",
+    "@storybook/addon-essentials": "^6.5.16",
+    "@storybook/addon-interactions": "^6.5.16",
+    "@storybook/addon-links": "^6.5.16",
+    "@storybook/builder-webpack5": "^6.5.16",
+    "@storybook/manager-webpack5": "^6.5.16",
+    "@storybook/react": "^6.5.16",
+    "@storybook/testing-library": "^0.0.13",
     "@types/chrome": "0.0.158",
     "@types/jest": "^27.0.2",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@types/react-syntax-highlighter": "^15.5.6",
     "autoprefixer": "^10.4.13",
+    "babel-loader": "^8.3.0",
     "copy-webpack-plugin": "^9.0.1",
     "css-loader": "^6.7.3",
     "glob": "^7.1.6",
