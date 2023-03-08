@@ -13,5 +13,5 @@ export const GrowthBookDevToolsHeader: FC = () => {
         DevTools v2
       </Heading>
     </HStack>
-  )
-}
+  );
+};
