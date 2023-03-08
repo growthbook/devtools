@@ -1,4 +1,7 @@
-import { ChakraProvider } from "@chakra-ui/react"
+import { ChakraProvider } from "@chakra-ui/react";
+
+import "../src/global.css";
+
 
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
