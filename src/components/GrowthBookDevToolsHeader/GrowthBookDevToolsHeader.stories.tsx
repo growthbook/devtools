@@ -1,6 +1,4 @@
 import React from "react";
-import { number, text } from "@storybook/addon-knobs";
-import { action } from "@storybook/addon-actions";
 import { GrowthBookDevToolsHeader } from "./GrowthBookDevToolsHeader";
 
 export default {
@@ -9,11 +7,5 @@ export default {
 };
 
 export const Default = () => {
-  const onClick = action("clicked!");
-
-  return (
-    <>
-      <GrowthBookDevToolsHeader />
-    </>
-  );
+  return <GrowthBookDevToolsHeader />;
 };
