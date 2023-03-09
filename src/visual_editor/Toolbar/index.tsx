@@ -1,28 +1,30 @@
-import React, { FC, SetStateAction, useEffect, useState } from "react";
+import React, { FC } from "react";
 import {
   RxCursorArrow,
   RxSection,
   RxGlobe,
   RxKeyboard,
   RxCamera,
+  RxListBullet,
 } from "react-icons/rx";
 import clsx from "clsx";
-import GripHandle from "../GripHandle";
-import useFixedPositioning from "../lib/hooks/useFixedPositioning";
+import { IconType } from "react-icons";
 
 export type ToolbarMode =
   | "normal"
   | "selection"
   | "css"
   | "mutation"
-  | "screenshot";
+  | "screenshot"
+  | "changes";
 
-const modeToIcon = {
+const modeToIcon: Record<ToolbarMode, IconType> = {
   normal: RxCursorArrow,
   selection: RxSection,
   css: RxGlobe,
   mutation: RxKeyboard,
   screenshot: RxCamera,
+  changes: RxListBullet,
 };
 
 const ToolbarButton = ({
@@ -83,6 +85,12 @@ const Toolbar: FC<{
           mode="mutation"
           enable={() => setMode("mutation")}
           title="DOM Mutation mode"
+        />
+        <ToolbarButton
+          isActive={mode === "changes"}
+          mode="changes"
+          enable={() => setMode("changes")}
+          title="All Changes"
         />
         {/*
         <ToolbarButton

@@ -7,7 +7,14 @@ const VisualEditorSection: FC<{
   title: string;
   onClose?: () => void;
   isExpanded?: boolean;
-}> = ({ children, title, onClose, isExpanded: _isExpanded = true }) => {
+  isCollapsible?: boolean;
+}> = ({
+  children,
+  title,
+  onClose,
+  isExpanded: _isExpanded = false,
+  isCollapsible = false,
+}) => {
   const [isExpanded, setIsExpanded] = useState(_isExpanded);
   return (
     <>
@@ -20,15 +27,17 @@ const VisualEditorSection: FC<{
       >
         <div className="flex">
           {title}
-          <RxCaretDown
-            className={clsx(
-              "w-4 h-4 cursor-pointer hover:text-slate-100 mx-2",
-              {
-                "rotate-180": !isExpanded,
-              }
-            )}
-            onClick={() => setIsExpanded(!isExpanded)}
-          />
+          {isCollapsible ? (
+            <RxCaretDown
+              className={clsx(
+                "w-4 h-4 cursor-pointer hover:text-slate-100 mx-2",
+                {
+                  "rotate-180": !isExpanded,
+                }
+              )}
+              onClick={() => setIsExpanded(!isExpanded)}
+            />
+          ) : null}
         </div>
 
         {onClose && (
@@ -41,7 +50,7 @@ const VisualEditorSection: FC<{
         )}
       </div>
 
-      {isExpanded ? children : null}
+      {!isCollapsible || (isCollapsible && isExpanded) ? children : null}
     </>
   );
 };

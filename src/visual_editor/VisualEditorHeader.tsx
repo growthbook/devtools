@@ -1,11 +1,12 @@
-import React, { FC, useCallback, useEffect, useState } from "react";
+import React, { FC, ReactNode, useCallback, useEffect, useState } from "react";
 import { clsx } from "clsx";
+import GBLogo from "../../public/logo192.png";
 
 // used to determine x y delta of mouse movement
 let originX: number | undefined;
 let originY: number | undefined;
 
-const GripHandle: FC<{
+const VisualEditorHeader: FC<{
   x: number;
   y: number;
   setX: (x: number) => void;
@@ -13,6 +14,7 @@ const GripHandle: FC<{
   className?: string;
   reverseX?: boolean;
   reverseY?: boolean;
+  children?: ReactNode;
 }> = ({
   x,
   y,
@@ -58,7 +60,7 @@ const GripHandle: FC<{
 
   return (
     <div
-      className={clsx("cursor-move bg-grip-handle", className)}
+      className={clsx("cursor-move", className)}
       onMouseDown={(e) => {
         e.preventDefault();
         originX = e.clientX;
@@ -71,8 +73,15 @@ const GripHandle: FC<{
         originY = undefined;
         setIsDragging(false);
       }}
-    ></div>
+    >
+      <div className="flex px-4 h-12 items-center justify-center rounded-t-xl logo-bg ">
+        <div className="h-8">
+          <img src={GBLogo} alt="GB Logo" className="w-auto h-full mr-1" />
+        </div>
+        <div className="font-semibold text-white">GrowthBook Visual Editor</div>
+      </div>
+    </div>
   );
 };
 
-export default GripHandle;
+export default VisualEditorHeader;

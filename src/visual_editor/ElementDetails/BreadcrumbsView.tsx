@@ -26,11 +26,11 @@ const BreadcrumbsView: FC<{
   };
 
   return (
-    <div className="px-4 mb-2">
+    <div className="px-4">
       {breadcrumbs.map((breadcrumb, index) => (
-        <span key={index} className="text-md text-slate-300">
+        <span key={index} className="text-sm text-slate-200">
           <span
-            className="cursor-pointer hover:text-slate-400"
+            className="cursor-pointer hover:text-slate-100"
             onClick={() => setElement(breadcrumb)}
           >
             {breadcrumb.tagName.toLowerCase()}

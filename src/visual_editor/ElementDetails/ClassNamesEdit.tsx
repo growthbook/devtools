@@ -43,7 +43,7 @@ const AddClassNameInput: FC<{ onAdd: (className: string) => void }> = ({
             </button>
           </div>
         ) : (
-          <button className="text-indigo-900" onClick={() => setIsAdding(true)}>
+          <button className="text-slate-300" onClick={() => setIsAdding(true)}>
             <RxPlus className="w-4 h-4" strokeWidth={2} />
           </button>
         )}
@@ -57,10 +57,10 @@ const ClassNameToken: FC<{
   onRemove: () => void;
 }> = ({ className, onRemove }) => {
   return (
-    <div className="flex rounded bg-slate-200 text-sm px-2 mr-2 mb-1">
+    <div className="flex justify-between rounded bg-slate-600 text-slate-200 text-sm px-2 mr-2 mb-1">
       {className}
       <button
-        className="text-rose-500 hover:text-rose-700 ml-1"
+        className="text-slate-200 hover:text-slate-100 ml-1"
         onClick={onRemove}
       >
         <RxCross2 className="w-4 h-4" />

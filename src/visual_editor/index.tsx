@@ -22,11 +22,9 @@ import {
 } from "./lib/modes";
 import "./targetPage.css";
 import ElementDetails from "./ElementDetails";
-import ExperimentCreator from "./ExperimentCreator";
 import HighlightedElementSelectorDisplay from "./HighlightedElementSelectorDisplay";
 // @ts-expect-error ts-loader does not understand this .css import
 import VisualEditorCss from "./index.css";
-import DOMMutationList from "./DOMMutationList";
 import GlobalCSSEditor from "./GlobalCSSEditor";
 import DOMMutationEditor from "./DOMMutationEditor";
 import VisualEditorPane from "./VisualEditorPane";
@@ -34,6 +32,10 @@ import VisualEditorSection from "./VisualEditorSection";
 import BreadcrumbsView from "./ElementDetails/BreadcrumbsView";
 import ClassNamesEdit from "./ElementDetails/ClassNamesEdit";
 import getSelector from "./lib/getSelector";
+import DOMMutationList from "./DOMMutationList";
+import VariationSelector from "./VariationSelector";
+import useFixedPositioning from "./lib/hooks/useFixedPositioning";
+import VisualEditorHeader from "./VisualEditorHeader";
 
 export interface ExperimentVariation {
   css?: string;
@@ -66,6 +68,11 @@ const VisualEditor: FC<{}> = () => {
     string | null
   >(null);
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const { x, y, setX, setY, parentStyles } = useFixedPositioning({
+    x: 24,
+    y: 24,
+    rightAligned: true,
+  });
 
   const mutateRevert = useRef<(() => void) | null>(null);
 
@@ -129,6 +136,15 @@ const VisualEditor: FC<{}> = () => {
     [selectedElement]
   );
 
+  // selectedElementMutations
+  const selectedElementMutations = useMemo(
+    () =>
+      selectedVariation?.domMutations.filter((m) =>
+        selectedElement && selector ? m.selector === selector : true
+      ) ?? [],
+    [selectedVariation, selector]
+  );
+
   const addClassNames = useCallback(
     (classNames: string) => {
       if (!selector) return;
@@ -155,6 +171,17 @@ const VisualEditor: FC<{}> = () => {
       });
     },
     [selectedElement, addDomMutation]
+  );
+
+  const removeDomMutation = useCallback(
+    (domMutationIndex: number) => {
+      updateSelectedVariation({
+        domMutations: selectedVariation.domMutations.filter(
+          (mutation, i) => i !== domMutationIndex
+        ),
+      });
+    },
+    [updateSelectedVariation, selectedVariation]
   );
 
   // get ahold of api credentials. requires talking to the "other side"
@@ -318,23 +345,30 @@ const VisualEditor: FC<{}> = () => {
   if (!isVisualEditorEnabled) return null;
 
   return (
-    <VisualEditorPane>
-      <ExperimentCreator
-        mode={mode}
-        setMode={setMode}
+    <VisualEditorPane style={parentStyles}>
+      <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
+
+      <VariationSelector
         variations={variations}
-        createVariation={createVariation}
         selectedVariationIndex={selectedVariationIndex}
         setSelectedVariationIndex={setSelectedVariationIndex}
-        updateSelectedVariation={updateSelectedVariation}
+        createVariation={createVariation}
       />
+
+      <Toolbar mode={mode} setMode={setMode} />
 
       {mode === "selection" && selectedElement ? (
         <>
           <VisualEditorSection
-            title="Element Details"
+            title="Breadcrumbs"
             onClose={() => setSelectedElement(null)}
           >
+            <BreadcrumbsView
+              element={selectedElement}
+              setElement={setSelectedElement}
+            />
+          </VisualEditorSection>
+          <VisualEditorSection title="Element Details">
             <ElementDetails
               selector={selector}
               element={selectedElement}
@@ -351,13 +385,6 @@ const VisualEditor: FC<{}> = () => {
               onAdd={addClassNames}
             />
           </VisualEditorSection>
-
-          <VisualEditorSection title="Breadcrumbs">
-            <BreadcrumbsView
-              element={selectedElement}
-              setElement={setSelectedElement}
-            />
-          </VisualEditorSection>
         </>
       ) : null}
 
@@ -368,11 +395,40 @@ const VisualEditor: FC<{}> = () => {
       ) : null}
 
       {mode === "css" && (
-        <GlobalCSSEditor css={selectedVariation.css} setCss={setGlobalCSS} />
+        <VisualEditorSection title="Global CSS">
+          <GlobalCSSEditor css={selectedVariation.css} setCss={setGlobalCSS} />
+        </VisualEditorSection>
       )}
 
       {mode === "mutation" && (
-        <DOMMutationEditor addMutation={addDomMutation} />
+        <VisualEditorSection title="DOM Mutation Editor">
+          <DOMMutationEditor addMutation={addDomMutation} />
+        </VisualEditorSection>
+      )}
+
+      {mode === "selection" && selectedElement && (
+        <VisualEditorSection
+          isCollapsible
+          title={`Changes (${selectedElementMutations.length})`}
+        >
+          <DOMMutationList
+            removeDomMutation={removeDomMutation}
+            mutations={selectedElementMutations ?? []}
+          />
+        </VisualEditorSection>
+      )}
+
+      {mode === "changes" && (
+        <VisualEditorSection
+          isCollapsible
+          isExpanded
+          title={`Changes (${selectedVariation?.domMutations.length})`}
+        >
+          <DOMMutationList
+            removeDomMutation={removeDomMutation}
+            mutations={selectedVariation?.domMutations ?? []}
+          />
+        </VisualEditorSection>
       )}
     </VisualEditorPane>
   );
