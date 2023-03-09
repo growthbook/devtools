@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  @apply font-sans;
+}
+
 .bg-grip-handle {
   background-image: radial-gradient(#777 1px, transparent 1px);
   background-position: 0 0, 2px 2px;

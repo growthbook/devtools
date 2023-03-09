@@ -1,29 +1,19 @@
 import getSelector from "../lib/getSelector";
 import { DeclarativeMutation } from "dom-mutator";
 import React, { FC, useCallback, useMemo } from "react";
-import GripHandle from "../GripHandle";
 import DetailsRow from "./DetailsRow";
 import ClassNamesEdit from "./ClassNamesEdit";
 import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
-import useFixedPositioning from "../lib/hooks/useFixedPositioning";
-import BreadcrumbsView from "./BreadcrumbsView";
 
 const ElementDetails: FC<{
+  selector: string;
   element: HTMLElement;
   setElement: (element: HTMLElement) => void;
-  clearElement: () => void;
   addMutation: (mutation: DeclarativeMutation) => void;
   addMutations: (mutations: DeclarativeMutation[]) => void;
-}> = ({ addMutation, addMutations, element, setElement, clearElement }) => {
-  const { x, y, setX, setY, parentStyles } = useFixedPositioning({
-    x: 24,
-    y: 24,
-    bottomAligned: true,
-  });
-
+}> = ({ addMutation, addMutations, element, selector }) => {
   const name = element.tagName;
   const html = element.innerHTML;
-  const selector = useMemo(() => getSelector(element), [element]);
 
   const setHTML = useCallback(
     (html: string) => {
@@ -48,7 +38,7 @@ const ElementDetails: FC<{
         }))
       );
     },
-    [element, addMutation]
+    [element, addMutations]
   );
 
   const removeClassNames = useCallback(
@@ -96,47 +86,10 @@ const ElementDetails: FC<{
   );
 
   return (
-    <div
-      className="bg-slate-300 rounded-lg shadow-xl z-max overflow-y-auto"
-      style={{
-        ...parentStyles,
-        width: "36rem",
-        maxHeight: "36rem",
-      }}
-    >
-      <div className="flex justify-between py-2 mr-2">
-        <BreadcrumbsView element={element} setElement={setElement} />
-        <a
-          className="text-grey-200 underline cursor-pointer"
-          onClick={(e) => {
-            e.stopPropagation();
-            clearElement();
-          }}
-        >
-          close
-        </a>
-      </div>
-
-      <div className="flex flex-col ml-4">
-        <DetailsRow label="Selector" value={selector} readOnly />
-        <DetailsRow label="Tag name" value={name} readOnly />
-        <DetailsRow label="Inner HTML" value={html} onSave={setHTML} />
-        <ClassNamesEdit
-          element={element}
-          onRemove={removeClassNames}
-          onAdd={addClassNames}
-        />
-        <AttributeEdit element={element} onSave={setAttributes} />
-      </div>
-
-      <GripHandle
-        reverseY
-        className="w-full h-4 bg-slate-300 rounded-b-lg"
-        x={x}
-        y={y}
-        setX={setX}
-        setY={setY}
-      />
+    <div className="text-slate-300 flex flex-col ml-4">
+      <DetailsRow label="Selector" value={selector} readOnly />
+      <DetailsRow label="Tag name" value={name} readOnly />
+      <DetailsRow label="Inner HTML" value={html} onSave={setHTML} />
     </div>
   );
 };

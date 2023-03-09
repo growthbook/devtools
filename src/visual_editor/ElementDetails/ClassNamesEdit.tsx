@@ -57,7 +57,7 @@ const ClassNameToken: FC<{
   onRemove: () => void;
 }> = ({ className, onRemove }) => {
   return (
-    <div className="flex rounded bg-slate-200 text-sm px-2 mr-2 my-1">
+    <div className="flex rounded bg-slate-200 text-sm px-2 mr-2 mb-1">
       {className}
       <button
         className="text-rose-500 hover:text-rose-700 ml-1"
@@ -85,19 +85,15 @@ const ClassNamesEdit: FC<{
   );
 
   return (
-    <div className="flex mb-2 items-start mr-2 -ml-2 p-2 rounded-lg bg-slate-400">
-      <div className="w-24 text-white">Class names</div>
-
-      <div className="flex-1 flex flex-wrap items-center ml-4">
-        {classNames.map((className, index) => (
-          <ClassNameToken
-            key={index}
-            className={className}
-            onRemove={() => onRemove(className)}
-          />
-        ))}
-        <AddClassNameInput onAdd={onAdd} />
-      </div>
+    <div className="flex flex-wrap items-center ml-4">
+      {classNames.map((className, index) => (
+        <ClassNameToken
+          key={index}
+          className={className}
+          onRemove={() => onRemove(className)}
+        />
+      ))}
+      <AddClassNameInput onAdd={onAdd} />
     </div>
   );
 };

@@ -29,6 +29,11 @@ import VisualEditorCss from "./index.css";
 import DOMMutationList from "./DOMMutationList";
 import GlobalCSSEditor from "./GlobalCSSEditor";
 import DOMMutationEditor from "./DOMMutationEditor";
+import VisualEditorPane from "./VisualEditorPane";
+import VisualEditorSection from "./VisualEditorSection";
+import BreadcrumbsView from "./ElementDetails/BreadcrumbsView";
+import ClassNamesEdit from "./ElementDetails/ClassNamesEdit";
+import getSelector from "./lib/getSelector";
 
 export interface ExperimentVariation {
   css?: string;
@@ -111,23 +116,45 @@ const VisualEditor: FC<{}> = () => {
     [addDomMutations]
   );
 
-  const removeDomMutation = useCallback(
-    (domMutationIndex: number) => {
-      updateSelectedVariation({
-        domMutations: selectedVariation.domMutations.filter(
-          (mutation, i) => i !== domMutationIndex
-        ),
-      });
-    },
-    [updateSelectedVariation, selectedVariation]
-  );
-
   const setGlobalCSS = useCallback(
     (css: string) => {
       updateSelectedVariation({ css });
       globalStyleTag.innerHTML = css;
     },
     [updateSelectedVariation]
+  );
+
+  const selector = useMemo(
+    () => (selectedElement ? getSelector(selectedElement) : ""),
+    [selectedElement]
+  );
+
+  const addClassNames = useCallback(
+    (classNames: string) => {
+      if (!selector) return;
+      addDomMutations(
+        classNames.split(" ").map((className) => ({
+          action: "append",
+          attribute: "class",
+          value: className,
+          selector,
+        }))
+      );
+    },
+    [selectedElement, addDomMutations]
+  );
+
+  const removeClassNames = useCallback(
+    (classNames: string) => {
+      if (!selector) return;
+      addDomMutation({
+        action: "remove",
+        attribute: "class",
+        value: classNames,
+        selector,
+      });
+    },
+    [selectedElement, addDomMutation]
   );
 
   // get ahold of api credentials. requires talking to the "other side"
@@ -291,12 +318,7 @@ const VisualEditor: FC<{}> = () => {
   if (!isVisualEditorEnabled) return null;
 
   return (
-    <>
-      <DOMMutationList
-        mutations={selectedVariation?.domMutations ?? []}
-        removeDomMutation={removeDomMutation}
-      />
-
+    <VisualEditorPane>
       <ExperimentCreator
         mode={mode}
         setMode={setMode}
@@ -304,16 +326,39 @@ const VisualEditor: FC<{}> = () => {
         createVariation={createVariation}
         selectedVariationIndex={selectedVariationIndex}
         setSelectedVariationIndex={setSelectedVariationIndex}
+        updateSelectedVariation={updateSelectedVariation}
       />
 
       {mode === "selection" && selectedElement ? (
-        <ElementDetails
-          element={selectedElement}
-          setElement={setSelectedElement}
-          clearElement={() => setSelectedElement(null)}
-          addMutation={addDomMutation}
-          addMutations={addDomMutations}
-        />
+        <>
+          <VisualEditorSection
+            title="Element Details"
+            onClose={() => setSelectedElement(null)}
+          >
+            <ElementDetails
+              selector={selector}
+              element={selectedElement}
+              setElement={setSelectedElement}
+              addMutation={addDomMutation}
+              addMutations={addDomMutations}
+            />
+          </VisualEditorSection>
+
+          <VisualEditorSection title="Class names">
+            <ClassNamesEdit
+              element={selectedElement}
+              onRemove={removeClassNames}
+              onAdd={addClassNames}
+            />
+          </VisualEditorSection>
+
+          <VisualEditorSection title="Breadcrumbs">
+            <BreadcrumbsView
+              element={selectedElement}
+              setElement={setSelectedElement}
+            />
+          </VisualEditorSection>
+        </>
       ) : null}
 
       {mode === "selection" ? (
@@ -329,7 +374,7 @@ const VisualEditor: FC<{}> = () => {
       {mode === "mutation" && (
         <DOMMutationEditor addMutation={addDomMutation} />
       )}
-    </>
+    </VisualEditorPane>
   );
 };
 

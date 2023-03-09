@@ -1,7 +1,5 @@
 import { DeclarativeMutation } from "dom-mutator";
 import React, { FC, useState } from "react";
-import GripHandle from "./GripHandle";
-import useFixedPositioning from "./lib/hooks/useFixedPositioning";
 
 const DOMMutationEditor: FC<{
   addMutation: (mutation: DeclarativeMutation) => void;
@@ -11,12 +9,6 @@ const DOMMutationEditor: FC<{
   const [attribute, setAttribute] =
     useState<DeclarativeMutation["attribute"]>("");
   const [value, setValue] = useState<DeclarativeMutation["value"]>("");
-  const { x, y, setX, setY, parentStyles } = useFixedPositioning({
-    x: 24,
-    y: 24,
-    bottomAligned: true,
-  });
-
   const reset = () => {
     setSelector("");
     setAction("append");
@@ -38,10 +30,7 @@ const DOMMutationEditor: FC<{
   };
 
   return (
-    <div
-      className="bg-slate-300 rounded-lg shadow-xl z-max w-96"
-      style={parentStyles}
-    >
+    <div className="bg-slate-300 rounded-lg shadow-xl z-max w-96">
       <div className="p-4">
         <div className="text-xl font-semibold mb-2">Add DOM Mutation</div>
 
@@ -99,15 +88,6 @@ const DOMMutationEditor: FC<{
           </button>
         </div>
       </div>
-
-      <GripHandle
-        reverseY
-        className="bg-slate-300 h-5 w-full rounded-b-xl"
-        x={x}
-        y={y}
-        setX={setX}
-        setY={setY}
-      />
     </div>
   );
 };

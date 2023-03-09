@@ -72,29 +72,45 @@ const DetailsRow = ({
   };
 
   return (
-    <label className="flex mb-2 items-center">
-      <div className="w-24">{label}</div>
-      <input
-        style={{ flex: 2 }}
-        className={clsx("ml-4 p-2 rounded", {
-          "bg-white": editing,
-          "bg-slate-200": !editing,
-        })}
-        type={inputType}
-        readOnly={readOnly || !editing}
-        value={_value}
-        onChange={(e) => _setValue(e.target.value)}
-      />
-      <div className="flex justify-center w-16">
-        {!readOnly ? (
-          <EditAndSaveButtons
-            isEditing={editing}
-            toggleEditing={() => setIsEditing(!editing)}
-            onSave={saveEdit}
-            onCancel={cancelEdit}
+    <label
+      className={clsx("flex mb-2 last:mb-0", {
+        "flex-col": editing,
+      })}
+    >
+      <div className="w-24 text-xs text-slate-400">{label}</div>
+
+      {editing ? (
+        <div className="w-full pr-2">
+          <textarea
+            className="text-black w-full mt-2 text-sm p-1"
+            onChange={(e) => _setValue(e.currentTarget.value)}
+            value={_value}
           />
-        ) : null}
-      </div>
+          <div className="flex justify-end my-1">
+            <button onClick={saveEdit}>
+              <RxCheck className="w-4 h-4 mr-2 cursor-pointer" />
+            </button>
+            <button onClick={cancelEdit}>
+              <RxCross2 className="w-4 h-4 cursor-pointer" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div
+          className={clsx(
+            "text-slate-200 text-ellipsis overflow-hidden text-sm",
+            {
+              "hover:text-slate-100": !readOnly,
+              "hover:bg-slate-600": !readOnly,
+              "cursor-pointer": !readOnly,
+            }
+          )}
+          style={{ flex: 2, maxHeight: "3rem" }}
+          onClick={!readOnly ? () => setIsEditing(true) : () => {}}
+        >
+          {_value}
+        </div>
+      )}
     </label>
   );
 };
