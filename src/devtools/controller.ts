@@ -5,6 +5,8 @@ import {
   SetOverridesMessage,
 } from "../../devtools";
 
+const isProd = process.env.NODE_ENV === "production";
+
 // Send message to content script
 function sendMessage(msg: Message) {
   chrome.tabs &&
@@ -22,6 +24,7 @@ function sendMessage(msg: Message) {
 // Listen for updates from content script and forward to any listeners
 let refreshListeners: Set<(err: string, data: RefreshMessage | null) => void> =
   new Set();
+
 export function onGrowthBookData(
   cb: (err: string, data: RefreshMessage | null) => void
 ) {
@@ -31,19 +34,21 @@ export function onGrowthBookData(
   };
 }
 
-chrome.runtime.onMessage.addListener(
-  async (msg: RefreshMessage | ErrorMessage) => {
-    if (msg.type === "GB_REFRESH") {
-      refreshListeners.forEach((cb) => {
-        cb("", msg);
-      });
-    } else if (msg.type === "GB_ERROR") {
-      refreshListeners.forEach((cb) => {
-        cb(msg.error, null);
-      });
+if (isProd) {
+  chrome.runtime.onMessage.addListener(
+    async (msg: RefreshMessage | ErrorMessage) => {
+      if (msg.type === "GB_REFRESH") {
+        refreshListeners.forEach((cb) => {
+          cb("", msg);
+        });
+      } else if (msg.type === "GB_ERROR") {
+        refreshListeners.forEach((cb) => {
+          cb(msg.error, null);
+        });
+      }
     }
-  }
-);
+  );
+}
 
 export function requestRefresh() {
   sendMessage({
@@ -56,4 +61,27 @@ export function setOverrides(data: Omit<SetOverridesMessage, "type">) {
     type: "GB_SET_OVERRIDES",
     ...data,
   });
+}
+
+if (!isProd) {
+  const mockData: RefreshMessage = {
+    type: "GB_REFRESH",
+    features: {
+      isCoolFeatureEnabled: {
+        defaultValue: false,
+        rules: [],
+      },
+    },
+    experiments: {},
+    attributes: {
+      test: 123,
+    },
+    overrides: {},
+  };
+
+  setTimeout(() => {
+    refreshListeners.forEach((cb) => {
+      cb("", mockData);
+    });
+  }, 1000);
 }

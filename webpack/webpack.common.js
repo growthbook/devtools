@@ -15,6 +15,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, "../dist/js"),
     filename: "[name].js",
+    publicPath: "/js/",
   },
   optimization: {
     splitChunks: {
@@ -54,4 +55,7 @@ module.exports = {
       options: {},
     }),
   ],
+  devServer: {
+    static: "./public",
+  },
 };
