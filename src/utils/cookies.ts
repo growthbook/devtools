@@ -1,5 +1,3 @@
-import Cookies from "js-cookie";
-
 /**
  * Gets a cookie. If the value returned is falsy, e.g. undefined (if the key doesn't exist) or an empty string, it returns null.
  * This util does not decode and returns the raw value or null.
