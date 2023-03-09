@@ -8,22 +8,69 @@ describe("feature json utils", () => {
 
       const result = featuresJsonFromEncodedCookieValue(input);
 
-      expect(result!.banner_text).toEqual({
-        defaultValue: "Welcome to Acme Donuts!",
-        rules: [
-          {
-            condition: {
-              country: "france",
+      expect(result).toEqual({
+        dark_mode: {
+          defaultValue: false,
+          rules: [
+            {
+              condition: {
+                loggedIn: true,
+              },
+              coverage: 0.5,
+              force: true,
+              hashAttribute: "id",
             },
-            force: "Bienvenue au Beignets Acme !",
-          },
-          {
-            condition: {
-              country: "spain",
+          ],
+        },
+        donut_price: {
+          defaultValue: 2.5,
+          rules: [
+            {
+              condition: {
+                employee: true,
+              },
+              force: 0,
             },
-            force: "¡Bienvenidos y bienvenidas a Donas Acme!",
+          ],
+        },
+        banner_text: {
+          defaultValue: "Welcome to Acme Donuts!",
+          rules: [
+            {
+              condition: {
+                country: "france",
+              },
+              force: "Bienvenue au Beignets Acme !",
+            },
+            {
+              condition: {
+                country: "spain",
+              },
+              force: "¡Bienvenidos y bienvenidas a Donas Acme!",
+            },
+          ],
+        },
+        meal_overrides_gluten_free: {
+          defaultValue: {
+            dessert: "Strawberry Cheesecake",
+            meal_type: "standard",
           },
-        ],
+          rules: [
+            {
+              condition: {
+                dietaryRestrictions: {
+                  $elemMatch: {
+                    $eq: "gluten_free",
+                  },
+                },
+              },
+              force: {
+                dessert: "French Vanilla Ice Cream",
+                meal_type: "gf",
+              },
+            },
+          ],
+        },
       });
     });
   });
