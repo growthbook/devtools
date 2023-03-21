@@ -108,7 +108,6 @@ const DetailsRow = ({
           style={{ flex: 2, maxHeight: "3rem" }}
           onClick={!readOnly ? () => setIsEditing(true) : () => {}}
         >
-          {" "}
           {_value}
         </div>
       )}

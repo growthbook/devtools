@@ -32,19 +32,16 @@ const AddClassNameInput: FC<{ onAdd: (className: string) => void }> = ({
       <div className="flex justify-center items-center h-5">
         {isAdding ? (
           <div className="ml-2">
-            <button className="text-green-700" onClick={onSave}>
-              <RxCheck className="w-4 h-4" strokeWidth={2} />
+            <button className="text-slate-200" onClick={onSave}>
+              <RxCheck className="w-4 h-4" />
             </button>
-            <button
-              className="text-rose-500 hover:text-rose-700 ml-1"
-              onClick={onCancel}
-            >
-              <RxCross2 className="w-4 h-4" strokeWidth={2} />
+            <button className="text-slate-200 ml-1" onClick={onCancel}>
+              <RxCross2 className="w-4 h-4" />
             </button>
           </div>
         ) : (
-          <button className="text-slate-300" onClick={() => setIsAdding(true)}>
-            <RxPlus className="w-4 h-4" strokeWidth={2} />
+          <button className="text-slate-200" onClick={() => setIsAdding(true)}>
+            <RxPlus className="w-4 h-4" />
           </button>
         )}
       </div>

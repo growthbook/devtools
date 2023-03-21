@@ -106,8 +106,8 @@ const AddAttributeInput: FC<{
       {isAdding ? (
         <EditAttributeInput onSubmit={onAdd} onCancel={onCancel} />
       ) : (
-        <button className="text-slate-300" onClick={() => setIsAdding(true)}>
-          <RxPlus className="w-4 h-4" strokeWidth={2} />
+        <button className="text-slate-200" onClick={() => setIsAdding(true)}>
+          <RxPlus className="w-4 h-4" />
         </button>
       )}
     </>
