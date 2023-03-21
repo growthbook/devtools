@@ -37,47 +37,102 @@ import VariationSelector from "./VariationSelector";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
 import VisualEditorHeader from "./VisualEditorHeader";
 
-export interface ExperimentVariation {
+const VISUAL_CHANGESET_ID_PARAMS_KEY = "vc-id";
+const VARIATION_INDEX_PARAMS_KEY = "v-idx";
+
+// TODO
+type APIExperiment = any;
+type APIVisualChangeset = any;
+
+export interface VisualEditorVariation {
+  id: string;
+  name: string;
+  description: string;
   css?: string;
   domMutations: DeclarativeMutation[];
 }
 
-// TODO Replace with interface in API payload
-export interface Experiment {
-  variations?: ExperimentVariation[];
-}
-
 let _globalStyleTag: HTMLStyleElement | null = null;
+
+const genVisualEditorVariations = ({
+  experiment,
+  visualChangeset,
+}: {
+  experiment: APIExperiment;
+  visualChangeset: APIVisualChangeset;
+}): VisualEditorVariation[] => {
+  const { variations } = experiment;
+  const { visualChanges } = visualChangeset;
+  return variations.map((variation: any, index: number) => {
+    const { css = "", domMutations = [] } = visualChanges[index] ?? {};
+    return {
+      id: variation.id,
+      name: variation.name,
+      description: variation.description,
+      css,
+      domMutations,
+    };
+  });
+};
+
+const getVariationIndexFromParams = (
+  param: string | (string | null)[] | null
+): number => {
+  if (Array.isArray(param)) {
+    if (!param[0]) return 1;
+    return parseInt(param[0], 10);
+  }
+  return parseInt(param ?? "1", 10);
+};
+
+const cleanUpParams = (params: qs.ParsedQuery) => {
+  window.history.replaceState(
+    null,
+    "",
+    qs.stringifyUrl({
+      url: window.location.href,
+      query: {
+        ...params,
+        [VISUAL_CHANGESET_ID_PARAMS_KEY]: undefined,
+        [VARIATION_INDEX_PARAMS_KEY]: undefined,
+      },
+    })
+  );
+};
 
 const VisualEditor: FC<{}> = () => {
   const params = qs.parse(window.location.search);
-  const experimentId = params["visual-exp-id"] as string;
-  const [apiCreds, setApiCreds] = useState<{
-    apiKey?: string;
-    apiHost?: string;
-  }>({});
+  const visualChangesetId = params[VISUAL_CHANGESET_ID_PARAMS_KEY] as string;
+  const variationIndex = getVariationIndexFromParams(
+    params[VARIATION_INDEX_PARAMS_KEY]
+  );
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
-  const [variations, setVariations] = useState<ExperimentVariation[]>([]);
   const [mode, setMode] = useState<ToolbarMode>("selection");
+  const [variations, setVariations] = useState<VisualEditorVariation[]>([]);
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(
     null
   );
   const [selectedVariationIndex, setSelectedVariationIndex] =
-    useState<number>(1);
+    useState<number>(variationIndex);
   const [highlightedElementSelector, setHighlightedElementSelector] = useState<
     string | null
   >(null);
-  const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const { x, y, setX, setY, parentStyles } = useFixedPositioning({
     x: 24,
     y: 24,
     rightAligned: true,
   });
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const [apiCreds, setApiCreds] = useState<{
+    apiKey?: string;
+    apiHost?: string;
+  }>({});
 
   const mutateRevert = useRef<(() => void) | null>(null);
 
   const selectedVariation = variations?.[selectedVariationIndex] ?? null;
 
+  // generate a style tag to hold the global CSS
   const globalStyleTag = useMemo(() => {
     if (_globalStyleTag) document.head.removeChild(_globalStyleTag);
     _globalStyleTag = document.createElement("style");
@@ -86,12 +141,8 @@ const VisualEditor: FC<{}> = () => {
     return _globalStyleTag;
   }, [selectedVariation]);
 
-  const createVariation = useCallback(async () => {
-    setVariations([...variations, { domMutations: [] }]);
-  }, [variations, setVariations]);
-
   const updateSelectedVariation = useCallback(
-    (updates: Partial<ExperimentVariation>) => {
+    (updates: Partial<VisualEditorVariation>) => {
       setVariations([
         ...(variations?.map((variation, index) => {
           if (index === selectedVariationIndex) {
@@ -131,12 +182,13 @@ const VisualEditor: FC<{}> = () => {
     [updateSelectedVariation]
   );
 
+  // the generated selector of the currently selected element
   const selector = useMemo(
     () => (selectedElement ? getSelector(selectedElement) : ""),
     [selectedElement]
   );
 
-  // selectedElementMutations
+  // the dom mutations that apply to the currently selected element
   const selectedElementMutations = useMemo(
     () =>
       selectedVariation?.domMutations.filter((m) =>
@@ -177,23 +229,17 @@ const VisualEditor: FC<{}> = () => {
     (domMutationIndex: number) => {
       updateSelectedVariation({
         domMutations: selectedVariation.domMutations.filter(
-          (mutation, i) => i !== domMutationIndex
+          (_mutation, i) => i !== domMutationIndex
         ),
       });
     },
     [updateSelectedVariation, selectedVariation]
   );
 
-  // get ahold of api credentials. requires talking to the "other side"
+  // get ahold of api credentials. requires messaging the background script
   useEffect(() => {
-    window.postMessage(
-      {
-        type: "GB_REQUEST_API_CREDS",
-      },
-      "*"
-    );
-
-    window.addEventListener("message", function (event: MessageEvent<Message>) {
+    // add listener for response
+    const onMsg = (event: MessageEvent<Message>) => {
       const data = event.data;
       if (
         data.type === "GB_RESPONSE_API_CREDS" &&
@@ -205,19 +251,27 @@ const VisualEditor: FC<{}> = () => {
           apiHost: data.apiHost,
         });
       }
-    });
+    };
+
+    window.addEventListener("message", onMsg);
+
+    // send message
+    window.postMessage({ type: "GB_REQUEST_API_CREDS" }, "*");
+
+    // cleanup
+    return () => window.removeEventListener("message", onMsg);
   }, []);
 
-  // fetch experiment from api once we have credentials
+  // fetch visual changeset and experiment from api once we have credentials
   useEffect(() => {
     const { apiHost, apiKey } = apiCreds;
 
-    if (!experimentId) return;
+    if (!visualChangesetId) return;
     if (!apiHost || !apiKey) return;
 
-    const fetchExperiment = async () => {
+    const fetchVisualChangeset = async () => {
       const response = await fetch(
-        `${apiHost}/api/v1/experiments/${experimentId}`,
+        `${apiHost}/api/v1/visual-changesets/${visualChangesetId}?includeExperiment=1`,
         {
           headers: {
             Authorization: `Basic ${btoa(apiKey + ":")}`,
@@ -226,49 +280,26 @@ const VisualEditor: FC<{}> = () => {
       );
 
       const res = await response.json();
-      const { experiment } = res;
+      const { visualChangeset, experiment } = res;
 
-      if (!experiment) return;
+      // Visual editor will not load if we cannot load visual changeset
+      if (!visualChangeset) return;
 
-      setVariations(
-        experiment.variations.map((v: any) => ({
-          ...v,
-          domMutations: [],
-        }))
-      );
+      const visualEditorVariations = genVisualEditorVariations({
+        experiment,
+        visualChangeset,
+      });
 
-      // TODO enable on prod
-      // window.history.replaceState(
-      //   null,
-      //   "",
-      //   qs.stringifyUrl({
-      //     url: window.location.href,
-      //     query: {
-      //       ...params,
-      //       "visual-exp-id": undefined,
-      //     },
-      //   })
-      // );
+      setVariations(visualEditorVariations);
+
+      // remove visual editor query param once loaded
+      cleanUpParams(params);
 
       setIsEnabled(true);
     };
 
-    fetchExperiment();
-  }, [experimentId, apiCreds]);
-
-  // listen for messages from popup menu
-  useEffect(() => {
-    const messageHandler = (event: MessageEvent<Message>) => {
-      const data = event.data;
-      if (data.type === "GB_ENABLE_VISUAL_EDITOR") {
-        setIsEnabled(true);
-      } else if (data.type === "GB_DISABLE_VISUAL_EDITOR") {
-        setIsEnabled(false);
-      }
-    };
-    window.addEventListener("message", messageHandler);
-    return () => window.removeEventListener("message", messageHandler);
-  }, []);
+    fetchVisualChangeset();
+  }, [visualChangesetId, apiCreds]);
 
   // handle mode selection
   useEffect(() => {
@@ -312,22 +343,25 @@ const VisualEditor: FC<{}> = () => {
     mode,
   ]);
 
+  // upon every DOM mutation, we revert all changes and replay them to ensure
+  // that the DOM is in the correct state
   useEffect(() => {
     if (mutateRevert?.current) mutateRevert.current();
 
-    const callbacks: Array<() => void> = [];
+    const revertCallbacks: Array<() => void> = [];
 
     selectedVariation?.domMutations.forEach((mutation) => {
       const controller = mutate.declarative(mutation);
-      callbacks.push(controller.revert);
+      revertCallbacks.push(controller.revert);
     });
 
     mutateRevert.current = () => {
-      callbacks.forEach((callback) => callback());
+      revertCallbacks.reverse().forEach((c) => c());
     };
   }, [variations, selectedVariation]);
 
-  // Upon any DOM change, trigger a refresh of visual editor to keep it in sync
+  // Upon any DOM change on the page, we trigger a refresh of visual editor to
+  // keep it in sync
   useEffect(() => {
     const observer = new MutationObserver(() =>
       setTimeout(() => forceUpdate(), 0)
@@ -352,7 +386,6 @@ const VisualEditor: FC<{}> = () => {
         variations={variations}
         selectedVariationIndex={selectedVariationIndex}
         setSelectedVariationIndex={setSelectedVariationIndex}
-        createVariation={createVariation}
       />
 
       <Toolbar mode={mode} setMode={setMode} />

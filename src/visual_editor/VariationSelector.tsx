@@ -1,31 +1,13 @@
-import React, { FC, useEffect, useRef } from "react";
-import { ExperimentVariation } from ".";
+import React, { FC } from "react";
+import { VisualEditorVariation } from ".";
 
 const VariationSelector: FC<{
-  variations: ExperimentVariation[];
+  variations: VisualEditorVariation[];
   selectedVariationIndex: number;
   setSelectedVariationIndex: (i: number) => void;
-  createVariation: () => void;
-}> = ({
-  variations,
-  selectedVariationIndex,
-  setSelectedVariationIndex,
-  createVariation,
-}) => {
-  const prevVariationsCount = useRef(1);
-
-  useEffect(() => {
-    if (!variations?.length) return;
-    const lastVarIndex = variations.length - 1;
-    if (lastVarIndex !== prevVariationsCount.current) {
-      setSelectedVariationIndex(lastVarIndex);
-      prevVariationsCount.current = lastVarIndex;
-    }
-  }, [variations]);
-
+}> = ({ variations, selectedVariationIndex, setSelectedVariationIndex }) => {
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = Number(e.target.value);
-    if (value === -1) return createVariation();
     setSelectedVariationIndex(value);
   };
 
@@ -36,12 +18,11 @@ const VariationSelector: FC<{
         value={selectedVariationIndex}
         onChange={onChange}
       >
-        {variations.map((_variation, index) => (
+        {variations.map((variation, index) => (
           <option key={index} value={index}>
-            {index === 0 ? "Control" : `Variation ${index}`}
+            {variation.name ?? index === 0 ? "Control" : `Variation ${index}`}
           </option>
         ))}
-        <option value={-1}>+ Add variation</option>
       </select>
     </div>
   );
