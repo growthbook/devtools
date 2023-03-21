@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { validAttributeName } from "dom-mutator";
 import React, { FC, useCallback, useState } from "react";
 import { RxCross2, RxPlus, RxCheck } from "react-icons/rx";
@@ -51,21 +52,21 @@ const EditAttributeInput: FC<{
     onCancel();
   }, [name, value, _onSubmit, onCancel]);
   return (
-    <div className="flex items-center rounded bg-slate-200 text-sm pl-2 mr-2 my-1">
-      <div className="mr-1 font-semibold">
+    <div className="flex">
+      <div className="mr-1">
         <input
           type="text"
-          className="rounded px-2 text-sm w-16"
+          className=" px-2 text-sm w-16"
           placeholder="Key"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
       </div>
 
-      <div className="flex-1 bg-indigo-700 text-white py-1 px-2 m-1 rounded cursor-pointer">
+      <div className="flex-1">
         <input
           type="text"
-          className="rounded py-0 px-2 text-sm text-black"
+          className="py-0 px-2 text-sm text-black"
           placeholder="Value"
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -73,14 +74,11 @@ const EditAttributeInput: FC<{
       </div>
 
       <div>
-        <button className="text-green-700" onClick={onSubmit}>
-          <RxCheck className="w-4 h-4" strokeWidth={2} />
+        <button className="text-slate-200" onClick={onSubmit}>
+          <RxCheck className="w-4 h-4" />
         </button>
-        <button
-          className="text-rose-500 hover:text-rose-700 ml-1"
-          onClick={onCancel}
-        >
-          <RxCross2 className="w-4 h-4" strokeWidth={2} />
+        <button className="text-slate-200 mx-1" onClick={onCancel}>
+          <RxCross2 className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -108,10 +106,7 @@ const AddAttributeInput: FC<{
       {isAdding ? (
         <EditAttributeInput onSubmit={onAdd} onCancel={onCancel} />
       ) : (
-        <button
-          className="text-indigo-900 h-7"
-          onClick={() => setIsAdding(true)}
-        >
+        <button className="text-slate-300" onClick={() => setIsAdding(true)}>
           <RxPlus className="w-4 h-4" strokeWidth={2} />
         </button>
       )}
@@ -147,25 +142,20 @@ const AttributeToken: FC<
     );
   }
   return (
-    <div className="flex items-center rounded bg-slate-200 text-sm pl-2 mr-2 my-1">
-      <div className="mr-1 font-semibold">
-        {name}
-        {value ? ":" : null}
+    <div className="flex mb-2 last:mb-0">
+      <div className="w-12 text-xs text-slate-400">{name}</div>
+
+      <div
+        className={clsx(
+          "text-slate-200 text-ellipsis overflow-hidden text-sm hover:text-slate-100 hover:bg-slate-600 cursor-pointer"
+        )}
+        style={{ flex: 2, maxHeight: "3rem" }}
+        onClick={() => setIsEditing(true)}
+      >
+        {value}
       </div>
 
-      {value ? (
-        <button
-          className="flex-1 bg-indigo-700 text-white px-2 m-1 rounded cursor-pointer break-all text-left"
-          onClick={() => setIsEditing(true)}
-        >
-          {value}
-        </button>
-      ) : null}
-
-      <button
-        className="text-rose-500 hover:text-rose-700 mx-1"
-        onClick={onRemove}
-      >
+      <button className="text-slate-200 mx-1" onClick={onRemove}>
         <RxCross2 className="w-4 h-4" />
       </button>
     </div>
@@ -203,21 +193,17 @@ const AttributeEdit: FC<{
   );
 
   return (
-    <div className="flex mb-2 items-start mr-2 -ml-2 p-2 rounded-lg bg-slate-400">
-      <div className="w-24 text-white">HTML Attributes</div>
-
-      <div className="flex-1 flex flex-wrap ml-4 items-center">
-        {attributes.map(({ name, value }, index) => (
-          <AttributeToken
-            key={index}
-            name={name}
-            value={value}
-            onEdit={editAttr}
-            onRemove={() => removeAttr(name)}
-          />
-        ))}
-        <AddAttributeInput onAdd={addAttr} />
-      </div>
+    <div className="flex flex-col ml-4">
+      {attributes.map(({ name, value }, index) => (
+        <AttributeToken
+          key={index}
+          name={name}
+          value={value}
+          onEdit={editAttr}
+          onRemove={() => removeAttr(name)}
+        />
+      ))}
+      <AddAttributeInput onAdd={addAttr} />
     </div>
   );
 };

@@ -36,24 +36,33 @@ import DOMMutationList from "./DOMMutationList";
 import VariationSelector from "./VariationSelector";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
 import VisualEditorHeader from "./VisualEditorHeader";
+import useApi, {
+  APICreds,
+  APIDomMutation,
+  APIExperiment,
+  APIExperimentVariation,
+  APIVisualChange,
+  APIVisualChangeset,
+} from "./lib/hooks/useApi";
+import AttributeEdit, {
+  Attribute,
+  IGNORED_ATTRS,
+} from "./ElementDetails/AttributeEdit";
 
 const VISUAL_CHANGESET_ID_PARAMS_KEY = "vc-id";
 const VARIATION_INDEX_PARAMS_KEY = "v-idx";
 
-// TODO
-type APIExperiment = any;
-type APIVisualChangeset = any;
-
 export interface VisualEditorVariation {
-  id: string;
   name: string;
   description: string;
   css?: string;
-  domMutations: DeclarativeMutation[];
+  domMutations: APIDomMutation[];
+  variationId: string;
 }
 
 let _globalStyleTag: HTMLStyleElement | null = null;
 
+// normalize API payloads into local object shape
 const genVisualEditorVariations = ({
   experiment,
   visualChangeset,
@@ -63,12 +72,23 @@ const genVisualEditorVariations = ({
 }): VisualEditorVariation[] => {
   const { variations } = experiment;
   const { visualChanges } = visualChangeset;
-  return variations.map((variation: any, index: number) => {
-    const { css = "", domMutations = [] } = visualChanges[index] ?? {};
+  const visualChangesByVariationId = visualChanges.reduce(
+    (acc: Record<string, APIVisualChange>, visualChange: APIVisualChange) => {
+      const { variation } = visualChange;
+      acc[variation] = visualChange;
+      return acc;
+    },
+    {}
+  );
+
+  return variations.map((variation: APIExperimentVariation) => {
+    const { name, description, variationId } = variation;
+    const { css = "", domMutations = [] } =
+      visualChangesByVariationId[variation.variationId] ?? {};
     return {
-      id: variation.id,
-      name: variation.name,
-      description: variation.description,
+      name,
+      description,
+      variationId,
       css,
       domMutations,
     };
@@ -102,9 +122,11 @@ const cleanUpParams = (params: qs.ParsedQuery) => {
 
 const VisualEditor: FC<{}> = () => {
   const params = qs.parse(window.location.search);
-  const visualChangesetId = params[VISUAL_CHANGESET_ID_PARAMS_KEY] as string;
-  const variationIndex = getVariationIndexFromParams(
-    params[VARIATION_INDEX_PARAMS_KEY]
+  const [visualChangesetId] = useState(
+    params[VISUAL_CHANGESET_ID_PARAMS_KEY] as string
+  );
+  const [variationIndex] = useState(
+    getVariationIndexFromParams(params[VARIATION_INDEX_PARAMS_KEY])
   );
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
   const [mode, setMode] = useState<ToolbarMode>("selection");
@@ -123,10 +145,8 @@ const VisualEditor: FC<{}> = () => {
     rightAligned: true,
   });
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
-  const [apiCreds, setApiCreds] = useState<{
-    apiKey?: string;
-    apiHost?: string;
-  }>({});
+  const [apiCreds, setApiCreds] = useState<APICreds>({});
+  const { fetchVisualChangeset, updateVisualChangeset } = useApi(apiCreds);
 
   const mutateRevert = useRef<(() => void) | null>(null);
 
@@ -143,19 +163,31 @@ const VisualEditor: FC<{}> = () => {
 
   const updateSelectedVariation = useCallback(
     (updates: Partial<VisualEditorVariation>) => {
-      setVariations([
-        ...(variations?.map((variation, index) => {
-          if (index === selectedVariationIndex) {
-            return {
-              ...variation,
-              ...updates,
-            };
-          }
-          return variation;
-        }) ?? []),
-      ]);
+      const updatedVariation = {
+        ...variations[selectedVariationIndex],
+        ...updates,
+      };
+
+      const newVariations = [
+        ...(variations?.map((v, i) =>
+          i === selectedVariationIndex ? updatedVariation : v
+        ) ?? []),
+      ];
+
+      setVariations(newVariations);
+
+      if (!updateVisualChangeset) return;
+
+      updateVisualChangeset(visualChangesetId, newVariations);
     },
-    [variations, selectedVariation, setVariations, selectedVariationIndex]
+    [
+      variations,
+      selectedVariation,
+      setVariations,
+      selectedVariationIndex,
+      visualChangesetId,
+      updateVisualChangeset,
+    ]
   );
 
   const addDomMutations = useCallback(
@@ -194,7 +226,7 @@ const VisualEditor: FC<{}> = () => {
       selectedVariation?.domMutations.filter((m) =>
         selectedElement && selector ? m.selector === selector : true
       ) ?? [],
-    [selectedVariation, selector]
+    [selectedElement, selectedVariation, selector]
   );
 
   const addClassNames = useCallback(
@@ -236,6 +268,38 @@ const VisualEditor: FC<{}> = () => {
     [updateSelectedVariation, selectedVariation]
   );
 
+  const setAttributes = useCallback(
+    (attrs: Attribute[]) => {
+      if (!selectedElement) return;
+      const existing = [...selectedElement.attributes];
+      const removed = existing.filter(
+        (e) =>
+          !attrs.find((a) => a.name === e.name) &&
+          !IGNORED_ATTRS.includes(e.name)
+      );
+      const changed = attrs.filter(
+        (attr) => attr.value !== selectedElement.getAttribute(attr.name)
+      );
+      removed.forEach((attr) => {
+        addDomMutation({
+          action: "remove",
+          attribute: attr.name,
+          selector,
+          value: attr.value,
+        });
+      });
+      changed.forEach((attr) => {
+        addDomMutation({
+          action: selectedElement.hasAttribute(attr.name) ? "set" : "append",
+          attribute: attr.name,
+          selector,
+          value: attr.value,
+        });
+      });
+    },
+    [selectedElement, addDomMutation]
+  );
+
   // get ahold of api credentials. requires messaging the background script
   useEffect(() => {
     // add listener for response
@@ -266,24 +330,16 @@ const VisualEditor: FC<{}> = () => {
   useEffect(() => {
     const { apiHost, apiKey } = apiCreds;
 
-    if (!visualChangesetId) return;
-    if (!apiHost || !apiKey) return;
+    if (!apiHost || !apiKey || !fetchVisualChangeset || !visualChangesetId)
+      return;
 
-    const fetchVisualChangeset = async () => {
-      const response = await fetch(
-        `${apiHost}/api/v1/visual-changesets/${visualChangesetId}?includeExperiment=1`,
-        {
-          headers: {
-            Authorization: `Basic ${btoa(apiKey + ":")}`,
-          },
-        }
+    const load = async () => {
+      const { visualChangeset, experiment } = await fetchVisualChangeset(
+        visualChangesetId
       );
 
-      const res = await response.json();
-      const { visualChangeset, experiment } = res;
-
       // Visual editor will not load if we cannot load visual changeset
-      if (!visualChangeset) return;
+      if (!visualChangeset || !experiment) return;
 
       const visualEditorVariations = genVisualEditorVariations({
         experiment,
@@ -293,13 +349,14 @@ const VisualEditor: FC<{}> = () => {
       setVariations(visualEditorVariations);
 
       // remove visual editor query param once loaded
-      cleanUpParams(params);
+      // TODO uncomment
+      // cleanUpParams(params);
 
       setIsEnabled(true);
     };
 
-    fetchVisualChangeset();
-  }, [visualChangesetId, apiCreds]);
+    load();
+  }, [visualChangesetId, fetchVisualChangeset]);
 
   // handle mode selection
   useEffect(() => {
@@ -401,6 +458,7 @@ const VisualEditor: FC<{}> = () => {
               setElement={setSelectedElement}
             />
           </VisualEditorSection>
+
           <VisualEditorSection title="Element Details">
             <ElementDetails
               selector={selector}
@@ -409,6 +467,10 @@ const VisualEditor: FC<{}> = () => {
               addMutation={addDomMutation}
               addMutations={addDomMutations}
             />
+          </VisualEditorSection>
+
+          <VisualEditorSection title="Attributes">
+            <AttributeEdit element={selectedElement} onSave={setAttributes} />
           </VisualEditorSection>
 
           <VisualEditorSection title="Class names">
@@ -444,10 +506,7 @@ const VisualEditor: FC<{}> = () => {
           isCollapsible
           title={`Changes (${selectedElementMutations.length})`}
         >
-          <DOMMutationList
-            removeDomMutation={removeDomMutation}
-            mutations={selectedElementMutations ?? []}
-          />
+          <DOMMutationList mutations={selectedElementMutations ?? []} />
         </VisualEditorSection>
       )}
 

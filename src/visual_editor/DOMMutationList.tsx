@@ -14,7 +14,7 @@ const DOMAttrColumn: FC<{ children: ReactNode }> = ({ children }) => (
 
 const DOMMutationList: FC<{
   mutations: DeclarativeMutation[];
-  removeDomMutation: (mutationIndex: number) => void;
+  removeDomMutation?: (mutationIndex: number) => void;
 }> = ({ mutations: _mutations, removeDomMutation }) => {
   const mutations: DeclarativeMutation[] = [..._mutations];
 
@@ -34,12 +34,14 @@ const DOMMutationList: FC<{
           <DOMAttrColumn>{mutation.attribute}</DOMAttrColumn>
           <DOMAttrColumn>{mutation.value}</DOMAttrColumn>
 
-          <div className="w-8 flex justify-end">
-            <RxCross2
-              className="w-4 h-4 cursor-pointer hover:text-slate-100"
-              onClick={() => removeDomMutation(index)}
-            />
-          </div>
+          {removeDomMutation && (
+            <div className="w-8 flex justify-end">
+              <RxCross2
+                className="w-4 h-4 cursor-pointer hover:text-slate-100"
+                onClick={() => removeDomMutation(index)}
+              />
+            </div>
+          )}
         </div>
       ))}
     </div>

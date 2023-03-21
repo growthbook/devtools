@@ -20,7 +20,7 @@ const VariationSelector: FC<{
       >
         {variations.map((variation, index) => (
           <option key={index} value={index}>
-            {variation.name ?? index === 0 ? "Control" : `Variation ${index}`}
+            {variation.name ?? (index === 0 ? "Control" : `Variation ${index}`)}
           </option>
         ))}
       </select>

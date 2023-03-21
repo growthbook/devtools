@@ -34,7 +34,6 @@ let _setSelectedElement: ((element: HTMLElement | null) => void) | null;
 let _setHighlightedElementSelector: ((selector: string) => void) | null;
 
 const clickHandler = (event: MouseEvent) => {
-  console.log("DEBUG clickHandler", event);
   // don't intercept cilcks on the visual editor itself
   if ((event.target as HTMLElement).id === CONTAINER_ID) return;
 

@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useEffect, useState } from "react";
-import { RxPlus, RxTrash, RxCheck, RxCross2 } from "react-icons/rx";
+import React, { FC, useCallback, useState } from "react";
+import { RxPlus, RxCheck, RxCross2 } from "react-icons/rx";
 
 const AddClassNameInput: FC<{ onAdd: (className: string) => void }> = ({
   onAdd,
