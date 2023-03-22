@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 
 const ApiKeyInput: FC<{
   apiKey: string | null;
@@ -14,7 +14,7 @@ const ApiKeyInput: FC<{
       className="flex flex-col"
       onSubmit={(_e) => {
         saveApiKey(_apiKey);
-        saveApiHost(_apiHost);
+        saveApiHost(_apiHost.replace(/[\/]+$/, ""));
         onSave();
       }}
     >

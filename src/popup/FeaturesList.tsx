@@ -12,7 +12,7 @@ const FeaturesList: FC<{}> = () => {
       <div className="text-sm">
         {loading
           ? "Loading..."
-          : data?.features.map((feature: any) => (
+          : data?.features?.map((feature: any) => (
               <div key={feature.id}>{feature.id}</div>
             ))}
       </div>
