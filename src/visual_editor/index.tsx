@@ -48,6 +48,7 @@ import AttributeEdit, {
   Attribute,
   IGNORED_ATTRS,
 } from "./ElementDetails/AttributeEdit";
+import SetApiCredsAlert from "./SetApiCredsAlert";
 
 const VISUAL_CHANGESET_ID_PARAMS_KEY = "vc-id";
 const VARIATION_INDEX_PARAMS_KEY = "v-idx";
@@ -147,6 +148,7 @@ const VisualEditor: FC<{}> = () => {
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const [apiCreds, setApiCreds] = useState<APICreds>({});
   const { fetchVisualChangeset, updateVisualChangeset } = useApi(apiCreds);
+  const [showApiCredsAlert, setShowApiCredsAlert] = useState(false);
 
   const mutateRevert = useRef<(() => void) | null>(null);
 
@@ -305,6 +307,14 @@ const VisualEditor: FC<{}> = () => {
     // add listener for response
     const onMsg = (event: MessageEvent<Message>) => {
       const data = event.data;
+      const hasVisualEditorParams = visualChangesetId && variationIndex;
+
+      if (data.type !== "GB_RESPONSE_API_CREDS") return;
+
+      if (hasVisualEditorParams && (!data.apiKey || !data.apiHost)) {
+        setShowApiCredsAlert(true);
+      }
+
       if (
         data.type === "GB_RESPONSE_API_CREDS" &&
         data.apiKey &&
@@ -431,6 +441,10 @@ const VisualEditor: FC<{}> = () => {
 
     return () => observer.disconnect();
   }, []);
+
+  if (showApiCredsAlert) {
+    return <SetApiCredsAlert />;
+  }
 
   if (!isVisualEditorEnabled) return null;
 
