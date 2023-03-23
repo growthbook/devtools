@@ -52,26 +52,21 @@ const EditAttributeInput: FC<{
     onCancel();
   }, [name, value, _onSubmit, onCancel]);
   return (
-    <div className="flex">
-      <div className="mr-1">
-        <input
-          type="text"
-          className=" px-2 text-sm w-16"
-          placeholder="Key"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </div>
+    <>
+      <input
+        type="text"
+        className="px-2 text-sm w-16 mb-1"
+        placeholder="Key"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
 
-      <div className="flex-1">
-        <input
-          type="text"
-          className="py-0 px-2 text-sm text-black"
-          placeholder="Value"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
-      </div>
+      <textarea
+        className="py-0 px-2 text-sm text-black mr-2 mb-1"
+        placeholder="Value"
+        value={value?.trim()}
+        onChange={(e) => setValue(e.target.value)}
+      />
 
       <div>
         <button className="text-slate-200" onClick={onSubmit}>
@@ -81,7 +76,7 @@ const EditAttributeInput: FC<{
           <RxCross2 className="w-4 h-4" />
         </button>
       </div>
-    </div>
+    </>
   );
 };
 
