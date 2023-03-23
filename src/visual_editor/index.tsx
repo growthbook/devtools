@@ -476,7 +476,6 @@ const VisualEditor: FC<{}> = () => {
             <ElementDetails
               selector={selector}
               element={selectedElement}
-              setElement={setSelectedElement}
               addMutation={addDomMutation}
               addMutations={addDomMutations}
             />

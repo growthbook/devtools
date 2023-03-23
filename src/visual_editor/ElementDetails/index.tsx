@@ -5,7 +5,6 @@ import DetailsRow from "./DetailsRow";
 const ElementDetails: FC<{
   selector: string;
   element: HTMLElement;
-  setElement: (element: HTMLElement) => void;
   addMutation: (mutation: DeclarativeMutation) => void;
   addMutations: (mutations: DeclarativeMutation[]) => void;
 }> = ({ addMutation, element, selector }) => {

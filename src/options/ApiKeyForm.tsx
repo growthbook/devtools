@@ -8,7 +8,9 @@ const ApiKeyInput: FC<{
   onSave: () => void;
 }> = ({ saveApiKey, apiHost, saveApiHost, apiKey, onSave }) => {
   const [_apiKey, _setApiKey] = useState(apiKey || "");
-  const [_apiHost, _setApiHost] = useState(apiHost || "");
+  const [_apiHost, _setApiHost] = useState(
+    apiHost || "https://api.growthbook.io"
+  );
   return (
     <form
       className="flex flex-col"
