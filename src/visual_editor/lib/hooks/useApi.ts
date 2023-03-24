@@ -12,6 +12,7 @@ const genHeaders = (apiKey: string) => ({
 });
 
 export interface APIExperiment {
+  id: string;
   variations: {
     variationId: string;
     key: string;

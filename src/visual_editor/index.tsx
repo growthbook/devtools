@@ -52,6 +52,7 @@ import SetApiCredsAlert from "./SetApiCredsAlert";
 
 const VISUAL_CHANGESET_ID_PARAMS_KEY = "vc-id";
 const VARIATION_INDEX_PARAMS_KEY = "v-idx";
+const EXPERIMENT_URL_PARAMS_KEY = "exp-url";
 
 export interface VisualEditorVariation {
   name: string;
@@ -116,6 +117,7 @@ const cleanUpParams = (params: qs.ParsedQuery) => {
         ...params,
         [VISUAL_CHANGESET_ID_PARAMS_KEY]: undefined,
         [VARIATION_INDEX_PARAMS_KEY]: undefined,
+        [EXPERIMENT_URL_PARAMS_KEY]: undefined,
       },
     })
   );
@@ -128,6 +130,9 @@ const VisualEditor: FC<{}> = () => {
   );
   const [variationIndex] = useState(
     getVariationIndexFromParams(params[VARIATION_INDEX_PARAMS_KEY])
+  );
+  const [experimentUrl] = useState(
+    decodeURIComponent(params[EXPERIMENT_URL_PARAMS_KEY] as string)
   );
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
   const [mode, setMode] = useState<ToolbarMode>("selection");
@@ -451,6 +456,10 @@ const VisualEditor: FC<{}> = () => {
   return (
     <VisualEditorPane style={parentStyles}>
       <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
+
+      <div className="px-4 pt-2 text-slate-300 text-xs">
+        <a href={experimentUrl}>← Back to Experiment</a>
+      </div>
 
       <VariationSelector
         variations={variations}

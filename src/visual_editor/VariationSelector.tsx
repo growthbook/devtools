@@ -12,7 +12,7 @@ const VariationSelector: FC<{
   };
 
   return (
-    <div className="w-full p-4">
+    <div className="w-full p-4 pt-2">
       <select
         className="w-full p-2 border border-gray-300 rounded"
         value={selectedVariationIndex}
