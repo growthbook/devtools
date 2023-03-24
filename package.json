@@ -20,17 +20,17 @@
     "@emotion/styled": "^11.10.5",
     "@growthbook/growthbook": "^0.20.1",
     "@medv/finder": "^2.1.0",
-    "dom-mutator": "^0.3.2",
-    "json-stringify-pretty-compact": "^4.0.0",
-    "query-string": "^8.1.0",
     "clsx": "^1.2.1",
+    "dom-mutator": "^0.3.2",
     "framer-motion": "^8.4.3",
     "json-stringify-pretty-compact": "^4.0.0",
+    "query-string": "^8.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.42.1",
     "react-icons": "^4.7.1",
-    "react-syntax-highlighter": "^15.5.0"
+    "react-syntax-highlighter": "^15.5.0",
+    "react-textarea-autosize": "^8.4.1"
   },
   "devDependencies": {
     "@types/chrome": "0.0.158",

@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import React, { FC, useEffect, useState } from "react";
 import { RxPencil1, RxCheck, RxCross2 } from "react-icons/rx";
+import TextareaAutosize from "react-textarea-autosize";
 
 const EditAndSaveButtons = ({
   isEditing,
@@ -36,21 +37,18 @@ const EditAndSaveButtons = ({
 const DetailsRow = ({
   label,
   value = "",
-  inputType = "text",
   readOnly = false,
   onSave = () => {},
 }:
   | {
       label: string;
       value: string;
-      inputType?: HTMLInputElement["type"];
       readOnly: true;
       onSave?: never;
     }
   | {
       label: string;
       value: string;
-      inputType?: HTMLInputElement["type"];
       readOnly?: false;
       onSave: (value: string) => void;
     }) => {
@@ -81,7 +79,7 @@ const DetailsRow = ({
 
       {editing ? (
         <div className="w-full pr-2">
-          <textarea
+          <TextareaAutosize
             className="text-black w-full mt-2 text-sm p-1"
             onChange={(e) => _setValue(e.currentTarget.value)}
             value={_value}

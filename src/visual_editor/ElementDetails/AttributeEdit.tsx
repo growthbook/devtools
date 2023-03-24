@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { validAttributeName } from "dom-mutator";
 import React, { FC, useCallback, useState } from "react";
+import TextareaAutosize from "react-textarea-autosize";
 import { RxCross2, RxPlus, RxCheck } from "react-icons/rx";
 import {
   highlightedAttributeName,
@@ -40,6 +41,7 @@ const EditAttributeInput: FC<{
   onSubmit: _onSubmit,
   onCancel: _onCancel,
 }) => {
+  const isAdding = !_name;
   const [name, setName] = useState(_name);
   const [value, setValue] = useState(_value);
   const onCancel = useCallback(() => {
@@ -53,15 +55,19 @@ const EditAttributeInput: FC<{
   }, [name, value, _onSubmit, onCancel]);
   return (
     <>
-      <input
-        type="text"
-        className="px-2 text-sm w-16 mb-1"
-        placeholder="Key"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+      {isAdding ? (
+        <input
+          type="text"
+          className="px-2 text-sm w-16 mb-2"
+          placeholder="Key"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      ) : (
+        <div className="w-12 text-xs text-slate-400 mb-2">{name}</div>
+      )}
 
-      <textarea
+      <TextareaAutosize
         className="py-0 px-2 text-sm text-black mr-2 mb-1"
         placeholder="Value"
         value={value?.trim()}

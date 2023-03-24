@@ -2,7 +2,7 @@ import React, { FC } from "react";
 import GBLogo from "../../public/logo192.png";
 
 const SetApiCredsAlert: FC<{}> = () => (
-  <div className="fixed top-1 right-1 rounded bg-slate-700 text-white w-96">
+  <div className="z-max fixed top-1 right-1 rounded bg-slate-700 text-white w-96">
     <div className="flex px-4 h-12 items-center justify-center logo-bg rounded">
       <div className="h-8">
         <img src={GBLogo} alt="GB Logo" className="w-auto h-full mr-1" />
