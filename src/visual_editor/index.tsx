@@ -457,10 +457,6 @@ const VisualEditor: FC<{}> = () => {
     <VisualEditorPane style={parentStyles}>
       <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
 
-      <div className="px-4 pt-2 text-slate-300 text-xs">
-        <a href={experimentUrl}>← Back to Experiment</a>
-      </div>
-
       <VariationSelector
         variations={variations}
         selectedVariationIndex={selectedVariationIndex}
@@ -543,6 +539,15 @@ const VisualEditor: FC<{}> = () => {
           />
         </VisualEditorSection>
       )}
+
+      <div className="m-4">
+        <button
+          className="w-full p-2 bg-indigo-800 rounded text-white font-semibold text-lg"
+          onClick={() => (window.location.href = experimentUrl)}
+        >
+          Done Editing
+        </button>
+      </div>
     </VisualEditorPane>
   );
 };
