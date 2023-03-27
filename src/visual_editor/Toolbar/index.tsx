@@ -58,7 +58,8 @@ const ToolbarButton = ({
 const Toolbar: FC<{
   mode: ToolbarMode;
   setMode: (mode: ToolbarMode) => void;
-}> = ({ mode, setMode }) => {
+  clearSelectedElement: () => void;
+}> = ({ mode, setMode, clearSelectedElement }) => {
   return (
     <div className="z-max shadow-xl">
       <div className="flex flex-row">
@@ -71,7 +72,10 @@ const Toolbar: FC<{
         <ToolbarButton
           isActive={mode === "selection"}
           mode="selection"
-          enable={() => setMode("selection")}
+          enable={() => {
+            setMode("selection");
+            clearSelectedElement();
+          }}
           title="Selection mode"
         />
         <ToolbarButton

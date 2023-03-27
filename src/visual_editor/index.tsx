@@ -478,14 +478,15 @@ const VisualEditor: FC<{}> = () => {
         setSelectedVariationIndex={setSelectedVariationIndex}
       />
 
-      <Toolbar mode={mode} setMode={setMode} />
+      <Toolbar
+        mode={mode}
+        setMode={setMode}
+        clearSelectedElement={() => setSelectedElement(null)}
+      />
 
       {mode === "selection" && selectedElement ? (
         <>
-          <VisualEditorSection
-            title="Breadcrumbs"
-            onClose={() => setSelectedElement(null)}
-          >
+          <VisualEditorSection title="Breadcrumbs">
             <BreadcrumbsView
               element={selectedElement}
               setElement={setSelectedElement}
