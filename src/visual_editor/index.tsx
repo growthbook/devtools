@@ -447,7 +447,7 @@ const VisualEditor: FC<{}> = () => {
   // keep it in sync
   useEffect(() => {
     const observer = new MutationObserver(() =>
-      setTimeout(() => forceUpdate(), 1000)
+      setTimeout(() => forceUpdate(), 0)
     );
     observer.observe(document.body, {
       attributes: true,
