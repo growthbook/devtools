@@ -1,5 +1,10 @@
 import type { Message } from "../devtools";
-import { loadApiHost, loadApiKey } from "./utils/storage";
+import {
+  loadApiHost,
+  loadApiKey,
+  saveApiHost,
+  saveApiKey,
+} from "./utils/storage";
 
 // Pass along messages from content script -----> devtools, popup, etc.
 window.addEventListener("message", function (msg: MessageEvent<Message>) {
@@ -26,6 +31,18 @@ window.addEventListener("message", function (msg: MessageEvent<Message>) {
         url: chrome.runtime.getURL("options.html"),
       },
       "*"
+    );
+  }
+
+  if (data.type === "GB_SAVE_API_CREDS") {
+    const { apiHost, apiKey } = data;
+    Promise.all([saveApiKey(apiKey), saveApiHost(apiHost)]).then(
+      ([apiKey, apiHost]) => {
+        window.postMessage(
+          { type: "GB_RESPONSE_API_CREDS", apiKey, apiHost },
+          "*"
+        );
+      }
     );
   }
 });

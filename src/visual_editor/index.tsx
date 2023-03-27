@@ -1,4 +1,5 @@
 import mutate, { DeclarativeMutation } from "dom-mutator";
+import { debounce } from "lodash";
 import qs from "query-string";
 import React, {
   FC,
@@ -47,12 +48,13 @@ import AttributeEdit, {
   Attribute,
   IGNORED_ATTRS,
 } from "./ElementDetails/AttributeEdit";
-import SetApiCredsAlert from "./SetApiCredsAlert";
+import SetApiCredsForm, { ApiCreds } from "./SetApiCredsForm";
 import useMessage from "./lib/hooks/useMessage";
 
 const VISUAL_CHANGESET_ID_PARAMS_KEY = "vc-id";
 const VARIATION_INDEX_PARAMS_KEY = "v-idx";
 const EXPERIMENT_URL_PARAMS_KEY = "exp-url";
+const API_HOST_PARAMS_KEY = "api-host";
 
 export interface VisualEditorVariation {
   name: string;
@@ -118,6 +120,7 @@ const cleanUpParams = (params: qs.ParsedQuery) => {
         [VISUAL_CHANGESET_ID_PARAMS_KEY]: undefined,
         [VARIATION_INDEX_PARAMS_KEY]: undefined,
         [EXPERIMENT_URL_PARAMS_KEY]: undefined,
+        [API_HOST_PARAMS_KEY]: undefined,
       },
     })
   );
@@ -133,6 +136,9 @@ const VisualEditor: FC<{}> = () => {
   );
   const [experimentUrl] = useState(
     decodeURIComponent(params[EXPERIMENT_URL_PARAMS_KEY] as string)
+  );
+  const [apiHost] = useState(
+    decodeURIComponent(params[API_HOST_PARAMS_KEY] as string)
   );
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
   const [mode, setMode] = useState<ToolbarMode>("selection");
@@ -150,11 +156,12 @@ const VisualEditor: FC<{}> = () => {
     y: 24,
     rightAligned: true,
   });
-  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const [, _forceUpdate] = useReducer((x) => x + 1, 0);
   const [apiCreds, setApiCreds] = useState<APICreds>({});
   const { fetchVisualChangeset, updateVisualChangeset } = useApi(apiCreds);
   const [showApiCredsAlert, setShowApiCredsAlert] = useState(false);
 
+  const forceUpdate = debounce(_forceUpdate, 100);
   const mutateRevert = useRef<(() => void) | null>(null);
 
   const selectedVariation = variations?.[selectedVariationIndex] ?? null;
@@ -307,16 +314,29 @@ const VisualEditor: FC<{}> = () => {
     [selectedElement, addDomMutation]
   );
 
+  const saveApiCreds = useCallback(({ key, host }: ApiCreds) => {
+    window.postMessage(
+      {
+        type: "GB_SAVE_API_CREDS",
+        apiHost: host,
+        apiKey: key,
+      },
+      "*"
+    );
+  }, []);
+
   // get ahold of api credentials. requires messaging the background script
   useMessage({
     messageHandler: (message) => {
-      const hasVisualEditorParams = visualChangesetId && variationIndex;
+      const hasVisualEditorParams = Boolean(
+        visualChangesetId && variationIndex
+      );
 
       if (message.type !== "GB_RESPONSE_API_CREDS") return;
 
-      if (hasVisualEditorParams && (!message.apiKey || !message.apiHost)) {
-        setShowApiCredsAlert(true);
-      }
+      setShowApiCredsAlert(
+        hasVisualEditorParams && (!message.apiKey || !message.apiHost)
+      );
 
       if (
         message.type === "GB_RESPONSE_API_CREDS" &&
@@ -426,22 +446,22 @@ const VisualEditor: FC<{}> = () => {
   // keep it in sync
   useEffect(() => {
     const observer = new MutationObserver(() =>
-      setTimeout(() => forceUpdate(), 0)
+      setTimeout(() => forceUpdate(), 1000)
     );
-
     observer.observe(document.body, {
       attributes: true,
       childList: true,
       subtree: true,
     });
-
     return () => observer.disconnect();
   }, []);
 
   if (showApiCredsAlert) {
     return (
-      <SetApiCredsAlert
-        hostUrl={experimentUrl.substr(0, experimentUrl.indexOf("/experiment"))}
+      <SetApiCredsForm
+        appHost={experimentUrl.substr(0, experimentUrl.indexOf("/experiment"))}
+        apiHost={apiHost}
+        saveApiCreds={saveApiCreds}
       />
     );
   }

@@ -4,13 +4,16 @@ import { Message } from "../../../../devtools";
 /**
  * Use this hook to send messages to backaround script and to receive messages from it.
  */
-export default function useMessage({
-  messageHandler,
-  outgoingMessage,
-}: {
-  messageHandler: (event: Message) => void;
-  outgoingMessage: Message;
-}) {
+export default function useMessage(
+  {
+    messageHandler,
+    outgoingMessage,
+  }: {
+    messageHandler: (event: Message) => void;
+    outgoingMessage: Message;
+  },
+  dependencies: React.DependencyList = []
+) {
   useEffect(() => {
     const onMsg = (event: MessageEvent<Message>) => messageHandler(event.data);
 
@@ -22,5 +25,5 @@ export default function useMessage({
 
     // clean up
     return () => window.removeEventListener("message", onMsg);
-  }, []);
+  }, dependencies);
 }

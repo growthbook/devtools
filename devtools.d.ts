@@ -38,6 +38,12 @@ type DisableVisualEditorMessage = {
   type: "GB_DISABLE_VISUAL_EDITOR";
 };
 
+type SaveApiCredsMessage = {
+  type: "GB_SAVE_API_CREDS";
+  apiKey: string;
+  apiHost: string;
+};
+
 type ApiCredsRequest = {
   type: "GB_REQUEST_API_CREDS";
 };
@@ -67,4 +73,5 @@ export type Message =
   | ApiCredsRequest
   | ApiCredsResponse
   | OptionsUrlRequest
-  | OptionsUrlResponse;
+  | OptionsUrlResponse
+  | SaveApiCredsMessage;

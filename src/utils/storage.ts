@@ -10,13 +10,19 @@ export const loadApiKey = async () => {
   return result[API_KEY] || null;
 };
 
-export const saveApiKey = (apiKey: string) =>
-  chrome.storage.sync.set({ [API_KEY]: apiKey });
+export const saveApiKey = async (apiKey: string) => {
+  await chrome.storage.sync.set({ [API_KEY]: apiKey });
+  const result = await chrome.storage.sync.get([API_KEY]);
+  return result[API_KEY];
+};
 
 export const clearApiKey = () => chrome.storage.sync.remove([API_KEY]);
 
-export const saveApiHost = (apiHost: string) =>
-  chrome.storage.sync.set({ [API_HOST]: apiHost });
+export const saveApiHost = async (apiHost: string) => {
+  await chrome.storage.sync.set({ [API_HOST]: apiHost });
+  const result = await chrome.storage.sync.get([API_HOST]);
+  return result[API_HOST];
+};
 
 export const loadApiHost = async () => {
   const result = await chrome.storage.sync.get([API_HOST]);

@@ -75,7 +75,6 @@ export const updateSelectedElement = ({
     clearHighlightedElementAttr();
     _selectedElement.setAttribute(selectedAttributeName, "");
     _setHighlightedElementSelector(finder(_selectedElement));
-    // document.removeEventListener("mousemove", mouseMoveHandler);
   }
 };
 
