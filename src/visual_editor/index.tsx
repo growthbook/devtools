@@ -10,7 +10,6 @@ import React, {
   useMemo,
 } from "react";
 import * as ReactDOM from "react-dom/client";
-import { Message } from "../../devtools";
 import Toolbar, { ToolbarMode } from "./Toolbar";
 import {
   toggleNormalMode,
@@ -530,6 +529,7 @@ const VisualEditor: FC<{}> = () => {
           title={`Changes (${selectedVariation?.domMutations.length})`}
         >
           <DOMMutationList
+            globalCss={selectedVariation.css}
             removeDomMutation={removeDomMutation}
             mutations={selectedVariation?.domMutations ?? []}
           />

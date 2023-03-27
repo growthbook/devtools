@@ -13,10 +13,23 @@ const DOMAttrColumn: FC<{ children: ReactNode }> = ({ children }) => (
 );
 
 const DOMMutationList: FC<{
+  globalCss?: string;
   mutations: DeclarativeMutation[];
   removeDomMutation?: (mutationIndex: number) => void;
-}> = ({ mutations: _mutations, removeDomMutation }) => {
-  const mutations: DeclarativeMutation[] = [..._mutations];
+}> = ({ mutations: _mutations, removeDomMutation, globalCss }) => {
+  const mutations: DeclarativeMutation[] = [
+    ...(globalCss
+      ? [
+          {
+            selector: "global",
+            action: "set" as DeclarativeMutation["action"],
+            value: globalCss,
+            attribute: "css",
+          },
+        ]
+      : []),
+    ..._mutations,
+  ];
 
   if (!mutations.length) return null;
 
