@@ -37,7 +37,6 @@ import VariationSelector from "./VariationSelector";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
 import VisualEditorHeader from "./VisualEditorHeader";
 import useApi, {
-  APICreds,
   APIDomMutation,
   APIExperiment,
   APIExperimentVariation,
@@ -48,8 +47,9 @@ import AttributeEdit, {
   Attribute,
   IGNORED_ATTRS,
 } from "./ElementDetails/AttributeEdit";
-import SetApiCredsForm, { ApiCreds } from "./SetApiCredsForm";
+import SetApiCredsForm from "./SetApiCredsForm";
 import useMessage from "./lib/hooks/useMessage";
+import { ApiCreds } from "../../devtools";
 
 const VISUAL_CHANGESET_ID_PARAMS_KEY = "vc-id";
 const VARIATION_INDEX_PARAMS_KEY = "v-idx";
@@ -137,7 +137,7 @@ const VisualEditor: FC<{}> = () => {
   const [experimentUrl] = useState(
     decodeURIComponent(params[EXPERIMENT_URL_PARAMS_KEY] as string)
   );
-  const [apiHost] = useState(
+  const [apiHostHint] = useState(
     decodeURIComponent(params[API_HOST_PARAMS_KEY] as string)
   );
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
@@ -157,8 +157,9 @@ const VisualEditor: FC<{}> = () => {
     rightAligned: true,
   });
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
-  const [apiCreds, setApiCreds] = useState<APICreds>({});
-  const { fetchVisualChangeset, updateVisualChangeset } = useApi(apiCreds);
+  const [apiCreds, setApiCreds] = useState<Partial<ApiCreds>>({});
+  const { fetchVisualChangeset, updateVisualChangeset, error } =
+    useApi(apiCreds);
   const [showApiCredsAlert, setShowApiCredsAlert] = useState(false);
 
   const forceUpdate = debounce(_forceUpdate, 100);
@@ -314,12 +315,12 @@ const VisualEditor: FC<{}> = () => {
     [selectedElement, addDomMutation]
   );
 
-  const saveApiCreds = useCallback(({ key, host }: ApiCreds) => {
+  const saveApiCreds = useCallback(({ apiKey, apiHost }: ApiCreds) => {
     window.postMessage(
       {
         type: "GB_SAVE_API_CREDS",
-        apiHost: host,
-        apiKey: key,
+        apiHost,
+        apiKey,
       },
       "*"
     );
@@ -456,12 +457,14 @@ const VisualEditor: FC<{}> = () => {
     return () => observer.disconnect();
   }, []);
 
-  if (showApiCredsAlert) {
+  if (showApiCredsAlert || error) {
     return (
       <SetApiCredsForm
         appHost={experimentUrl.substr(0, experimentUrl.indexOf("/experiment"))}
-        apiHost={apiHost}
+        apiHost={apiCreds.apiHost || apiHostHint}
+        apiKey={apiCreds.apiKey}
         saveApiCreds={saveApiCreds}
+        error={error}
       />
     );
   }

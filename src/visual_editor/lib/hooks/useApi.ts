@@ -1,10 +1,6 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { VisualEditorVariation } from "../..";
-
-export interface APICreds {
-  apiKey?: string;
-  apiHost?: string;
-}
+import { ApiCreds } from "../../../../devtools";
 
 const genHeaders = (apiKey: string) => ({
   Authorization: `Basic ${btoa(apiKey + ":")}`,
@@ -49,7 +45,7 @@ export interface APIVisualChangeset {
 export type APIVisualChange = APIVisualChangeset["visualChanges"][number];
 export type APIDomMutation = APIVisualChange["domMutations"][number];
 
-type UseApiHook = (creds: APICreds) => {
+type UseApiHook = (creds: Partial<ApiCreds>) => {
   fetchVisualChangeset?: (visualChangesetId: string) => Promise<{
     visualChangeset?: APIVisualChangeset;
     experiment?: APIExperiment;
@@ -58,28 +54,43 @@ type UseApiHook = (creds: APICreds) => {
     visualChangesetId: string,
     payload: any
   ) => Promise<{ nModified?: number }>;
+  error: string;
 };
 
-const useApi: UseApiHook = ({ apiKey, apiHost }: APICreds) => {
+const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
+  const [error, setError] = useState("");
+
   const fetchVisualChangeset = useCallback(
     async (visualChangesetId: string) => {
       if (!apiHost || !apiKey) return {};
 
-      const response = await fetch(
-        `${apiHost}/api/v1/visual-changesets/${visualChangesetId}?includeExperiment=1`,
-        {
-          headers: genHeaders(apiKey),
-        }
-      );
+      try {
+        const response = await fetch(
+          `${apiHost}/api/v1/visual-changesets/${visualChangesetId}?includeExperiment=1`,
+          {
+            headers: genHeaders(apiKey),
+          }
+        );
 
-      const res = await response.json();
+        if (response.status !== 200) throw new Error(response.statusText);
 
-      const { visualChangeset, experiment } = res;
+        const res = await response.json();
 
-      return {
-        visualChangeset,
-        experiment,
-      };
+        const { visualChangeset, experiment } = res;
+
+        setError("");
+
+        return {
+          visualChangeset,
+          experiment,
+        };
+      } catch (e) {
+        console.log("testtt");
+        setError(
+          "There was an error reaching the API. Please check your API key and host."
+        );
+        return {};
+      }
     },
     [apiHost, apiKey]
   );
@@ -97,18 +108,29 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: APICreds) => {
         })),
       };
 
-      const response = await fetch(
-        `${apiHost}/api/v1/visual-changesets/${visualChangesetId}`,
-        {
-          headers: genHeaders(apiKey),
-          method: "PUT",
-          body: JSON.stringify(updatePayload),
-        }
-      );
+      try {
+        const response = await fetch(
+          `${apiHost}/api/v1/visual-changesets/${visualChangesetId}`,
+          {
+            headers: genHeaders(apiKey),
+            method: "PUT",
+            body: JSON.stringify(updatePayload),
+          }
+        );
 
-      const res = await response.json();
+        if (response.status !== 200) throw new Error(response.statusText);
 
-      return { nModified: res.nModified };
+        const res = await response.json();
+
+        setError("");
+
+        return { nModified: res.nModified };
+      } catch (e) {
+        setError(
+          "There was an error reaching the API. Please check your API key and host."
+        );
+        return {};
+      }
     },
     [apiHost, apiKey]
   );
@@ -116,6 +138,7 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: APICreds) => {
   return {
     fetchVisualChangeset,
     updateVisualChangeset,
+    error,
   };
 };
 

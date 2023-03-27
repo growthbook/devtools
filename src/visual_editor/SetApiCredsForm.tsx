@@ -1,22 +1,26 @@
 import React, { FC, useCallback, useState } from "react";
 import GBLogo from "../../public/logo192.png";
-
-export interface ApiCreds {
-  key: string;
-  host: string;
-}
+import { ApiCreds } from "../../devtools";
 
 const areValidApiCreds = (creds: Partial<ApiCreds>): creds is ApiCreds =>
-  !!creds.host && !!creds.key;
+  !!creds.apiHost && !!creds.apiKey;
 
 const SetApiCredsAlert: FC<{
   appHost?: string;
   apiHost?: string;
+  apiKey?: string;
   saveApiCreds: (creds: ApiCreds) => void;
-}> = ({ appHost, apiHost: _apiHost, saveApiCreds }) => {
+  error?: string;
+}> = ({
+  appHost,
+  apiHost: _apiHost = "",
+  apiKey: _apiKey = "",
+  saveApiCreds,
+  error: _error,
+}) => {
   const [apiHost, setApiHost] = useState(_apiHost);
-  const [apiKey, setApiKey] = useState("");
-  const [error, setError] = useState("");
+  const [apiKey, setApiKey] = useState(_apiKey);
+  const [error, setError] = useState(_error || "");
 
   const onSubmit = useCallback(
     (creds: Partial<ApiCreds>) => {
@@ -83,7 +87,7 @@ const SetApiCredsAlert: FC<{
 
         <button
           className="mt-4 p-2 bg-indigo-600 w-full rounded"
-          onClick={() => onSubmit({ key: apiKey, host: apiHost })}
+          onClick={() => onSubmit({ apiKey, apiHost })}
         >
           Save
         </button>

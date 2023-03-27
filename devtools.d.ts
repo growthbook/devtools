@@ -75,3 +75,8 @@ export type Message =
   | OptionsUrlRequest
   | OptionsUrlResponse
   | SaveApiCredsMessage;
+
+export interface ApiCreds {
+  apiKey: string;
+  apiHost: string;
+}
