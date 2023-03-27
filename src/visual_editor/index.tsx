@@ -49,6 +49,7 @@ import AttributeEdit, {
   IGNORED_ATTRS,
 } from "./ElementDetails/AttributeEdit";
 import SetApiCredsAlert from "./SetApiCredsAlert";
+import useMessage from "./lib/hooks/useMessage";
 
 const VISUAL_CHANGESET_ID_PARAMS_KEY = "vc-id";
 const VARIATION_INDEX_PARAMS_KEY = "v-idx";
@@ -308,38 +309,29 @@ const VisualEditor: FC<{}> = () => {
   );
 
   // get ahold of api credentials. requires messaging the background script
-  useEffect(() => {
-    // add listener for response
-    const onMsg = (event: MessageEvent<Message>) => {
-      const data = event.data;
+  useMessage({
+    messageHandler: (message) => {
       const hasVisualEditorParams = visualChangesetId && variationIndex;
 
-      if (data.type !== "GB_RESPONSE_API_CREDS") return;
+      if (message.type !== "GB_RESPONSE_API_CREDS") return;
 
-      if (hasVisualEditorParams && (!data.apiKey || !data.apiHost)) {
+      if (hasVisualEditorParams && (!message.apiKey || !message.apiHost)) {
         setShowApiCredsAlert(true);
       }
 
       if (
-        data.type === "GB_RESPONSE_API_CREDS" &&
-        data.apiKey &&
-        data.apiHost
+        message.type === "GB_RESPONSE_API_CREDS" &&
+        message.apiKey &&
+        message.apiHost
       ) {
         setApiCreds({
-          apiKey: data.apiKey,
-          apiHost: data.apiHost,
+          apiKey: message.apiKey,
+          apiHost: message.apiHost,
         });
       }
-    };
-
-    window.addEventListener("message", onMsg);
-
-    // send message
-    window.postMessage({ type: "GB_REQUEST_API_CREDS" }, "*");
-
-    // cleanup
-    return () => window.removeEventListener("message", onMsg);
-  }, []);
+    },
+    outgoingMessage: { type: "GB_REQUEST_API_CREDS" },
+  });
 
   // fetch visual changeset and experiment from api once we have credentials
   useEffect(() => {
@@ -448,7 +440,11 @@ const VisualEditor: FC<{}> = () => {
   }, []);
 
   if (showApiCredsAlert) {
-    return <SetApiCredsAlert />;
+    return (
+      <SetApiCredsAlert
+        hostUrl={experimentUrl.substr(0, experimentUrl.indexOf("/experiment"))}
+      />
+    );
   }
 
   if (!isVisualEditorEnabled) return null;

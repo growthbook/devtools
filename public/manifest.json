@@ -9,10 +9,6 @@
     "page": "options.html"
   },
 
-  "action": {
-    "default_popup": "popup.html"
-  },
-
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
@@ -27,7 +23,9 @@
       "resources": [
         "js/devtools_embed_script.js",
         "js/visual_editor.js",
-        "js/logo192.png"
+        "js/logo192.png",
+        "js/create-api-key.png",
+        "options.html"
       ]
     }
   ],

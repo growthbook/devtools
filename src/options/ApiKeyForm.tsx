@@ -27,7 +27,7 @@ const ApiKeyInput: FC<{
         <span className="text-xs px-1">API Host</span>
         <input
           placeholder="https://api.growthbook.io"
-          className="border p-2 rounded mb-2"
+          className="border p-2 rounded mb-2 text-black"
           type="text"
           value={_apiHost}
           onChange={(e) => _setApiHost(e.target.value)}
@@ -37,7 +37,7 @@ const ApiKeyInput: FC<{
         <span className="text-xs px-1">API Secret</span>
         <input
           placeholder="secret_xyz..."
-          className="border p-2 rounded mb-2"
+          className="border p-2 rounded mb-4 text-black"
           type="password"
           value={_apiKey}
           onChange={(e) => _setApiKey(e.target.value)}

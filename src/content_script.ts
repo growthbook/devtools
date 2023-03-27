@@ -5,13 +5,12 @@ import { loadApiHost, loadApiKey } from "./utils/storage";
 window.addEventListener("message", function (msg: MessageEvent<Message>) {
   const data = msg.data;
   const devtoolsMessages = ["GB_REFRESH", "GB_ERROR"];
-  const visualEditorMessages = ["GB_REQUEST_API_CREDS"];
 
   if (devtoolsMessages.includes(data.type)) {
     chrome.runtime.sendMessage(data);
   }
 
-  if (visualEditorMessages.includes(data.type)) {
+  if (data.type === "GB_REQUEST_API_CREDS") {
     Promise.all([loadApiKey(), loadApiHost()]).then(([apiKey, apiHost]) => {
       window.postMessage(
         { type: "GB_RESPONSE_API_CREDS", apiKey, apiHost },
@@ -19,19 +18,27 @@ window.addEventListener("message", function (msg: MessageEvent<Message>) {
       );
     });
   }
+
+  if (data.type === "GB_REQUEST_OPTIONS_URL") {
+    window.postMessage(
+      {
+        type: "GB_RESPONSE_OPTIONS_URL",
+        url: chrome.runtime.getURL("options.html"),
+      },
+      "*"
+    );
+  }
 });
 
 // Pass along messages from devtools, popup ----> content script
 chrome.runtime.onMessage.addListener(async (msg: Message) => {
-  const data = msg.type;
   const devtoolsMessages = ["GB_REQUEST_REFRESH", "GB_SET_OVERRIDES"];
   const popupMessages = ["GB_ENABLE_VISUAL_EDITOR", "GB_DISABLE_VISUAL_EDITOR"];
 
-  if ([...devtoolsMessages, ...popupMessages].includes(data)) {
+  if ([...devtoolsMessages, ...popupMessages].includes(msg.type)) {
     window.postMessage(msg, "*");
   }
 });
-
 
 // Inject devtools content script
 const DEVTOOLS_SCRIPT_ID = "gbdevtools-page-script";
