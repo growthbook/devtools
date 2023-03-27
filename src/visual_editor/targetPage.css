@@ -13,22 +13,5 @@
 [gb-selection-mode-selected] {
   outline: 2px dashed #945eff;
   cursor: crosshair;
-
   outline-offset: 2px;
-  animation-name: outline-pulse;
-  animation-iteration-count: infinite;
-  animation-duration: 1500ms;
-  animation-timing-function: linear;
-}
-
-@keyframes outline-pulse {
-  0% {
-    outline-offset: 2px;
-  }
-  50% {
-    outline-offset: 6px;
-  }
-  100% {
-    outline-offset: 2px;
-  }
 }
