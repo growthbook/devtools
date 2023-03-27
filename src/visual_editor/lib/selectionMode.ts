@@ -1,5 +1,5 @@
 import { finder } from "@medv/finder";
-import { shadowRoot, CONTAINER_ID } from "..";
+import { CONTAINER_ID } from "..";
 
 export const highlightedAttributeName = "gb-selection-mode-highlighted";
 export const selectedAttributeName = "gb-selection-mode-selected";
@@ -75,7 +75,7 @@ export const updateSelectedElement = ({
     clearHighlightedElementAttr();
     _selectedElement.setAttribute(selectedAttributeName, "");
     _setHighlightedElementSelector(finder(_selectedElement));
-    document.removeEventListener("mousemove", mouseMoveHandler);
+    // document.removeEventListener("mousemove", mouseMoveHandler);
   }
 };
 
