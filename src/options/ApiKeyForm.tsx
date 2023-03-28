@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 
 const ApiKeyInput: FC<{
   apiKey: string | null;
@@ -8,13 +8,15 @@ const ApiKeyInput: FC<{
   onSave: () => void;
 }> = ({ saveApiKey, apiHost, saveApiHost, apiKey, onSave }) => {
   const [_apiKey, _setApiKey] = useState(apiKey || "");
-  const [_apiHost, _setApiHost] = useState(apiHost || "");
+  const [_apiHost, _setApiHost] = useState(
+    apiHost || "https://api.growthbook.io"
+  );
   return (
     <form
       className="flex flex-col"
       onSubmit={(_e) => {
         saveApiKey(_apiKey);
-        saveApiHost(_apiHost);
+        saveApiHost(_apiHost.replace(/[\/]+$/, ""));
         onSave();
       }}
     >
@@ -25,7 +27,7 @@ const ApiKeyInput: FC<{
         <span className="text-xs px-1">API Host</span>
         <input
           placeholder="https://api.growthbook.io"
-          className="border p-2 rounded mb-2"
+          className="border p-2 rounded mb-2 text-black"
           type="text"
           value={_apiHost}
           onChange={(e) => _setApiHost(e.target.value)}
@@ -35,8 +37,8 @@ const ApiKeyInput: FC<{
         <span className="text-xs px-1">API Secret</span>
         <input
           placeholder="secret_xyz..."
-          className="border p-2 rounded mb-2"
-          type="text"
+          className="border p-2 rounded mb-4 text-black"
+          type="password"
           value={_apiKey}
           onChange={(e) => _setApiKey(e.target.value)}
         />

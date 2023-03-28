@@ -71,7 +71,7 @@ export const useApiKey = () => {
   };
 };
 
-export const useApiEndpoint = <T>(endpoint: string) => {
+export const useApiEndpoint = <T>(endpoint: string | null) => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<T | null>(null);
 
@@ -97,8 +97,9 @@ export const useApiEndpoint = <T>(endpoint: string) => {
   };
 
   useEffect(() => {
+    if (!endpoint) return;
     fetchEndpoint();
-  }, []);
+  }, [endpoint]);
 
   return {
     data,

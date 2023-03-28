@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import * as ReactDOM from "react-dom/client";
 import { useApiKey } from "../utils/hooks";
 import ApiKeyForm from "./ApiKeyForm";
-import "../global.css";
+import "./index.css";
 
 const Options = () => {
   const { apiKey, apiHost, saveApiKey, saveApiHost, loading } = useApiKey();
