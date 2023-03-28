@@ -4,7 +4,6 @@ const path = require("path");
 const srcDir = path.join(__dirname, "..", "src");
 
 module.exports = {
-  mode: "development",
   entry: {
     devtools_init: path.join(srcDir, "devtools", "init.ts"),
     devtools_embed_script: path.join(srcDir, "devtools", "embed_script.ts"),
@@ -16,6 +15,7 @@ module.exports = {
     assetModuleFilename: "[name][ext]",
   },
   optimization: {
+    nodeEnv: "development",
     splitChunks: {
       name: "vendor",
       chunks(chunk) {
