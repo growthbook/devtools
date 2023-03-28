@@ -2579,10 +2579,10 @@ dlv@^1.1.3:
   resolved "https://registry.yarnpkg.com/dlv/-/dlv-1.1.3.tgz#5c198a8a11453596e751494d49874bc7732f2e79"
   integrity sha512-+HlytyjlPKnIG8XuRG8WvmBP8xs8P71y+SKKS6ZXWoEgLuePxtDoUEiH7WkdePWrQ5JBpE6aoVqfZfJUQkjXwA==
 
-dom-mutator@^0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/dom-mutator/-/dom-mutator-0.3.2.tgz#6a5246092674efc51565846839e46c38bfc2529c"
-  integrity sha512-tQ52xFNIZJTYrsfzq87siF2gLklR3iKU7zQelSHVv6Qe0HZXtrwhXE4SMrmnsj14sTVZzKnLevW7wZS90IUhCA==
+dom-mutator@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/dom-mutator/-/dom-mutator-0.4.0.tgz#cb0a6981ed58bdba25028cb0e5c75777b9b68c07"
+  integrity sha512-H8pcE9Tmmnxs6FTZCX4aRthcweGsVdytqpBSiVIDnTnmosXXYO+jatDWwRReMbJJsAmsnAWsc0Ht4ZYGdN8gZw==
 
 domexception@^2.0.1:
   version "2.0.1"
