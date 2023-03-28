@@ -1,6 +1,9 @@
 const { merge } = require("webpack-merge");
-const common = require("./webpack.common.js");
+const devtoolsConfig = require("./webpack.devtools.js");
+const visualEditorConfig = require("./webpack.visual-editor.js");
 
-module.exports = merge(common, {
-  mode: "production",
-});
+module.exports = [devtoolsConfig, visualEditorConfig].map((c) =>
+  merge(c, {
+    mode: "production",
+  })
+);

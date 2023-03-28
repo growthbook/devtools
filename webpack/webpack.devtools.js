@@ -1,16 +1,13 @@
 const webpack = require("webpack");
-const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
+const path = require("path");
 const srcDir = path.join(__dirname, "..", "src");
 
 module.exports = {
   entry: {
-    options: path.join(srcDir, "options", "index.tsx"),
-    content_script: path.join(srcDir, "content_script.ts"),
     devtools_init: path.join(srcDir, "devtools", "init.ts"),
     devtools_embed_script: path.join(srcDir, "devtools", "embed_script.ts"),
     devtools_panel: path.join(srcDir, "devtools", "ui", "index.tsx"),
-    visual_editor: path.join(srcDir, "visual_editor", "index.tsx"),
   },
   output: {
     path: path.join(__dirname, "../dist/js"),
@@ -18,6 +15,7 @@ module.exports = {
     assetModuleFilename: "[name][ext]",
   },
   optimization: {
+    nodeEnv: "development",
     splitChunks: {
       name: "vendor",
       chunks(chunk) {
@@ -33,23 +31,12 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: /\.css$/,
-        // visual editor css loaded separately
-        exclude: [path.join(srcDir, "visual_editor", "index.css")],
-        use: ["style-loader", "css-loader", "postcss-loader"],
-      },
-      {
         test: /\.svg$/,
         use: [
           {
             loader: "url-loader",
           },
         ],
-      },
-      {
-        include: path.join(srcDir, "visual_editor", "index.css"),
-        type: "asset/source",
-        loader: "postcss-loader",
       },
       {
         test: /\.png$/i,
