@@ -30,7 +30,7 @@
     }
   ],
 
-  "permissions": ["storage", "activeTab", "desktopCapture"],
+  "permissions": ["storage", "activeTab"],
 
   "host_permissions": ["<all_urls>"],
 
