@@ -525,6 +525,10 @@ const VisualEditor: FC<{}> = () => {
         />
       ) : null}
 
+      {mode === "selection" && selectedElement ? (
+        <HighlightedElementSelectorDisplay selector={selector} />
+      ) : null}
+
       {mode === "css" && (
         <VisualEditorSection title="Global CSS">
           <GlobalCSSEditor css={selectedVariation.css} setCss={setGlobalCSS} />
