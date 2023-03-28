@@ -62,9 +62,6 @@ module.exports = [
     entry: {
       options: path.join(srcDir, "options", "index.tsx"),
       content_script: path.join(srcDir, "content_script.ts"),
-      devtools_init: path.join(srcDir, "devtools", "init.ts"),
-      devtools_embed_script: path.join(srcDir, "devtools", "embed_script.ts"),
-      devtools_panel: path.join(srcDir, "devtools", "ui", "index.tsx"),
       visual_editor: path.join(srcDir, "visual_editor", "index.tsx"),
     },
     output: {
