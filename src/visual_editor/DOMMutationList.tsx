@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useCallback } from "react";
 import { DeclarativeMutation } from "dom-mutator";
 import { FC } from "react";
 import { RxCross2 } from "react-icons/rx";
@@ -16,7 +16,13 @@ const DOMMutationList: FC<{
   globalCss?: string;
   mutations: DeclarativeMutation[];
   removeDomMutation?: (mutationIndex: number) => void;
-}> = ({ mutations: _mutations, removeDomMutation, globalCss }) => {
+  clearGlobalCss?: () => void;
+}> = ({
+  mutations: _mutations,
+  removeDomMutation,
+  globalCss,
+  clearGlobalCss,
+}) => {
   const mutations: DeclarativeMutation[] = [
     ...(globalCss
       ? [
@@ -30,6 +36,17 @@ const DOMMutationList: FC<{
       : []),
     ..._mutations,
   ];
+
+  const onRemoveMutation = useCallback(
+    (mutation: DeclarativeMutation) => {
+      if (mutation.selector === "global" && mutation.attribute === "css") {
+        clearGlobalCss?.();
+        return;
+      }
+      removeDomMutation?.(mutations.indexOf(mutation));
+    },
+    [removeDomMutation, clearGlobalCss]
+  );
 
   if (!mutations.length) return null;
 
@@ -51,7 +68,7 @@ const DOMMutationList: FC<{
             <div className="w-8 flex justify-end">
               <RxCross2
                 className="w-4 h-4 cursor-pointer hover:text-slate-100"
-                onClick={() => removeDomMutation(index)}
+                onClick={() => onRemoveMutation(mutation)}
               />
             </div>
           )}

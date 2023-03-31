@@ -14,14 +14,6 @@ module.exports = {
     filename: "[name].js",
     assetModuleFilename: "[name][ext]",
   },
-  optimization: {
-    splitChunks: {
-      name: "vendor",
-      chunks(chunk) {
-        return chunk.name !== "background" && chunk.name !== "visual_editor";
-      },
-    },
-  },
   module: {
     rules: [
       {

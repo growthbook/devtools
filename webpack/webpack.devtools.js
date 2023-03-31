@@ -18,9 +18,6 @@ module.exports = {
     nodeEnv: "development",
     splitChunks: {
       name: "vendor",
-      chunks(chunk) {
-        return chunk.name !== "background" && chunk.name !== "visual_editor";
-      },
     },
   },
   module: {

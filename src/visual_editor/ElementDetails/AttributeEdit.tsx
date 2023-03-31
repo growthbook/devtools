@@ -50,7 +50,7 @@ const EditAttributeInput: FC<{
     _onCancel();
   }, [setName, setValue]);
   const onSubmit = useCallback(() => {
-    _onSubmit({ name, value });
+    _onSubmit({ name, value: value.trim() });
     onCancel();
   }, [name, value, _onSubmit, onCancel]);
   return (
@@ -70,7 +70,7 @@ const EditAttributeInput: FC<{
       <TextareaAutosize
         className="py-0 px-2 text-sm text-black mr-2 mb-1"
         placeholder="Value"
-        value={value?.trim()}
+        value={value}
         onChange={(e) => setValue(e.target.value)}
       />
 

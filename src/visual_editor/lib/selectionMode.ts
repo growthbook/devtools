@@ -33,7 +33,7 @@ let _selectedElement: HTMLElement | null;
 let _setSelectedElement: ((element: HTMLElement | null) => void) | null;
 let _setHighlightedElementSelector: ((selector: string) => void) | null;
 
-const clickHandler = (event: MouseEvent) => {
+const mouseDownHandler = (event: MouseEvent) => {
   // don't intercept cilcks on the visual editor itself
   if ((event.target as HTMLElement).id === CONTAINER_ID) return;
 
@@ -51,7 +51,7 @@ const teardown = () => {
   clearHighlightedElementAttr();
   clearSelectedElementAttr();
   document.removeEventListener("mousemove", mouseMoveHandler);
-  document.removeEventListener("click", clickHandler, true);
+  document.removeEventListener("mousedown", mouseDownHandler);
 };
 
 export const updateSelectedElement = ({
@@ -94,7 +94,7 @@ export const toggleSelectionMode = ({
     _setSelectedElement = setSelectedElement;
     _setHighlightedElementSelector = setHighlightedElementSelector;
     document.addEventListener("mousemove", mouseMoveHandler);
-    document.addEventListener("click", clickHandler, true);
+    document.addEventListener("mousedown", mouseDownHandler);
   } else {
     teardown();
   }

@@ -1,9 +1,13 @@
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 
 const GlobalCSSEditor: FC<{
   css?: string;
-  setCss: (css: string) => void;
-}> = ({ css = "", setCss }) => {
+  onSubmit: (css: string) => void;
+}> = ({ css: _css = "", onSubmit }) => {
+  const [css, setCss] = useState(_css);
+
+  useEffect(() => onSubmit(css), [css]);
+
   return (
     <div className="px-4 pb-4">
       <textarea

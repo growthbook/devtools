@@ -222,10 +222,10 @@ const VisualEditor: FC<{}> = () => {
   );
 
   const setGlobalCSS = useCallback(
-    (css: string) => {
+    debounce((css: string) => {
       updateSelectedVariation({ css });
       globalStyleTag.innerHTML = css;
-    },
+    }, 500),
     [updateSelectedVariation]
   );
 
@@ -531,7 +531,10 @@ const VisualEditor: FC<{}> = () => {
 
       {mode === "css" && (
         <VisualEditorSection title="Global CSS">
-          <GlobalCSSEditor css={selectedVariation.css} setCss={setGlobalCSS} />
+          <GlobalCSSEditor
+            css={selectedVariation.css}
+            onSubmit={setGlobalCSS}
+          />
         </VisualEditorSection>
       )}
 
@@ -558,6 +561,7 @@ const VisualEditor: FC<{}> = () => {
         >
           <DOMMutationList
             globalCss={selectedVariation.css}
+            clearGlobalCss={() => setGlobalCSS("")}
             removeDomMutation={removeDomMutation}
             mutations={selectedVariation?.domMutations ?? []}
           />
