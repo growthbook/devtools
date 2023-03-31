@@ -225,7 +225,7 @@ const VisualEditor: FC<{}> = () => {
     debounce((css: string) => {
       updateSelectedVariation({ css });
       globalStyleTag.innerHTML = css;
-    }, 1000),
+    }, 500),
     [updateSelectedVariation]
   );
 
@@ -561,6 +561,7 @@ const VisualEditor: FC<{}> = () => {
         >
           <DOMMutationList
             globalCss={selectedVariation.css}
+            clearGlobalCss={() => setGlobalCSS("")}
             removeDomMutation={removeDomMutation}
             mutations={selectedVariation?.domMutations ?? []}
           />
