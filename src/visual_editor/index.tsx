@@ -273,10 +273,11 @@ const VisualEditor: FC<{}> = () => {
   );
 
   const removeDomMutation = useCallback(
-    (domMutationIndex: number) => {
+    (mutation: DeclarativeMutation) => {
+      const indexToDelete = selectedVariation.domMutations.indexOf(mutation);
       updateSelectedVariation({
         domMutations: selectedVariation.domMutations.filter(
-          (_mutation, i) => i !== domMutationIndex
+          (_mutation, i) => i !== indexToDelete
         ),
       });
     },
@@ -549,7 +550,10 @@ const VisualEditor: FC<{}> = () => {
           isCollapsible
           title={`Changes (${selectedElementMutations.length})`}
         >
-          <DOMMutationList mutations={selectedElementMutations ?? []} />
+          <DOMMutationList
+            mutations={selectedElementMutations ?? []}
+            removeDomMutation={removeDomMutation}
+          />
         </VisualEditorSection>
       )}
 

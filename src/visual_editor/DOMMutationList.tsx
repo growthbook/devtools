@@ -15,7 +15,7 @@ const DOMAttrColumn: FC<{ children: ReactNode }> = ({ children }) => (
 const DOMMutationList: FC<{
   globalCss?: string;
   mutations: DeclarativeMutation[];
-  removeDomMutation?: (mutationIndex: number) => void;
+  removeDomMutation?: (mutation: DeclarativeMutation) => void;
   clearGlobalCss?: () => void;
 }> = ({
   mutations: _mutations,
@@ -43,7 +43,7 @@ const DOMMutationList: FC<{
         clearGlobalCss?.();
         return;
       }
-      removeDomMutation?.(mutations.indexOf(mutation));
+      removeDomMutation?.(mutation);
     },
     [removeDomMutation, clearGlobalCss]
   );
