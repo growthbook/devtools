@@ -33,6 +33,13 @@ let _selectedElement: HTMLElement | null;
 let _setSelectedElement: ((element: HTMLElement | null) => void) | null;
 let _setHighlightedElementSelector: ((selector: string) => void) | null;
 
+// only the 'click' event can prevent the default behavior when clicking on
+// a link or button or similar
+const clickHandler = (event: MouseEvent) => {
+  event.preventDefault();
+  event.stopPropagation();
+};
+
 const mouseDownHandler = (event: MouseEvent) => {
   // don't intercept cilcks on the visual editor itself
   if ((event.target as HTMLElement).id === CONTAINER_ID) return;
@@ -52,6 +59,7 @@ const teardown = () => {
   clearSelectedElementAttr();
   document.removeEventListener("mousemove", mouseMoveHandler);
   document.removeEventListener("mousedown", mouseDownHandler);
+  document.removeEventListener("click", clickHandler);
 };
 
 export const updateSelectedElement = ({
@@ -95,6 +103,7 @@ export const toggleSelectionMode = ({
     _setHighlightedElementSelector = setHighlightedElementSelector;
     document.addEventListener("mousemove", mouseMoveHandler);
     document.addEventListener("mousedown", mouseDownHandler);
+    document.addEventListener("click", clickHandler);
   } else {
     teardown();
   }
