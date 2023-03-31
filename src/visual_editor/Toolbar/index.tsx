@@ -30,11 +30,13 @@ const modeToIcon: Record<ToolbarMode, IconType> = {
 const ToolbarButton = ({
   mode,
   enable,
+  disable = () => {},
   isActive,
   title,
 }: {
   mode: ToolbarMode;
   enable: () => void;
+  disable?: () => void;
   isActive: boolean;
   title: string;
 }) => {
@@ -48,7 +50,7 @@ const ToolbarButton = ({
           "bg-slate-700": isActive,
         }
       )}
-      onClick={enable}
+      onClick={isActive ? disable : enable}
     >
       <Icon />
     </button>
@@ -74,6 +76,8 @@ const Toolbar: FC<{
           mode="selection"
           enable={() => {
             setMode("selection");
+          }}
+          disable={() => {
             clearSelectedElement();
           }}
           title="Selection mode"
