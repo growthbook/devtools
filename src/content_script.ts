@@ -1,5 +1,10 @@
 import type { Message } from "../devtools";
 import {
+  VISUAL_CHANGESET_ID_PARAMS_KEY,
+  EXPERIMENT_URL_PARAMS_KEY,
+  API_HOST_PARAMS_KEY,
+} from "./visual_editor/lib/constants";
+import {
   loadApiHost,
   loadApiKey,
   saveApiHost,
@@ -67,9 +72,21 @@ if (!document.getElementById(DEVTOOLS_SCRIPT_ID)) {
   document.body.appendChild(script);
 }
 
+const hasVisualEditorQueryParams = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  return (
+    !!urlParams.get(VISUAL_CHANGESET_ID_PARAMS_KEY) &&
+    !!urlParams.get(EXPERIMENT_URL_PARAMS_KEY) &&
+    !!urlParams.get(API_HOST_PARAMS_KEY)
+  );
+};
+
 // Inject visual editor content script
 const VISUAL_EDITOR_SCRIPT_ID = "visual-editor-script";
-if (!document.getElementById(VISUAL_EDITOR_SCRIPT_ID)) {
+if (
+  !document.getElementById(VISUAL_EDITOR_SCRIPT_ID) &&
+  hasVisualEditorQueryParams()
+) {
   const script = document.createElement("script");
   script.id = VISUAL_EDITOR_SCRIPT_ID;
   script.async = true;
