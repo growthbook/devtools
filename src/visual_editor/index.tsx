@@ -50,11 +50,12 @@ import AttributeEdit, {
 import SetApiCredsForm from "./SetApiCredsForm";
 import useMessage from "./lib/hooks/useMessage";
 import { ApiCreds } from "../../devtools";
-
-const VISUAL_CHANGESET_ID_PARAMS_KEY = "vc-id";
-const VARIATION_INDEX_PARAMS_KEY = "v-idx";
-const EXPERIMENT_URL_PARAMS_KEY = "exp-url";
-const API_HOST_PARAMS_KEY = "api-host";
+import {
+  VISUAL_CHANGESET_ID_PARAMS_KEY,
+  VARIATION_INDEX_PARAMS_KEY,
+  EXPERIMENT_URL_PARAMS_KEY,
+  API_HOST_PARAMS_KEY,
+} from "./lib/constants";
 
 export interface VisualEditorVariation {
   name: string;
