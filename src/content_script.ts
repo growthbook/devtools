@@ -67,9 +67,17 @@ if (!document.getElementById(DEVTOOLS_SCRIPT_ID)) {
   document.body.appendChild(script);
 }
 
+const hasVisualEditorQueryParams = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  return !!urlParams.get("vc-id");
+};
+
 // Inject visual editor content script
 const VISUAL_EDITOR_SCRIPT_ID = "visual-editor-script";
-if (!document.getElementById(VISUAL_EDITOR_SCRIPT_ID)) {
+if (
+  !document.getElementById(VISUAL_EDITOR_SCRIPT_ID) &&
+  hasVisualEditorQueryParams()
+) {
   const script = document.createElement("script");
   script.id = VISUAL_EDITOR_SCRIPT_ID;
   script.async = true;
