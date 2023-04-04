@@ -389,7 +389,7 @@ const VisualEditor: FC<{}> = () => {
   // handle mode selection
   useEffect(() => {
     toggleNormalMode(
-      !isVisualEditorEnabled ? isVisualEditorEnabled : mode === "normal"
+      !isVisualEditorEnabled ? isVisualEditorEnabled : mode === "interactive"
     );
     toggleSelectionMode({
       isEnabled: !isVisualEditorEnabled

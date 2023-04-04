@@ -1,17 +1,17 @@
 import React, { FC } from "react";
 import {
   RxCursorArrow,
-  RxSection,
   RxGlobe,
   RxKeyboard,
   RxCamera,
   RxListBullet,
+  RxPencil1,
 } from "react-icons/rx";
 import clsx from "clsx";
 import { IconType } from "react-icons";
 
 export type ToolbarMode =
-  | "normal"
+  | "interactive"
   | "selection"
   | "css"
   | "mutation"
@@ -19,8 +19,8 @@ export type ToolbarMode =
   | "changes";
 
 const modeToIcon: Record<ToolbarMode, IconType> = {
-  normal: RxCursorArrow,
-  selection: RxSection,
+  interactive: RxCursorArrow,
+  selection: RxPencil1,
   css: RxGlobe,
   mutation: RxKeyboard,
   screenshot: RxCamera,
@@ -66,10 +66,10 @@ const Toolbar: FC<{
     <div className="z-max shadow-xl">
       <div className="flex flex-row">
         <ToolbarButton
-          isActive={mode === "normal"}
-          mode="normal"
-          enable={() => setMode("normal")}
-          title="Normal mode"
+          isActive={mode === "interactive"}
+          mode="interactive"
+          enable={() => setMode("interactive")}
+          title="Interactive mode"
         />
         <ToolbarButton
           isActive={mode === "selection"}
