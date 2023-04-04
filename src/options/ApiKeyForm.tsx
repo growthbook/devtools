@@ -1,5 +1,7 @@
 import React, { FC, useState } from "react";
 
+const DEFAULT_API_HOST = "https://api.growthbook.io";
+
 const ApiKeyInput: FC<{
   apiKey: string | null;
   apiHost: string | null;
@@ -8,15 +10,15 @@ const ApiKeyInput: FC<{
   onSave: () => void;
 }> = ({ saveApiKey, apiHost, saveApiHost, apiKey, onSave }) => {
   const [_apiKey, _setApiKey] = useState(apiKey || "");
-  const [_apiHost, _setApiHost] = useState(
-    apiHost || "https://api.growthbook.io"
-  );
+  const [_apiHost, _setApiHost] = useState(apiHost || DEFAULT_API_HOST);
   return (
     <form
       className="flex flex-col"
       onSubmit={(_e) => {
         saveApiKey(_apiKey);
-        saveApiHost(_apiHost.replace(/[\/]+$/, ""));
+        saveApiHost(
+          _apiHost ? _apiHost.replace(/[\/]+$/, "") : DEFAULT_API_HOST
+        );
         onSave();
       }}
     >
