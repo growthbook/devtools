@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-
 const NAMESPACE = "gb-devtools";
 const VERSION = "v1";
 const API_KEY = `${NAMESPACE}-${VERSION}-api-key`;
 const API_HOST = `${NAMESPACE}-${VERSION}-api-host`;
+
+const DEFAULT_API_HOST = "https://api.growthbook.io";
 
 export const loadApiKey = async () => {
   const result = await chrome.storage.sync.get([API_KEY]);
@@ -19,7 +19,7 @@ export const saveApiKey = async (apiKey: string) => {
 export const clearApiKey = () => chrome.storage.sync.remove([API_KEY]);
 
 export const saveApiHost = async (apiHost: string) => {
-  await chrome.storage.sync.set({ [API_HOST]: apiHost });
+  await chrome.storage.sync.set({ [API_HOST]: apiHost || DEFAULT_API_HOST });
   const result = await chrome.storage.sync.get([API_HOST]);
   return result[API_HOST];
 };

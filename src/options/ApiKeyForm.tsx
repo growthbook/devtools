@@ -1,8 +1,6 @@
 import React, { FC, useState } from "react";
 
-const DEFAULT_API_HOST = "https://api.growthbook.io";
-
-const ApiKeyInput: FC<{
+const ApiKeyForm: FC<{
   apiKey: string | null;
   apiHost: string | null;
   saveApiKey: (apiKey: string) => void;
@@ -10,15 +8,13 @@ const ApiKeyInput: FC<{
   onSave: () => void;
 }> = ({ saveApiKey, apiHost, saveApiHost, apiKey, onSave }) => {
   const [_apiKey, _setApiKey] = useState(apiKey || "");
-  const [_apiHost, _setApiHost] = useState(apiHost || DEFAULT_API_HOST);
+  const [_apiHost, _setApiHost] = useState(apiHost || "");
   return (
     <form
       className="flex flex-col"
       onSubmit={(_e) => {
         saveApiKey(_apiKey);
-        saveApiHost(
-          _apiHost ? _apiHost.replace(/[\/]+$/, "") : DEFAULT_API_HOST
-        );
+        saveApiHost(_apiHost.replace(/[\/]+$/, ""));
         onSave();
       }}
     >
@@ -50,4 +46,4 @@ const ApiKeyInput: FC<{
   );
 };
 
-export default ApiKeyInput;
+export default ApiKeyForm;

@@ -3,9 +3,9 @@ import GBLogo from "../../public/logo192.png";
 import { ApiCreds } from "../../devtools";
 
 const areValidApiCreds = (creds: Partial<ApiCreds>): creds is ApiCreds =>
-  !!creds.apiHost && !!creds.apiKey;
+  !!creds.apiKey;
 
-const SetApiCredsAlert: FC<{
+const SetApiCredsForm: FC<{
   appHost?: string;
   apiHost?: string;
   apiKey?: string;
@@ -25,7 +25,7 @@ const SetApiCredsAlert: FC<{
   const onSubmit = useCallback(
     (creds: Partial<ApiCreds>) => {
       if (!areValidApiCreds(creds)) {
-        return setError("Please fill out both fields");
+        return setError("Please fill out the API Key field");
       }
       saveApiCreds(creds);
     },
@@ -69,6 +69,7 @@ const SetApiCredsAlert: FC<{
         <div className="text-black">
           <label className="text-white text-sm">API Host</label>
           <input
+            placeholder="https://api.growthbook.io"
             className="p-2 w-full rounded mb-2"
             type="text"
             value={apiHost}
@@ -96,4 +97,4 @@ const SetApiCredsAlert: FC<{
   );
 };
 
-export default SetApiCredsAlert;
+export default SetApiCredsForm;
