@@ -1,6 +1,6 @@
 import React, { FC, useState } from "react";
 
-const ApiKeyInput: FC<{
+const ApiKeyForm: FC<{
   apiKey: string | null;
   apiHost: string | null;
   saveApiKey: (apiKey: string) => void;
@@ -8,9 +8,7 @@ const ApiKeyInput: FC<{
   onSave: () => void;
 }> = ({ saveApiKey, apiHost, saveApiHost, apiKey, onSave }) => {
   const [_apiKey, _setApiKey] = useState(apiKey || "");
-  const [_apiHost, _setApiHost] = useState(
-    apiHost || "https://api.growthbook.io"
-  );
+  const [_apiHost, _setApiHost] = useState(apiHost || "");
   return (
     <form
       className="flex flex-col"
@@ -48,4 +46,4 @@ const ApiKeyInput: FC<{
   );
 };
 
-export default ApiKeyInput;
+export default ApiKeyForm;
