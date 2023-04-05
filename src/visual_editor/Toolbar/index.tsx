@@ -1,7 +1,6 @@
 import React, { FC } from "react";
 import {
   RxCursorArrow,
-  RxGlobe,
   RxKeyboard,
   RxCamera,
   RxListBullet,
@@ -9,6 +8,7 @@ import {
 } from "react-icons/rx";
 import clsx from "clsx";
 import { IconType } from "react-icons";
+import { BsFiletypeCss } from "react-icons/bs";
 
 export type ToolbarMode =
   | "interactive"
@@ -18,10 +18,10 @@ export type ToolbarMode =
   | "screenshot"
   | "changes";
 
-const modeToIcon: Record<ToolbarMode, IconType> = {
+const modeToIcon: Record<ToolbarMode, IconType | FC<{}>> = {
   interactive: RxCursorArrow,
   selection: RxPencil1,
-  css: RxGlobe,
+  css: BsFiletypeCss,
   mutation: RxKeyboard,
   screenshot: RxCamera,
   changes: RxListBullet,
