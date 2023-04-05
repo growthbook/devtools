@@ -14,7 +14,6 @@ export type ToolbarMode =
   | "interactive"
   | "selection"
   | "css"
-  | "mutation"
   | "screenshot"
   | "changes";
 
@@ -22,7 +21,6 @@ const modeToIcon: Record<ToolbarMode, IconType | FC<{}>> = {
   interactive: RxCursorArrow,
   selection: RxPencil1,
   css: BsFiletypeCss,
-  mutation: RxKeyboard,
   screenshot: RxCamera,
   changes: RxListBullet,
 };
@@ -87,12 +85,6 @@ const Toolbar: FC<{
           mode="css"
           enable={() => setMode("css")}
           title="Global CSS mode"
-        />
-        <ToolbarButton
-          isActive={mode === "mutation"}
-          mode="mutation"
-          enable={() => setMode("mutation")}
-          title="DOM Mutation mode"
         />
         <ToolbarButton
           isActive={mode === "changes"}

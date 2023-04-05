@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import React, { FC, useMemo } from "react";
 
 const getBreadcrumbs = (element: HTMLElement) => {
@@ -30,12 +31,19 @@ const BreadcrumbsView: FC<{
   };
 
   return (
-    <div className="px-4 text-sm text-slate-200">
+    <div className="px-4 text-sm text-light">
       {breadcrumbs.map((breadcrumb, index) => (
         <span key={index}>
           <span
-            className="cursor-pointer hover:text-slate-100"
-            onClick={() => setElement(breadcrumb)}
+            className={clsx({
+              "cursor-pointer": index !== breadcrumbs.length - 1,
+              "text-link": index !== breadcrumbs.length - 1,
+            })}
+            onClick={
+              index !== breadcrumbs.length - 1
+                ? () => setElement(breadcrumb)
+                : undefined
+            }
           >
             {breadcrumb.tagName.toLowerCase()}
           </span>

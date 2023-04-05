@@ -38,3 +38,12 @@
     transform: translateY(0px);
   }
 }
+
+.text-light {
+  @apply text-slate-300;
+}
+
+.text-link {
+  @apply text-slate-300 hover:text-slate-100;
+  cursor: pointer;
+}

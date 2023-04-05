@@ -25,7 +25,7 @@ const ElementDetails: FC<{
   );
 
   return (
-    <div className="text-slate-300 flex flex-col ml-4">
+    <div className="text-light flex flex-col ml-4">
       <DetailsRow label="Selector" value={selector} readOnly />
       <DetailsRow label="Tag name" value={name} readOnly />
       {isHtmlTooLarge ? (
