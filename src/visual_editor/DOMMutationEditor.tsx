@@ -3,7 +3,8 @@ import React, { FC, useState } from "react";
 
 const DOMMutationEditor: FC<{
   addMutation: (mutation: DeclarativeMutation) => void;
-}> = ({ addMutation }) => {
+  onClose?: () => void;
+}> = ({ addMutation, onClose }) => {
   const [selector, setSelector] = useState<DeclarativeMutation["selector"]>("");
   const [action, setAction] = useState<DeclarativeMutation["action"]>("append");
   const [attribute, setAttribute] =
@@ -30,7 +31,7 @@ const DOMMutationEditor: FC<{
   };
 
   return (
-    <div className="p-4">
+    <>
       <div className="flex w-full items-center mb-2">
         <div className="text-slate-200 w-20">Selector</div>
         <input
@@ -77,14 +78,19 @@ const DOMMutationEditor: FC<{
       </div>
 
       <div className="flex justify-end">
+        {onClose && (
+          <button className="text-link" onClick={onClose}>
+            Cancel
+          </button>
+        )}
         <button
-          className="p-4 bg-indigo-800 text-white font-semibold rounded-lg w-24"
+          className="py-2 px-4 bg-indigo-800 text-link font-semibold rounded ml-2"
           onClick={save}
         >
           Add
         </button>
       </div>
-    </div>
+    </>
   );
 };
 

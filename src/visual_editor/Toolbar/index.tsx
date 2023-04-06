@@ -1,28 +1,26 @@
 import React, { FC } from "react";
 import {
   RxCursorArrow,
-  RxSection,
-  RxGlobe,
   RxKeyboard,
   RxCamera,
   RxListBullet,
+  RxPencil1,
 } from "react-icons/rx";
 import clsx from "clsx";
 import { IconType } from "react-icons";
+import { BsFiletypeCss } from "react-icons/bs";
 
 export type ToolbarMode =
-  | "normal"
+  | "interactive"
   | "selection"
   | "css"
-  | "mutation"
   | "screenshot"
   | "changes";
 
-const modeToIcon: Record<ToolbarMode, IconType> = {
-  normal: RxCursorArrow,
-  selection: RxSection,
-  css: RxGlobe,
-  mutation: RxKeyboard,
+const modeToIcon: Record<ToolbarMode, IconType | FC<{}>> = {
+  interactive: RxCursorArrow,
+  selection: RxPencil1,
+  css: BsFiletypeCss,
   screenshot: RxCamera,
   changes: RxListBullet,
 };
@@ -66,10 +64,10 @@ const Toolbar: FC<{
     <div className="z-max shadow-xl">
       <div className="flex flex-row">
         <ToolbarButton
-          isActive={mode === "normal"}
-          mode="normal"
-          enable={() => setMode("normal")}
-          title="Normal mode"
+          isActive={mode === "interactive"}
+          mode="interactive"
+          enable={() => setMode("interactive")}
+          title="Interactive mode"
         />
         <ToolbarButton
           isActive={mode === "selection"}
@@ -87,12 +85,6 @@ const Toolbar: FC<{
           mode="css"
           enable={() => setMode("css")}
           title="Global CSS mode"
-        />
-        <ToolbarButton
-          isActive={mode === "mutation"}
-          mode="mutation"
-          enable={() => setMode("mutation")}
-          title="DOM Mutation mode"
         />
         <ToolbarButton
           isActive={mode === "changes"}

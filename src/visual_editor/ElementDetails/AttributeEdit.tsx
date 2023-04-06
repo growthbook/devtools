@@ -3,10 +3,7 @@ import { validAttributeName } from "dom-mutator";
 import React, { FC, useCallback, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { RxCross2, RxPlus, RxCheck } from "react-icons/rx";
-import {
-  highlightedAttributeName,
-  selectedAttributeName,
-} from "../lib/selectionMode";
+import { highlightedAttributeName, selectedAttributeName } from "../lib/modes";
 
 export const IGNORED_ATTRS = [
   "class",
@@ -148,7 +145,7 @@ const AttributeToken: FC<
 
       <div
         className={clsx(
-          "text-slate-200 text-ellipsis overflow-hidden text-sm hover:text-slate-100 hover:bg-slate-600 cursor-pointer"
+          "text-link text-ellipsis overflow-hidden text-sm hover:bg-slate-600"
         )}
         style={{ flex: 2, maxHeight: "3rem" }}
         onClick={() => setIsEditing(true)}
@@ -156,7 +153,7 @@ const AttributeToken: FC<
         {value}
       </div>
 
-      <button className="text-slate-200 mx-1" onClick={onRemove}>
+      <button className="text-link mx-1" onClick={onRemove}>
         <RxCross2 className="w-4 h-4" />
       </button>
     </div>

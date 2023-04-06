@@ -56,10 +56,7 @@ const ClassNameToken: FC<{
   return (
     <div className="flex justify-between rounded bg-slate-600 text-slate-200 text-sm px-2 mr-2 mb-1">
       {className}
-      <button
-        className="text-slate-200 hover:text-slate-100 ml-1"
-        onClick={onRemove}
-      >
+      <button className="text-link ml-1" onClick={onRemove}>
         <RxCross2 className="w-4 h-4" />
       </button>
     </div>

@@ -12,21 +12,13 @@ import React, {
 } from "react";
 import * as ReactDOM from "react-dom/client";
 import Toolbar, { ToolbarMode } from "./Toolbar";
-import {
-  toggleNormalMode,
-  toggleSelectionMode,
-  updateSelectedElement,
-  toggleCssMode,
-  toggleMutationMode,
-  toggleScreenshotMode,
-} from "./lib/modes";
+import { toggleSelectionMode, updateSelectedElement } from "./lib/modes";
 import "./targetPage.css";
 import ElementDetails from "./ElementDetails";
 import HighlightedElementSelectorDisplay from "./HighlightedElementSelectorDisplay";
 // @ts-expect-error ts-loader does not understand this .css import
 import VisualEditorCss from "./index.css";
 import GlobalCSSEditor from "./GlobalCSSEditor";
-import DOMMutationEditor from "./DOMMutationEditor";
 import VisualEditorPane from "./VisualEditorPane";
 import VisualEditorSection from "./VisualEditorSection";
 import BreadcrumbsView from "./ElementDetails/BreadcrumbsView";
@@ -388,9 +380,6 @@ const VisualEditor: FC<{}> = () => {
 
   // handle mode selection
   useEffect(() => {
-    toggleNormalMode(
-      !isVisualEditorEnabled ? isVisualEditorEnabled : mode === "normal"
-    );
     toggleSelectionMode({
       isEnabled: !isVisualEditorEnabled
         ? isVisualEditorEnabled
@@ -399,15 +388,6 @@ const VisualEditor: FC<{}> = () => {
       setSelectedElement,
       setHighlightedElementSelector,
     });
-    toggleCssMode(
-      !isVisualEditorEnabled ? isVisualEditorEnabled : mode === "css"
-    );
-    toggleMutationMode(
-      !isVisualEditorEnabled ? isVisualEditorEnabled : mode === "mutation"
-    );
-    toggleScreenshotMode(
-      !isVisualEditorEnabled ? isVisualEditorEnabled : mode === "screenshot"
-    );
   }, [isVisualEditorEnabled, mode]);
 
   // selection mode - update on select
@@ -462,7 +442,10 @@ const VisualEditor: FC<{}> = () => {
   if (showApiCredsAlert || error) {
     return (
       <SetApiCredsForm
-        appHost={experimentUrl.substr(0, experimentUrl.indexOf("/experiment"))}
+        appHost={experimentUrl.substring(
+          0,
+          experimentUrl.indexOf("/experiment")
+        )}
         apiHost={apiCreds.apiHost || apiHostHint}
         apiKey={apiCreds.apiKey}
         saveApiCreds={saveApiCreds}
@@ -540,12 +523,6 @@ const VisualEditor: FC<{}> = () => {
         </VisualEditorSection>
       )}
 
-      {mode === "mutation" && (
-        <VisualEditorSection title="DOM Mutation Editor">
-          <DOMMutationEditor addMutation={addDomMutation} />
-        </VisualEditorSection>
-      )}
-
       {mode === "selection" && selectedElement && (
         <VisualEditorSection
           isCollapsible
@@ -565,6 +542,7 @@ const VisualEditor: FC<{}> = () => {
           title={`Changes (${selectedVariation?.domMutations.length})`}
         >
           <DOMMutationList
+            addMutation={addDomMutation}
             globalCss={selectedVariation.css}
             clearGlobalCss={() => setGlobalCSS("")}
             removeDomMutation={removeDomMutation}
