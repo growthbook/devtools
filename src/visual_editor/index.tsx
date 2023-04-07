@@ -12,10 +12,10 @@ import React, {
 } from "react";
 import * as ReactDOM from "react-dom/client";
 import Toolbar, { ToolbarMode } from "./Toolbar";
-import { toggleSelectionMode, updateSelectedElement } from "./lib/modes";
+import { toggleSelectionMode, onSelectionModeUpdate } from "./lib/modes";
 import "./targetPage.css";
 import ElementDetails from "./ElementDetails";
-import HighlightedElementSelectorDisplay from "./HighlightedElementSelectorDisplay";
+import SelectorDisplay from "./SelectorDisplay";
 // @ts-expect-error ts-loader does not understand this .css import
 import VisualEditorCss from "./index.css";
 import GlobalCSSEditor from "./GlobalCSSEditor";
@@ -395,7 +395,7 @@ const VisualEditor: FC<{}> = () => {
     if (!isVisualEditorEnabled) return;
     if (mode !== "selection") return;
 
-    updateSelectedElement({
+    onSelectionModeUpdate({
       selectedElement,
       setSelectedElement,
       setHighlightedElementSelector,
@@ -505,13 +505,11 @@ const VisualEditor: FC<{}> = () => {
       ) : null}
 
       {mode === "selection" ? (
-        <HighlightedElementSelectorDisplay
-          selector={highlightedElementSelector}
-        />
+        <SelectorDisplay selector={highlightedElementSelector} />
       ) : null}
 
       {mode === "selection" && selectedElement ? (
-        <HighlightedElementSelectorDisplay selector={selector} />
+        <SelectorDisplay selector={selector} />
       ) : null}
 
       {mode === "css" && (

@@ -1,10 +1,4 @@
-[gb-move-mode-highlighted] {
-  outline: 2px dashed #7c45ea;
-  outline-offset: 2px;
-  cursor: move;
-}
-
-[gb-selection-mode-highlighted] {
+[gb-selection-mode-hover] {
   outline: 2px dashed #7c45ea;
   outline-offset: 2px;
   cursor: crosshair;
@@ -12,6 +6,6 @@
 
 [gb-selection-mode-selected] {
   outline: 2px dashed #945eff;
-  cursor: crosshair;
+  cursor: move;
   outline-offset: 2px;
 }

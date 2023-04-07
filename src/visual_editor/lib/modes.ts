@@ -1,37 +1,38 @@
 import { finder } from "@medv/finder";
 import { CONTAINER_ID } from "..";
 
-export const highlightedAttributeName = "gb-selection-mode-highlighted";
+export const hoverAttributeName = "gb-selection-mode-hover";
 export const selectedAttributeName = "gb-selection-mode-selected";
+
+// state vars
+let _selectedElement: HTMLElement | null;
+let _setSelectedElement: ((element: HTMLElement | null) => void) | null;
+let _setHighlightedElementSelector: ((selector: string) => void) | null;
+let _prevDomNode: Element | null = null;
+let _isDragging: boolean = false;
 
 const clearSelectedElementAttr = () => {
   const selected = document.querySelectorAll(`[${selectedAttributeName}]`)?.[0];
   selected?.removeAttribute(selectedAttributeName);
 };
 
-const clearHighlightedElementAttr = () => {
-  const highlights = document.querySelectorAll(`[${highlightedAttributeName}]`);
-  highlights.forEach((highlight) => {
-    highlight.removeAttribute(highlightedAttributeName);
+const clearHoverAttribute = () => {
+  const hoveredElements = document.querySelectorAll(`[${hoverAttributeName}]`);
+  hoveredElements.forEach((hoveredElement) => {
+    hoveredElement.removeAttribute(hoverAttributeName);
   });
 };
-
-let _prevDomNode: Element | null = null;
 
 const mouseMoveHandler = (event: MouseEvent) => {
   const { clientX: x, clientY: y } = event;
   const domNode = document.elementFromPoint(x, y);
   if (!domNode || domNode === _prevDomNode) return;
-  clearHighlightedElementAttr();
-  domNode.setAttribute(highlightedAttributeName, "");
+  clearHoverAttribute();
+  domNode.setAttribute(hoverAttributeName, "");
   _prevDomNode = domNode;
-  // use finder w/out config since this is for display only
+  // use default finder since this is for display only
   _setHighlightedElementSelector?.(finder(domNode));
 };
-
-let _selectedElement: HTMLElement | null;
-let _setSelectedElement: ((element: HTMLElement | null) => void) | null;
-let _setHighlightedElementSelector: ((selector: string) => void) | null;
 
 // only the 'click' event can prevent the default behavior when clicking on
 // a link or button or similar
@@ -48,21 +49,29 @@ const mouseDownHandler = (event: MouseEvent) => {
   event.stopPropagation();
 
   const element = event.target as HTMLElement;
-  _setSelectedElement?.(element);
-  _setHighlightedElementSelector?.(finder(element));
+
+  if (_selectedElement !== element) {
+    _setSelectedElement?.(element);
+    _isDragging = false;
+  } else {
+    // TODO Drag and drop behavior
+    alert("we draggin");
+  }
 };
 
 const teardown = () => {
   _selectedElement = null;
   _setSelectedElement = null;
-  clearHighlightedElementAttr();
+  _isDragging = false;
+  clearHoverAttribute();
   clearSelectedElementAttr();
   document.removeEventListener("mousemove", mouseMoveHandler);
   document.removeEventListener("mousedown", mouseDownHandler);
   document.removeEventListener("click", clickHandler);
 };
 
-export const updateSelectedElement = ({
+// called by react component
+export const onSelectionModeUpdate = ({
   selectedElement,
   setSelectedElement,
   setHighlightedElementSelector,
@@ -75,17 +84,15 @@ export const updateSelectedElement = ({
   _setSelectedElement = setSelectedElement;
   _setHighlightedElementSelector = setHighlightedElementSelector;
 
-  if (!_selectedElement) {
-    clearSelectedElementAttr();
-    document.addEventListener("mousemove", mouseMoveHandler);
-  } else {
-    clearSelectedElementAttr();
-    clearHighlightedElementAttr();
+  clearSelectedElementAttr();
+  clearHoverAttribute();
+
+  if (_selectedElement) {
     _selectedElement.setAttribute(selectedAttributeName, "");
-    _setHighlightedElementSelector(finder(_selectedElement));
   }
 };
 
+// called by react component
 export const toggleSelectionMode = ({
   isEnabled,
   selectedElement,

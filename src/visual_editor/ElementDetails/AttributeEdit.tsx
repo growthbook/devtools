@@ -3,11 +3,11 @@ import { validAttributeName } from "dom-mutator";
 import React, { FC, useCallback, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { RxCross2, RxPlus, RxCheck } from "react-icons/rx";
-import { highlightedAttributeName, selectedAttributeName } from "../lib/modes";
+import { hoverAttributeName, selectedAttributeName } from "../lib/modes";
 
 export const IGNORED_ATTRS = [
   "class",
-  highlightedAttributeName,
+  hoverAttributeName,
   selectedAttributeName,
 ];
 
