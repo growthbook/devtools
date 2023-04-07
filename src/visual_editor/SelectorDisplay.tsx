@@ -1,8 +1,6 @@
 import React, { FC } from "react";
 
-const HighlightedElementSelectorDisplay: FC<{ selector: string | null }> = ({
-  selector,
-}) => {
+const SelectorDisplay: FC<{ selector: string | null }> = ({ selector }) => {
   if (!selector) return null;
 
   const parentElement = document.querySelector(selector);
@@ -21,4 +19,4 @@ const HighlightedElementSelectorDisplay: FC<{ selector: string | null }> = ({
   );
 };
 
-export default HighlightedElementSelectorDisplay;
+export default SelectorDisplay;
