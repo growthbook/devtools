@@ -16,7 +16,6 @@ import { toggleSelectionMode, onSelectionModeUpdate } from "./lib/modes";
 import "./targetPage.css";
 import ElementDetails from "./ElementDetails";
 import SelectorDisplay from "./SelectorDisplay";
-// @ts-expect-error ts-loader does not understand this .css import
 import VisualEditorCss from "./index.css";
 import GlobalCSSEditor from "./GlobalCSSEditor";
 import VisualEditorPane from "./VisualEditorPane";
@@ -92,6 +91,7 @@ const genVisualEditorVariations = ({
   });
 };
 
+// normalize param values into number type
 const getVariationIndexFromParams = (
   param: string | (string | null)[] | null
 ): number => {
@@ -102,6 +102,7 @@ const getVariationIndexFromParams = (
   return parseInt(param ?? "1", 10);
 };
 
+// remove visual editor params from url once loaded
 const cleanUpParams = (params: qs.ParsedQuery) => {
   window.history.replaceState(
     null,
@@ -214,6 +215,7 @@ const VisualEditor: FC<{}> = () => {
     [addDomMutations]
   );
 
+  // debounced since we accept text input from the user here
   const setGlobalCSS = useCallback(
     debounce((css: string) => {
       updateSelectedVariation({ css });
@@ -320,7 +322,7 @@ const VisualEditor: FC<{}> = () => {
     );
   }, []);
 
-  // get ahold of api credentials. requires messaging the background script
+  // get ahold of api credentials on load. requires messaging the background script
   useMessage({
     messageHandler: (message) => {
       const hasVisualEditorParams = Boolean(
@@ -376,7 +378,7 @@ const VisualEditor: FC<{}> = () => {
     };
 
     load();
-  }, [visualChangesetId, fetchVisualChangeset]);
+  }, [apiCreds, visualChangesetId, fetchVisualChangeset]);
 
   // handle mode selection
   useEffect(() => {
@@ -411,6 +413,7 @@ const VisualEditor: FC<{}> = () => {
   // upon every DOM mutation, we revert all changes and replay them to ensure
   // that the DOM is in the correct state
   useEffect(() => {
+    // run reverts if they exist
     if (mutateRevert?.current) mutateRevert.current();
 
     const revertCallbacks: Array<() => void> = [];
@@ -561,7 +564,9 @@ const VisualEditor: FC<{}> = () => {
   );
 };
 
-// mounting the visual editor
+/**
+ * mounting the visual editor
+ */
 export const CONTAINER_ID = "__gb_visual_editor";
 
 const container = document.createElement("div");
