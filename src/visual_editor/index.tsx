@@ -12,8 +12,10 @@ import React, {
 } from "react";
 import * as ReactDOM from "react-dom/client";
 import Toolbar, { ToolbarMode } from "./Toolbar";
-import { toggleSelectionMode, onSelectionModeUpdate } from "./lib/modes";
-import "./targetPage.css";
+import {
+  toggleSelectionMode,
+  onSelectionModeUpdate,
+} from "./lib/selectionMode";
 import ElementDetails from "./ElementDetails";
 import SelectorDisplay from "./SelectorDisplay";
 import VisualEditorCss from "./index.css";
@@ -47,6 +49,7 @@ import {
   EXPERIMENT_URL_PARAMS_KEY,
   API_HOST_PARAMS_KEY,
 } from "./lib/constants";
+import "./targetPage.css";
 
 export interface VisualEditorVariation {
   name: string;
@@ -372,7 +375,7 @@ const VisualEditor: FC<{}> = () => {
       setVariations(visualEditorVariations);
 
       // remove visual editor query param once loaded
-      cleanUpParams(params);
+      // cleanUpParams(params);
 
       setIsEnabled(true);
     };

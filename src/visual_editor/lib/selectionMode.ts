@@ -1,5 +1,6 @@
 import { finder } from "@medv/finder";
 import { CONTAINER_ID } from "..";
+import { onDrag, teardown as moveElementTeardown } from "./moveElement";
 
 export const hoverAttributeName = "gb-selection-mode-hover";
 export const selectedAttributeName = "gb-selection-mode-selected";
@@ -10,6 +11,7 @@ let _setSelectedElement: ((element: HTMLElement | null) => void) | null;
 let _setHighlightedElementSelector: ((selector: string) => void) | null;
 let _prevDomNode: Element | null = null;
 let _isDragging: boolean = false;
+let _draggedElement: HTMLElement | null = null;
 
 const clearSelectedElementAttr = () => {
   const selected = document.querySelectorAll(`[${selectedAttributeName}]`)?.[0];
@@ -26,12 +28,24 @@ const clearHoverAttribute = () => {
 const mouseMoveHandler = (event: MouseEvent) => {
   const { clientX: x, clientY: y } = event;
   const domNode = document.elementFromPoint(x, y);
-  if (!domNode || domNode === _prevDomNode) return;
-  clearHoverAttribute();
-  domNode.setAttribute(hoverAttributeName, "");
-  _prevDomNode = domNode;
-  // use default finder since this is for display only
-  _setHighlightedElementSelector?.(finder(domNode));
+
+  if (_isDragging) {
+    onDrag({
+      x,
+      y,
+      hoveredElement: domNode,
+    });
+  } else {
+    console.log("DEBUG domNode", domNode);
+
+    if (!domNode || domNode === _prevDomNode) return;
+
+    clearHoverAttribute();
+    domNode.setAttribute(hoverAttributeName, "");
+    _prevDomNode = domNode;
+    // use default finder since this is for display only
+    _setHighlightedElementSelector?.(finder(domNode));
+  }
 };
 
 // only the 'click' event can prevent the default behavior when clicking on
@@ -39,6 +53,12 @@ const mouseMoveHandler = (event: MouseEvent) => {
 const clickHandler = (event: MouseEvent) => {
   event.preventDefault();
   event.stopPropagation();
+};
+
+// on mouse up, we stop dragging
+const mouseUpHandler = (event: MouseEvent) => {
+  // TODO if we have a dragged element and an edge to drop it in, create DOM mutation
+  moveElementTeardown();
 };
 
 const mouseDownHandler = (event: MouseEvent) => {
@@ -50,23 +70,25 @@ const mouseDownHandler = (event: MouseEvent) => {
 
   const element = event.target as HTMLElement;
 
+  // if the user is clicking on an already selected element, we begin dragging
   if (_selectedElement !== element) {
     _setSelectedElement?.(element);
-    _isDragging = false;
+    moveElementTeardown();
   } else {
-    // TODO Drag and drop behavior
-    alert("we draggin");
+    _isDragging = true;
+    _draggedElement = element;
   }
 };
 
 const teardown = () => {
   _selectedElement = null;
   _setSelectedElement = null;
-  _isDragging = false;
   clearHoverAttribute();
   clearSelectedElementAttr();
+  moveElementTeardown();
   document.removeEventListener("mousemove", mouseMoveHandler);
   document.removeEventListener("mousedown", mouseDownHandler);
+  document.removeEventListener("mouseup", mouseUpHandler);
   document.removeEventListener("click", clickHandler);
 };
 
@@ -110,6 +132,7 @@ export const toggleSelectionMode = ({
     _setHighlightedElementSelector = setHighlightedElementSelector;
     document.addEventListener("mousemove", mouseMoveHandler);
     document.addEventListener("mousedown", mouseDownHandler);
+    document.addEventListener("mouseup", mouseUpHandler);
     document.addEventListener("click", clickHandler);
   } else {
     teardown();

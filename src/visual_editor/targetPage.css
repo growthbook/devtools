@@ -9,3 +9,12 @@
   cursor: move;
   outline-offset: 2px;
 }
+
+/* drag element highlight edges */
+[gb-selection-mode-drag-target] {
+  position: relative;
+}
+[gb-selection-mode-drag-target-edge] {
+  position: absolute;
+  background-color: "red";
+}
