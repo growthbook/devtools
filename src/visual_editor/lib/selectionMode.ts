@@ -11,7 +11,6 @@ let _setSelectedElement: ((element: HTMLElement | null) => void) | null;
 let _setHighlightedElementSelector: ((selector: string) => void) | null;
 let _prevDomNode: Element | null = null;
 let _isDragging: boolean = false;
-let _draggedElement: HTMLElement | null = null;
 
 const clearSelectedElementAttr = () => {
   const selected = document.querySelectorAll(`[${selectedAttributeName}]`)?.[0];
@@ -33,11 +32,9 @@ const mouseMoveHandler = (event: MouseEvent) => {
     onDrag({
       x,
       y,
-      hoveredElement: domNode,
+      elementUnderCursor: domNode,
     });
   } else {
-    console.log("DEBUG domNode", domNode);
-
     if (!domNode || domNode === _prevDomNode) return;
 
     clearHoverAttribute();
@@ -71,12 +68,11 @@ const mouseDownHandler = (event: MouseEvent) => {
   const element = event.target as HTMLElement;
 
   // if the user is clicking on an already selected element, we begin dragging
-  if (_selectedElement !== element) {
+  if (_selectedElement === element) {
+    _isDragging = true;
+  } else {
     _setSelectedElement?.(element);
     moveElementTeardown();
-  } else {
-    _isDragging = true;
-    _draggedElement = element;
   }
 };
 
@@ -92,7 +88,7 @@ const teardown = () => {
   document.removeEventListener("click", clickHandler);
 };
 
-// called by react component
+// called by react component - on update
 export const onSelectionModeUpdate = ({
   selectedElement,
   setSelectedElement,
@@ -114,7 +110,7 @@ export const onSelectionModeUpdate = ({
   }
 };
 
-// called by react component
+// called by react component - on init
 export const toggleSelectionMode = ({
   isEnabled,
   selectedElement,

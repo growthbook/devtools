@@ -46,28 +46,43 @@ const getContainerFlow = (element: Element): "vertical" | "horizontal" => {
 };
 
 const createHighlightEdge = ({
-  element,
+  elementX,
+  elementY,
+  elementBottom,
+  elementRight,
   position,
 }: {
-  element: Element;
+  elementX: number;
+  elementY: number;
+  elementBottom: number;
+  elementRight: number;
   position: "left" | "right" | "top" | "bottom";
 }) => {
-  const visualMarker = document.createElement("div");
+  console.log("createHighlightEdge", {
+    position,
+    elementX,
+    elementY,
+    elementBottom,
+    elementRight,
+  });
 
+  const visualMarker = document.createElement("div");
   visualMarker.setAttribute(dragTargetEdgeAttributeName, "");
-  element.appendChild(visualMarker);
+  document.body.appendChild(visualMarker);
 
   if (["left", "right"].includes(position)) {
-    visualMarker.style.top = "0";
-    visualMarker.style.bottom = "0";
+    visualMarker.style.top = `${elementY}px`;
+    visualMarker.style.bottom = `${elementBottom}px`;
+    visualMarker.style[`${position}`] =
+      position === "left" ? `${elementX}px` : `${elementRight}px`;
     visualMarker.style.width = "4px";
   } else {
-    visualMarker.style.left = "0";
-    visualMarker.style.right = "0";
+    visualMarker.style.left = `${elementX}px`;
+    visualMarker.style.right = `${elementRight}px`;
     visualMarker.style.height = "4px";
+    visualMarker.style[`${position}`] =
+      position === "top" ? `${elementY}px` : `${elementBottom}px`;
   }
-
-  visualMarker.style[`${position}`] = "0";
 };
 
 const getEdgePosition = ({
@@ -93,8 +108,8 @@ const getEdgePosition = ({
   return mouseY - top < bottom - mouseY ? "top" : "bottom";
 };
 
-let _targetElement: Element | null = null;
-let _edgePosition: "top" | "bottom" | "left" | "right" | null = null;
+let _lastTargetElement: Element | null = null;
+let _lastEdgePosition: "top" | "bottom" | "left" | "right" | null = null;
 const highlightEdge = ({
   element,
   orientation,
@@ -125,54 +140,58 @@ const highlightEdge = ({
     orientation,
   });
 
-  if (_targetElement === element && edgePosition === _edgePosition) return;
+  if (_lastTargetElement === element && edgePosition === _lastEdgePosition)
+    return;
 
-  _targetElement = element;
-  _edgePosition = edgePosition;
+  _lastTargetElement = element;
+  _lastEdgePosition = edgePosition;
 
   clearDragTargetEdges();
 
   createHighlightEdge({
-    element,
+    elementX,
+    elementY,
+    elementBottom,
+    elementRight,
     position: edgePosition,
   });
 };
 
-let _hoveredElement: Element | null = null;
-let _hoveredElementContainerFlow: "vertical" | "horizontal" = "vertical";
+let _lastElementUnderCursor: Element | null = null;
+let _lastContainerFlow: "vertical" | "horizontal" = "vertical";
 export const onDrag = ({
   x,
   y,
-  hoveredElement,
+  elementUnderCursor,
 }: {
   x: number;
   y: number;
-  hoveredElement: Element | null;
+  elementUnderCursor: Element | null;
 }) => {
-  if (!hoveredElement || !hoveredElement.parentElement) return;
+  if (!elementUnderCursor || !elementUnderCursor.parentElement) return;
 
-  if (hoveredElement !== _hoveredElement) {
+  if (elementUnderCursor !== _lastElementUnderCursor) {
     clearDragTargetAttribute();
-    _hoveredElementContainerFlow = getContainerFlow(hoveredElement);
+    _lastContainerFlow = getContainerFlow(elementUnderCursor);
   }
 
   // on hover of element
   //  1. get container flow
   //  2. highlight appropriate edge based on flow and position of cursor
   highlightEdge({
-    element: hoveredElement,
-    orientation: _hoveredElementContainerFlow,
+    element: elementUnderCursor,
+    orientation: _lastContainerFlow,
     mouseX: x,
     mouseY: y,
   });
 
-  _hoveredElement = hoveredElement;
+  _lastElementUnderCursor = elementUnderCursor;
 };
 
 export const teardown = () => {
-  _hoveredElement = null;
-  _targetElement = null;
-  _edgePosition = null;
+  _lastElementUnderCursor = null;
+  _lastTargetElement = null;
+  _lastEdgePosition = null;
   _containerElement = null;
   _containerFlow = "vertical";
 };

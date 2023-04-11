@@ -14,7 +14,9 @@
 [gb-selection-mode-drag-target] {
   position: relative;
 }
+
 [gb-selection-mode-drag-target-edge] {
-  position: absolute;
-  background-color: "red";
+  position: fixed;
+  background-color: red;
+  @apply z-max;
 }
