@@ -58,30 +58,40 @@ const createHighlightEdge = ({
   elementRight: number;
   position: "left" | "right" | "top" | "bottom";
 }) => {
-  console.log("createHighlightEdge", {
-    position,
-    elementX,
-    elementY,
-    elementBottom,
-    elementRight,
-  });
-
   const visualMarker = document.createElement("div");
+
   visualMarker.setAttribute(dragTargetEdgeAttributeName, "");
+
   document.body.appendChild(visualMarker);
 
-  if (["left", "right"].includes(position)) {
-    visualMarker.style.top = `${elementY}px`;
-    visualMarker.style.bottom = `${elementBottom}px`;
-    visualMarker.style[`${position}`] =
-      position === "left" ? `${elementX}px` : `${elementRight}px`;
-    visualMarker.style.width = "4px";
-  } else {
-    visualMarker.style.left = `${elementX}px`;
-    visualMarker.style.right = `${elementRight}px`;
-    visualMarker.style.height = "4px";
-    visualMarker.style[`${position}`] =
-      position === "top" ? `${elementY}px` : `${elementBottom}px`;
+  const borderStyle = "4px solid red";
+  switch (position) {
+    case "left":
+      visualMarker.style.top = `${elementY}px`;
+      visualMarker.style.left = `${elementX}px`;
+      visualMarker.style.height = `${elementBottom - elementY}px`;
+      visualMarker.style.borderLeft = borderStyle;
+      break;
+    case "right":
+      visualMarker.style.top = `${elementY}px`;
+      visualMarker.style.left = `${elementRight}px`;
+      visualMarker.style.height = `${elementBottom - elementY}px`;
+      visualMarker.style.borderRight = borderStyle;
+      break;
+    case "top":
+      visualMarker.style.top = `${elementY}px`;
+      visualMarker.style.left = `${elementX}px`;
+      visualMarker.style.width = `${elementRight - elementX}px`;
+      visualMarker.style.borderTop = borderStyle;
+      break;
+    case "bottom":
+      visualMarker.style.top = `${elementBottom}px`;
+      visualMarker.style.left = `${elementX}px`;
+      visualMarker.style.width = `${elementRight - elementX}px`;
+      visualMarker.style.borderBottom = borderStyle;
+      break;
+    default:
+      break;
   }
 };
 
@@ -140,21 +150,27 @@ const highlightEdge = ({
     orientation,
   });
 
-  if (_lastTargetElement === element && edgePosition === _lastEdgePosition)
-    return;
+  const landedParent = element.parentElement;
+  const landedSibling = ["left", "top"].includes(edgePosition)
+    ? element
+    : element.nextElementSibling;
 
-  _lastTargetElement = element;
-  _lastEdgePosition = edgePosition;
+  if (_lastTargetElement !== element || _lastEdgePosition !== edgePosition) {
+    _lastTargetElement = element;
+    _lastEdgePosition = edgePosition;
 
-  clearDragTargetEdges();
+    clearDragTargetEdges();
 
-  createHighlightEdge({
-    elementX,
-    elementY,
-    elementBottom,
-    elementRight,
-    position: edgePosition,
-  });
+    createHighlightEdge({
+      elementX,
+      elementY,
+      elementBottom,
+      elementRight,
+      position: edgePosition,
+    });
+  }
+
+  return { landedParent, landedSibling };
 };
 
 let _lastElementUnderCursor: Element | null = null;
@@ -168,7 +184,11 @@ export const onDrag = ({
   y: number;
   elementUnderCursor: Element | null;
 }) => {
-  if (!elementUnderCursor || !elementUnderCursor.parentElement) return;
+  if (!elementUnderCursor || !elementUnderCursor.parentElement)
+    return {
+      draggedToParent: null,
+      draggedToSibling: null,
+    };
 
   if (elementUnderCursor !== _lastElementUnderCursor) {
     clearDragTargetAttribute();
@@ -178,7 +198,7 @@ export const onDrag = ({
   // on hover of element
   //  1. get container flow
   //  2. highlight appropriate edge based on flow and position of cursor
-  highlightEdge({
+  const { landedParent, landedSibling } = highlightEdge({
     element: elementUnderCursor,
     orientation: _lastContainerFlow,
     mouseX: x,
@@ -186,6 +206,11 @@ export const onDrag = ({
   });
 
   _lastElementUnderCursor = elementUnderCursor;
+
+  return {
+    draggedToParent: landedParent,
+    draggedToSibling: landedSibling,
+  };
 };
 
 export const teardown = () => {
@@ -194,4 +219,6 @@ export const teardown = () => {
   _lastEdgePosition = null;
   _containerElement = null;
   _containerFlow = "vertical";
+  clearDragTargetEdges();
+  clearDragTargetAttribute();
 };

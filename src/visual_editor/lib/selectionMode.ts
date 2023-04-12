@@ -24,16 +24,21 @@ const clearHoverAttribute = () => {
   });
 };
 
+let _draggedToParent: Element | null = null;
+let _draggedToSibling: Element | null = null;
 const mouseMoveHandler = (event: MouseEvent) => {
   const { clientX: x, clientY: y } = event;
   const domNode = document.elementFromPoint(x, y);
 
   if (_isDragging) {
-    onDrag({
+    ({
+      draggedToParent: _draggedToParent,
+      draggedToSibling: _draggedToSibling,
+    } = onDrag({
       x,
       y,
       elementUnderCursor: domNode,
-    });
+    }));
   } else {
     if (!domNode || domNode === _prevDomNode) return;
 
@@ -55,7 +60,12 @@ const clickHandler = (event: MouseEvent) => {
 // on mouse up, we stop dragging
 const mouseUpHandler = (event: MouseEvent) => {
   // TODO if we have a dragged element and an edge to drop it in, create DOM mutation
+  console.log("DEBUG mouseUp", {
+    parent: _draggedToParent,
+    sibling: _draggedToSibling,
+  });
   moveElementTeardown();
+  _isDragging = false;
 };
 
 const mouseDownHandler = (event: MouseEvent) => {
