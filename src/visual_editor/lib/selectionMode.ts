@@ -1,4 +1,5 @@
 import { finder } from "@medv/finder";
+import { DeclarativeMutation } from "dom-mutator";
 import { CONTAINER_ID } from "..";
 import { onDrag, teardown as moveElementTeardown } from "./moveElement";
 
@@ -11,6 +12,7 @@ let _setSelectedElement: ((element: HTMLElement | null) => void) | null;
 let _setHighlightedElementSelector: ((selector: string) => void) | null;
 let _prevDomNode: Element | null = null;
 let _isDragging: boolean = false;
+let _addDomMutation: ((mutation: DeclarativeMutation) => void) | null = null;
 
 const clearSelectedElementAttr = () => {
   const selected = document.querySelectorAll(`[${selectedAttributeName}]`)?.[0];
@@ -58,14 +60,28 @@ const clickHandler = (event: MouseEvent) => {
 };
 
 // on mouse up, we stop dragging
-const mouseUpHandler = (event: MouseEvent) => {
-  // TODO if we have a dragged element and an edge to drop it in, create DOM mutation
-  console.log("DEBUG mouseUp", {
-    parent: _draggedToParent,
-    sibling: _draggedToSibling,
-  });
+const mouseUpHandler = () => {
+  if (_selectedElement && _draggedToParent) {
+    if (
+      _selectedElement.parentElement !== _draggedToParent ||
+      (_selectedElement.nextElementSibling !== _draggedToSibling &&
+        _selectedElement !== _draggedToSibling)
+    ) {
+      _addDomMutation?.({
+        action: "set",
+        attribute: "position",
+        parentSelector: finder(_draggedToParent),
+        insertBeforeSelector: _draggedToSibling
+          ? finder(_draggedToSibling)
+          : undefined,
+        selector: finder(_selectedElement),
+      });
+    }
+  }
   moveElementTeardown();
   _isDragging = false;
+  _draggedToParent = null;
+  _draggedToSibling = null;
 };
 
 const mouseDownHandler = (event: MouseEvent) => {
@@ -103,14 +119,17 @@ export const onSelectionModeUpdate = ({
   selectedElement,
   setSelectedElement,
   setHighlightedElementSelector,
+  addDomMutation,
 }: {
   selectedElement: HTMLElement | null;
   setSelectedElement: (element: HTMLElement | null) => void;
   setHighlightedElementSelector: (selector: string) => void;
+  addDomMutation: (mutation: DeclarativeMutation) => void;
 }) => {
   _selectedElement = selectedElement;
   _setSelectedElement = setSelectedElement;
   _setHighlightedElementSelector = setHighlightedElementSelector;
+  _addDomMutation = addDomMutation;
 
   clearSelectedElementAttr();
   clearHoverAttribute();
@@ -126,20 +145,26 @@ export const toggleSelectionMode = ({
   selectedElement,
   setSelectedElement,
   setHighlightedElementSelector,
+  addDomMutation,
 }: {
   isEnabled: boolean;
   selectedElement: HTMLElement | null;
   setSelectedElement: (element: HTMLElement | null) => void;
   setHighlightedElementSelector: (selector: string) => void;
+  addDomMutation: (mutation: DeclarativeMutation) => void;
 }) => {
   if (isEnabled) {
-    _selectedElement = selectedElement;
-    _setSelectedElement = setSelectedElement;
-    _setHighlightedElementSelector = setHighlightedElementSelector;
     document.addEventListener("mousemove", mouseMoveHandler);
     document.addEventListener("mousedown", mouseDownHandler);
     document.addEventListener("mouseup", mouseUpHandler);
     document.addEventListener("click", clickHandler);
+
+    onSelectionModeUpdate({
+      selectedElement,
+      setSelectedElement,
+      setHighlightedElementSelector,
+      addDomMutation,
+    });
   } else {
     teardown();
   }

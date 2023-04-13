@@ -85,7 +85,6 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
           experiment,
         };
       } catch (e) {
-        console.log("testtt");
         setError(
           "There was an error reaching the API. Please check your API key and host."
         );

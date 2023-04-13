@@ -392,6 +392,7 @@ const VisualEditor: FC<{}> = () => {
       selectedElement,
       setSelectedElement,
       setHighlightedElementSelector,
+      addDomMutation,
     });
   }, [isVisualEditorEnabled, mode]);
 
@@ -404,6 +405,7 @@ const VisualEditor: FC<{}> = () => {
       selectedElement,
       setSelectedElement,
       setHighlightedElementSelector,
+      addDomMutation,
     });
   }, [
     selectedElement,
