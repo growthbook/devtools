@@ -375,7 +375,7 @@ const VisualEditor: FC<{}> = () => {
       setVariations(visualEditorVariations);
 
       // remove visual editor query param once loaded
-      // cleanUpParams(params);
+      cleanUpParams(params);
 
       setIsEnabled(true);
     };
