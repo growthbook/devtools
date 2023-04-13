@@ -39,18 +39,21 @@ const DetailsRow = ({
   value = "",
   readOnly = false,
   onSave = () => {},
+  onErase,
 }:
   | {
       label: string;
       value: string;
       readOnly: true;
       onSave?: never;
+      onErase?: never;
     }
   | {
       label: string;
       value: string;
       readOnly?: false;
       onSave: (value: string) => void;
+      onErase?: () => void;
     }) => {
   const [editing, setIsEditing] = useState(false);
   const [_value, _setValue] = useState<string>(value);
@@ -107,6 +110,13 @@ const DetailsRow = ({
           onClick={!readOnly ? () => setIsEditing(true) : () => {}}
         >
           {_value}
+        </div>
+      )}
+      {onErase && (
+        <div className="px-1">
+          <button onClick={onErase}>
+            <RxCross2 className="w-4 h-4 cursor-pointer" />
+          </button>
         </div>
       )}
     </label>
