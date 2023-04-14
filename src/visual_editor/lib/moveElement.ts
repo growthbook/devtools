@@ -179,12 +179,27 @@ export const onDrag = ({
   x,
   y,
   elementUnderCursor,
+  draggedElement,
 }: {
   x: number;
   y: number;
   elementUnderCursor: Element | null;
+  draggedElement: Element;
 }) => {
-  if (!elementUnderCursor || !elementUnderCursor.parentElement)
+  if (
+    // if there is no element under cursor, return
+    !elementUnderCursor ||
+    // if the element under cursor is the dragged element, return
+    elementUnderCursor === draggedElement ||
+    // if the element under cursor is a child of the dragged element, return
+    draggedElement.contains(elementUnderCursor) ||
+    // if the dragged element has no parent, it's not in the DOM, return
+    !draggedElement.parentElement ||
+    // if the element under cursor is the parent element, return
+    draggedElement.parentElement === elementUnderCursor ||
+    // if the element under cursor is NOT a child of the parent element, return
+    !draggedElement.parentElement.contains(elementUnderCursor)
+  )
     return {
       draggedToParent: null,
       draggedToSibling: null,

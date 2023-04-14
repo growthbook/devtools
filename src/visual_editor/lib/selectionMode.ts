@@ -2,6 +2,7 @@ import { finder } from "@medv/finder";
 import { DeclarativeMutation } from "dom-mutator";
 import { CONTAINER_ID } from "..";
 import { onDrag, teardown as moveElementTeardown } from "./moveElement";
+import getSelector from "./getSelector";
 
 export const hoverAttributeName = "gb-selection-mode-hover";
 export const selectedAttributeName = "gb-selection-mode-selected";
@@ -32,7 +33,7 @@ const mouseMoveHandler = (event: MouseEvent) => {
   const { clientX: x, clientY: y } = event;
   const domNode = document.elementFromPoint(x, y);
 
-  if (_isDragging) {
+  if (_isDragging && _selectedElement) {
     ({
       draggedToParent: _draggedToParent,
       draggedToSibling: _draggedToSibling,
@@ -40,6 +41,7 @@ const mouseMoveHandler = (event: MouseEvent) => {
       x,
       y,
       elementUnderCursor: domNode,
+      draggedElement: _selectedElement,
     }));
   } else {
     if (!domNode || domNode === _prevDomNode) return;
@@ -59,29 +61,45 @@ const clickHandler = (event: MouseEvent) => {
   event.stopPropagation();
 };
 
-// on mouse up, we stop dragging
-const mouseUpHandler = () => {
-  if (_selectedElement && _draggedToParent) {
-    if (
-      _selectedElement.parentElement !== _draggedToParent ||
-      (_selectedElement.nextElementSibling !== _draggedToSibling &&
-        _selectedElement !== _draggedToSibling)
-    ) {
-      _addDomMutation?.({
-        action: "set",
-        attribute: "position",
-        parentSelector: finder(_draggedToParent),
-        insertBeforeSelector: _draggedToSibling
-          ? finder(_draggedToSibling)
-          : undefined,
-        selector: finder(_selectedElement),
-      });
-    }
-  }
+const dragElementTeardown = () => {
   moveElementTeardown();
   _isDragging = false;
   _draggedToParent = null;
   _draggedToSibling = null;
+};
+
+// on mouse up, we stop dragging if applicable
+const mouseUpHandler = () => {
+  // if we are finished dragging, create mutation
+  if (_selectedElement && _draggedToParent) {
+    const parentSelector = getSelector(_draggedToParent);
+    const insertBeforeSelector = _draggedToSibling
+      ? getSelector(_draggedToSibling)
+      : undefined;
+    const elementSelector = getSelector(_selectedElement);
+
+    // catch buggy behavior before happens. moving elements around with nth
+    // child selectors causes looping behavior
+    const trailingNthChildSelectorRegex = /nth-child\([\d]+\)$/;
+    if (
+      trailingNthChildSelectorRegex.test(elementSelector) ||
+      trailingNthChildSelectorRegex.test(insertBeforeSelector ?? "")
+    ) {
+      alert(
+        "The elements are too generic to define a move operation. Please increase specificity by adding an id to the elements you are either dragging or dragging next to and try again."
+      );
+    } else {
+      _addDomMutation?.({
+        action: "set",
+        attribute: "position",
+        parentSelector,
+        insertBeforeSelector,
+        selector: elementSelector,
+      });
+    }
+
+    dragElementTeardown();
+  }
 };
 
 const mouseDownHandler = (event: MouseEvent) => {
@@ -98,7 +116,7 @@ const mouseDownHandler = (event: MouseEvent) => {
     _isDragging = true;
   } else {
     _setSelectedElement?.(element);
-    moveElementTeardown();
+    dragElementTeardown();
   }
 };
 
@@ -107,7 +125,7 @@ const teardown = () => {
   _setSelectedElement = null;
   clearHoverAttribute();
   clearSelectedElementAttr();
-  moveElementTeardown();
+  dragElementTeardown();
   document.removeEventListener("mousemove", mouseMoveHandler);
   document.removeEventListener("mousedown", mouseDownHandler);
   document.removeEventListener("mouseup", mouseUpHandler);
