@@ -174,6 +174,8 @@ const highlightEdge = ({
 };
 
 let _lastElementUnderCursor: Element | null = null;
+let _lastLandedParent: Element | null = null;
+let _lastLandedSibling: Element | null = null;
 let _lastContainerFlow: "vertical" | "horizontal" = "vertical";
 export const onDrag = ({
   x,
@@ -201,8 +203,8 @@ export const onDrag = ({
     !draggedElement.parentElement.contains(elementUnderCursor)
   )
     return {
-      draggedToParent: null,
-      draggedToSibling: null,
+      draggedToParent: _lastLandedParent,
+      draggedToSibling: _lastLandedSibling,
     };
 
   if (elementUnderCursor !== _lastElementUnderCursor) {
@@ -221,6 +223,8 @@ export const onDrag = ({
   });
 
   _lastElementUnderCursor = elementUnderCursor;
+  _lastLandedParent = landedParent;
+  _lastLandedSibling = landedSibling;
 
   return {
     draggedToParent: landedParent,
@@ -232,6 +236,8 @@ export const teardown = () => {
   _lastElementUnderCursor = null;
   _lastTargetElement = null;
   _lastEdgePosition = null;
+  _lastLandedParent = null;
+  _lastLandedSibling = null;
   _containerElement = null;
   _containerFlow = "vertical";
   clearDragTargetEdges();
