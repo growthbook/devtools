@@ -199,8 +199,8 @@ export const onDrag = ({
     !draggedElement.parentElement ||
     // if the element under cursor is the parent element, return
     draggedElement.parentElement === elementUnderCursor ||
-    // if the element under cursor is NOT a child of the parent element, return
-    !draggedElement.parentElement.contains(elementUnderCursor)
+    // if the element under cursor is NOT a sibling, return
+    draggedElement.parentElement !== elementUnderCursor.parentElement
   )
     return {
       draggedToParent: _lastLandedParent,
