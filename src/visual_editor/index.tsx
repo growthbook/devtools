@@ -355,6 +355,7 @@ const VisualEditor: FC<{}> = () => {
       return;
 
     const load = async () => {
+      console.log("loading called", visualChangesetId);
       const { visualChangeset, experiment } = await fetchVisualChangeset(
         visualChangesetId
       );
@@ -551,9 +552,9 @@ const VisualEditor: FC<{}> = () => {
         </VisualEditorSection>
       )}
 
-      <div className="m-4">
+      <div className="gb-m-4">
         <button
-          className="w-full p-2 bg-indigo-800 rounded text-white font-semibold text-lg"
+          className="gb-w-full gb-p-2 gb-bg-indigo-800 gb-rounded gb-text-white gb-font-semibold gb-text-lg"
           onClick={() => (window.location.href = experimentUrl)}
         >
           Done Editing

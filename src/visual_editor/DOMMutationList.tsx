@@ -7,7 +7,7 @@ import DOMMutationEditor from "./DOMMutationEditor";
 const DOMAttrColumn: FC<{ children: ReactNode }> = ({ children }) => (
   <div
     title={children?.toString()}
-    className="mr-1 w-1/5 text-ellipsis overflow-x-hidden whitespace-nowrap"
+    className="gb-mr-1 gb-w-1/5 gb-text-ellipsis gb-overflow-x-hidden gb-whitespace-nowrap"
   >
     {children}
   </div>
@@ -58,9 +58,9 @@ const DOMMutationList: FC<{
         {mutations.map((mutation, index) => (
           <div
             key={index}
-            className="bg-slate-700 odd:bg-slate-600 py-2 text-xs px-2 text-light flex"
+            className="gb-bg-slate-700 odd:gb-bg-slate-600 gb-py-2 gb-text-xs gb-px-2 gb-text-light gb-flex"
           >
-            <div className="mr-1 w-8">#{index + 1}</div>
+            <div className="gb-mr-1 gb-w-8">#{index + 1}</div>
 
             <DOMAttrColumn>{mutation.action}</DOMAttrColumn>
             <DOMAttrColumn>{mutation.selector}</DOMAttrColumn>
@@ -68,9 +68,9 @@ const DOMMutationList: FC<{
             <DOMAttrColumn>{mutation.value}</DOMAttrColumn>
 
             {removeDomMutation && (
-              <div className="w-8 flex justify-end">
+              <div className="gb-w-8 flex gb-justify-end">
                 <RxCross2
-                  className="w-4 h-4 cursor-pointer text-link"
+                  className="gb-w-4 gb-h-4 gb-cursor-pointer gb-text-link"
                   onClick={() => onRemoveMutation(mutation)}
                 />
               </div>
@@ -80,7 +80,7 @@ const DOMMutationList: FC<{
       </div>
 
       {addMutation && !showEditor && (
-        <div className="text-link text-sm" onClick={() => setShowEditor(true)}>
+        <div className="gb-text-link gb-text-sm" onClick={() => setShowEditor(true)}>
           + Add custom DOM mutation
         </div>
       )}

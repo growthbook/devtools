@@ -19,18 +19,18 @@ const VisualEditorSection: FC<{
   return (
     <>
       <div
-        className={clsx("text-light text-xs font-semibold uppercase p-4", {
-          "flex justify-between": onClose,
-          "shadow-xl": isExpanded,
-          "mb-2": isExpanded,
+        className={clsx("gb-text-light gb-text-xs gb-font-semibold gb-uppercase gb-p-4", {
+          "gb-flex gb-justify-between": onClose,
+          "gb-shadow-xl": isExpanded,
+          "gb-mb-2": isExpanded,
         })}
       >
         <div className="flex">
           {title}
           {isCollapsible ? (
             <RxCaretDown
-              className={clsx("w-4 h-4 cursor-pointer text-link mx-2", {
-                "rotate-180": !isExpanded,
+              className={clsx("gb-w-4 gb-h-4 gb-cursor-pointer gb-text-link gb-mx-2", {
+                "gb-rotate-180": !isExpanded,
               })}
               onClick={() => setIsExpanded(!isExpanded)}
             />
@@ -38,8 +38,8 @@ const VisualEditorSection: FC<{
         </div>
 
         {onClose && (
-          <button className="text-link" onClick={onClose}>
-            <RxCross1 className="w-3 h-3" />
+          <button className="gb-text-link" onClick={onClose}>
+            <RxCross1 className="gb-w-3 gb-h-3" />
           </button>
         )}
       </div>

@@ -12,9 +12,9 @@ const VariationSelector: FC<{
   };
 
   return (
-    <div className="w-full p-4 pt-2">
+    <div className="gb-w-full gb-p-4 gb-pt-2">
       <select
-        className="w-full p-2 border border-gray-300 rounded"
+        className="gb-w-full gb-p-2 gb-border gb-border-gray-300 gb-rounded"
         value={selectedVariationIndex}
         onChange={onChange}
       >

@@ -60,7 +60,7 @@ const VisualEditorHeader: FC<{
 
   return (
     <div
-      className={clsx("cursor-move", className)}
+      className={clsx("gb-cursor-move", className)}
       onMouseDown={(e) => {
         e.preventDefault();
         originX = e.clientX;
@@ -74,11 +74,11 @@ const VisualEditorHeader: FC<{
         setIsDragging(false);
       }}
     >
-      <div className="flex px-4 h-12 items-center justify-center rounded-t-xl logo-bg ">
-        <div className="h-8">
-          <img src={GBLogo} alt="GB Logo" className="w-auto h-full mr-1" />
+      <div className="gb-flex gb-px-4 gb-h-12 gb-items-center gb-justify-center gb-rounded-t-xl gb-logo-bg ">
+        <div className="gb-h-8">
+          <img src={GBLogo} alt="GB Logo" className="gb-w-auto gb-h-full gb-mr-1" />
         </div>
-        <div className="font-semibold text-white">GrowthBook Visual Editor</div>
+        <div className="gb-font-semibold gb-text-white">GrowthBook Visual Editor</div>
       </div>
     </div>
   );

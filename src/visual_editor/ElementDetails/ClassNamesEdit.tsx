@@ -16,12 +16,12 @@ const AddClassNameInput: FC<{ onAdd: (className: string) => void }> = ({
     setNewClassName("");
   }, [setIsAdding, setNewClassName]);
   return (
-    <div className="flex-1 flex">
+    <div className="gb-flex-1 gb-flex">
       {isAdding ? (
         <div>
           <input
             type="text"
-            className="rounded px-2 text-sm"
+            className="gb-rounded gb-px-2 gb-text-sm"
             placeholder="Enter class name"
             value={newClassName}
             onChange={(e) => setNewClassName(e.target.value)}
@@ -29,19 +29,19 @@ const AddClassNameInput: FC<{ onAdd: (className: string) => void }> = ({
         </div>
       ) : null}
 
-      <div className="flex justify-center items-center h-5">
+      <div className="gb-flex gb-justify-center gb-items-center gb-h-5">
         {isAdding ? (
-          <div className="ml-2">
-            <button className="text-slate-200" onClick={onSave}>
-              <RxCheck className="w-4 h-4" />
+          <div className="gb-ml-2">
+            <button className="gb-text-slate-200" onClick={onSave}>
+              <RxCheck className="gb-w-4 gb-h-4" />
             </button>
-            <button className="text-slate-200 ml-1" onClick={onCancel}>
-              <RxCross2 className="w-4 h-4" />
+            <button className="gb-text-slate-200 gb-ml-1" onClick={onCancel}>
+              <RxCross2 className="gb-w-4 gb-h-4" />
             </button>
           </div>
         ) : (
-          <button className="text-slate-200" onClick={() => setIsAdding(true)}>
-            <RxPlus className="w-4 h-4" />
+          <button className="gb-text-slate-200" onClick={() => setIsAdding(true)}>
+            <RxPlus className="gb-w-4 gb-h-4" />
           </button>
         )}
       </div>
@@ -54,10 +54,10 @@ const ClassNameToken: FC<{
   onRemove: () => void;
 }> = ({ className, onRemove }) => {
   return (
-    <div className="flex justify-between rounded bg-slate-600 text-slate-200 text-sm px-2 mr-2 mb-1">
+    <div className="gb-flex gb-justify-between gb-rounded gb-bg-slate-600 gb-text-slate-200 gb-text-sm gb-px-2 gb-mr-2 gb-mb-1">
       {className}
-      <button className="text-link ml-1" onClick={onRemove}>
-        <RxCross2 className="w-4 h-4" />
+      <button className="gb-text-link gb-ml-1" onClick={onRemove}>
+        <RxCross2 className="gb-w-4 gb-h-4" />
       </button>
     </div>
   );
@@ -79,7 +79,7 @@ const ClassNamesEdit: FC<{
   );
 
   return (
-    <div className="flex flex-wrap items-center ml-4">
+    <div className="gb-flex gb-flex-wrap gb-items-center gb-ml-4">
       {classNames.map((className, index) => (
         <ClassNameToken
           key={index}
