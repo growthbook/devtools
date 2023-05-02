@@ -46,7 +46,7 @@ const FloatingFrame: FC<{ parentElement: Element | null }> = ({
   return (
     <>
       <div
-        gb-highlight-frame
+        gb-highlight-frame="true"
         className="gb-fixed gb-border-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
         style={{
           top: domRect.top,
@@ -56,7 +56,7 @@ const FloatingFrame: FC<{ parentElement: Element | null }> = ({
         }}
       ></div>
       <div
-        gb-highlight-frame
+        gb-highlight-frame="true"
         className="gb-fixed gb-border-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
         style={{
           top: domRect.top,
@@ -66,7 +66,7 @@ const FloatingFrame: FC<{ parentElement: Element | null }> = ({
         }}
       ></div>
       <div
-        gb-highlight-frame
+        gb-highlight-frame="true"
         className="gb-fixed gb-border-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
         style={{
           top: domRect.top + domRect.height,
@@ -76,7 +76,7 @@ const FloatingFrame: FC<{ parentElement: Element | null }> = ({
         }}
       ></div>
       <div
-        gb-highlight-frame
+        gb-highlight-frame="true"
         className="gb-fixed gb-border-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
         style={{
           top: domRect.top,

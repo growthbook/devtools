@@ -40,7 +40,10 @@ const AddClassNameInput: FC<{ onAdd: (className: string) => void }> = ({
             </button>
           </div>
         ) : (
-          <button className="gb-text-slate-200" onClick={() => setIsAdding(true)}>
+          <button
+            className="gb-text-slate-200"
+            onClick={() => setIsAdding(true)}
+          >
             <RxPlus className="gb-w-4 gb-h-4" />
           </button>
         )}
@@ -68,7 +71,8 @@ const ClassNamesEdit: FC<{
   onRemove: (classNames: string) => void;
   onAdd: (classNames: string) => void;
 }> = ({ element, onRemove, onAdd: _onAdd }) => {
-  const classNames = element.className.split(" ").filter(Boolean);
+  const classNameString = element.getAttribute("class") || "";
+  const classNames = classNameString.split(" ").filter(Boolean);
 
   const onAdd = useCallback(
     (classNames: string) => {

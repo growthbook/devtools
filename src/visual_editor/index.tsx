@@ -500,13 +500,16 @@ const VisualEditor: FC<{}> = () => {
               <AttributeEdit element={selectedElement} onSave={setAttributes} />
             </VisualEditorSection>
 
-            <VisualEditorSection title="Class names">
-              <ClassNamesEdit
-                element={selectedElement}
-                onRemove={removeClassNames}
-                onAdd={addClassNames}
-              />
-            </VisualEditorSection>
+            {/** SVGs do not work with class name editor ATM; See issue GB-194 **/}
+            {!["svg", "path"].includes(selectedElement.tagName) && (
+              <VisualEditorSection title="Class names">
+                <ClassNamesEdit
+                  element={selectedElement}
+                  onRemove={removeClassNames}
+                  onAdd={addClassNames}
+                />
+              </VisualEditorSection>
+            )}
           </>
         ) : null}
 
