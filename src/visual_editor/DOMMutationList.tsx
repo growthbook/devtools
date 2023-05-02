@@ -53,8 +53,8 @@ const DOMMutationList: FC<{
   );
 
   return (
-    <div className="px-4 ">
-      <div className="mb-4">
+    <div className="gb-px-4">
+      <div className="gb-mb-4">
         {mutations.map((mutation, index) => (
           <div
             key={index}
@@ -80,7 +80,10 @@ const DOMMutationList: FC<{
       </div>
 
       {addMutation && !showEditor && (
-        <div className="gb-text-link gb-text-sm" onClick={() => setShowEditor(true)}>
+        <div
+          className="gb-text-link gb-text-sm"
+          onClick={() => setShowEditor(true)}
+        >
           + Add custom DOM mutation
         </div>
       )}

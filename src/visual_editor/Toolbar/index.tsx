@@ -43,7 +43,7 @@ const ToolbarButton = ({
     <button
       title={title}
       className={clsx(
-        "gb-flex-1 gb-p-4 gb-h-full hover:gb-bg-slate-600/75 flex gb-justify-center gb-text-white",
+        "gb-flex-1 gb-p-4 gb-h-full hover:gb-bg-slate-600/75 gb-flex gb-justify-center gb-text-white",
         {
           "gb-bg-slate-700": isActive,
         }
