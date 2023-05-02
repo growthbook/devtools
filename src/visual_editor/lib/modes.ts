@@ -22,6 +22,8 @@ const mouseMoveHandler = (event: MouseEvent) => {
   const { clientX: x, clientY: y } = event;
   const domNode = document.elementFromPoint(x, y);
   if (!domNode || domNode === _prevDomNode) return;
+  // return prevNode if current node is our frame component
+  if (domNode.hasAttribute("gb-highlight-frame")) return;
   clearHighlightedElementAttr();
   domNode.setAttribute(highlightedAttributeName, "");
   _prevDomNode = domNode;
