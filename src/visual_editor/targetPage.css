@@ -1,4 +1,7 @@
-[gb-selection-mode-hover],
+[gb-selection-mode-hover] {
+  cursor: crosshair;
+}
+
 [gb-selection-mode-selected] {
   cursor: move;
 }
