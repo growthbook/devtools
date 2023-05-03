@@ -1,17 +1,14 @@
-[gb-move-mode-highlighted] {
-  outline: 2px dashed #7c45ea;
-  outline-offset: 2px;
+[gb-selection-mode-hover],
+[gb-selection-mode-selected] {
   cursor: move;
 }
 
-[gb-selection-mode-highlighted] {
-  outline: 2px dashed #7c45ea;
-  outline-offset: 2px;
-  cursor: crosshair;
+/* drag element highlight edges */
+[gb-selection-mode-drag-target] {
+  position: relative;
 }
 
-[gb-selection-mode-selected] {
-  outline: 2px dashed #945eff;
-  cursor: crosshair;
-  outline-offset: 2px;
+[gb-selection-mode-drag-target-edge] {
+  position: fixed;
+  @apply gb-z-max;
 }

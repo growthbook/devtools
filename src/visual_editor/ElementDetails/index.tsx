@@ -38,7 +38,7 @@ const ElementDetails: FC<{
   }, [mutations, selector]);
 
   return (
-    <div className="text-light flex flex-col ml-4">
+    <div className="gb-text-light gb-flex gb-flex-col gb-ml-4">
       <DetailsRow label="Selector" value={selector} readOnly />
       <DetailsRow label="Tag name" value={name} readOnly />
       {isHtmlTooLarge ? (

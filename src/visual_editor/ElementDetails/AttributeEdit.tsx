@@ -3,11 +3,11 @@ import { validAttributeName } from "dom-mutator";
 import React, { FC, useCallback, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { RxCross2, RxPlus, RxCheck } from "react-icons/rx";
-import { highlightedAttributeName, selectedAttributeName } from "../lib/modes";
+import { hoverAttributeName, selectedAttributeName } from "../lib/selectionMode";
 
 export const IGNORED_ATTRS = [
   "class",
-  highlightedAttributeName,
+  hoverAttributeName,
   selectedAttributeName,
 ];
 
@@ -55,28 +55,28 @@ const EditAttributeInput: FC<{
       {isAdding ? (
         <input
           type="text"
-          className="px-2 text-sm w-16 mb-2"
+          className="gb-px-2 gb-text-sm gb-w-16 gb-mb-2"
           placeholder="Key"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
       ) : (
-        <div className="w-12 text-xs text-slate-400 mb-2">{name}</div>
+        <div className="gb-w-12 gb-text-xs gb-text-slate-400 gb-mb-2">{name}</div>
       )}
 
       <TextareaAutosize
-        className="py-0 px-2 text-sm text-black mr-2 mb-1"
+        className="gb-py-0 gb-px-2 gb-text-sm gb-text-black gb-mr-2 gb-mb-1"
         placeholder="Value"
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
 
       <div>
-        <button className="text-slate-200" onClick={onSubmit}>
-          <RxCheck className="w-4 h-4" />
+        <button className="gb-text-slate-200" onClick={onSubmit}>
+          <RxCheck className="gb-w-4 gb-h-4" />
         </button>
-        <button className="text-slate-200 mx-1" onClick={onCancel}>
-          <RxCross2 className="w-4 h-4" />
+        <button className="gb-text-slate-200 gb-mx-1" onClick={onCancel}>
+          <RxCross2 className="gb-w-4 gb-h-4" />
         </button>
       </div>
     </>
@@ -104,8 +104,8 @@ const AddAttributeInput: FC<{
       {isAdding ? (
         <EditAttributeInput onSubmit={onAdd} onCancel={onCancel} />
       ) : (
-        <button className="text-slate-200" onClick={() => setIsAdding(true)}>
-          <RxPlus className="w-4 h-4" />
+        <button className="gb-text-slate-200" onClick={() => setIsAdding(true)}>
+          <RxPlus className="gb-w-4 gb-h-4" />
         </button>
       )}
     </>
@@ -140,12 +140,12 @@ const AttributeToken: FC<
     );
   }
   return (
-    <div className="flex mb-2 last:mb-0">
-      <div className="w-12 text-xs text-slate-400">{name}</div>
+    <div className="gb-flex gb-mb-2 last:gb-mb-0">
+      <div className="gb-w-12 gb-text-xs gb-text-slate-400">{name}</div>
 
       <div
         className={clsx(
-          "text-link text-ellipsis overflow-hidden text-sm hover:bg-slate-600"
+          "gb-text-link gb-text-ellipsis gb-overflow-hidden gb-text-sm hover:gb-bg-slate-600"
         )}
         style={{ flex: 2, maxHeight: "3rem" }}
         onClick={() => setIsEditing(true)}
@@ -153,8 +153,8 @@ const AttributeToken: FC<
         {value}
       </div>
 
-      <button className="text-link mx-1" onClick={onRemove}>
-        <RxCross2 className="w-4 h-4" />
+      <button className="gb-text-link gb-mx-1" onClick={onRemove}>
+        <RxCross2 className="gb-w-4 gb-h-4" />
       </button>
     </div>
   );
@@ -191,7 +191,7 @@ const AttributeEdit: FC<{
   );
 
   return (
-    <div className="flex flex-col ml-4">
+    <div className="gb-flex gb-flex-col gb-ml-4">
       {attributes.map(({ name, value }, index) => (
         <AttributeToken
           key={index}

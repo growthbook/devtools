@@ -9,9 +9,9 @@ const GlobalCSSEditor: FC<{
   useEffect(() => onSubmit(css), [css]);
 
   return (
-    <div className="px-4 pb-4">
+    <div className="gb-px-4 gb-pb-4">
       <textarea
-        className="w-full h-64 rounded p-2"
+        className="gb-w-full gb-h-64 gb-rounded gb-p-2"
         placeholder="Enter CSS here"
         value={css}
         onChange={(e) => setCss(e.currentTarget.value)}
