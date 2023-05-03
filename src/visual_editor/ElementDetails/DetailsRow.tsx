@@ -1,59 +1,28 @@
 import clsx from "clsx";
-import React, { FC, useEffect, useState } from "react";
-import { RxPencil1, RxCheck, RxCross2 } from "react-icons/rx";
+import React, { useEffect, useState } from "react";
+import { RxCheck, RxCross2, RxReset } from "react-icons/rx";
 import TextareaAutosize from "react-textarea-autosize";
-
-const EditAndSaveButtons = ({
-  isEditing,
-  toggleEditing,
-  onSave,
-  onCancel,
-}: {
-  isEditing: boolean;
-  toggleEditing: () => void;
-  onSave: () => void;
-  onCancel: () => void;
-}) => {
-  if (!isEditing) {
-    return (
-      <button onClick={toggleEditing}>
-        <RxPencil1 className="w-6 h-6" />
-      </button>
-    );
-  }
-
-  return (
-    <>
-      <button className="text-green-500 hover:text-green-700" onClick={onSave}>
-        <RxCheck className="w-6 h-6" />
-      </button>
-      <button className="text-rose-500 hover:text-rose-700" onClick={onCancel}>
-        <RxCross2 className="w-6 h-6" />
-      </button>
-    </>
-  );
-};
 
 const DetailsRow = ({
   label,
   value = "",
   readOnly = false,
   onSave = () => {},
-  onErase,
+  onUndo,
 }:
   | {
       label: string;
       value: string;
       readOnly: true;
       onSave?: never;
-      onErase?: never;
+      onUndo?: never;
     }
   | {
       label: string;
       value: string;
       readOnly?: false;
       onSave: (value: string) => void;
-      onErase?: () => void;
+      onUndo?: () => void;
     }) => {
   const [editing, setIsEditing] = useState(false);
   const [_value, _setValue] = useState<string>(value);
@@ -112,10 +81,10 @@ const DetailsRow = ({
           {_value}
         </div>
       )}
-      {onErase && (
+      {onUndo && (
         <div className="px-1">
-          <button onClick={onErase}>
-            <RxCross2 className="w-4 h-4 cursor-pointer" />
+          <button onClick={onUndo}>
+            <RxReset className="w-4 h-4 cursor-pointer" />
           </button>
         </div>
       )}

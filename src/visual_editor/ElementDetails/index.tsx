@@ -26,7 +26,7 @@ const ElementDetails: FC<{
     [element, addMutation]
   );
 
-  const clearHTMLMutations = useMemo(() => {
+  const undoHTMLMutations = useMemo(() => {
     const htmlMutations = mutations.filter(
       (mutation) =>
         mutation.attribute === "html" && mutation.selector === selector
@@ -52,7 +52,7 @@ const ElementDetails: FC<{
           label="Inner HTML"
           value={html}
           onSave={setHTML}
-          onErase={clearHTMLMutations}
+          onUndo={undoHTMLMutations}
         />
       )}
     </div>
