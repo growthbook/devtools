@@ -277,10 +277,20 @@ const VisualEditor: FC<{}> = () => {
 
   const removeDomMutation = useCallback(
     (mutation: DeclarativeMutation) => {
-      const indexToDelete = selectedVariation.domMutations.indexOf(mutation);
       updateSelectedVariation({
         domMutations: selectedVariation.domMutations.filter(
-          (_mutation, i) => i !== indexToDelete
+          (m) => mutation !== m
+        ),
+      });
+    },
+    [updateSelectedVariation, selectedVariation]
+  );
+
+  const removeDomMutations = useCallback(
+    (mutations: DeclarativeMutation[]) => {
+      updateSelectedVariation({
+        domMutations: selectedVariation.domMutations.filter(
+          (m) => !mutations.includes(m)
         ),
       });
     },
@@ -497,10 +507,12 @@ const VisualEditor: FC<{}> = () => {
 
             <VisualEditorSection title="Element Details">
               <ElementDetails
+                mutations={selectedVariation?.domMutations ?? []}
                 selector={selector}
                 element={selectedElement}
                 addMutation={addDomMutation}
                 addMutations={addDomMutations}
+                removeDomMutations={removeDomMutations}
               />
             </VisualEditorSection>
 
