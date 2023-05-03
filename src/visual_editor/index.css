@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 * {
-  @apply font-sans;
+  @apply gb-font-sans;
 }
 
-.logo-bg {
+.gb-logo-bg {
   background: linear-gradient(135deg, #c111dd, #81d, #350e47);
   animation: gradient 5s ease infinite;
   background-size: 200% 200%;
@@ -24,7 +24,7 @@
   }
 }
 
-.exp-creator {
+.gb-exp-creator {
   animation: appear 500ms ease-in-out;
 }
 
@@ -39,11 +39,11 @@
   }
 }
 
-.text-light {
-  @apply text-slate-300;
+.gb-text-light {
+  @apply gb-text-slate-300;
 }
 
-.text-link {
-  @apply text-slate-300 hover:text-slate-100;
+.gb-text-link {
+  @apply gb-text-slate-300 hover:gb-text-slate-100;
   cursor: pointer;
 }

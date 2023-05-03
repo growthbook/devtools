@@ -1,13 +1,6 @@
-[gb-selection-mode-hover] {
-  outline: 2px dashed #7c45ea;
-  outline-offset: 2px;
-  cursor: crosshair;
-}
-
+[gb-selection-mode-hover],
 [gb-selection-mode-selected] {
-  outline: 2px dashed #945eff;
   cursor: move;
-  outline-offset: 2px;
 }
 
 /* drag element highlight edges */
@@ -17,5 +10,5 @@
 
 [gb-selection-mode-drag-target-edge] {
   position: fixed;
-  @apply z-max;
+  @apply gb-z-max;
 }

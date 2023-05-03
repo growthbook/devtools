@@ -32,6 +32,8 @@ let _draggedToSibling: Element | null = null;
 const mouseMoveHandler = (event: MouseEvent) => {
   const { clientX: x, clientY: y } = event;
   const domNode = document.elementFromPoint(x, y);
+  // return prevNode if current node is our frame component
+  if (domNode?.hasAttribute("gb-highlight-frame")) return;
 
   if (_isDragging && _selectedElement) {
     ({

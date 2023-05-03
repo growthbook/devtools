@@ -31,13 +31,13 @@ const BreadcrumbsView: FC<{
   };
 
   return (
-    <div className="px-4 text-sm text-light">
+    <div className="gb-px-4 gb-text-sm gb-text-light">
       {breadcrumbs.map((breadcrumb, index) => (
         <span key={index}>
           <span
             className={clsx({
-              "cursor-pointer": index !== breadcrumbs.length - 1,
-              "text-link": index !== breadcrumbs.length - 1,
+              "gb-cursor-pointer": index !== breadcrumbs.length - 1,
+              "gb-text-link": index !== breadcrumbs.length - 1,
             })}
             onClick={
               index !== breadcrumbs.length - 1
@@ -55,7 +55,7 @@ const BreadcrumbsView: FC<{
         <span>
           {" > "}
           <span>
-            <select value={-1} onChange={onChildSelect} className="text-black">
+            <select value={-1} onChange={onChildSelect} className="gb-text-black">
               <option value={-1}>MORE</option>
               {children.map((child, index) => (
                 <option key={index} value={index}>
