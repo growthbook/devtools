@@ -12,11 +12,13 @@ import React, {
 } from "react";
 import * as ReactDOM from "react-dom/client";
 import Toolbar, { ToolbarMode } from "./Toolbar";
-import { toggleSelectionMode, updateSelectedElement } from "./lib/modes";
-import "./targetPage.css";
+import {
+  toggleSelectionMode,
+  onSelectionModeUpdate,
+} from "./lib/selectionMode";
 import ElementDetails from "./ElementDetails";
-import HighlightedElementSelectorDisplay from "./HighlightedElementSelectorDisplay";
-// @ts-expect-error ts-loader does not understand this .css import
+import SelectorDisplay from "./SelectorDisplay";
+import FloatingFrame from "./FloatingFrame";
 import VisualEditorCss from "./index.css";
 import GlobalCSSEditor from "./GlobalCSSEditor";
 import VisualEditorPane from "./VisualEditorPane";
@@ -48,7 +50,7 @@ import {
   EXPERIMENT_URL_PARAMS_KEY,
   API_HOST_PARAMS_KEY,
 } from "./lib/constants";
-import FloatingFrame from "./FloatingFrame";
+import "./targetPage.css";
 
 export interface VisualEditorVariation {
   name: string;
@@ -93,6 +95,7 @@ const genVisualEditorVariations = ({
   });
 };
 
+// normalize param values into number type
 const getVariationIndexFromParams = (
   param: string | (string | null)[] | null
 ): number => {
@@ -103,6 +106,7 @@ const getVariationIndexFromParams = (
   return parseInt(param ?? "1", 10);
 };
 
+// remove visual editor params from url once loaded
 const cleanUpParams = (params: qs.ParsedQuery) => {
   window.history.replaceState(
     null,
@@ -219,6 +223,7 @@ const VisualEditor: FC<{}> = () => {
     [addDomMutations]
   );
 
+  // debounced since we accept text input from the user here
   const setGlobalCSS = useCallback(
     debounce((css: string) => {
       updateSelectedVariation({ css });
@@ -325,7 +330,7 @@ const VisualEditor: FC<{}> = () => {
     );
   }, []);
 
-  // get ahold of api credentials. requires messaging the background script
+  // get ahold of api credentials on load. requires messaging the background script
   useMessage({
     messageHandler: (message) => {
       const hasVisualEditorParams = Boolean(
@@ -381,7 +386,7 @@ const VisualEditor: FC<{}> = () => {
     };
 
     load();
-  }, [visualChangesetId, fetchVisualChangeset]);
+  }, [apiCreds, visualChangesetId, fetchVisualChangeset]);
 
   // handle mode selection
   useEffect(() => {
@@ -392,6 +397,7 @@ const VisualEditor: FC<{}> = () => {
       selectedElement,
       setSelectedElement,
       setHighlightedElementSelector,
+      addDomMutation,
     });
   }, [isVisualEditorEnabled, mode]);
 
@@ -400,10 +406,11 @@ const VisualEditor: FC<{}> = () => {
     if (!isVisualEditorEnabled) return;
     if (mode !== "selection") return;
 
-    updateSelectedElement({
+    onSelectionModeUpdate({
       selectedElement,
       setSelectedElement,
       setHighlightedElementSelector,
+      addDomMutation,
     });
   }, [
     selectedElement,
@@ -416,6 +423,7 @@ const VisualEditor: FC<{}> = () => {
   // upon every DOM mutation, we revert all changes and replay them to ensure
   // that the DOM is in the correct state
   useEffect(() => {
+    // run reverts if they exist
     if (mutateRevert?.current) mutateRevert.current();
 
     const revertCallbacks: Array<() => void> = [];
@@ -513,16 +521,6 @@ const VisualEditor: FC<{}> = () => {
           </>
         ) : null}
 
-        {mode === "selection" ? (
-          <HighlightedElementSelectorDisplay
-            selector={highlightedElementSelector}
-          />
-        ) : null}
-
-        {mode === "selection" && selectedElement ? (
-          <HighlightedElementSelectorDisplay selector={selector} />
-        ) : null}
-
         {mode === "css" && (
           <VisualEditorSection title="Global CSS">
             <GlobalCSSEditor
@@ -572,22 +570,22 @@ const VisualEditor: FC<{}> = () => {
       {mode === "selection" && selectedElement ? (
         <>
           <FloatingFrame parentElement={selectedElement} />
-          <HighlightedElementSelectorDisplay selector={selector} />
+          <SelectorDisplay selector={selector} />
         </>
       ) : null}
       {mode === "selection" ? (
         <>
           <FloatingFrame parentElement={highlightedElement} />
-          <HighlightedElementSelectorDisplay
-            selector={highlightedElementSelector}
-          />
+          <SelectorDisplay selector={highlightedElementSelector} />
         </>
       ) : null}
     </>
   );
 };
 
-// mounting the visual editor
+/**
+ * mounting the visual editor
+ */
 export const CONTAINER_ID = "__gb_visual_editor";
 
 const container = document.createElement("div");

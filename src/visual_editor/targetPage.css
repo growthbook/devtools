@@ -1,11 +1,14 @@
-[gb-move-mode-highlighted] {
+[gb-selection-mode-hover],
+[gb-selection-mode-selected] {
   cursor: move;
 }
 
-[gb-selection-mode-highlighted] {
-  cursor: crosshair;
+/* drag element highlight edges */
+[gb-selection-mode-drag-target] {
+  position: relative;
 }
 
-[gb-selection-mode-selected] {
-  cursor: crosshair;
+[gb-selection-mode-drag-target-edge] {
+  position: fixed;
+  @apply gb-z-max;
 }
