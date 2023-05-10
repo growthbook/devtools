@@ -106,6 +106,31 @@ const getVariationIndexFromParams = (
   return parseInt(param ?? "1", 10);
 };
 
+const refreshWithParams = ({
+  visualChangesetId,
+  variationIndex,
+  experimentUrl,
+  apiHost,
+  params,
+}: {
+  visualChangesetId: string;
+  variationIndex: string;
+  experimentUrl: string;
+  apiHost: string;
+  params: qs.ParsedQuery;
+}) => {
+  window.location.href = qs.stringifyUrl({
+    url: window.location.href,
+    query: {
+      ...params,
+      [VISUAL_CHANGESET_ID_PARAMS_KEY]: visualChangesetId,
+      [VARIATION_INDEX_PARAMS_KEY]: variationIndex,
+      [EXPERIMENT_URL_PARAMS_KEY]: experimentUrl,
+      [API_HOST_PARAMS_KEY]: apiHost,
+    },
+  });
+};
+
 // remove visual editor params from url once loaded
 const cleanUpParams = (params: qs.ParsedQuery) => {
   window.history.replaceState(
@@ -570,12 +595,26 @@ const VisualEditor: FC<{}> = () => {
           </VisualEditorSection>
         )}
 
-        <div className="gb-m-4">
+        <div className="gb-m-4 gb-text-center">
           <button
             className="gb-w-full gb-p-2 gb-bg-indigo-800 gb-rounded gb-text-white gb-font-semibold gb-text-lg"
             onClick={() => (window.location.href = experimentUrl)}
           >
             Done Editing
+          </button>
+          <button
+            className="gb-text-white gb-text-xs gb-text-indigo-500 gb-mt-2"
+            onClick={() =>
+              refreshWithParams({
+                apiHost: apiCreds.apiHost || "",
+                experimentUrl,
+                params,
+                variationIndex: variationIndex.toString(),
+                visualChangesetId,
+              })
+            }
+          >
+            Reload page
           </button>
         </div>
       </VisualEditorPane>
