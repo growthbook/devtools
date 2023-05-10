@@ -53,6 +53,12 @@ import {
 import "./targetPage.css";
 import GlobalJsEditor from "./GlobalJSEditor";
 
+declare global {
+  interface Window {
+    __gb_global_js_err?: (error: string) => void;
+  }
+}
+
 export interface VisualEditorVariation {
   name: string;
   description: string;
@@ -191,33 +197,12 @@ const VisualEditor: FC<{}> = () => {
   const { fetchVisualChangeset, updateVisualChangeset, error } =
     useApi(apiCreds);
   const [showApiCredsAlert, setShowApiCredsAlert] = useState(false);
+  const [globalJsError, setGlobalJsError] = useState("");
 
   const forceUpdate = debounce(_forceUpdate, 100);
   const mutateRevert = useRef<(() => void) | null>(null);
 
   const selectedVariation = variations?.[selectedVariationIndex] ?? null;
-
-  // generate a style tag to hold the global CSS
-  const globalStyleTag = useMemo(() => {
-    if (_globalStyleTag) document.head.removeChild(_globalStyleTag);
-    _globalStyleTag = document.createElement("style");
-    document.head.appendChild(_globalStyleTag);
-    _globalStyleTag.innerHTML = selectedVariation?.css ?? "";
-    return _globalStyleTag;
-  }, [selectedVariation]);
-
-  const globalScriptTag = useMemo(() => {
-    if (_globalScriptTag) document.body.removeChild(_globalScriptTag);
-    _globalScriptTag = document.createElement("script");
-    _globalScriptTag.onerror = () => {
-      alert("whoa there big fella");
-    };
-    document.body.appendChild(_globalScriptTag);
-    _globalScriptTag.innerHTML =
-      `try { ${selectedVariation?.js} } catch(e) { alert('whoa there big fella: ' + e.message); }` ??
-      "";
-    return _globalScriptTag;
-  }, [selectedVariation]);
 
   const updateSelectedVariation = useCallback(
     (updates: Partial<VisualEditorVariation>) => {
@@ -268,15 +253,14 @@ const VisualEditor: FC<{}> = () => {
   const setGlobalCSS = useCallback(
     debounce((css: string) => {
       updateSelectedVariation({ css });
-      globalStyleTag.innerHTML = css;
     }, 500),
     [updateSelectedVariation]
   );
 
   const setGlobalJs = useCallback(
     (js: string) => {
+      setGlobalJsError("");
       updateSelectedVariation({ js });
-      globalScriptTag.innerHTML = js;
     },
     [updateSelectedVariation]
   );
@@ -511,6 +495,28 @@ const VisualEditor: FC<{}> = () => {
     return () => observer.disconnect();
   }, []);
 
+  // generate a style tag to hold the global CSS
+  useEffect(() => {
+    if (_globalStyleTag) document.head.removeChild(_globalStyleTag);
+    if (!selectedVariation?.css) return;
+    _globalStyleTag = document.createElement("style");
+    document.head.appendChild(_globalStyleTag);
+    _globalStyleTag.innerHTML = selectedVariation?.css ?? "";
+  }, [selectedVariation]);
+
+  // generate a script tag to hold global JS
+  // TODO figure out how to make this render once per variation, and per update
+  useEffect(() => {
+    if (_globalScriptTag) document.body.removeChild(_globalScriptTag);
+    if (!selectedVariation?.js) return;
+    _globalScriptTag = document.createElement("script");
+    document.body.appendChild(_globalScriptTag);
+    window.__gb_global_js_err = setGlobalJsError;
+    _globalScriptTag.innerHTML =
+      `try { ${selectedVariation?.js} } catch(e) { window.__gb_global_js_err(e.message); }` ??
+      "";
+  }, [selectedVariation]);
+
   if (showApiCredsAlert || error) {
     return (
       <SetApiCredsForm
@@ -584,7 +590,16 @@ const VisualEditor: FC<{}> = () => {
 
         {mode === "js" && (
           <VisualEditorSection title="Global JS">
-            <GlobalJsEditor js={selectedVariation.js} onSubmit={setGlobalJs} />
+            <GlobalJsEditor
+              js={selectedVariation.js}
+              onSubmit={setGlobalJs}
+              onError={setGlobalJsError}
+            />
+            {globalJsError && (
+              <div className="gb-px-4 gb-text-rose-500">
+                JS error: {globalJsError}
+              </div>
+            )}
           </VisualEditorSection>
         )}
 

@@ -1,34 +1,25 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
+
+const validate = (js: string) => {
+  let error;
+  try {
+    new Function(js);
+  } catch (e: any) {
+    error = e.message;
+  }
+  return error;
+};
 
 const GlobalJSEditor: FC<{
   js?: string;
   onSubmit: (js: string) => void;
-}> = ({ js: _js = "", onSubmit }) => {
+  onError: (error: string) => void;
+}> = ({ js: _js = "", onSubmit, onError }) => {
   const [js, setJs] = useState(_js);
 
-  const validate = (js: string) => {
-    console.log("validate", { js });
-    let isValid = true;
-    let error;
-    try {
-      new Function(js);
-    } catch (e: any) {
-      isValid = false;
-      error = e.message;
-    }
-
-    return { isValid, error };
-  };
-
   const onSave = (js: string) => {
-    console.log("onSave", { js });
-    const { isValid, error } = validate(js);
-
-    if (!isValid) {
-      alert(error);
-      return;
-    }
-
+    const error = validate(js);
+    if (error) return onError(error);
     onSubmit(js);
   };
 
