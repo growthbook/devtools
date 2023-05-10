@@ -51,16 +51,19 @@ import {
   API_HOST_PARAMS_KEY,
 } from "./lib/constants";
 import "./targetPage.css";
+import GlobalJsEditor from "./GlobalJSEditor";
 
 export interface VisualEditorVariation {
   name: string;
   description: string;
   css?: string;
+  js?: string;
   domMutations: APIDomMutation[];
   variationId: string;
 }
 
 let _globalStyleTag: HTMLStyleElement | null = null;
+let _globalScriptTag: HTMLScriptElement | null = null;
 
 // normalize API payloads into local object shape
 const genVisualEditorVariations = ({
@@ -203,6 +206,19 @@ const VisualEditor: FC<{}> = () => {
     return _globalStyleTag;
   }, [selectedVariation]);
 
+  const globalScriptTag = useMemo(() => {
+    if (_globalScriptTag) document.body.removeChild(_globalScriptTag);
+    _globalScriptTag = document.createElement("script");
+    _globalScriptTag.onerror = () => {
+      alert("whoa there big fella");
+    };
+    document.body.appendChild(_globalScriptTag);
+    _globalScriptTag.innerHTML =
+      `try { ${selectedVariation?.js} } catch(e) { alert('whoa there big fella: ' + e.message); }` ??
+      "";
+    return _globalScriptTag;
+  }, [selectedVariation]);
+
   const updateSelectedVariation = useCallback(
     (updates: Partial<VisualEditorVariation>) => {
       const updatedVariation = {
@@ -254,6 +270,14 @@ const VisualEditor: FC<{}> = () => {
       updateSelectedVariation({ css });
       globalStyleTag.innerHTML = css;
     }, 500),
+    [updateSelectedVariation]
+  );
+
+  const setGlobalJs = useCallback(
+    (js: string) => {
+      updateSelectedVariation({ js });
+      globalScriptTag.innerHTML = js;
+    },
     [updateSelectedVariation]
   );
 
@@ -557,6 +581,12 @@ const VisualEditor: FC<{}> = () => {
             )}
           </>
         ) : null}
+
+        {mode === "js" && (
+          <VisualEditorSection title="Global JS">
+            <GlobalJsEditor js={selectedVariation.js} onSubmit={setGlobalJs} />
+          </VisualEditorSection>
+        )}
 
         {mode === "css" && (
           <VisualEditorSection title="Global CSS">

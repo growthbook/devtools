@@ -1,18 +1,18 @@
 import React, { FC } from "react";
 import {
   RxCursorArrow,
-  RxKeyboard,
   RxCamera,
   RxListBullet,
   RxPencil1,
 } from "react-icons/rx";
 import clsx from "clsx";
 import { IconType } from "react-icons";
-import { BsFiletypeCss } from "react-icons/bs";
+import { BsFiletypeCss, BsFiletypeJs } from "react-icons/bs";
 
 export type ToolbarMode =
   | "interactive"
   | "selection"
+  | "js"
   | "css"
   | "screenshot"
   | "changes";
@@ -20,6 +20,7 @@ export type ToolbarMode =
 const modeToIcon: Record<ToolbarMode, IconType | FC<{}>> = {
   interactive: RxCursorArrow,
   selection: RxPencil1,
+  js: BsFiletypeJs,
   css: BsFiletypeCss,
   screenshot: RxCamera,
   changes: RxListBullet,
@@ -79,6 +80,12 @@ const Toolbar: FC<{
             clearSelectedElement();
           }}
           title="Selection mode"
+        />
+        <ToolbarButton
+          isActive={mode === "js"}
+          mode="js"
+          enable={() => setMode("js")}
+          title="Global JS mode"
         />
         <ToolbarButton
           isActive={mode === "css"}
