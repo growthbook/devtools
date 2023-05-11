@@ -6,7 +6,13 @@ const GlobalCSSEditor: FC<{
 }> = ({ css: _css = "", onSubmit }) => {
   const [css, setCss] = useState(_css);
 
-  useEffect(() => onSubmit(css), [css]);
+  useEffect(() => {
+    onSubmit(css);
+  }, [css]);
+
+  useEffect(() => {
+    setCss(_css);
+  }, [_css]);
 
   return (
     <div className="gb-px-4 gb-pb-4">

@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useCallback, useEffect, useState } from "react";
 
 const validate = (js: string) => {
   let error;
@@ -17,11 +17,18 @@ const GlobalJSEditor: FC<{
 }> = ({ js: _js = "", onSubmit, onError }) => {
   const [js, setJs] = useState(_js);
 
-  const onSave = (js: string) => {
-    const error = validate(js);
-    if (error) return onError(error);
-    onSubmit(js);
-  };
+  const onSave = useCallback(
+    (js: string) => {
+      const error = validate(js);
+      if (error) return onError(error);
+      onSubmit(js);
+    },
+    [onSubmit, onError]
+  );
+
+  useEffect(() => {
+    setJs(_js);
+  }, [_js]);
 
   return (
     <div className="gb-px-4 gb-pb-4">
