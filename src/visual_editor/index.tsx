@@ -638,6 +638,8 @@ const VisualEditor: FC<{}> = () => {
               addMutation={addDomMutation}
               globalCss={selectedVariation.css}
               clearGlobalCss={() => setGlobalCSS("")}
+              globalJs={selectedVariation.js}
+              clearGlobalJs={() => setGlobalJs("")}
               removeDomMutation={removeDomMutation}
               mutations={selectedVariation?.domMutations ?? []}
             />
