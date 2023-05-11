@@ -92,13 +92,17 @@ const genVisualEditorVariations = ({
 
   return variations.map((variation: APIExperimentVariation) => {
     const { name, description, variationId } = variation;
-    const { css = "", domMutations = [] } =
-      visualChangesByVariationId[variation.variationId] ?? {};
+    const {
+      css = "",
+      js = "",
+      domMutations = [],
+    } = visualChangesByVariationId[variation.variationId] ?? {};
     return {
       name,
       description,
       variationId,
       css,
+      js,
       domMutations,
     };
   });
@@ -497,7 +501,7 @@ const VisualEditor: FC<{}> = () => {
 
   // generate a style tag to hold the global CSS
   useEffect(() => {
-    if (_globalStyleTag) document.head.removeChild(_globalStyleTag);
+    if (_globalStyleTag) _globalStyleTag.remove();
     if (!selectedVariation?.css) return;
     _globalStyleTag = document.createElement("style");
     document.head.appendChild(_globalStyleTag);
@@ -505,9 +509,9 @@ const VisualEditor: FC<{}> = () => {
   }, [selectedVariation]);
 
   // generate a script tag to hold global JS
-  // TODO figure out how to make this render once per variation, and per update
+  // renders only when js changes
   useEffect(() => {
-    if (_globalScriptTag) document.body.removeChild(_globalScriptTag);
+    if (_globalScriptTag) _globalStyleTag?.remove();
     if (!selectedVariation?.js) return;
     _globalScriptTag = document.createElement("script");
     document.body.appendChild(_globalScriptTag);
@@ -515,7 +519,7 @@ const VisualEditor: FC<{}> = () => {
     _globalScriptTag.innerHTML =
       `try { ${selectedVariation?.js} } catch(e) { window.__gb_global_js_err(e.message); }` ??
       "";
-  }, [selectedVariation]);
+  }, [selectedVariation?.js]);
 
   if (showApiCredsAlert || error) {
     return (

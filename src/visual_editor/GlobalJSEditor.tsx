@@ -32,7 +32,8 @@ const GlobalJSEditor: FC<{
         onChange={(e) => setJs(e.currentTarget.value)}
       />
       <button
-        className="gb-mt-2 gb-p-2 gb-px-4 gb-border-indigo-500 gb-border-2 gb-rounded gb-text-indigo-500 gb-font-semibold"
+        disabled={_js === js}
+        className="gb-mt-2 gb-p-2 gb-px-4 gb-border-indigo-500 disabled:opacity-30 disabled:gb-border-gray-500 gb-border-2 gb-rounded disabled:gb-text-gray-500 gb-text-indigo-500 gb-font-semibold"
         onClick={() => onSave(js)}
       >
         Save
