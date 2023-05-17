@@ -7,7 +7,8 @@ import {
 } from "react-icons/rx";
 import clsx from "clsx";
 import { IconType } from "react-icons";
-import { BsFiletypeCss, BsFiletypeJs } from "react-icons/bs";
+import { BsFiletypeCss } from "react-icons/bs";
+import { IoLogoJavascript } from "react-icons/io";
 
 export type ToolbarMode =
   | "interactive"
@@ -20,7 +21,7 @@ export type ToolbarMode =
 const modeToIcon: Record<ToolbarMode, IconType | FC<{}>> = {
   interactive: RxCursorArrow,
   selection: RxPencil1,
-  js: BsFiletypeJs,
+  js: IoLogoJavascript,
   css: BsFiletypeCss,
   screenshot: RxCamera,
   changes: RxListBullet,
