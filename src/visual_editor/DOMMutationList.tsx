@@ -19,14 +19,14 @@ const DOMMutationList: FC<{
   addMutation?: (mutation: DeclarativeMutation) => void;
   removeDomMutation?: (mutation: DeclarativeMutation) => void;
   clearGlobalCss?: () => void;
-  globalJs?: string;
-  clearGlobalJs?: () => void;
+  customJs?: string;
+  clearCustomJs?: () => void;
 }> = ({
   addMutation,
   mutations: _mutations,
   removeDomMutation,
-  globalJs,
-  clearGlobalJs,
+  customJs,
+  clearCustomJs,
   globalCss,
   clearGlobalCss,
 }) => {
@@ -41,12 +41,12 @@ const DOMMutationList: FC<{
           },
         ]
       : []),
-    ...(globalJs
+    ...(customJs
       ? [
           {
             selector: "global",
             action: "set" as DeclarativeMutation["action"],
-            value: globalJs,
+            value: customJs,
             attribute: "js",
           },
         ]
@@ -62,7 +62,7 @@ const DOMMutationList: FC<{
         return;
       }
       if (mutation.selector === "global" && mutation.attribute === "js") {
-        clearGlobalJs?.();
+        clearCustomJs?.();
         return;
       }
       removeDomMutation?.(mutation);

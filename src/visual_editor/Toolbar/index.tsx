@@ -86,7 +86,7 @@ const Toolbar: FC<{
           isActive={mode === "js"}
           mode="js"
           enable={() => setMode("js")}
-          title="Global JS mode"
+          title="Custom JS mode"
         />
         <ToolbarButton
           isActive={mode === "css"}

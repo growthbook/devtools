@@ -51,7 +51,7 @@ import {
   API_HOST_PARAMS_KEY,
 } from "./lib/constants";
 import "./targetPage.css";
-import GlobalJsEditor from "./GlobalJSEditor";
+import CustomJSEditor from "./CustomJSEditor";
 
 declare global {
   interface Window {
@@ -201,7 +201,7 @@ const VisualEditor: FC<{}> = () => {
   const { fetchVisualChangeset, updateVisualChangeset, error } =
     useApi(apiCreds);
   const [showApiCredsAlert, setShowApiCredsAlert] = useState(false);
-  const [globalJsError, setGlobalJsError] = useState("");
+  const [customJsError, setCustomJsError] = useState("");
 
   const forceUpdate = debounce(_forceUpdate, 100);
   const mutateRevert = useRef<(() => void) | null>(null);
@@ -261,9 +261,9 @@ const VisualEditor: FC<{}> = () => {
     [updateSelectedVariation]
   );
 
-  const setGlobalJs = useCallback(
+  const setCustomJs = useCallback(
     (js: string) => {
-      setGlobalJsError("");
+      setCustomJsError("");
       updateSelectedVariation({ js });
     },
     [updateSelectedVariation]
@@ -508,14 +508,15 @@ const VisualEditor: FC<{}> = () => {
     _globalStyleTag.innerHTML = selectedVariation?.css ?? "";
   }, [selectedVariation]);
 
-  // generate a script tag to hold global JS
+  // generate a script tag to hold custom JS
   // renders only when js changes
   useEffect(() => {
-    if (_globalScriptTag) _globalStyleTag?.remove();
+    setCustomJsError("");
+    if (_globalScriptTag) _globalScriptTag?.remove();
     if (!selectedVariation?.js) return;
     _globalScriptTag = document.createElement("script");
     document.body.appendChild(_globalScriptTag);
-    window.__gb_global_js_err = setGlobalJsError;
+    window.__gb_global_js_err = setCustomJsError;
     _globalScriptTag.innerHTML =
       `try { ${selectedVariation?.js} } catch(e) { window.__gb_global_js_err(e.message); }` ??
       "";
@@ -593,15 +594,15 @@ const VisualEditor: FC<{}> = () => {
         ) : null}
 
         {mode === "js" && (
-          <VisualEditorSection title="Global JS">
-            <GlobalJsEditor
+          <VisualEditorSection title="Custom JS">
+            <CustomJSEditor
               js={selectedVariation.js}
-              onSubmit={setGlobalJs}
-              onError={setGlobalJsError}
+              onSubmit={setCustomJs}
+              onError={setCustomJsError}
             />
-            {globalJsError && (
-              <div className="gb-px-4 gb-text-rose-500">
-                JS error: {globalJsError}
+            {customJsError && (
+              <div className="gb-px-4 gb-py-2 gb-text-rose-500">
+                JS error: {customJsError}
               </div>
             )}
           </VisualEditorSection>
@@ -638,8 +639,8 @@ const VisualEditor: FC<{}> = () => {
               addMutation={addDomMutation}
               globalCss={selectedVariation.css}
               clearGlobalCss={() => setGlobalCSS("")}
-              globalJs={selectedVariation.js}
-              clearGlobalJs={() => setGlobalJs("")}
+              customJs={selectedVariation.js}
+              clearCustomJs={() => setCustomJs("")}
               removeDomMutation={removeDomMutation}
               mutations={selectedVariation?.domMutations ?? []}
             />
@@ -654,7 +655,7 @@ const VisualEditor: FC<{}> = () => {
             Done Editing
           </button>
           <button
-            className="gb-text-white gb-text-xs gb-text-indigo-500 gb-mt-2"
+            className="gb-text-light gb-text-xs gb-mt-2"
             onClick={() =>
               refreshWithParams({
                 apiHost: apiCreds.apiHost || "",
