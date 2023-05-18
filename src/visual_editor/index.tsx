@@ -50,8 +50,8 @@ import VisualEditorHeader from "./VisualEditorHeader";
 import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
 import SetApiCredsForm from "./SetApiCredsForm";
 import CustomJSEditor from "./CustomJSEditor";
+import CSSAttributeEditor from "./CSSAttributeEditor";
 import "./targetPage.css";
-import InlineCSSEditor from "./InlineCSSEditor";
 
 declare global {
   interface Window {
@@ -600,7 +600,7 @@ const VisualEditor: FC<{}> = () => {
             )}
 
             <VisualEditorSection isCollapsible title={`CSS attributes`}>
-              <InlineCSSEditor />
+              <CSSAttributeEditor selectedElement={selectedElement} />
             </VisualEditorSection>
 
             <VisualEditorSection
