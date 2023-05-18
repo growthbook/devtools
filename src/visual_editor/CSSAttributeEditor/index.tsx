@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useCallback, useEffect, useState } from "react";
 import {
   BiAlignLeft,
   BiBold,
@@ -161,9 +161,10 @@ const _layoutAttributes = [
   },
 ];
 
-const CSSAttributeEditor: FC<{ selectedElement: Element }> = ({
-  selectedElement,
-}) => {
+const CSSAttributeEditor: FC<{
+  selectedElement: Element;
+  setCSS: (css: string) => void;
+}> = ({ selectedElement, setCSS }) => {
   const elementStyle = selectedElement.getAttribute("style") ?? "";
   const [attributes, setAttributes] = useState<AllAttributes>({
     typography: [],
@@ -212,30 +213,50 @@ const CSSAttributeEditor: FC<{ selectedElement: Element }> = ({
     layout: layoutAttributes,
   } = attributes;
 
+  const updateAttribute = useCallback(
+    (name: string, value: string) => {
+      let newStyle;
+      try {
+        newStyle = styleToObject(elementStyle) ?? {};
+        newStyle[name] = value;
+        const newStyleInlineFormat = Object.entries(newStyle)
+          .map((e) => e.join(": "))
+          .join("; ");
+        setCSS(newStyleInlineFormat);
+      } catch (e) {
+        console.error("Error parsing inline style", {
+          selectedElement,
+          error: e,
+        });
+      }
+    },
+    [elementStyle]
+  );
+
   return (
     <div className="gb-text-light gb-mx-4">
       <div className="gb-py-4 gb-text-xs">Typography</div>
       <div>
         {typographyAttributes.map((attr, i) => (
-          <CSSTextInput key={i} {...attr} />
+          <CSSTextInput key={i} {...attr} updateAttribute={updateAttribute} />
         ))}
       </div>
       <div className="gb-py-4 gb-text-xs">Background</div>
       <div>
         {backgroundAttributes.map((attr, i) => (
-          <CSSTextInput key={i} {...attr} />
+          <CSSTextInput key={i} {...attr} updateAttribute={updateAttribute} />
         ))}
       </div>
       <div className="gb-py-4 gb-text-xs">Border</div>
       <div>
         {borderAttributes.map((attr, i) => (
-          <CSSTextInput key={i} {...attr} />
+          <CSSTextInput key={i} {...attr} updateAttribute={updateAttribute} />
         ))}
       </div>
       <div className="gb-py-4 gb-text-xs">Layout</div>
       <div>
         {layoutAttributes.map((attr, i) => (
-          <CSSTextInput key={i} {...attr} />
+          <CSSTextInput key={i} {...attr} updateAttribute={updateAttribute} />
         ))}
       </div>
     </div>

@@ -8,15 +8,18 @@ const CSSTextInput: FC<{
   name: string;
   value: string;
   isInline: boolean;
-}> = ({ name, value: _value, isInline }) => {
+  updateAttribute: (name: string, value: string) => void;
+}> = ({ name, value: _value, isInline, updateAttribute }) => {
   const [editing, setIsEditing] = useState(false);
   const [value, setValue] = useState<string>(_value);
 
-  // TODO
   const saveEdit = () => {
+    updateAttribute(name, value);
     setIsEditing(false);
   };
+
   const cancelEdit = () => {
+    setValue(_value);
     setIsEditing(false);
   };
 

@@ -374,6 +374,19 @@ const VisualEditor: FC<{}> = () => {
     [selectedElement, addDomMutation]
   );
 
+  const setCSS = useCallback(
+    (css: string) => {
+      if (!selector) return;
+      addDomMutation({
+        action: "set",
+        attribute: "style",
+        value: css,
+        selector,
+      });
+    },
+    [selector, addDomMutation]
+  );
+
   const saveApiCreds = useCallback(({ apiKey, apiHost }: ApiCreds) => {
     window.postMessage(
       {
@@ -600,7 +613,10 @@ const VisualEditor: FC<{}> = () => {
             )}
 
             <VisualEditorSection isCollapsible title={`CSS attributes`}>
-              <CSSAttributeEditor selectedElement={selectedElement} />
+              <CSSAttributeEditor
+                selectedElement={selectedElement}
+                setCSS={setCSS}
+              />
             </VisualEditorSection>
 
             <VisualEditorSection
