@@ -284,6 +284,14 @@ const VisualEditor: FC<{}> = () => {
     [selectedElement, selectedVariation, selector]
   );
 
+  const selectedVariationTotalChangesLength = useMemo(
+    () =>
+      (selectedVariation?.domMutations ?? []).length +
+      (selectedVariation?.js ? 1 : 0) +
+      (selectedVariation?.css ? 1 : 0),
+    [selectedVariation]
+  );
+
   const addClassNames = useCallback(
     (classNames: string) => {
       if (!selector) return;
@@ -633,7 +641,7 @@ const VisualEditor: FC<{}> = () => {
           <VisualEditorSection
             isCollapsible
             isExpanded
-            title={`Changes (${selectedVariation?.domMutations.length})`}
+            title={`Changes (${selectedVariationTotalChangesLength})`}
           >
             <DOMMutationList
               addMutation={addDomMutation}
