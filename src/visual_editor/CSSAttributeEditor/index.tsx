@@ -172,6 +172,7 @@ const CSSAttributeEditor: FC<{ selectedElement: Element }> = ({
     layout: [],
   });
 
+  // when the element's styles change, re-render CSS attributes
   useEffect(() => {
     if (!window) return;
 
