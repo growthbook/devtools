@@ -51,6 +51,7 @@ import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
 import SetApiCredsForm from "./SetApiCredsForm";
 import CustomJSEditor from "./CustomJSEditor";
 import CSSAttributeEditor from "./CSSAttributeEditor";
+import AICopySuggestor from "./AICopySuggestor";
 import "./targetPage.css";
 
 declare global {
@@ -702,6 +703,7 @@ const VisualEditor: FC<{}> = () => {
         <>
           <FloatingFrame parentElement={selectedElement} />
           <SelectorDisplay selector={selector} />
+          <AICopySuggestor parentElement={selectedElement} />
         </>
       ) : null}
       {mode === "selection" ? (
