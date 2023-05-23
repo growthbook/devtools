@@ -276,6 +276,29 @@ const VisualEditor: FC<{}> = () => {
     [selectedElement]
   );
 
+  const setHTML = useCallback(
+    (html: string) => {
+      addDomMutation({
+        action: "set",
+        attribute: "html",
+        value: html,
+        selector,
+      });
+    },
+    [selector, addDomMutation]
+  );
+
+  const undoHTMLMutations = useMemo(() => {
+    const htmlMutations = (selectedVariation?.domMutations ?? []).filter(
+      (mutation) =>
+        mutation.attribute === "html" && mutation.selector === selector
+    );
+    if (htmlMutations.length === 0) return;
+    return () => {
+      removeDomMutations(htmlMutations);
+    };
+  }, [selectedVariation, selector]);
+
   // the dom mutations that apply to the currently selected element
   const selectedElementMutations = useMemo(
     () =>
@@ -589,12 +612,10 @@ const VisualEditor: FC<{}> = () => {
 
             <VisualEditorSection title="Element Details">
               <ElementDetails
-                mutations={selectedVariation?.domMutations ?? []}
                 selector={selector}
                 element={selectedElement}
-                addMutation={addDomMutation}
-                addMutations={addDomMutations}
-                removeDomMutations={removeDomMutations}
+                setHTML={setHTML}
+                undoHTMLMutations={undoHTMLMutations}
               />
             </VisualEditorSection>
 
@@ -703,7 +724,7 @@ const VisualEditor: FC<{}> = () => {
         <>
           <FloatingFrame parentElement={selectedElement} />
           <SelectorDisplay selector={selector} />
-          <AICopySuggestor parentElement={selectedElement} />
+          <AICopySuggestor parentElement={selectedElement} setHTML={setHTML} />
         </>
       ) : null}
       {mode === "selection" ? (
