@@ -42,7 +42,7 @@ const DetailsRow = ({
   };
 
   return (
-    <label
+    <div
       className={clsx("gb-flex gb-mb-2 last:gb-mb-0", {
         "flex-col": editing,
       })}
@@ -88,7 +88,7 @@ const DetailsRow = ({
           </button>
         </div>
       )}
-    </label>
+    </div>
   );
 };
 

@@ -29,7 +29,7 @@ const clearHoverAttribute = () => {
 
 let _draggedToParent: Element | null = null;
 let _draggedToSibling: Element | null = null;
-const mouseMoveHandler = (event: MouseEvent) => {
+const pointerMoveHandler = (event: MouseEvent) => {
   const { clientX: x, clientY: y } = event;
   const domNode = document.elementFromPoint(x, y);
   // return prevNode if current node is our frame component
@@ -59,6 +59,11 @@ const mouseMoveHandler = (event: MouseEvent) => {
 // only the 'click' event can prevent the default behavior when clicking on
 // a link or button or similar
 const clickHandler = (event: MouseEvent) => {
+  const element = event.target as HTMLElement;
+
+  // don't intercept cilcks on the visual editor itself
+  if (element.id === CONTAINER_ID) return;
+
   event.preventDefault();
   event.stopPropagation();
 };
@@ -71,7 +76,7 @@ const dragElementTeardown = () => {
 };
 
 // on mouse up, we stop dragging if applicable
-const mouseUpHandler = () => {
+const pointerUpHandler = () => {
   // if we are finished dragging, create mutation
   if (_selectedElement && _draggedToParent) {
     const parentSelector = getSelector(_draggedToParent);
@@ -104,14 +109,14 @@ const mouseUpHandler = () => {
   }
 };
 
-const mouseDownHandler = (event: MouseEvent) => {
+const pointerDownHandler = (event: MouseEvent) => {
+  const element = event.target as HTMLElement;
+
   // don't intercept cilcks on the visual editor itself
-  if ((event.target as HTMLElement).id === CONTAINER_ID) return;
+  if (element.id === CONTAINER_ID) return;
 
   event.preventDefault();
   event.stopPropagation();
-
-  const element = event.target as HTMLElement;
 
   // if the user is clicking on an already selected element, we begin dragging
   if (_selectedElement === element) {
@@ -128,10 +133,10 @@ const teardown = () => {
   clearHoverAttribute();
   clearSelectedElementAttr();
   dragElementTeardown();
-  document.removeEventListener("mousemove", mouseMoveHandler);
-  document.removeEventListener("mousedown", mouseDownHandler);
-  document.removeEventListener("mouseup", mouseUpHandler);
-  document.removeEventListener("click", clickHandler);
+  document.removeEventListener("click", clickHandler, true);
+  document.removeEventListener("pointermove", pointerMoveHandler, true);
+  document.removeEventListener("pointerup", pointerUpHandler, true);
+  document.removeEventListener("pointerdown", pointerDownHandler, true);
 };
 
 // called by react component - on update
@@ -174,10 +179,10 @@ export const toggleSelectionMode = ({
   addDomMutation: (mutation: DeclarativeMutation) => void;
 }) => {
   if (isEnabled) {
-    document.addEventListener("mousemove", mouseMoveHandler);
-    document.addEventListener("mousedown", mouseDownHandler);
-    document.addEventListener("mouseup", mouseUpHandler);
-    document.addEventListener("click", clickHandler);
+    document.addEventListener("click", clickHandler, true);
+    document.addEventListener("pointermove", pointerMoveHandler, true);
+    document.addEventListener("pointerup", pointerUpHandler, true);
+    document.addEventListener("pointerdown", pointerDownHandler, true);
 
     onSelectionModeUpdate({
       selectedElement,
