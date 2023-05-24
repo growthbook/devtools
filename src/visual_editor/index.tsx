@@ -11,25 +11,14 @@ import React, {
   useMemo,
 } from "react";
 import * as ReactDOM from "react-dom/client";
-import Toolbar, { ToolbarMode } from "./Toolbar";
+
 import {
   toggleSelectionMode,
   onSelectionModeUpdate,
 } from "./lib/selectionMode";
-import ElementDetails from "./ElementDetails";
-import SelectorDisplay from "./SelectorDisplay";
-import FloatingFrame from "./FloatingFrame";
-import VisualEditorCss from "./index.css";
-import GlobalCSSEditor from "./GlobalCSSEditor";
-import VisualEditorPane from "./VisualEditorPane";
-import VisualEditorSection from "./VisualEditorSection";
-import BreadcrumbsView from "./ElementDetails/BreadcrumbsView";
-import ClassNamesEdit from "./ElementDetails/ClassNamesEdit";
 import getSelector from "./lib/getSelector";
-import DOMMutationList from "./DOMMutationList";
-import VariationSelector from "./VariationSelector";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
-import VisualEditorHeader from "./VisualEditorHeader";
+import useMessage from "./lib/hooks/useMessage";
 import useApi, {
   APIDomMutation,
   APIExperiment,
@@ -37,21 +26,39 @@ import useApi, {
   APIVisualChange,
   APIVisualChangeset,
 } from "./lib/hooks/useApi";
-import AttributeEdit, {
-  Attribute,
-  IGNORED_ATTRS,
-} from "./ElementDetails/AttributeEdit";
-import SetApiCredsForm from "./SetApiCredsForm";
-import useMessage from "./lib/hooks/useMessage";
-import { ApiCreds } from "../../devtools";
 import {
   VISUAL_CHANGESET_ID_PARAMS_KEY,
   VARIATION_INDEX_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
   API_HOST_PARAMS_KEY,
 } from "./lib/constants";
+
+import { ApiCreds } from "../../devtools";
+import Toolbar, { ToolbarMode } from "./Toolbar";
+import ElementDetails from "./ElementDetails";
+import SelectorDisplay from "./SelectorDisplay";
+import FloatingFrame from "./FloatingFrame";
+import VisualEditorCss from "./index.css";
+import GlobalCSSEditor from "./GlobalCSSEditor";
+import VisualEditorPane from "./VisualEditorPane";
+import VisualEditorSection from "./VisualEditorSection";
+import BreadcrumbsView from "./BreadcrumbsView";
+import ClassNamesEdit from "./ClassNamesEdit";
+import DOMMutationList from "./DOMMutationList";
+import VariationSelector from "./VariationSelector";
+import VisualEditorHeader from "./VisualEditorHeader";
+import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
+import SetApiCredsForm from "./SetApiCredsForm";
+import CustomJSEditor from "./CustomJSEditor";
+import CSSAttributeEditor from "./CSSAttributeEditor";
 import "./targetPage.css";
 import CustomJSEditor from "./CustomJSEditor";
+
+declare global {
+  interface Window {
+    __gb_global_js_err?: (error: string) => void;
+  }
+}
 
 declare global {
   interface Window {
@@ -374,6 +381,19 @@ const VisualEditor: FC<{}> = () => {
     [selectedElement, addDomMutation]
   );
 
+  const setCSS = useCallback(
+    (css: string) => {
+      if (!selector) return;
+      addDomMutation({
+        action: "set",
+        attribute: "style",
+        value: css,
+        selector,
+      });
+    },
+    [selector, addDomMutation]
+  );
+
   const saveApiCreds = useCallback(({ apiKey, apiHost }: ApiCreds) => {
     window.postMessage(
       {
@@ -598,6 +618,23 @@ const VisualEditor: FC<{}> = () => {
                 />
               </VisualEditorSection>
             )}
+
+            <VisualEditorSection isCollapsible title={`CSS attributes`}>
+              <CSSAttributeEditor
+                selectedElement={selectedElement}
+                setCSS={setCSS}
+              />
+            </VisualEditorSection>
+
+            <VisualEditorSection
+              isCollapsible
+              title={`Changes (${selectedElementMutations.length})`}
+            >
+              <DOMMutationList
+                mutations={selectedElementMutations ?? []}
+                removeDomMutation={removeDomMutation}
+              />
+            </VisualEditorSection>
           </>
         ) : null}
 
@@ -621,18 +658,6 @@ const VisualEditor: FC<{}> = () => {
             <GlobalCSSEditor
               css={selectedVariation.css}
               onSubmit={setGlobalCSS}
-            />
-          </VisualEditorSection>
-        )}
-
-        {mode === "selection" && selectedElement && (
-          <VisualEditorSection
-            isCollapsible
-            title={`Changes (${selectedElementMutations.length})`}
-          >
-            <DOMMutationList
-              mutations={selectedElementMutations ?? []}
-              removeDomMutation={removeDomMutation}
             />
           </VisualEditorSection>
         )}
@@ -678,6 +703,8 @@ const VisualEditor: FC<{}> = () => {
           </button>
         </div>
       </VisualEditorPane>
+
+      {/** Overlays for highlighting selected/hovered elements **/}
       {mode === "selection" && selectedElement ? (
         <>
           <FloatingFrame parentElement={selectedElement} />

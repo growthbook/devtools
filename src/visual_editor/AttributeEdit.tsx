@@ -3,7 +3,7 @@ import { validAttributeName } from "dom-mutator";
 import React, { FC, useCallback, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { RxCross2, RxPlus, RxCheck } from "react-icons/rx";
-import { hoverAttributeName, selectedAttributeName } from "../lib/selectionMode";
+import { hoverAttributeName, selectedAttributeName } from "./lib/selectionMode";
 
 export const IGNORED_ATTRS = [
   "class",
@@ -61,7 +61,9 @@ const EditAttributeInput: FC<{
           onChange={(e) => setName(e.target.value)}
         />
       ) : (
-        <div className="gb-w-12 gb-text-xs gb-text-slate-400 gb-mb-2">{name}</div>
+        <div className="gb-w-12 gb-text-xs gb-text-slate-400 gb-mb-2">
+          {name}
+        </div>
       )}
 
       <TextareaAutosize
