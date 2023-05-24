@@ -66,6 +66,12 @@ declare global {
   }
 }
 
+declare global {
+  interface Window {
+    __gb_global_js_err?: (error: string) => void;
+  }
+}
+
 export interface VisualEditorVariation {
   name: string;
   description: string;
