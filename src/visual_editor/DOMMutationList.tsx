@@ -19,10 +19,14 @@ const DOMMutationList: FC<{
   addMutation?: (mutation: DeclarativeMutation) => void;
   removeDomMutation?: (mutation: DeclarativeMutation) => void;
   clearGlobalCss?: () => void;
+  customJs?: string;
+  clearCustomJs?: () => void;
 }> = ({
   addMutation,
   mutations: _mutations,
   removeDomMutation,
+  customJs,
+  clearCustomJs,
   globalCss,
   clearGlobalCss,
 }) => {
@@ -37,6 +41,16 @@ const DOMMutationList: FC<{
           },
         ]
       : []),
+    ...(customJs
+      ? [
+          {
+            selector: "global",
+            action: "set" as DeclarativeMutation["action"],
+            value: customJs,
+            attribute: "js",
+          },
+        ]
+      : []),
     ..._mutations,
   ];
   const [showEditor, setShowEditor] = React.useState(false);
@@ -45,6 +59,10 @@ const DOMMutationList: FC<{
     (mutation: DeclarativeMutation) => {
       if (mutation.selector === "global" && mutation.attribute === "css") {
         clearGlobalCss?.();
+        return;
+      }
+      if (mutation.selector === "global" && mutation.attribute === "js") {
+        clearCustomJs?.();
         return;
       }
       removeDomMutation?.(mutation);

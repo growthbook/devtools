@@ -51,16 +51,25 @@ import {
   API_HOST_PARAMS_KEY,
 } from "./lib/constants";
 import "./targetPage.css";
+import CustomJSEditor from "./CustomJSEditor";
+
+declare global {
+  interface Window {
+    __gb_global_js_err?: (error: string) => void;
+  }
+}
 
 export interface VisualEditorVariation {
   name: string;
   description: string;
   css?: string;
+  js?: string;
   domMutations: APIDomMutation[];
   variationId: string;
 }
 
 let _globalStyleTag: HTMLStyleElement | null = null;
+let _globalScriptTag: HTMLScriptElement | null = null;
 
 // normalize API payloads into local object shape
 const genVisualEditorVariations = ({
@@ -83,13 +92,17 @@ const genVisualEditorVariations = ({
 
   return variations.map((variation: APIExperimentVariation) => {
     const { name, description, variationId } = variation;
-    const { css = "", domMutations = [] } =
-      visualChangesByVariationId[variation.variationId] ?? {};
+    const {
+      css = "",
+      js = "",
+      domMutations = [],
+    } = visualChangesByVariationId[variation.variationId] ?? {};
     return {
       name,
       description,
       variationId,
       css,
+      js,
       domMutations,
     };
   });
@@ -104,6 +117,31 @@ const getVariationIndexFromParams = (
     return parseInt(param[0], 10);
   }
   return parseInt(param ?? "1", 10);
+};
+
+const refreshWithParams = ({
+  visualChangesetId,
+  variationIndex,
+  experimentUrl,
+  apiHost,
+  params,
+}: {
+  visualChangesetId: string;
+  variationIndex: string;
+  experimentUrl: string;
+  apiHost: string;
+  params: qs.ParsedQuery;
+}) => {
+  window.location.href = qs.stringifyUrl({
+    url: window.location.href,
+    query: {
+      ...params,
+      [VISUAL_CHANGESET_ID_PARAMS_KEY]: visualChangesetId,
+      [VARIATION_INDEX_PARAMS_KEY]: variationIndex,
+      [EXPERIMENT_URL_PARAMS_KEY]: experimentUrl,
+      [API_HOST_PARAMS_KEY]: apiHost,
+    },
+  });
 };
 
 // remove visual editor params from url once loaded
@@ -163,20 +201,12 @@ const VisualEditor: FC<{}> = () => {
   const { fetchVisualChangeset, updateVisualChangeset, error } =
     useApi(apiCreds);
   const [showApiCredsAlert, setShowApiCredsAlert] = useState(false);
+  const [customJsError, setCustomJsError] = useState("");
 
   const forceUpdate = debounce(_forceUpdate, 100);
   const mutateRevert = useRef<(() => void) | null>(null);
 
   const selectedVariation = variations?.[selectedVariationIndex] ?? null;
-
-  // generate a style tag to hold the global CSS
-  const globalStyleTag = useMemo(() => {
-    if (_globalStyleTag) document.head.removeChild(_globalStyleTag);
-    _globalStyleTag = document.createElement("style");
-    document.head.appendChild(_globalStyleTag);
-    _globalStyleTag.innerHTML = selectedVariation?.css ?? "";
-    return _globalStyleTag;
-  }, [selectedVariation]);
 
   const updateSelectedVariation = useCallback(
     (updates: Partial<VisualEditorVariation>) => {
@@ -227,8 +257,15 @@ const VisualEditor: FC<{}> = () => {
   const setGlobalCSS = useCallback(
     debounce((css: string) => {
       updateSelectedVariation({ css });
-      globalStyleTag.innerHTML = css;
     }, 500),
+    [updateSelectedVariation]
+  );
+
+  const setCustomJs = useCallback(
+    (js: string) => {
+      setCustomJsError("");
+      updateSelectedVariation({ js });
+    },
     [updateSelectedVariation]
   );
 
@@ -245,6 +282,14 @@ const VisualEditor: FC<{}> = () => {
         selectedElement && selector ? m.selector === selector : true
       ) ?? [],
     [selectedElement, selectedVariation, selector]
+  );
+
+  const selectedVariationTotalChangesLength = useMemo(
+    () =>
+      (selectedVariation?.domMutations ?? []).length +
+      (selectedVariation?.js ? 1 : 0) +
+      (selectedVariation?.css ? 1 : 0),
+    [selectedVariation]
   );
 
   const addClassNames = useCallback(
@@ -462,6 +507,29 @@ const VisualEditor: FC<{}> = () => {
     return () => observer.disconnect();
   }, []);
 
+  // generate a style tag to hold the global CSS
+  useEffect(() => {
+    if (_globalStyleTag) _globalStyleTag.remove();
+    if (!selectedVariation?.css) return;
+    _globalStyleTag = document.createElement("style");
+    document.head.appendChild(_globalStyleTag);
+    _globalStyleTag.innerHTML = selectedVariation?.css ?? "";
+  }, [selectedVariation]);
+
+  // generate a script tag to hold custom JS
+  // renders only when js changes
+  useEffect(() => {
+    setCustomJsError("");
+    if (_globalScriptTag) _globalScriptTag?.remove();
+    if (!selectedVariation?.js) return;
+    _globalScriptTag = document.createElement("script");
+    document.body.appendChild(_globalScriptTag);
+    window.__gb_global_js_err = setCustomJsError;
+    _globalScriptTag.innerHTML =
+      `try { ${selectedVariation?.js} } catch(e) { window.__gb_global_js_err(e.message); }` ??
+      "";
+  }, [selectedVariation?.js]);
+
   if (showApiCredsAlert || error) {
     return (
       <SetApiCredsForm
@@ -533,6 +601,21 @@ const VisualEditor: FC<{}> = () => {
           </>
         ) : null}
 
+        {mode === "js" && (
+          <VisualEditorSection title="Custom JS">
+            <CustomJSEditor
+              js={selectedVariation.js}
+              onSubmit={setCustomJs}
+              onError={setCustomJsError}
+            />
+            {customJsError && (
+              <div className="gb-px-4 gb-py-2 gb-text-rose-500">
+                JS error: {customJsError}
+              </div>
+            )}
+          </VisualEditorSection>
+        )}
+
         {mode === "css" && (
           <VisualEditorSection title="Global CSS">
             <GlobalCSSEditor
@@ -558,24 +641,40 @@ const VisualEditor: FC<{}> = () => {
           <VisualEditorSection
             isCollapsible
             isExpanded
-            title={`Changes (${selectedVariation?.domMutations.length})`}
+            title={`Changes (${selectedVariationTotalChangesLength})`}
           >
             <DOMMutationList
               addMutation={addDomMutation}
               globalCss={selectedVariation.css}
               clearGlobalCss={() => setGlobalCSS("")}
+              customJs={selectedVariation.js}
+              clearCustomJs={() => setCustomJs("")}
               removeDomMutation={removeDomMutation}
               mutations={selectedVariation?.domMutations ?? []}
             />
           </VisualEditorSection>
         )}
 
-        <div className="gb-m-4">
+        <div className="gb-m-4 gb-text-center">
           <button
             className="gb-w-full gb-p-2 gb-bg-indigo-800 gb-rounded gb-text-white gb-font-semibold gb-text-lg"
             onClick={() => (window.location.href = experimentUrl)}
           >
             Done Editing
+          </button>
+          <button
+            className="gb-text-light gb-text-xs gb-mt-2"
+            onClick={() =>
+              refreshWithParams({
+                apiHost: apiCreds.apiHost || "",
+                experimentUrl,
+                params,
+                variationIndex: variationIndex.toString(),
+                visualChangesetId,
+              })
+            }
+          >
+            Reload page
           </button>
         </div>
       </VisualEditorPane>

@@ -32,6 +32,7 @@ export interface APIVisualChangeset {
   visualChanges: {
     description?: string;
     css?: string;
+    js?: string;
     variation: string;
     domMutations: {
       selector: string;
@@ -103,6 +104,7 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
           variation: v.variationId,
           domMutations: v.domMutations,
           css: v.css,
+          js: v.js,
           description: v.description,
         })),
       };
