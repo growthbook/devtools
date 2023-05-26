@@ -2,6 +2,8 @@ import { useCallback, useState } from "react";
 import { VisualEditorVariation } from "../..";
 import { ApiCreds } from "../../../../devtools";
 
+export type CopyMode = "energetic" | "concise" | "humorous";
+
 const genHeaders = (apiKey: string) => ({
   Authorization: `Basic ${btoa(apiKey + ":")}`,
   ["Content-Type"]: "application/json",
@@ -55,6 +57,7 @@ type UseApiHook = (creds: Partial<ApiCreds>) => {
     visualChangesetId: string,
     payload: any
   ) => Promise<{ nModified?: number }>;
+  transformCopy: (copy: string, mode: CopyMode) => Promise<string | undefined>;
   error: string;
 };
 
@@ -136,9 +139,48 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
     [apiHost, apiKey]
   );
 
+  const transformCopy = useCallback(
+    async (copy: string, mode: CopyMode) => {
+      if (!apiHost || !apiKey) return {};
+
+      try {
+        const response = await fetch(`${apiHost}/api/v1/transform-copy`, {
+          headers: genHeaders(apiKey),
+          method: "POST",
+          body: JSON.stringify({
+            copy,
+            mode,
+            metadata: {
+              url: window.location.href,
+              title: document.title,
+              description: document
+                .querySelector("meta[name='description']")
+                ?.getAttribute("content"),
+            },
+          }),
+        });
+
+        if (response.status !== 200) throw new Error(response.statusText);
+
+        const res = await response.json();
+
+        setError("");
+
+        return res.transformed;
+      } catch (e) {
+        setError(
+          "There was an error reaching the API. Please check your API key and host."
+        );
+        return {};
+      }
+    },
+    [apiHost, apiKey]
+  );
+
   return {
     fetchVisualChangeset,
     updateVisualChangeset,
+    transformCopy,
     error,
   };
 };

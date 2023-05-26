@@ -199,7 +199,7 @@ const VisualEditor: FC<{}> = () => {
   });
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
   const [apiCreds, setApiCreds] = useState<Partial<ApiCreds>>({});
-  const { fetchVisualChangeset, updateVisualChangeset, error } =
+  const { fetchVisualChangeset, updateVisualChangeset, transformCopy, error } =
     useApi(apiCreds);
   const [showApiCredsAlert, setShowApiCredsAlert] = useState(false);
   const [customJsError, setCustomJsError] = useState("");
@@ -724,7 +724,11 @@ const VisualEditor: FC<{}> = () => {
         <>
           <FloatingFrame parentElement={selectedElement} />
           <SelectorDisplay selector={selector} />
-          <AICopySuggestor parentElement={selectedElement} setHTML={setHTML} />
+          <AICopySuggestor
+            parentElement={selectedElement}
+            setHTML={setHTML}
+            transformCopy={transformCopy}
+          />
         </>
       ) : null}
       {mode === "selection" ? (
