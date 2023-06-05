@@ -54,6 +54,7 @@ import CSSAttributeEditor from "./CSSAttributeEditor";
 import ReloadPageButton from "./ReloadPageButton";
 import CSPErrorText from "./CSPErrorText";
 import "./targetPage.css";
+import BackToGBButton from "./BackToGBButton";
 
 declare global {
   interface Window {
@@ -540,7 +541,10 @@ const VisualEditor: FC<{}> = () => {
       <VisualEditorPane style={parentStyles}>
         <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
         <CSPErrorText cspError={cspError} />
-        <div className="gb-pb-4 gb-text-center">
+        <div className="gb-m-4 gb-text-center">
+          <BackToGBButton experimentUrl={experimentUrl}>
+            Back to GrowthBook
+          </BackToGBButton>
           <ReloadPageButton
             apiCreds={apiCreds}
             params={params}
@@ -669,12 +673,9 @@ const VisualEditor: FC<{}> = () => {
         )}
 
         <div className="gb-m-4 gb-text-center">
-          <button
-            className="gb-w-full gb-p-2 gb-bg-indigo-800 gb-rounded gb-text-white gb-font-semibold gb-text-lg"
-            onClick={() => (window.location.href = experimentUrl)}
-          >
+          <BackToGBButton experimentUrl={experimentUrl}>
             Done Editing
-          </button>
+          </BackToGBButton>
           <ReloadPageButton
             apiCreds={apiCreds}
             params={params}
