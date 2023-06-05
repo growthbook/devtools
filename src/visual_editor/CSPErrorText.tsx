@@ -5,7 +5,7 @@ const CSPErrorText: FC<{ cspError: CSPError }> = ({ cspError }) =>
   cspError ? (
     <div className="gb-p-4 gb-text-red-400">
       The '{cspError.violatedDirective}' directive in the Content Security
-      Policy is too strict for the Visual Editor on this page. Refer to the
+      Policy on this page is too strict for the Visual Editor. Refer to the
       Visual Editor documentation's{" "}
       <a
         className="gb-underline"
