@@ -51,6 +51,10 @@ import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
 import SetApiCredsForm from "./SetApiCredsForm";
 import CustomJSEditor from "./CustomJSEditor";
 import CSSAttributeEditor from "./CSSAttributeEditor";
+import ReloadPageButton, {
+  getVariationIndexFromParams,
+} from "./ReloadPageButton";
+import CSPErrorText from "./CSPErrorText";
 import "./targetPage.css";
 
 declare global {
@@ -109,40 +113,6 @@ const genVisualEditorVariations = ({
 };
 
 // normalize param values into number type
-const getVariationIndexFromParams = (
-  param: string | (string | null)[] | null
-): number => {
-  if (Array.isArray(param)) {
-    if (!param[0]) return 1;
-    return parseInt(param[0], 10);
-  }
-  return parseInt(param ?? "1", 10);
-};
-
-const refreshWithParams = ({
-  visualChangesetId,
-  variationIndex,
-  experimentUrl,
-  apiHost,
-  params,
-}: {
-  visualChangesetId: string;
-  variationIndex: string;
-  experimentUrl: string;
-  apiHost: string;
-  params: qs.ParsedQuery;
-}) => {
-  window.location.href = qs.stringifyUrl({
-    url: window.location.href,
-    query: {
-      ...params,
-      [VISUAL_CHANGESET_ID_PARAMS_KEY]: visualChangesetId,
-      [VARIATION_INDEX_PARAMS_KEY]: variationIndex,
-      [EXPERIMENT_URL_PARAMS_KEY]: experimentUrl,
-      [API_HOST_PARAMS_KEY]: apiHost,
-    },
-  });
-};
 
 // remove visual editor params from url once loaded
 const cleanUpParams = (params: qs.ParsedQuery) => {
@@ -198,7 +168,7 @@ const VisualEditor: FC<{}> = () => {
   });
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
   const [apiCreds, setApiCreds] = useState<Partial<ApiCreds>>({});
-  const { fetchVisualChangeset, updateVisualChangeset, error } =
+  const { fetchVisualChangeset, updateVisualChangeset, cspError, error } =
     useApi(apiCreds);
   const [showApiCredsAlert, setShowApiCredsAlert] = useState(false);
   const [customJsError, setCustomJsError] = useState("");
@@ -558,6 +528,18 @@ const VisualEditor: FC<{}> = () => {
     );
   }
 
+  if (cspError) {
+    return (
+      <VisualEditorPane style={parentStyles}>
+        <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
+        <CSPErrorText cspError={cspError} />
+        <div className="gb-pb-4 gb-text-center">
+          <ReloadPageButton apiCreds={apiCreds} />
+        </div>
+      </VisualEditorPane>
+    );
+  }
+
   if (!isVisualEditorEnabled) return null;
 
   return (
@@ -680,20 +662,7 @@ const VisualEditor: FC<{}> = () => {
           >
             Done Editing
           </button>
-          <button
-            className="gb-text-light gb-text-xs gb-mt-2"
-            onClick={() =>
-              refreshWithParams({
-                apiHost: apiCreds.apiHost || "",
-                experimentUrl,
-                params,
-                variationIndex: variationIndex.toString(),
-                visualChangesetId,
-              })
-            }
-          >
-            Reload page
-          </button>
+          <ReloadPageButton apiCreds={apiCreds} />
         </div>
       </VisualEditorPane>
 

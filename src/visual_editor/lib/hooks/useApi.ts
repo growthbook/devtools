@@ -46,6 +46,10 @@ export interface APIVisualChangeset {
 export type APIVisualChange = APIVisualChangeset["visualChanges"][number];
 export type APIDomMutation = APIVisualChange["domMutations"][number];
 
+export type CSPError = {
+  violatedDirective: string;
+} | null;
+
 type UseApiHook = (creds: Partial<ApiCreds>) => {
   fetchVisualChangeset?: (visualChangesetId: string) => Promise<{
     visualChangeset?: APIVisualChangeset;
@@ -56,24 +60,17 @@ type UseApiHook = (creds: Partial<ApiCreds>) => {
     payload: any
   ) => Promise<{ nModified?: number }>;
   error: string;
+  cspError: CSPError;
 };
 
 const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
   const [error, setError] = useState("");
-  const [cspError, setCSPError] = useState<{
-    violatedDirective: string;
-  } | null>(null);
+  const [cspError, setCSPError] = useState<CSPError>(null);
 
   document.addEventListener("securitypolicyviolation", (e) => {
+    setError("");
     setCSPError({ violatedDirective: e.violatedDirective });
   });
-
-  useEffect(() => {
-    if (!cspError) return;
-    setError(
-      `The '${cspError.violatedDirective}' directive in the Content Security Policy is too strict for the Visual Editor on this page. Refer to the Visual Editor documentation's 'Security Requirements' for details.`
-    );
-  }, [cspError, setError]);
 
   const fetchVisualChangeset = useCallback(
     async (visualChangesetId: string) => {
@@ -154,6 +151,7 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
     fetchVisualChangeset,
     updateVisualChangeset,
     error,
+    cspError,
   };
 };
 
