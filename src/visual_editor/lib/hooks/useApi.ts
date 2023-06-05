@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { VisualEditorVariation } from "../..";
 import { ApiCreds } from "../../../../devtools";
 
@@ -60,6 +60,20 @@ type UseApiHook = (creds: Partial<ApiCreds>) => {
 
 const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
   const [error, setError] = useState("");
+  const [cspError, setCSPError] = useState<{
+    violatedDirective: string;
+  } | null>(null);
+
+  document.addEventListener("securitypolicyviolation", (e) => {
+    setCSPError({ violatedDirective: e.violatedDirective });
+  });
+
+  useEffect(() => {
+    if (!cspError) return;
+    setError(
+      `The '${cspError.violatedDirective}' directive in the Content Security Policy is too strict for the Visual Editor on this page. Refer to the Visual Editor documentation's 'Security Requirements' for details.`
+    );
+  }, [cspError, setError]);
 
   const fetchVisualChangeset = useCallback(
     async (visualChangesetId: string) => {
