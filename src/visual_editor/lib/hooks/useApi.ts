@@ -69,7 +69,12 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
 
   document.addEventListener("securitypolicyviolation", (e) => {
     setError("");
-    setCSPError({ violatedDirective: e.violatedDirective });
+
+    if (apiHost && e.blockedURI.includes(apiHost)) {
+      setCSPError({
+        violatedDirective: e.violatedDirective,
+      });
+    }
   });
 
   const fetchVisualChangeset = useCallback(
