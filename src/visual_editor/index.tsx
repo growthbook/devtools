@@ -51,9 +51,7 @@ import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
 import SetApiCredsForm from "./SetApiCredsForm";
 import CustomJSEditor from "./CustomJSEditor";
 import CSSAttributeEditor from "./CSSAttributeEditor";
-import ReloadPageButton, {
-  getVariationIndexFromParams,
-} from "./ReloadPageButton";
+import ReloadPageButton from "./ReloadPageButton";
 import CSPErrorText from "./CSPErrorText";
 import "./targetPage.css";
 
@@ -113,6 +111,15 @@ const genVisualEditorVariations = ({
 };
 
 // normalize param values into number type
+const getVariationIndexFromParams = (
+  param: string | (string | null)[] | null
+): number => {
+  if (Array.isArray(param)) {
+    if (!param[0]) return 1;
+    return parseInt(param[0], 10);
+  }
+  return parseInt(param ?? "1", 10);
+};
 
 // remove visual editor params from url once loaded
 const cleanUpParams = (params: qs.ParsedQuery) => {
@@ -534,7 +541,13 @@ const VisualEditor: FC<{}> = () => {
         <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
         <CSPErrorText cspError={cspError} />
         <div className="gb-pb-4 gb-text-center">
-          <ReloadPageButton apiCreds={apiCreds} />
+          <ReloadPageButton
+            apiCreds={apiCreds}
+            params={params}
+            experimentUrl={experimentUrl}
+            variationIndex={variationIndex}
+            visualChangesetId={visualChangesetId}
+          />
         </div>
       </VisualEditorPane>
     );
@@ -662,7 +675,13 @@ const VisualEditor: FC<{}> = () => {
           >
             Done Editing
           </button>
-          <ReloadPageButton apiCreds={apiCreds} />
+          <ReloadPageButton
+            apiCreds={apiCreds}
+            params={params}
+            experimentUrl={experimentUrl}
+            variationIndex={variationIndex}
+            visualChangesetId={visualChangesetId}
+          />
         </div>
       </VisualEditorPane>
 
