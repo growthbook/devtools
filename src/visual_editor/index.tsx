@@ -52,19 +52,6 @@ import SetApiCredsForm from "./SetApiCredsForm";
 import CustomJSEditor from "./CustomJSEditor";
 import CSSAttributeEditor from "./CSSAttributeEditor";
 import "./targetPage.css";
-import CustomJSEditor from "./CustomJSEditor";
-
-declare global {
-  interface Window {
-    __gb_global_js_err?: (error: string) => void;
-  }
-}
-
-declare global {
-  interface Window {
-    __gb_global_js_err?: (error: string) => void;
-  }
-}
 
 declare global {
   interface Window {
