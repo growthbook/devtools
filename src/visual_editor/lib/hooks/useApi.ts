@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { VisualEditorVariation } from "../..";
 import { ApiCreds } from "../../../../devtools";
 
@@ -48,6 +48,10 @@ export interface APIVisualChangeset {
 export type APIVisualChange = APIVisualChangeset["visualChanges"][number];
 export type APIDomMutation = APIVisualChange["domMutations"][number];
 
+export type CSPError = {
+  violatedDirective: string;
+} | null;
+
 type UseApiHook = (creds: Partial<ApiCreds>) => {
   fetchVisualChangeset?: (visualChangesetId: string) => Promise<{
     visualChangeset?: APIVisualChangeset;
@@ -59,10 +63,22 @@ type UseApiHook = (creds: Partial<ApiCreds>) => {
   ) => Promise<{ nModified?: number }>;
   transformCopy: (copy: string, mode: CopyMode) => Promise<string | undefined>;
   error: string;
+  cspError: CSPError;
 };
 
 const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
   const [error, setError] = useState("");
+  const [cspError, setCSPError] = useState<CSPError>(null);
+
+  document.addEventListener("securitypolicyviolation", (e) => {
+    setError("");
+
+    if (apiHost && e.blockedURI.includes(apiHost)) {
+      setCSPError({
+        violatedDirective: e.violatedDirective,
+      });
+    }
+  });
 
   const fetchVisualChangeset = useCallback(
     async (visualChangesetId: string) => {
@@ -182,6 +198,7 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
     updateVisualChangeset,
     transformCopy,
     error,
+    cspError,
   };
 };
 

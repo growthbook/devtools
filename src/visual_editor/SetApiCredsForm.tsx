@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useState } from "react";
+import React, { FC, useCallback, useEffect, useState } from "react";
 import GBLogo from "../../public/logo192.png";
 import { ApiCreds } from "../../devtools";
 
@@ -22,6 +22,10 @@ const SetApiCredsForm: FC<{
   const [apiKey, setApiKey] = useState(_apiKey);
   const [error, setError] = useState(_error || "");
 
+  useEffect(() => {
+    setError(_error ?? "");
+  }, [_error]);
+
   const onSubmit = useCallback(
     (creds: Partial<ApiCreds>) => {
       if (!areValidApiCreds(creds)) {
@@ -36,9 +40,15 @@ const SetApiCredsForm: FC<{
     <div className="gb-z-max gb-fixed gb-top-1 gb-right-1 gb-rounded gb-bg-slate-700 gb-text-white gb-w-96">
       <div className="gb-flex gb-px-4 gb-h-12 gb-items-center gb-justify-center gb-logo-bg gb-rounded">
         <div className="gb-h-8">
-          <img src={GBLogo} alt="GB Logo" className="gb-w-auto gb-h-full gb-mr-1" />
+          <img
+            src={GBLogo}
+            alt="GB Logo"
+            className="gb-w-auto gb-h-full gb-mr-1"
+          />
         </div>
-        <div className="gb-font-semibold gb-text-white">GrowthBook Visual Editor</div>
+        <div className="gb-font-semibold gb-text-white">
+          GrowthBook Visual Editor
+        </div>
       </div>
       <div className="gb-p-4">
         <div className="gb-text-xl gb-font-semibold">API Key Required</div>
