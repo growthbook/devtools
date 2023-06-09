@@ -52,6 +52,11 @@ export type CSPError = {
   violatedDirective: string;
 } | null;
 
+export type TransformCopyFn = (
+  copy: string,
+  mode: CopyMode
+) => Promise<{ transformed?: string; dailyLimitReached?: boolean }>;
+
 type UseApiHook = (creds: Partial<ApiCreds>) => {
   fetchVisualChangeset?: (visualChangesetId: string) => Promise<{
     visualChangeset?: APIVisualChangeset;
@@ -61,7 +66,7 @@ type UseApiHook = (creds: Partial<ApiCreds>) => {
     visualChangesetId: string,
     payload: any
   ) => Promise<{ nModified?: number }>;
-  transformCopy: (copy: string, mode: CopyMode) => Promise<string | undefined>;
+  transformCopy: TransformCopyFn;
   error: string;
   cspError: CSPError;
 };
@@ -182,13 +187,14 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
 
         setError("");
 
-        return res.transformed;
+        return {
+          transformed: res.transformed,
+          dailyLimitReached: !!res.dailyLimitReached,
+        };
       } catch (e) {
-        setError(
-          "There was an error reaching the API. Please check your API key and host."
-        );
-        return {};
+        console.error("There was an error transforming the copy", e);
       }
+      return {};
     },
     [apiHost, apiKey]
   );

@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import React, { FC, ReactNode, useState } from "react";
 import { RxCross1, RxCaretDown } from "react-icons/rx";
+import IDrop from "./IDrop";
 
 const VisualEditorSection: FC<{
   children: ReactNode;
@@ -8,12 +9,14 @@ const VisualEditorSection: FC<{
   onClose?: () => void;
   isExpanded?: boolean;
   isCollapsible?: boolean;
+  tooltip?: string;
 }> = ({
   children,
   title,
   onClose,
   isExpanded: _isExpanded = false,
   isCollapsible = false,
+  tooltip,
 }) => {
   const [isExpanded, setIsExpanded] = useState(_isExpanded);
   return (
@@ -28,8 +31,13 @@ const VisualEditorSection: FC<{
           }
         )}
       >
-        <div className="gb-flex">
+        <div className="gb-flex gb-items-center gb-relative">
           {title}
+          {tooltip && (
+            <div className="gb-ml-2">
+              <IDrop tooltip={tooltip} />
+            </div>
+          )}
           {isCollapsible ? (
             <RxCaretDown
               className={clsx(

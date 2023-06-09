@@ -1,15 +1,31 @@
-import React, { FC, MouseEvent, useCallback } from "react";
-import { BiBrain, BiX, BiLoaderCircle } from "react-icons/bi";
-import { CopyMode } from "./lib/hooks/useApi";
+import clsx from "clsx";
+import React, { FC, MouseEvent, useCallback, useState } from "react";
+import { BiLoaderCircle } from "react-icons/bi";
+import { CopyMode, TransformCopyFn } from "./lib/hooks/useApi";
 
 const ModeButton: FC<{
   onClick: (e: MouseEvent<HTMLDivElement>) => Promise<void>;
-  mode: CopyMode;
-}> = ({ onClick, mode }) => {
+  mode: string;
+  isDisabled: boolean;
+}> = ({ onClick, mode, isDisabled }) => {
   return (
     <div
-      className="gb-text-sm gb-p-2 gb-bg-indigo-700 gb-mb-2 gb-font-semibold gb-rounded gb-cursor-pointer gb-transition-transform hover:gb-scale-110"
-      onClick={onClick}
+      className={clsx(
+        "gb-text-xs",
+        "gb-px-2",
+        "gb-py-1",
+        "gb-mr-2",
+        "gb-mb-2",
+        "gb-font-semibold",
+        "gb-rounded",
+        "gb-text-light",
+        {
+          "gb-bg-slate-600": !isDisabled,
+          "gb-bg-slate-500": isDisabled,
+          "gb-cursor-pointer": !isDisabled,
+        }
+      )}
+      onClick={isDisabled ? () => {} : onClick}
     >
       {mode}
     </div>
@@ -19,57 +35,66 @@ const ModeButton: FC<{
 const AICopySuggestor: FC<{
   parentElement: Element;
   setHTML: (html: string) => void;
-  transformCopy: (copy: string, mode: CopyMode) => Promise<string | undefined>;
+  transformCopy: TransformCopyFn;
 }> = ({ parentElement, setHTML, transformCopy }) => {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-
-  const { left, top, width } = parentElement.getBoundingClientRect();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<"limit-reached" | "unknown" | null>(null);
 
   const replaceCopy = useCallback(
-    (mode: CopyMode) => async (e: MouseEvent<HTMLDivElement>) => {
+    (mode: string) => async (e: MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
 
-      setIsMenuOpen(false);
       setIsLoading(true);
 
-      const newCopy = await transformCopy(parentElement.innerHTML, mode);
+      const { transformed: newCopy, dailyLimitReached } = await transformCopy(
+        parentElement.innerHTML,
+        mode as CopyMode
+      );
 
-      if (!newCopy) {
-        alert("Unable to generate new copy");
+      if (dailyLimitReached) {
+        setError("limit-reached");
+      } else if (!newCopy) {
+        setError("unknown");
       } else {
         setHTML(newCopy);
       }
 
       setIsLoading(false);
     },
-    [parentElement, setHTML, setIsMenuOpen, setIsLoading, transformCopy]
+    [parentElement, setHTML, setIsLoading, transformCopy]
   );
 
   return (
-    <div
-      className="gb-fixed gb-z-max"
-      style={{ top: top - 38, left: left + width - 28 }}
-      onClick={() => setIsMenuOpen(!isMenuOpen)}
-    >
-      {isMenuOpen && (
-        <>
-          <div className="gb-absolute gb-bottom-9 gb-left-0 gb-text-white">
-            <ModeButton onClick={replaceCopy("energetic")} mode="energetic" />
-            <ModeButton onClick={replaceCopy("concise")} mode="concise" />
-            <ModeButton onClick={replaceCopy("humorous")} mode="humorous" />
+    <div className="gb-text-light gb-flex gb-flex-col gb-ml-4">
+      <div className="gb-flex gb-flex-wrap gb-relative">
+        {[
+          "energetic",
+          "concise",
+          "humorous",
+          "explosive",
+          "soothing",
+          "compassionate",
+          "punny",
+        ].map((e) => (
+          <ModeButton
+            isDisabled={isLoading || error === "limit-reached"}
+            onClick={replaceCopy(e)}
+            mode={e}
+          />
+        ))}
+        {isLoading && (
+          <div className="gb-absolute gb-inset-0 gb-flex gb-justify-center gb-items-center gb-text-light">
+            <BiLoaderCircle className="gb-animate-spin" />
           </div>
-        </>
-      )}
-      <div className="gb-p-2 gb-logo-bg gb-text-white gb-text-lg gb-rounded-full gb-cursor-pointer gb-transition-transform hover:gb-scale-110">
-        {isMenuOpen ? (
-          <BiX className="w-6 h-6" />
-        ) : isLoading ? (
-          <BiLoaderCircle className="w-6 h-6" />
-        ) : (
-          <BiBrain className="w-6 h-6" />
         )}
       </div>
+      {error && (
+        <div className="gb-text-xs gb-text-red-400">
+          {error === "limit-reached"
+            ? "Your daily limit for generative content has been reached."
+            : "An unknown error occurred."}
+        </div>
+      )}
     </div>
   );
 };
