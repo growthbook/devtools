@@ -5,7 +5,7 @@ import IDrop from "./IDrop";
 
 const VisualEditorSection: FC<{
   children: ReactNode;
-  title: string;
+  title: string | ReactNode;
   onClose?: () => void;
   isExpanded?: boolean;
   isCollapsible?: boolean;
@@ -19,6 +19,7 @@ const VisualEditorSection: FC<{
   tooltip,
 }) => {
   const [isExpanded, setIsExpanded] = useState(_isExpanded);
+  const toggleExpanded = () => isCollapsible && setIsExpanded(!isExpanded);
   return (
     <>
       <div
@@ -32,9 +33,16 @@ const VisualEditorSection: FC<{
         )}
       >
         <div className="gb-flex gb-items-center gb-relative">
-          {title}
+          <div
+            className={clsx({
+              "gb-cursor-pointer": isCollapsible,
+            })}
+            onClick={toggleExpanded}
+          >
+            {title}
+          </div>
           {tooltip && (
-            <div className="gb-ml-2">
+            <div className="gb-ml-2 gb-cursor-pointer" onClick={toggleExpanded}>
               <IDrop tooltip={tooltip} />
             </div>
           )}
@@ -46,7 +54,7 @@ const VisualEditorSection: FC<{
                   "gb-rotate-180": !isExpanded,
                 }
               )}
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={toggleExpanded}
             />
           ) : null}
         </div>

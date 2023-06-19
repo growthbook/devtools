@@ -51,10 +51,10 @@ import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
 import SetApiCredsForm from "./SetApiCredsForm";
 import CustomJSEditor from "./CustomJSEditor";
 import CSSAttributeEditor from "./CSSAttributeEditor";
-import AICopySuggestor from "./AICopySuggestor";
 import ReloadPageButton from "./ReloadPageButton";
 import CSPErrorText from "./CSPErrorText";
 import BackToGBButton from "./BackToGBButton";
+import AIEditorSection from "./AIEditorSection";
 import "./targetPage.css";
 
 declare global {
@@ -624,25 +624,20 @@ const VisualEditor: FC<{}> = () => {
 
         {mode === "selection" && selectedElement ? (
           <>
+            {selectedElementHasCopy && (
+              <AIEditorSection
+                parentElement={selectedElement}
+                setHTML={setHTML}
+                transformCopy={transformCopy}
+              />
+            )}
+
             <VisualEditorSection title="Breadcrumbs">
               <BreadcrumbsView
                 element={selectedElement}
                 setElement={setSelectedElement}
               />
             </VisualEditorSection>
-
-            {selectedElementHasCopy && (
-              <VisualEditorSection
-                title="generative content"
-                tooltip="Enhance your written content using GPT-powered AI. Transform human-readable text into any desired emotion effortlessly."
-              >
-                <AICopySuggestor
-                  parentElement={selectedElement}
-                  setHTML={setHTML}
-                  transformCopy={transformCopy}
-                />
-              </VisualEditorSection>
-            )}
 
             <VisualEditorSection title="Element Details">
               <ElementDetails
