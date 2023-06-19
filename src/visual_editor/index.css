@@ -13,11 +13,14 @@
 }
 
 .gb-ai-section-title {
-  background: linear-gradient(135deg, #c111dd, #df5ef3);
+  background: linear-gradient(135deg, #f4c6fb, #df5ef3);
   animation: gradient 5s ease infinite;
   background-size: 200% 200%;
   background-clip: text;
-  text-shadow: #fff 0 0 16px;
+}
+
+.gb-text-ai-label {
+  color: #df5ef3;
 }
 
 @keyframes gradient {

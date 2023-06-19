@@ -36,7 +36,8 @@ const AICopySuggestor: FC<{
   parentElement: Element;
   setHTML: (html: string) => void;
   transformCopy: TransformCopyFn;
-}> = ({ parentElement, setHTML, transformCopy }) => {
+  copy: string;
+}> = ({ parentElement, setHTML, transformCopy, copy }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<"limit-reached" | "unknown" | null>(null);
 
@@ -66,35 +67,73 @@ const AICopySuggestor: FC<{
 
   return (
     <div className="gb-text-light gb-flex gb-flex-col gb-ml-4">
-      <div className="gb-flex gb-flex-wrap gb-relative">
-        {[
-          "energetic",
-          "concise",
-          "humorous",
-          "explosive",
-          "soothing",
-          "compassionate",
-          "punny",
-        ].map((e) => (
-          <ModeButton
-            isDisabled={isLoading || error === "limit-reached"}
-            onClick={replaceCopy(e)}
-            mode={e}
-          />
-        ))}
-        {isLoading && (
-          <div className="gb-absolute gb-inset-0 gb-flex gb-justify-center gb-items-center gb-text-light">
-            <BiLoaderCircle className="gb-animate-spin" />
-          </div>
+      <div className="gb-w-24 gb-text-xs gb-text-slate-400">Original</div>
+      <div
+        className={clsx(
+          "gb-text-slate-200",
+          "gb-text-ellipsis",
+          "gb-overflow-hidden",
+          "gb-text-sm",
+          "gb-bg-slate-900",
+          "gb-mr-4",
+          "gb-mt-2",
+          "gb-p-2",
+          "gb-rounded"
         )}
+        style={{ flex: 2, maxHeight: "3rem" }}
+      >
+        {copy}
       </div>
-      {error && (
-        <div className="gb-text-xs gb-text-red-400">
-          {error === "limit-reached"
-            ? "Your daily limit for generative content has been reached."
-            : "An unknown error occurred."}
+
+      <div className="gb-w-24 gb-text-xs gb-text-slate-400 gb-mt-2">
+        Make it more...
+      </div>
+      <div className="gb-flex gb-mr-4 gb-mt-2 gb-text-sm">
+        <div className="gb-p-1 gb-flex-1 gb-flex gb-items-center gb-justify-center">
+          concise
         </div>
-      )}
+        <div className="gb-p-1 gb-flex-1 gb-flex gb-items-center gb-justify-center">
+          energetic
+        </div>
+        <div className="gb-p-1 gb-flex-1 gb-flex gb-items-center gb-justify-center">
+          humorous
+        </div>
+      </div>
+
+      <div className="gb-w-24 gb-text-xs gb-text-ai-label gb-mt-2">
+        Transformed{" "}
+      </div>
+      <div
+        className={clsx(
+          "gb-text-slate-200",
+          "gb-text-ellipsis",
+          "gb-overflow-hidden",
+          "gb-text-sm",
+          "gb-bg-slate-900",
+          "gb-mr-4",
+          "gb-mt-2",
+          "gb-p-2",
+          "gb-rounded"
+        )}
+        style={{ flex: 2, maxHeight: "3rem" }}
+      >
+        Dude, where's my car?
+      </div>
+      <button
+        className={clsx(
+          "gb-mr-4",
+          "gb-p-2",
+          "gb-bg-indigo-800",
+          "gb-rounded",
+          "gb-text-white",
+          "gb-font-semibold",
+          "gb-text-sm",
+          "gb-mt-2"
+        )}
+        onClick={() => {}}
+      >
+        Apply Change
+      </button>
     </div>
   );
 };

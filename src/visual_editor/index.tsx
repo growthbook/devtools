@@ -56,6 +56,7 @@ import CSPErrorText from "./CSPErrorText";
 import BackToGBButton from "./BackToGBButton";
 import AIEditorSection from "./AIEditorSection";
 import "./targetPage.css";
+import AICopySuggestor from "./AICopySuggestor";
 
 declare global {
   interface Window {
@@ -141,16 +142,15 @@ const cleanUpParams = (params: qs.ParsedQuery) => {
   );
 };
 
-const containsHumanReadableText = (element: HTMLElement) => {
+const getHumanReadableText = (element: HTMLElement): string => {
   // ignore when selected is simply wrapper of another element
-  if (element.innerHTML.startsWith("<")) return false;
+  if (element.innerHTML.startsWith("<")) return "";
   // hard-limit on text length
-  if (element.innerHTML.length > 800) return false;
+  if (element.innerHTML.length > 800) return "";
   const parser = new DOMParser();
   const parsed = parser.parseFromString(element.innerHTML, "text/html");
-  let text = parsed.body.textContent || "";
-  text = text.trim();
-  return text.length > 0;
+  const text = parsed.body.textContent || "";
+  return text.trim();
 };
 
 const VisualEditor: FC<{}> = () => {
@@ -417,10 +417,14 @@ const VisualEditor: FC<{}> = () => {
     );
   }, []);
 
+  const humanReadableText = useMemo(() => {
+    if (!selectedElement) return "";
+    return getHumanReadableText(selectedElement);
+  }, [getHumanReadableText, selectedElement]);
+
   const selectedElementHasCopy = useMemo(() => {
-    if (!selectedElement) return false;
-    return containsHumanReadableText(selectedElement);
-  }, [selectedElement]);
+    return humanReadableText.length > 0;
+  }, [humanReadableText]);
 
   // get ahold of api credentials on load. requires messaging the background script
   useMessage({
@@ -625,11 +629,14 @@ const VisualEditor: FC<{}> = () => {
         {mode === "selection" && selectedElement ? (
           <>
             {selectedElementHasCopy && (
-              <AIEditorSection
-                parentElement={selectedElement}
-                setHTML={setHTML}
-                transformCopy={transformCopy}
-              />
+              <AIEditorSection>
+                <AICopySuggestor
+                  parentElement={selectedElement}
+                  setHTML={setHTML}
+                  copy={humanReadableText}
+                  transformCopy={transformCopy}
+                />
+              </AIEditorSection>
             )}
 
             <VisualEditorSection title="Breadcrumbs">
