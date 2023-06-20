@@ -89,9 +89,10 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
           }
         );
 
-        if (response.status !== 200) throw new Error(response.statusText);
-
         const res = await response.json();
+
+        if (response.status !== 200)
+          throw new Error(res?.message || response.statusText);
 
         const { visualChangeset, experiment } = res;
 
@@ -101,9 +102,11 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
           visualChangeset,
           experiment,
         };
-      } catch (e) {
+      } catch (e: any) {
         setError(
-          "There was an error reaching the API. Please check your API key and host."
+          `There was an error reaching the API. ${
+            e || "Please check your API key and host."
+          }`
         );
         return {};
       }
