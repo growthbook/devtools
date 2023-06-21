@@ -628,17 +628,6 @@ const VisualEditor: FC<{}> = () => {
 
         {mode === "selection" && selectedElement ? (
           <>
-            {selectedElementHasCopy && (
-              <AIEditorSection>
-                <AICopySuggestor
-                  parentElement={selectedElement}
-                  setHTML={setHTML}
-                  copy={humanReadableText}
-                  transformCopy={transformCopy}
-                />
-              </AIEditorSection>
-            )}
-
             <VisualEditorSection title="Breadcrumbs">
               <BreadcrumbsView
                 element={selectedElement}
@@ -654,6 +643,15 @@ const VisualEditor: FC<{}> = () => {
                 undoHTMLMutations={undoHTMLMutations}
               />
             </VisualEditorSection>
+
+            <AIEditorSection isVisible={selectedElementHasCopy}>
+              <AICopySuggestor
+                parentElement={selectedElement}
+                setHTML={setHTML}
+                copy={humanReadableText}
+                transformCopy={transformCopy}
+              />
+            </AIEditorSection>
 
             <VisualEditorSection title="Attributes">
               <AttributeEdit element={selectedElement} onSave={setAttributes} />

@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import React, { FC, ReactNode } from "react";
 import VisualEditorSection from "./VisualEditorSection";
 
@@ -8,16 +9,29 @@ const AIEditorSectionTitle: FC<{}> = () => (
 );
 
 const AIEditorSection: FC<{
+  isVisible: boolean;
   children: ReactNode;
-}> = ({ children }) => {
+}> = ({ children, isVisible }) => {
   return (
-    <VisualEditorSection
-      isCollapsible
-      title={<AIEditorSectionTitle />}
-      tooltip="Enhance your written content using GPT-powered AI. Transform human-readable text into any desired emotion effortlessly."
-    >
-      {children}
-    </VisualEditorSection>
+    <div className="gb-overflow-hidden">
+      <div
+        className={clsx("gb-transition-all", "gb-duration-500", {
+          "-gb-mt-12": !isVisible,
+          "gb-mt-0": isVisible,
+          "gb-delay-500": isVisible,
+        })}
+      >
+        {isVisible && (
+          <VisualEditorSection
+            isCollapsible
+            title={<AIEditorSectionTitle />}
+            tooltip="Enhance your written content using GPT-powered AI. Transform human-readable text into any desired emotion effortlessly."
+          >
+            {children}
+          </VisualEditorSection>
+        )}
+      </div>
+    </div>
   );
 };
 
