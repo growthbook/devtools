@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import React, { FC, MouseEvent, useCallback, useState } from "react";
+import React, { FC, MouseEvent, useCallback, useEffect, useState } from "react";
 import { CopyMode, TransformCopyFn } from "./lib/hooks/useApi";
 import TextareaAutosize from "react-textarea-autosize";
 import { BiLoaderCircle } from "react-icons/bi";
@@ -9,13 +9,16 @@ const AICopySuggestor: FC<{
   setHTML: (html: string) => void;
   transformCopy: TransformCopyFn;
   copy: string;
-}> = ({ parentElement, setHTML, transformCopy, copy }) => {
+}> = ({ parentElement, setHTML, transformCopy, copy: _copy }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<"limit-reached" | "unknown" | null>(null);
   const [tone, setTone] = useState<"concise" | "energetic" | "humorous" | null>(
     null
   );
   const [generatedCopy, setGeneratedCopy] = useState<string>("");
+  const [copy, setCopy] = useState(_copy);
+
+  useEffect(() => setCopy(_copy), [_copy]);
 
   const generateCopy = useCallback(
     (mode: string) => async (e: MouseEvent<any>) => {

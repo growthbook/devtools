@@ -420,7 +420,7 @@ const VisualEditor: FC<{}> = () => {
   const humanReadableText = useMemo(() => {
     if (!selectedElement) return "";
     return getHumanReadableText(selectedElement);
-  }, [getHumanReadableText, selectedElement]);
+  }, [getHumanReadableText, selectedElement, selectedElement?.innerHTML]);
 
   const selectedElementHasCopy = useMemo(() => {
     return humanReadableText.length > 0;
