@@ -4,35 +4,6 @@ import { CopyMode, TransformCopyFn } from "./lib/hooks/useApi";
 import TextareaAutosize from "react-textarea-autosize";
 import { BiLoaderCircle } from "react-icons/bi";
 
-const ModeButton: FC<{
-  onClick: (e: MouseEvent<HTMLDivElement>) => Promise<void>;
-  mode: string;
-  isDisabled: boolean;
-}> = ({ onClick, mode, isDisabled }) => {
-  return (
-    <div
-      className={clsx(
-        "gb-text-xs",
-        "gb-px-2",
-        "gb-py-1",
-        "gb-mr-2",
-        "gb-mb-2",
-        "gb-font-semibold",
-        "gb-rounded",
-        "gb-text-light",
-        {
-          "gb-bg-slate-600": !isDisabled,
-          "gb-bg-slate-500": isDisabled,
-          "gb-cursor-pointer": !isDisabled,
-        }
-      )}
-      onClick={isDisabled ? () => {} : onClick}
-    >
-      {mode}
-    </div>
-  );
-};
-
 const AICopySuggestor: FC<{
   parentElement: Element;
   setHTML: (html: string) => void;
@@ -52,6 +23,7 @@ const AICopySuggestor: FC<{
 
       if (isLoading) return;
 
+      setError(null);
       setIsLoading(true);
 
       setGeneratedCopy("");
@@ -273,6 +245,14 @@ const AICopySuggestor: FC<{
           </div>
         </div>
       </div>
+
+      {error && (
+        <div className="gb-text-xs gb-text-red-400 gb-mt-3">
+          {error === "limit-reached"
+            ? "Your daily limit for generative content has been reached."
+            : "An unknown error occurred."}
+        </div>
+      )}
 
       <div className="gb-overflow-hidden">
         <div
