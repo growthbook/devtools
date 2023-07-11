@@ -31,6 +31,7 @@ import {
   VARIATION_INDEX_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
   API_HOST_PARAMS_KEY,
+  AI_ENABLED_PARAMS_KEY,
 } from "./lib/constants";
 
 import { ApiCreds } from "../../devtools";
@@ -55,8 +56,8 @@ import ReloadPageButton from "./ReloadPageButton";
 import CSPErrorText from "./CSPErrorText";
 import BackToGBButton from "./BackToGBButton";
 import AIEditorSection from "./AIEditorSection";
-import "./targetPage.css";
 import AICopySuggestor from "./AICopySuggestor";
+import "./targetPage.css";
 
 declare global {
   interface Window {
@@ -137,6 +138,7 @@ const cleanUpParams = (params: qs.ParsedQuery) => {
         [VARIATION_INDEX_PARAMS_KEY]: undefined,
         [EXPERIMENT_URL_PARAMS_KEY]: undefined,
         [API_HOST_PARAMS_KEY]: undefined,
+        [AI_ENABLED_PARAMS_KEY]: undefined,
       },
     })
   );
@@ -166,6 +168,10 @@ const VisualEditor: FC<{}> = () => {
   );
   const [apiHostHint] = useState(
     decodeURIComponent(params[API_HOST_PARAMS_KEY] as string)
+  );
+  const [hasAiEnabled] = useState(
+    decodeURIComponent((params[AI_ENABLED_PARAMS_KEY] as string) || "") ===
+      "true"
   );
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
   const [mode, setMode] = useState<ToolbarMode>("selection");
@@ -644,7 +650,7 @@ const VisualEditor: FC<{}> = () => {
               />
             </VisualEditorSection>
 
-            <AIEditorSection isVisible={selectedElementHasCopy}>
+            <AIEditorSection isVisible={hasAiEnabled && selectedElementHasCopy}>
               <AICopySuggestor
                 parentElement={selectedElement}
                 setHTML={setHTML}
