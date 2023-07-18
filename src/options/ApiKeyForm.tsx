@@ -11,37 +11,37 @@ const ApiKeyForm: FC<{
   const [_apiHost, _setApiHost] = useState(apiHost || "");
   return (
     <form
-      className="flex flex-col"
+      className="gb-flex gb-flex-col"
       onSubmit={(_e) => {
         saveApiKey(_apiKey);
         saveApiHost(_apiHost.replace(/[\/]+$/, ""));
         onSave();
       }}
     >
-      <div className="text-md mb-2">
+      <div className="gb-text-md gb-mb-2">
         Please enter your API credentials to connect to your GrowthBook account
       </div>
-      <label className="flex flex-col">
-        <span className="text-xs px-1">API Host</span>
+      <label className="gb-flex gb-flex-col">
+        <span className="gb-text-xs gb-px-1">API Host</span>
         <input
           placeholder="https://api.growthbook.io"
-          className="border p-2 rounded mb-2 text-black"
+          className="gb-border gb-p-2 gb-rounded gb-mb-2 gb-text-black"
           type="text"
           value={_apiHost}
           onChange={(e) => _setApiHost(e.target.value)}
         />
       </label>
-      <label className="flex flex-col">
-        <span className="text-xs px-1">API Secret</span>
+      <label className="gb-flex gb-flex-col">
+        <span className="gb-text-xs gb-px-1">API Secret</span>
         <input
           placeholder="secret_xyz..."
-          className="border p-2 rounded mb-4 text-black"
+          className="gb-border gb-p-2 gb-rounded gb-mb-4 gb-text-black"
           type="password"
           value={_apiKey}
           onChange={(e) => _setApiKey(e.target.value)}
         />
       </label>
-      <input type="submit" className="p-2 bg-blue-300" value="Submit" />
+      <input type="submit" className="gb-p-2 gb-bg-blue-300" value="Submit" />
     </form>
   );
 };
