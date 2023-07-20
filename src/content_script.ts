@@ -3,13 +3,8 @@ import {
   VISUAL_CHANGESET_ID_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
   API_HOST_PARAMS_KEY,
+  AUTH_TOKEN_KEY,
 } from "./visual_editor/lib/constants";
-import {
-  loadApiHost,
-  loadApiKey,
-  saveApiHost,
-  saveApiKey,
-} from "./utils/storage";
 
 // Pass along messages from content script -----> devtools, popup, etc.
 window.addEventListener("message", function (msg: MessageEvent<Message>) {
@@ -18,37 +13,6 @@ window.addEventListener("message", function (msg: MessageEvent<Message>) {
 
   if (devtoolsMessages.includes(data.type)) {
     chrome.runtime.sendMessage(data);
-  }
-
-  if (data.type === "GB_REQUEST_API_CREDS") {
-    Promise.all([loadApiKey(), loadApiHost()]).then(([apiKey, apiHost]) => {
-      window.postMessage(
-        { type: "GB_RESPONSE_API_CREDS", apiKey, apiHost },
-        "*"
-      );
-    });
-  }
-
-  if (data.type === "GB_REQUEST_OPTIONS_URL") {
-    window.postMessage(
-      {
-        type: "GB_RESPONSE_OPTIONS_URL",
-        url: chrome.runtime.getURL("options.html"),
-      },
-      "*"
-    );
-  }
-
-  if (data.type === "GB_SAVE_API_CREDS") {
-    const { apiHost, apiKey } = data;
-    Promise.all([saveApiKey(apiKey), saveApiHost(apiHost)]).then(
-      ([apiKey, apiHost]) => {
-        window.postMessage(
-          { type: "GB_RESPONSE_API_CREDS", apiKey, apiHost },
-          "*"
-        );
-      }
-    );
   }
 });
 
@@ -77,7 +41,8 @@ const hasVisualEditorQueryParams = () => {
   return (
     !!urlParams.get(VISUAL_CHANGESET_ID_PARAMS_KEY) &&
     !!urlParams.get(EXPERIMENT_URL_PARAMS_KEY) &&
-    !!urlParams.get(API_HOST_PARAMS_KEY)
+    !!urlParams.get(API_HOST_PARAMS_KEY) &&
+    !!urlParams.get(AUTH_TOKEN_KEY)
   );
 };
 

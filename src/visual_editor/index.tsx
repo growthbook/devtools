@@ -18,7 +18,6 @@ import {
 } from "./lib/selectionMode";
 import getSelector from "./lib/getSelector";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
-import useMessage from "./lib/hooks/useMessage";
 import useApi, {
   APIDomMutation,
   APIExperiment,
@@ -31,9 +30,9 @@ import {
   VARIATION_INDEX_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
   API_HOST_PARAMS_KEY,
+  AUTH_TOKEN_KEY,
 } from "./lib/constants";
 
-import { ApiCreds } from "../../devtools";
 import Toolbar, { ToolbarMode } from "./Toolbar";
 import ElementDetails from "./ElementDetails";
 import SelectorDisplay from "./SelectorDisplay";
@@ -48,13 +47,12 @@ import DOMMutationList from "./DOMMutationList";
 import VariationSelector from "./VariationSelector";
 import VisualEditorHeader from "./VisualEditorHeader";
 import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
-import SetApiCredsForm from "./SetApiCredsForm";
 import CustomJSEditor from "./CustomJSEditor";
 import CSSAttributeEditor from "./CSSAttributeEditor";
 import ReloadPageButton from "./ReloadPageButton";
 import CSPErrorText from "./CSPErrorText";
-import "./targetPage.css";
 import BackToGBButton from "./BackToGBButton";
+import "./targetPage.css";
 
 declare global {
   interface Window {
@@ -135,6 +133,7 @@ const cleanUpParams = (params: qs.ParsedQuery) => {
         [VARIATION_INDEX_PARAMS_KEY]: undefined,
         [EXPERIMENT_URL_PARAMS_KEY]: undefined,
         [API_HOST_PARAMS_KEY]: undefined,
+        [AUTH_TOKEN_KEY]: undefined,
       },
     })
   );
@@ -151,8 +150,15 @@ const VisualEditor: FC<{}> = () => {
   const [experimentUrl] = useState(
     decodeURIComponent(params[EXPERIMENT_URL_PARAMS_KEY] as string)
   );
-  const [apiHostHint] = useState(
+  const [apiHost] = useState(
     decodeURIComponent(params[API_HOST_PARAMS_KEY] as string)
+  );
+  const [authToken] = useState(
+    decodeURIComponent(params[AUTH_TOKEN_KEY] as string)
+  );
+  const [apiKey, setApiKey] = useState<string | undefined>(
+    // load from session storage which persists across page reloads
+    window.sessionStorage.getItem("apikey") ?? undefined
   );
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
   const [mode, setMode] = useState<ToolbarMode>("selection");
@@ -175,10 +181,13 @@ const VisualEditor: FC<{}> = () => {
     rightAligned: true,
   });
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
-  const [apiCreds, setApiCreds] = useState<Partial<ApiCreds>>({});
-  const { fetchVisualChangeset, updateVisualChangeset, cspError, error } =
-    useApi(apiCreds);
-  const [showApiCredsAlert, setShowApiCredsAlert] = useState(false);
+  const {
+    authenticate,
+    fetchVisualChangeset,
+    updateVisualChangeset,
+    cspError,
+    error,
+  } = useApi({ apiKey, apiHost });
   const [customJsError, setCustomJsError] = useState("");
 
   const forceUpdate = debounce(_forceUpdate, 100);
@@ -365,48 +374,18 @@ const VisualEditor: FC<{}> = () => {
     [selector, addDomMutation]
   );
 
-  const saveApiCreds = useCallback(({ apiKey, apiHost }: ApiCreds) => {
-    window.postMessage(
-      {
-        type: "GB_SAVE_API_CREDS",
-        apiHost,
-        apiKey,
-      },
-      "*"
-    );
-  }, []);
-
-  // get ahold of api credentials on load. requires messaging the background script
-  useMessage({
-    messageHandler: (message) => {
-      const hasVisualEditorParams = Boolean(
-        visualChangesetId && variationIndex
-      );
-
-      if (message.type !== "GB_RESPONSE_API_CREDS") return;
-
-      setShowApiCredsAlert(
-        hasVisualEditorParams && (!message.apiKey || !message.apiHost)
-      );
-
-      if (
-        message.type === "GB_RESPONSE_API_CREDS" &&
-        message.apiKey &&
-        message.apiHost
-      ) {
-        setApiCreds({
-          apiKey: message.apiKey,
-          apiHost: message.apiHost,
-        });
-      }
-    },
-    outgoingMessage: { type: "GB_REQUEST_API_CREDS" },
-  });
+  // authenticate and get api key
+  useEffect(() => {
+    if (!authToken || !authenticate) return;
+    const load = async () => {
+      const { visualEditorKey } = await authenticate(authToken);
+      setApiKey(visualEditorKey);
+    };
+    load();
+  }, [authToken, authenticate]);
 
   // fetch visual changeset and experiment from api once we have credentials
   useEffect(() => {
-    const { apiHost, apiKey } = apiCreds;
-
     if (!apiHost || !apiKey || !fetchVisualChangeset || !visualChangesetId)
       return;
 
@@ -432,7 +411,7 @@ const VisualEditor: FC<{}> = () => {
     };
 
     load();
-  }, [apiCreds, visualChangesetId, fetchVisualChangeset]);
+  }, [apiKey, visualChangesetId, fetchVisualChangeset]);
 
   // handle mode selection
   useEffect(() => {
@@ -521,21 +500,27 @@ const VisualEditor: FC<{}> = () => {
       "";
   }, [selectedVariation?.js]);
 
-  if (showApiCredsAlert || error) {
+  // TODO clean this up
+  if (error) {
     return (
-      <SetApiCredsForm
-        appHost={experimentUrl.substring(
-          0,
-          experimentUrl.indexOf("/experiment")
-        )}
-        apiHost={apiCreds.apiHost || apiHostHint}
-        apiKey={apiCreds.apiKey}
-        saveApiCreds={saveApiCreds}
-        error={error}
-      />
+      <VisualEditorPane style={parentStyles}>
+        <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
+        <div className="gb-p-4 gb-text-red-400">{error}</div>
+        <div className="gb-m-4 gb-text-center">
+          <BackToGBButton experimentUrl={experimentUrl}>
+            Back to GrowthBook
+          </BackToGBButton>
+          <ReloadPageButton
+            apiCreds={{ apiHost, apiKey }}
+            params={params}
+            experimentUrl={experimentUrl}
+            variationIndex={variationIndex}
+            visualChangesetId={visualChangesetId}
+          />
+        </div>
+      </VisualEditorPane>
     );
   }
-
   if (cspError) {
     return (
       <VisualEditorPane style={parentStyles}>
@@ -546,7 +531,7 @@ const VisualEditor: FC<{}> = () => {
             Back to GrowthBook
           </BackToGBButton>
           <ReloadPageButton
-            apiCreds={apiCreds}
+            apiCreds={{ apiHost, apiKey }}
             params={params}
             experimentUrl={experimentUrl}
             variationIndex={variationIndex}
@@ -677,7 +662,7 @@ const VisualEditor: FC<{}> = () => {
             Done Editing
           </BackToGBButton>
           <ReloadPageButton
-            apiCreds={apiCreds}
+            apiCreds={{ apiHost, apiKey }}
             params={params}
             experimentUrl={experimentUrl}
             variationIndex={variationIndex}
