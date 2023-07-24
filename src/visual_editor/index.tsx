@@ -500,43 +500,28 @@ const VisualEditor: FC<{}> = () => {
       "";
   }, [selectedVariation?.js]);
 
-  // TODO clean this up
-  if (error) {
+  if (error || cspError) {
     return (
       <VisualEditorPane style={parentStyles}>
         <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
-        <div className="gb-p-4 gb-text-red-400">{error}</div>
+        {error ? (
+          <div className="gb-p-4 gb-text-red-400">{error}</div>
+        ) : (
+          <CSPErrorText cspError={cspError} />
+        )}
         <div className="gb-m-4 gb-text-center">
           <BackToGBButton experimentUrl={experimentUrl}>
             Back to GrowthBook
           </BackToGBButton>
-          <ReloadPageButton
-            apiCreds={{ apiHost, apiKey }}
-            params={params}
-            experimentUrl={experimentUrl}
-            variationIndex={variationIndex}
-            visualChangesetId={visualChangesetId}
-          />
-        </div>
-      </VisualEditorPane>
-    );
-  }
-  if (cspError) {
-    return (
-      <VisualEditorPane style={parentStyles}>
-        <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
-        <CSPErrorText cspError={cspError} />
-        <div className="gb-m-4 gb-text-center">
-          <BackToGBButton experimentUrl={experimentUrl}>
-            Back to GrowthBook
-          </BackToGBButton>
-          <ReloadPageButton
-            apiCreds={{ apiHost, apiKey }}
-            params={params}
-            experimentUrl={experimentUrl}
-            variationIndex={variationIndex}
-            visualChangesetId={visualChangesetId}
-          />
+          {apiHost && apiKey ? (
+            <ReloadPageButton
+              apiCreds={{ apiHost, apiKey }}
+              params={params}
+              experimentUrl={experimentUrl}
+              variationIndex={variationIndex}
+              visualChangesetId={visualChangesetId}
+            />
+          ) : null}
         </div>
       </VisualEditorPane>
     );
