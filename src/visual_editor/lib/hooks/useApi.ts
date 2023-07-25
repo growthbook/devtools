@@ -51,7 +51,6 @@ export type CSPError = {
 } | null;
 
 type UseApiHook = (creds: Partial<ApiCreds>) => {
-  authenticate?: (token: string) => Promise<{ visualEditorKey?: string }>;
   fetchVisualChangeset?: (visualChangesetId: string) => Promise<{
     visualChangeset?: APIVisualChangeset;
     experiment?: APIExperiment;
@@ -77,35 +76,6 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
       });
     }
   });
-
-  const authenticate = useCallback(
-    async (token: string) => {
-      if (!apiHost) return {};
-      setError("");
-      try {
-        const response = await fetch(`${apiHost}/visual-editor/authenticate`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ token }),
-        });
-
-        const json = await response.json();
-
-        if (response.status !== 200) throw new Error(json.message);
-
-        // save to session storage which persists across page reloads
-        window.sessionStorage.setItem("apikey", json.visualEditorKey);
-
-        return { visualEditorKey: json.visualEditorKey };
-      } catch (e) {
-        setError(`There was an error. Try again, or contact support. ${e}`);
-        return {};
-      }
-    },
-    [apiHost]
-  );
 
   const fetchVisualChangeset = useCallback(
     async (visualChangesetId: string) => {
@@ -183,7 +153,6 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
   );
 
   return {
-    authenticate,
     fetchVisualChangeset,
     updateVisualChangeset,
     error,

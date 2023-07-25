@@ -12,6 +12,7 @@ import React, {
 } from "react";
 import * as ReactDOM from "react-dom/client";
 
+import { Message } from "../../devtools";
 import {
   toggleSelectionMode,
   onSelectionModeUpdate,
@@ -30,7 +31,6 @@ import {
   VARIATION_INDEX_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
   API_HOST_PARAMS_KEY,
-  AUTH_TOKEN_KEY,
 } from "./lib/constants";
 
 import Toolbar, { ToolbarMode } from "./Toolbar";
@@ -53,7 +53,6 @@ import ReloadPageButton from "./ReloadPageButton";
 import CSPErrorText from "./CSPErrorText";
 import BackToGBButton from "./BackToGBButton";
 import "./targetPage.css";
-import { Message } from "../../devtools";
 
 declare global {
   interface Window {
@@ -134,7 +133,6 @@ const cleanUpParams = (params: qs.ParsedQuery) => {
         [VARIATION_INDEX_PARAMS_KEY]: undefined,
         [EXPERIMENT_URL_PARAMS_KEY]: undefined,
         [API_HOST_PARAMS_KEY]: undefined,
-        [AUTH_TOKEN_KEY]: undefined,
       },
     })
   );
@@ -153,9 +151,6 @@ const VisualEditor: FC<{}> = () => {
   );
   const [apiHost] = useState(
     decodeURIComponent(params[API_HOST_PARAMS_KEY] as string)
-  );
-  const [authToken] = useState(
-    decodeURIComponent(params[AUTH_TOKEN_KEY] as string)
   );
   const [apiKey, setApiKey] = useState<string | undefined>("");
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
@@ -179,13 +174,9 @@ const VisualEditor: FC<{}> = () => {
     rightAligned: true,
   });
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
-  const {
-    authenticate,
-    fetchVisualChangeset,
-    updateVisualChangeset,
-    cspError,
-    error,
-  } = useApi({ apiKey, apiHost });
+  const [apiKeyError, setApiKeyError] = useState("");
+  const { fetchVisualChangeset, updateVisualChangeset, cspError, error } =
+    useApi({ apiKey, apiHost });
   const [customJsError, setCustomJsError] = useState("");
 
   const forceUpdate = debounce(_forceUpdate, 100);
@@ -381,7 +372,13 @@ const VisualEditor: FC<{}> = () => {
 
     const onMessage = (event: MessageEvent<Message>) => {
       if (event.data.type === "GB_RESPONSE_API_CREDS") {
-        setApiKey(event.data.apiKey ?? "");
+        if (!event.data.apiKey) {
+          setApiKeyError(
+            "The Visual Editor was unable find its API key. Please try again or contact support."
+          );
+          return;
+        }
+        setApiKey(event.data.apiKey);
       }
     };
 
@@ -506,12 +503,12 @@ const VisualEditor: FC<{}> = () => {
       "";
   }, [selectedVariation?.js]);
 
-  if (error || cspError) {
+  if (error || cspError || apiKeyError) {
     return (
       <VisualEditorPane style={parentStyles}>
         <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
-        {error ? (
-          <div className="gb-p-4 gb-text-red-400">{error}</div>
+        {error || apiKeyError ? (
+          <div className="gb-p-4 gb-text-red-400">{error || apiKeyError}</div>
         ) : (
           <CSPErrorText cspError={cspError} />
         )}

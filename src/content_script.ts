@@ -12,7 +12,7 @@ window.addEventListener("message", function (msg: MessageEvent<Message>) {
   const data = msg.data;
   const devtoolsMessages = ["GB_REFRESH", "GB_ERROR"];
 
-  if ([...devtoolsMessages].includes(data.type)) {
+  if (devtoolsMessages.includes(data.type)) {
     chrome.runtime.sendMessage(data);
   }
 
