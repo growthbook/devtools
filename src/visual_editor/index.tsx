@@ -53,6 +53,7 @@ import ReloadPageButton from "./ReloadPageButton";
 import CSPErrorText from "./CSPErrorText";
 import BackToGBButton from "./BackToGBButton";
 import "./targetPage.css";
+import { Message } from "../../devtools";
 
 declare global {
   interface Window {
@@ -156,10 +157,7 @@ const VisualEditor: FC<{}> = () => {
   const [authToken] = useState(
     decodeURIComponent(params[AUTH_TOKEN_KEY] as string)
   );
-  const [apiKey, setApiKey] = useState<string | undefined>(
-    // load from session storage which persists across page reloads
-    window.sessionStorage.getItem("apikey") ?? undefined
-  );
+  const [apiKey, setApiKey] = useState<string | undefined>("");
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
   const [mode, setMode] = useState<ToolbarMode>("selection");
   const [variations, setVariations] = useState<VisualEditorVariation[]>([]);
@@ -374,15 +372,23 @@ const VisualEditor: FC<{}> = () => {
     [selector, addDomMutation]
   );
 
-  // authenticate and get api key
+  // load api key
   useEffect(() => {
-    if (!authToken || !authenticate) return;
-    const load = async () => {
-      const { visualEditorKey } = await authenticate(authToken);
-      setApiKey(visualEditorKey);
+    window.postMessage(
+      { type: "GB_REQUEST_API_CREDS" },
+      window.location.origin
+    );
+
+    const onMessage = (event: MessageEvent<Message>) => {
+      if (event.data.type === "GB_RESPONSE_API_CREDS") {
+        setApiKey(event.data.apiKey ?? "");
+      }
     };
-    load();
-  }, [authToken, authenticate]);
+
+    window.addEventListener("message", onMessage);
+
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
 
   // fetch visual changeset and experiment from api once we have credentials
   useEffect(() => {

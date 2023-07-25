@@ -5,23 +5,37 @@ import {
   API_HOST_PARAMS_KEY,
   AUTH_TOKEN_KEY,
 } from "./visual_editor/lib/constants";
+import { loadApiKey, saveApiKey } from "./visual_editor/lib/storage";
 
 // Pass along messages from content script -----> devtools, popup, etc.
 window.addEventListener("message", function (msg: MessageEvent<Message>) {
   const data = msg.data;
   const devtoolsMessages = ["GB_REFRESH", "GB_ERROR"];
 
-  if (devtoolsMessages.includes(data.type)) {
+  if ([...devtoolsMessages].includes(data.type)) {
     chrome.runtime.sendMessage(data);
+  }
+
+  if (data.type === "GB_OPEN_VISUAL_EDITOR") {
+    saveApiKey(data.data);
+  }
+
+  if (data.type === "GB_REQUEST_API_CREDS") {
+    loadApiKey().then((apiKey) => {
+      window.postMessage(
+        { type: "GB_RESPONSE_API_CREDS", apiKey },
+        window.location.origin
+      );
+    });
   }
 });
 
 // Pass along messages from devtools, popup ----> content script
 chrome.runtime.onMessage.addListener(async (msg: Message) => {
   const devtoolsMessages = ["GB_REQUEST_REFRESH", "GB_SET_OVERRIDES"];
-  const popupMessages = ["GB_ENABLE_VISUAL_EDITOR", "GB_DISABLE_VISUAL_EDITOR"];
+  const visualEditorMessages = ["GB_OPEN_VISUAL_EDITOR"];
 
-  if ([...devtoolsMessages, ...popupMessages].includes(msg.type)) {
+  if ([...devtoolsMessages, ...visualEditorMessages].includes(msg.type)) {
     window.postMessage(msg, "*");
   }
 });
@@ -41,8 +55,7 @@ const hasVisualEditorQueryParams = () => {
   return (
     !!urlParams.get(VISUAL_CHANGESET_ID_PARAMS_KEY) &&
     !!urlParams.get(EXPERIMENT_URL_PARAMS_KEY) &&
-    !!urlParams.get(API_HOST_PARAMS_KEY) &&
-    !!urlParams.get(AUTH_TOKEN_KEY)
+    !!urlParams.get(API_HOST_PARAMS_KEY)
   );
 };
 

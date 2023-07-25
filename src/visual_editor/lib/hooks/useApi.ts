@@ -100,9 +100,7 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
 
         return { visualEditorKey: json.visualEditorKey };
       } catch (e) {
-        setError(
-          `There was an error authenticating the Visual Editor. Try going back to GrowthBook and opening the Visual Again. If the problem persists please reach out to support. Error: ${e}`
-        );
+        setError(`There was an error. Try again, or contact support. ${e}`);
         return {};
       }
     },
