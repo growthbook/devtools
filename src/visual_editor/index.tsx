@@ -374,7 +374,7 @@ const VisualEditor: FC<{}> = () => {
       if (event.data.type === "GB_RESPONSE_API_CREDS") {
         if (!event.data.apiKey) {
           setApiKeyError(
-            "The Visual Editor was unable find its API key. Please try again or contact support."
+            "The Visual Editor was unable find its API key. Please try again or enter it manually through the chrome extension options."
           );
           return;
         }
