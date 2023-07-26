@@ -15,8 +15,12 @@ window.addEventListener("message", function (msg: MessageEvent<Message>) {
     chrome.runtime.sendMessage(data);
   }
 
-  if (data.type === "GB_OPEN_VISUAL_EDITOR") {
+  if (data.type === "GB_REQUEST_OPEN_VISUAL_EDITOR") {
     saveApiKey(data.data);
+    window.postMessage(
+      { type: "GB_RESPONSE_OPEN_VISUAL_EDITOR" },
+      window.location.origin
+    );
   }
 
   if (data.type === "GB_REQUEST_API_CREDS") {

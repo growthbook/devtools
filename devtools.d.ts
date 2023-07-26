@@ -30,14 +30,6 @@ export type ErrorMessage = {
   error: string;
 };
 
-type EnableVisualEditorMessage = {
-  type: "GB_ENABLE_VISUAL_EDITOR";
-};
-
-type DisableVisualEditorMessage = {
-  type: "GB_DISABLE_VISUAL_EDITOR";
-};
-
 type ApiCredsRequest = {
   type: "GB_REQUEST_API_CREDS";
 };
@@ -47,8 +39,13 @@ type ApiCredsResponse = {
   apiKey: string | null;
 };
 
-type OpenVisualEditorMessage = {
-  type: "GB_OPEN_VISUAL_EDITOR";
+type OpenVisualEditorRequestMessage = {
+  type: "GB_REQUEST_OPEN_VISUAL_EDITOR";
+  data: string;
+};
+
+type OpenVisualEditorResponseMessage = {
+  type: "GB_RESPONSE_OPEN_VISUAL_EDITOR";
   data: string;
 };
 
@@ -59,9 +56,8 @@ export type Message =
   | ErrorMessage
   | ApiCredsRequest
   | ApiCredsResponse
-  | EnableVisualEditorMessage
-  | DisableVisualEditorMessage
-  | OpenVisualEditorMessage;
+  | OpenVisualEditorRequestMessage
+  | OpenVisualEditorResponseMessage;
 
 export interface ApiCreds {
   apiKey: string;
