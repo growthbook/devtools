@@ -3,7 +3,6 @@ import {
   VISUAL_CHANGESET_ID_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
   API_HOST_PARAMS_KEY,
-  AUTH_TOKEN_KEY,
 } from "./visual_editor/lib/constants";
 import { loadApiKey, saveApiKey } from "./visual_editor/lib/storage";
 
@@ -33,9 +32,8 @@ window.addEventListener("message", function (msg: MessageEvent<Message>) {
 // Pass along messages from devtools, popup ----> content script
 chrome.runtime.onMessage.addListener(async (msg: Message) => {
   const devtoolsMessages = ["GB_REQUEST_REFRESH", "GB_SET_OVERRIDES"];
-  const visualEditorMessages = ["GB_OPEN_VISUAL_EDITOR"];
 
-  if ([...devtoolsMessages, ...visualEditorMessages].includes(msg.type)) {
+  if (devtoolsMessages.includes(msg.type)) {
     window.postMessage(msg, "*");
   }
 });

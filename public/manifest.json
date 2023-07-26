@@ -5,6 +5,10 @@
   "description": "GrowthBook's Visual Editor and SDK Debugger",
   "version": "0.3.0",
 
+  "options_ui": {
+    "page": "options.html"
+  },
+
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
