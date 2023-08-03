@@ -97,7 +97,6 @@ const AICopySuggestor: FC<{
           {/* top center */}
           <div
             className={clsx(
-              "gb-z-10",
               "-gb-top-2",
               "gb-bottom-0",
               "gb-inset-x-1/2",
@@ -109,7 +108,7 @@ const AICopySuggestor: FC<{
                 "gb-border-gb": tone,
               }
             )}
-            style={{ width: "1px", height: "14px" }}
+            style={{ width: "1px", height: "13px", zIndex: 30 }}
           ></div>
           {/* left arm */}
           <div
@@ -127,7 +126,7 @@ const AICopySuggestor: FC<{
                 "gb-border-gb": tone === "concise",
               }
             )}
-            style={{ width: "102px", top: "4px", left: "50px" }}
+            style={{ width: "33%", top: "4px", left: "17%" }}
           ></div>
           {/* center arm */}
           <div
@@ -143,7 +142,7 @@ const AICopySuggestor: FC<{
                 "gb-border-gb": tone === "energetic",
               }
             )}
-            style={{ width: "0px", top: "5px", left: "152px" }}
+            style={{ width: "0px", top: "4px", left: "50%" }}
           ></div>
           {/* right arm */}
           <div
@@ -161,7 +160,7 @@ const AICopySuggestor: FC<{
                 "gb-border-gb": tone === "humorous",
               }
             )}
-            style={{ width: "85px", top: "4px", left: "153px" }}
+            style={{ width: "33%", top: "4px", left: "50%" }}
           ></div>
         </div>
 

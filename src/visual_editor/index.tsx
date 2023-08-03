@@ -607,6 +607,7 @@ const VisualEditor: FC<{}> = () => {
             experimentUrl={experimentUrl}
             variationIndex={variationIndex}
             visualChangesetId={visualChangesetId}
+            hasAiEnabled={hasAiEnabled}
           />
         </div>
       </VisualEditorPane>
@@ -745,6 +746,7 @@ const VisualEditor: FC<{}> = () => {
             experimentUrl={experimentUrl}
             variationIndex={variationIndex}
             visualChangesetId={visualChangesetId}
+            hasAiEnabled={hasAiEnabled}
           />
         </div>
       </VisualEditorPane>
