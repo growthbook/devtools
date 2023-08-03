@@ -15,7 +15,7 @@ function getValidGrowthBookInstance(cb: (gb: GrowthBook) => void) {
       type: "GB_ERROR",
       error: "Requires minimum Javascript SDK version of 0.16.0",
     };
-    window.postMessage(msg, "*");
+    window.postMessage(msg, window.location.origin);
   } else {
     cb(window._growthbook);
   }
@@ -31,7 +31,7 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
       error:
         "Unable to locate GrowthBook SDK instance. Please ensure you are using either the Javascript or React SDK, and Dev Mode is enabled.",
     };
-    window.postMessage(msg, "*");
+    window.postMessage(msg, window.location.origin);
   }, 5000);
 
   document.addEventListener(
@@ -68,7 +68,7 @@ function syncToDevtools(gb: GrowthBook, force?: boolean) {
   const hash = JSON.stringify(msg);
   if (force || hash !== lastMsg) {
     lastMsg = hash;
-    window.postMessage(msg, "*");
+    window.postMessage(msg, window.location.origin);
   }
 }
 

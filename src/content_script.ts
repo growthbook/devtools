@@ -38,7 +38,7 @@ chrome.runtime.onMessage.addListener(async (msg: Message) => {
   const devtoolsMessages = ["GB_REQUEST_REFRESH", "GB_SET_OVERRIDES"];
 
   if (devtoolsMessages.includes(msg.type)) {
-    window.postMessage(msg, "*");
+    window.postMessage(msg, window.location.origin);
   }
 });
 
