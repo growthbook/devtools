@@ -1,21 +1,25 @@
 import clsx from "clsx";
 import React, { FC, ReactNode, useState } from "react";
 import { RxCross1, RxCaretDown } from "react-icons/rx";
+import IDrop from "./IDrop";
 
 const VisualEditorSection: FC<{
   children: ReactNode;
-  title: string;
+  title: string | ReactNode;
   onClose?: () => void;
   isExpanded?: boolean;
   isCollapsible?: boolean;
+  tooltip?: string;
 }> = ({
   children,
   title,
   onClose,
   isExpanded: _isExpanded = false,
   isCollapsible = false,
+  tooltip,
 }) => {
   const [isExpanded, setIsExpanded] = useState(_isExpanded);
+  const toggleExpanded = () => isCollapsible && setIsExpanded(!isExpanded);
   return (
     <>
       <div
@@ -28,8 +32,20 @@ const VisualEditorSection: FC<{
           }
         )}
       >
-        <div className="gb-flex">
-          {title}
+        <div className="gb-flex gb-items-center gb-relative">
+          <div
+            className={clsx({
+              "gb-cursor-pointer": isCollapsible,
+            })}
+            onClick={toggleExpanded}
+          >
+            {title}
+          </div>
+          {tooltip && (
+            <div className="gb-ml-2 gb-cursor-pointer" onClick={toggleExpanded}>
+              <IDrop tooltip={tooltip} />
+            </div>
+          )}
           {isCollapsible ? (
             <RxCaretDown
               className={clsx(
@@ -38,7 +54,7 @@ const VisualEditorSection: FC<{
                   "gb-rotate-180": !isExpanded,
                 }
               )}
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={toggleExpanded}
             />
           ) : null}
         </div>

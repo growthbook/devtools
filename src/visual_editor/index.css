@@ -6,10 +6,29 @@
   @apply gb-font-sans;
 }
 
+.gb-bg-dark {
+  @apply gb-bg-slate-800;
+}
+
 .gb-logo-bg {
   background: linear-gradient(135deg, #c111dd, #81d, #350e47);
   animation: gradient 5s ease infinite;
   background-size: 200% 200%;
+}
+
+.gb-border-gb {
+  border-color: #df5ef3;
+}
+
+.gb-ai-section-title {
+  background: linear-gradient(135deg, #f4c6fb, #df5ef3);
+  animation: gradient 5s ease infinite;
+  background-size: 200% 200%;
+  background-clip: text;
+}
+
+.gb-text-ai-label {
+  color: #df5ef3;
 }
 
 @keyframes gradient {

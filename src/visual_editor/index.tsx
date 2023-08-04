@@ -31,6 +31,7 @@ import {
   VARIATION_INDEX_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
   API_HOST_PARAMS_KEY,
+  AI_ENABLED_PARAMS_KEY,
 } from "./lib/constants";
 
 import Toolbar, { ToolbarMode } from "./Toolbar";
@@ -52,6 +53,8 @@ import CSSAttributeEditor from "./CSSAttributeEditor";
 import ReloadPageButton from "./ReloadPageButton";
 import CSPErrorText from "./CSPErrorText";
 import BackToGBButton from "./BackToGBButton";
+import AIEditorSection from "./AIEditorSection";
+import AICopySuggestor from "./AICopySuggestor";
 import "./targetPage.css";
 
 declare global {
@@ -133,9 +136,21 @@ const cleanUpParams = (params: qs.ParsedQuery) => {
         [VARIATION_INDEX_PARAMS_KEY]: undefined,
         [EXPERIMENT_URL_PARAMS_KEY]: undefined,
         [API_HOST_PARAMS_KEY]: undefined,
+        [AI_ENABLED_PARAMS_KEY]: undefined,
       },
     })
   );
+};
+
+const getHumanReadableText = (element: HTMLElement): string => {
+  // ignore when selected is simply wrapper of another element
+  if (element.innerHTML.startsWith("<")) return "";
+  // hard-limit on text length
+  if (element.innerHTML.length > 800) return "";
+  const parser = new DOMParser();
+  const parsed = parser.parseFromString(element.innerHTML, "text/html");
+  const text = parsed.body.textContent || "";
+  return text.trim();
 };
 
 const VisualEditor: FC<{}> = () => {
@@ -151,6 +166,10 @@ const VisualEditor: FC<{}> = () => {
   );
   const [apiHost] = useState(
     decodeURIComponent(params[API_HOST_PARAMS_KEY] as string)
+  );
+  const [hasAiEnabled] = useState(
+    decodeURIComponent((params[AI_ENABLED_PARAMS_KEY] as string) || "") ===
+      "true"
   );
   const [apiKey, setApiKey] = useState<string | undefined>("");
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
@@ -175,7 +194,7 @@ const VisualEditor: FC<{}> = () => {
   });
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
   const [apiKeyError, setApiKeyError] = useState("");
-  const { fetchVisualChangeset, updateVisualChangeset, cspError, error } =
+  const { fetchVisualChangeset, updateVisualChangeset, transformCopy, cspError, error } =
     useApi({ apiKey, apiHost });
   const [customJsError, setCustomJsError] = useState("");
 
@@ -250,6 +269,29 @@ const VisualEditor: FC<{}> = () => {
     () => (selectedElement ? getSelector(selectedElement) : ""),
     [selectedElement]
   );
+
+  const setHTML = useCallback(
+    (html: string) => {
+      addDomMutation({
+        action: "set",
+        attribute: "html",
+        value: html,
+        selector,
+      });
+    },
+    [selector, addDomMutation]
+  );
+
+  const undoHTMLMutations = useMemo(() => {
+    const htmlMutations = (selectedVariation?.domMutations ?? []).filter(
+      (mutation) =>
+        mutation.attribute === "html" && mutation.selector === selector
+    );
+    if (htmlMutations.length === 0) return;
+    return () => {
+      removeDomMutations(htmlMutations);
+    };
+  }, [selectedVariation, selector]);
 
   // the dom mutations that apply to the currently selected element
   const selectedElementMutations = useMemo(
@@ -362,6 +404,15 @@ const VisualEditor: FC<{}> = () => {
     },
     [selector, addDomMutation]
   );
+  
+  const humanReadableText = useMemo(() => {
+    if (!selectedElement) return "";
+    return getHumanReadableText(selectedElement);
+  }, [getHumanReadableText, selectedElement, selectedElement?.innerHTML]);
+
+  const selectedElementHasCopy = useMemo(() => {
+    return humanReadableText.length > 0;
+  }, [humanReadableText]);
 
   // load api key
   useEffect(() => {
@@ -523,6 +574,7 @@ const VisualEditor: FC<{}> = () => {
               experimentUrl={experimentUrl}
               variationIndex={variationIndex}
               visualChangesetId={visualChangesetId}
+              hasAiEnabled={hasAiEnabled}
             />
           ) : null}
         </div>
@@ -560,14 +612,21 @@ const VisualEditor: FC<{}> = () => {
 
             <VisualEditorSection title="Element Details">
               <ElementDetails
-                mutations={selectedVariation?.domMutations ?? []}
                 selector={selector}
                 element={selectedElement}
-                addMutation={addDomMutation}
-                addMutations={addDomMutations}
-                removeDomMutations={removeDomMutations}
+                setHTML={setHTML}
+                undoHTMLMutations={undoHTMLMutations}
               />
             </VisualEditorSection>
+
+            <AIEditorSection isVisible={hasAiEnabled && selectedElementHasCopy}>
+              <AICopySuggestor
+                parentElement={selectedElement}
+                setHTML={setHTML}
+                copy={humanReadableText}
+                transformCopy={transformCopy}
+              />
+            </AIEditorSection>
 
             <VisualEditorSection title="Attributes">
               <AttributeEdit element={selectedElement} onSave={setAttributes} />
@@ -655,6 +714,7 @@ const VisualEditor: FC<{}> = () => {
             experimentUrl={experimentUrl}
             variationIndex={variationIndex}
             visualChangesetId={visualChangesetId}
+            hasAiEnabled={hasAiEnabled}
           />
         </div>
       </VisualEditorPane>

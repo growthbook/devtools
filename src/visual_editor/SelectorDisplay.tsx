@@ -12,7 +12,7 @@ const SelectorDisplay: FC<{ selector: string | null }> = ({ selector }) => {
   return (
     <div
       className="gb-fixed gb-p-2 gb-bg-indigo-800 gb-text-white gb-text-xs"
-      style={{ top: bottom + 6, left: left - 4 }}
+      style={{ top: bottom + 8, left }}
     >
       {selector}
     </div>

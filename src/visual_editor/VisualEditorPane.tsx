@@ -5,7 +5,7 @@ const VisualEditorPane: FC<{
   style: CSSProperties;
 }> = ({ children, style }) => (
   <div
-    className="gb-rounded-xl gb-shadow-xl gb-z-max gb-w-80 gb-cursor-default gb-exp-creator gb-bg-slate-800"
+    className="gb-rounded-xl gb-shadow-xl gb-z-max gb-w-80 gb-cursor-default gb-exp-creator gb-bg-dark"
     style={style}
   >
     <div

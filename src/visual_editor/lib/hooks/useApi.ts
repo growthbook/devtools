@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { VisualEditorVariation } from "../..";
 import { ApiCreds } from "../../../../devtools";
 
+export type CopyMode = "energetic" | "concise" | "humorous";
+
 const genHeaders = (apiKey: string) => ({
   Authorization: `Basic ${btoa(apiKey + ":")}`,
   ["Content-Type"]: "application/json",
@@ -50,6 +52,11 @@ export type CSPError = {
   violatedDirective: string;
 } | null;
 
+export type TransformCopyFn = (
+  copy: string,
+  mode: CopyMode
+) => Promise<{ transformed?: string; dailyLimitReached?: boolean }>;
+
 type UseApiHook = (creds: Partial<ApiCreds>) => {
   fetchVisualChangeset?: (visualChangesetId: string) => Promise<{
     visualChangeset?: APIVisualChangeset;
@@ -59,6 +66,7 @@ type UseApiHook = (creds: Partial<ApiCreds>) => {
     visualChangesetId: string,
     payload: any
   ) => Promise<{ nModified?: number }>;
+  transformCopy: TransformCopyFn;
   error: string;
   cspError: CSPError;
 };
@@ -152,9 +160,49 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
     [apiHost, apiKey]
   );
 
+  const transformCopy = useCallback(
+    async (copy: string, mode: CopyMode) => {
+      if (!apiHost || !apiKey) return {};
+
+      try {
+        const response = await fetch(`${apiHost}/api/v1/transform-copy`, {
+          headers: genHeaders(apiKey),
+          method: "POST",
+          body: JSON.stringify({
+            copy,
+            mode,
+            metadata: {
+              url: window.location.href,
+              title: document.title,
+              description: document
+                .querySelector("meta[name='description']")
+                ?.getAttribute("content"),
+            },
+          }),
+        });
+
+        if (response.status !== 200) throw new Error(response.statusText);
+
+        const res = await response.json();
+
+        setError("");
+
+        return {
+          transformed: res.transformed,
+          dailyLimitReached: !!res.dailyLimitReached,
+        };
+      } catch (e) {
+        console.error("There was an error transforming the copy", e);
+      }
+      return {};
+    },
+    [apiHost, apiKey]
+  );
+
   return {
     fetchVisualChangeset,
     updateVisualChangeset,
+    transformCopy,
     error,
     cspError,
   };
