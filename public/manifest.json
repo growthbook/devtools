@@ -3,7 +3,7 @@
 
   "name": "GrowthBook DevTools",
   "description": "GrowthBook's Visual Editor and SDK Debugger",
-  "version": "0.3.0",
+  "version": "0.3.1",
 
   "options_ui": {
     "page": "options.html"

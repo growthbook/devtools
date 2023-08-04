@@ -1,11 +1,11 @@
 import React from "react";
 import * as ReactDOM from "react-dom/client";
-import { useApiKey } from "../utils/hooks";
+import useApiKey from "../visual_editor/lib/hooks/useApiKey";
 import ApiKeyForm from "./ApiKeyForm";
 import "./index.css";
 
 const Options = () => {
-  const { apiKey, apiHost, saveApiKey, saveApiHost, loading } = useApiKey();
+  const { apiKey, saveApiKey, loading } = useApiKey();
 
   const onSave = () => {
     window.close();
@@ -13,17 +13,11 @@ const Options = () => {
 
   return (
     <>
-      <div className="w-96 p-4">
+      <div className="gb-w-96 gb-p-4">
         {loading ? (
-          <div className="text-gray-500">Loading...</div>
+          <div className="gb-text-gray-500">Loading...</div>
         ) : (
-          <ApiKeyForm
-            apiKey={apiKey}
-            apiHost={apiHost}
-            saveApiKey={saveApiKey}
-            saveApiHost={saveApiHost}
-            onSave={onSave}
-          />
+          <ApiKeyForm apiKey={apiKey} saveApiKey={saveApiKey} onSave={onSave} />
         )}
       </div>
     </>

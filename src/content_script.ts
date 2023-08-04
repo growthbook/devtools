@@ -4,12 +4,7 @@ import {
   EXPERIMENT_URL_PARAMS_KEY,
   API_HOST_PARAMS_KEY,
 } from "./visual_editor/lib/constants";
-import {
-  loadApiHost,
-  loadApiKey,
-  saveApiHost,
-  saveApiKey,
-} from "./utils/storage";
+import { loadApiKey, saveApiKey } from "./visual_editor/lib/storage";
 
 // Pass along messages from content script -----> devtools, popup, etc.
 window.addEventListener("message", function (msg: MessageEvent<Message>) {
@@ -20,45 +15,30 @@ window.addEventListener("message", function (msg: MessageEvent<Message>) {
     chrome.runtime.sendMessage(data);
   }
 
+  if (data.type === "GB_REQUEST_OPEN_VISUAL_EDITOR") {
+    saveApiKey(data.data);
+    window.postMessage(
+      { type: "GB_RESPONSE_OPEN_VISUAL_EDITOR" },
+      window.location.origin
+    );
+  }
+
   if (data.type === "GB_REQUEST_API_CREDS") {
-    Promise.all([loadApiKey(), loadApiHost()]).then(([apiKey, apiHost]) => {
+    loadApiKey().then((apiKey) => {
       window.postMessage(
-        { type: "GB_RESPONSE_API_CREDS", apiKey, apiHost },
-        "*"
+        { type: "GB_RESPONSE_API_CREDS", apiKey },
+        window.location.origin
       );
     });
-  }
-
-  if (data.type === "GB_REQUEST_OPTIONS_URL") {
-    window.postMessage(
-      {
-        type: "GB_RESPONSE_OPTIONS_URL",
-        url: chrome.runtime.getURL("options.html"),
-      },
-      "*"
-    );
-  }
-
-  if (data.type === "GB_SAVE_API_CREDS") {
-    const { apiHost, apiKey } = data;
-    Promise.all([saveApiKey(apiKey), saveApiHost(apiHost)]).then(
-      ([apiKey, apiHost]) => {
-        window.postMessage(
-          { type: "GB_RESPONSE_API_CREDS", apiKey, apiHost },
-          "*"
-        );
-      }
-    );
   }
 });
 
 // Pass along messages from devtools, popup ----> content script
 chrome.runtime.onMessage.addListener(async (msg: Message) => {
   const devtoolsMessages = ["GB_REQUEST_REFRESH", "GB_SET_OVERRIDES"];
-  const popupMessages = ["GB_ENABLE_VISUAL_EDITOR", "GB_DISABLE_VISUAL_EDITOR"];
 
-  if ([...devtoolsMessages, ...popupMessages].includes(msg.type)) {
-    window.postMessage(msg, "*");
+  if (devtoolsMessages.includes(msg.type)) {
+    window.postMessage(msg, window.location.origin);
   }
 });
 
