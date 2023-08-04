@@ -1,9 +1,9 @@
 # GrowthBook DevTools
 
-Home of:
+Home of the:
 
--   our Chrome DevTools extension that interfaces with the GrowthBook [Javascript](https://docs.growthbook.io/lib/js) and [React](https://docs.growthbook.io/lib/react) SDKs.
--   the [Visual Editor](https://docs.growthbook.io/app/visual), used to create and edit variations for visual experiments.
+-   Chrome DevTools extension that interfaces with the GrowthBook [Javascript](https://docs.growthbook.io/lib/js) and [React](https://docs.growthbook.io/lib/react) SDKs.
+-   [Visual Editor](https://docs.growthbook.io/app/visual), used to create and edit variations for visual experiments.
 
 DevTools Features
 
@@ -37,12 +37,12 @@ To release a new version of the extension to the Chrome Web Store:
 
 ## Developing the Visual Editor
 
-To run the Visual Editor locally and to develop and make changes to it:
+To run the Visual Editor locally and to be able to develop it:
 
 1. Follow steps 1 - 3 in the above 'Build and Release' section to get Chrome Extension loaded locally in your browser.
-2. Log into the GrowthBook web app
-3. Create or navigate to a Visual Experiment
-4. Once created, click the CTA for 'Open Visual Editor'
+2. Log into the GrowthBook web app.
+3. Create or navigate to an Experiment.
+4. Once created, click the CTA for 'Open Visual Editor'.
    i. If the experiment is new, it will ask you for a URL. Enter the URL of the site you wish to edit.
 5. When running a dev version of the Chrome Extension, the GB app will give you a warning that it does not detect the editor. This is okay - Click 'Proceed anyway' to move further.
 6. Viola! You should see the Visual Editor load.
