@@ -12,13 +12,13 @@ import React, {
 } from "react";
 import * as ReactDOM from "react-dom/client";
 
+import { Message } from "../../devtools";
 import {
   toggleSelectionMode,
   onSelectionModeUpdate,
 } from "./lib/selectionMode";
 import getSelector from "./lib/getSelector";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
-import useMessage from "./lib/hooks/useMessage";
 import useApi, {
   APIDomMutation,
   APIExperiment,
@@ -34,7 +34,6 @@ import {
   AI_ENABLED_PARAMS_KEY,
 } from "./lib/constants";
 
-import { ApiCreds } from "../../devtools";
 import Toolbar, { ToolbarMode } from "./Toolbar";
 import ElementDetails from "./ElementDetails";
 import SelectorDisplay from "./SelectorDisplay";
@@ -49,7 +48,6 @@ import DOMMutationList from "./DOMMutationList";
 import VariationSelector from "./VariationSelector";
 import VisualEditorHeader from "./VisualEditorHeader";
 import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
-import SetApiCredsForm from "./SetApiCredsForm";
 import CustomJSEditor from "./CustomJSEditor";
 import CSSAttributeEditor from "./CSSAttributeEditor";
 import ReloadPageButton from "./ReloadPageButton";
@@ -166,13 +164,14 @@ const VisualEditor: FC<{}> = () => {
   const [experimentUrl] = useState(
     decodeURIComponent(params[EXPERIMENT_URL_PARAMS_KEY] as string)
   );
-  const [apiHostHint] = useState(
+  const [apiHost] = useState(
     decodeURIComponent(params[API_HOST_PARAMS_KEY] as string)
   );
   const [hasAiEnabled] = useState(
     decodeURIComponent((params[AI_ENABLED_PARAMS_KEY] as string) || "") ===
       "true"
   );
+  const [apiKey, setApiKey] = useState<string | undefined>("");
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
   const [mode, setMode] = useState<ToolbarMode>("selection");
   const [variations, setVariations] = useState<VisualEditorVariation[]>([]);
@@ -194,15 +193,9 @@ const VisualEditor: FC<{}> = () => {
     rightAligned: true,
   });
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
-  const [apiCreds, setApiCreds] = useState<Partial<ApiCreds>>({});
-  const {
-    fetchVisualChangeset,
-    updateVisualChangeset,
-    cspError,
-    transformCopy,
-    error,
-  } = useApi(apiCreds);
-  const [showApiCredsAlert, setShowApiCredsAlert] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState("");
+  const { fetchVisualChangeset, updateVisualChangeset, transformCopy, cspError, error } =
+    useApi({ apiKey, apiHost });
   const [customJsError, setCustomJsError] = useState("");
 
   const forceUpdate = debounce(_forceUpdate, 100);
@@ -411,18 +404,7 @@ const VisualEditor: FC<{}> = () => {
     },
     [selector, addDomMutation]
   );
-
-  const saveApiCreds = useCallback(({ apiKey, apiHost }: ApiCreds) => {
-    window.postMessage(
-      {
-        type: "GB_SAVE_API_CREDS",
-        apiHost,
-        apiKey,
-      },
-      "*"
-    );
-  }, []);
-
+  
   const humanReadableText = useMemo(() => {
     if (!selectedElement) return "";
     return getHumanReadableText(selectedElement);
@@ -432,37 +414,32 @@ const VisualEditor: FC<{}> = () => {
     return humanReadableText.length > 0;
   }, [humanReadableText]);
 
-  // get ahold of api credentials on load. requires messaging the background script
-  useMessage({
-    messageHandler: (message) => {
-      const hasVisualEditorParams = Boolean(
-        visualChangesetId && variationIndex
-      );
+  // load api key
+  useEffect(() => {
+    window.postMessage(
+      { type: "GB_REQUEST_API_CREDS" },
+      window.location.origin
+    );
 
-      if (message.type !== "GB_RESPONSE_API_CREDS") return;
-
-      setShowApiCredsAlert(
-        hasVisualEditorParams && (!message.apiKey || !message.apiHost)
-      );
-
-      if (
-        message.type === "GB_RESPONSE_API_CREDS" &&
-        message.apiKey &&
-        message.apiHost
-      ) {
-        setApiCreds({
-          apiKey: message.apiKey,
-          apiHost: message.apiHost,
-        });
+    const onMessage = (event: MessageEvent<Message>) => {
+      if (event.data.type === "GB_RESPONSE_API_CREDS") {
+        if (!event.data.apiKey) {
+          setApiKeyError(
+            "The Visual Editor was unable find its API key. Please try again or enter it manually through the chrome extension options."
+          );
+          return;
+        }
+        setApiKey(event.data.apiKey);
       }
-    },
-    outgoingMessage: { type: "GB_REQUEST_API_CREDS" },
-  });
+    };
+
+    window.addEventListener("message", onMessage);
+
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
 
   // fetch visual changeset and experiment from api once we have credentials
   useEffect(() => {
-    const { apiHost, apiKey } = apiCreds;
-
     if (!apiHost || !apiKey || !fetchVisualChangeset || !visualChangesetId)
       return;
 
@@ -488,7 +465,7 @@ const VisualEditor: FC<{}> = () => {
     };
 
     load();
-  }, [apiCreds, visualChangesetId, fetchVisualChangeset]);
+  }, [apiKey, visualChangesetId, fetchVisualChangeset]);
 
   // handle mode selection
   useEffect(() => {
@@ -577,38 +554,29 @@ const VisualEditor: FC<{}> = () => {
       "";
   }, [selectedVariation?.js]);
 
-  if (showApiCredsAlert || error) {
-    return (
-      <SetApiCredsForm
-        appHost={experimentUrl.substring(
-          0,
-          experimentUrl.indexOf("/experiment")
-        )}
-        apiHost={apiCreds.apiHost || apiHostHint}
-        apiKey={apiCreds.apiKey}
-        saveApiCreds={saveApiCreds}
-        error={error}
-      />
-    );
-  }
-
-  if (cspError) {
+  if (error || cspError || apiKeyError) {
     return (
       <VisualEditorPane style={parentStyles}>
         <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
-        <CSPErrorText cspError={cspError} />
+        {error || apiKeyError ? (
+          <div className="gb-p-4 gb-text-red-400">{error || apiKeyError}</div>
+        ) : (
+          <CSPErrorText cspError={cspError} />
+        )}
         <div className="gb-m-4 gb-text-center">
           <BackToGBButton experimentUrl={experimentUrl}>
             Back to GrowthBook
           </BackToGBButton>
-          <ReloadPageButton
-            apiCreds={apiCreds}
-            params={params}
-            experimentUrl={experimentUrl}
-            variationIndex={variationIndex}
-            visualChangesetId={visualChangesetId}
-            hasAiEnabled={hasAiEnabled}
-          />
+          {apiHost && apiKey ? (
+            <ReloadPageButton
+              apiCreds={{ apiHost, apiKey }}
+              params={params}
+              experimentUrl={experimentUrl}
+              variationIndex={variationIndex}
+              visualChangesetId={visualChangesetId}
+              hasAiEnabled={hasAiEnabled}
+            />
+          ) : null}
         </div>
       </VisualEditorPane>
     );
@@ -741,7 +709,7 @@ const VisualEditor: FC<{}> = () => {
             Done Editing
           </BackToGBButton>
           <ReloadPageButton
-            apiCreds={apiCreds}
+            apiCreds={{ apiHost, apiKey }}
             params={params}
             experimentUrl={experimentUrl}
             variationIndex={variationIndex}
