@@ -1,3 +1,4 @@
+import { VisualChangesetApiResponse } from "../devtools";
 import { loadApiKey } from "./visual_editor/lib/storage";
 
 const genHeaders = (apiKey: string) => ({
@@ -8,7 +9,10 @@ const genHeaders = (apiKey: string) => ({
 const fetchVisualChangeset = async (
   apiHost: string,
   visualChangesetId: string
-) => {
+): Promise<
+  | VisualChangesetApiResponse
+  | { visualChangeset: null; experiment: null; error: string }
+> => {
   const apiKey = await loadApiKey();
 
   try {
@@ -28,9 +32,10 @@ const fetchVisualChangeset = async (
     return {
       visualChangeset,
       experiment,
+      error: null,
     };
   } catch (e) {
-    return { error: e };
+    return { visualChangeset: null, experiment: null, error: `${e}` };
   }
 };
 
@@ -41,13 +46,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const { apiHost, visualChangesetId } = data;
 
     fetchVisualChangeset(apiHost, visualChangesetId).then((res) => {
-      // check that sender origin matches editor URL origin
-      // TODO ensure works reasonably http ---> https redirects
-      if (!res.visualChangeset?.editorUrl.startsWith(sender.origin)) {
+      if (res.error) {
+        sendResponse({ error: res.error });
+        return;
+      }
+      // security check
+      if (
+        !sender.origin ||
+        !res.visualChangeset?.editorUrl.startsWith(sender.origin)
+      ) {
         sendResponse({ error: "Invalid origin" });
         return;
       }
-
       sendResponse(res);
     });
 
