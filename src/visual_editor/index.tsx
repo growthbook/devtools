@@ -194,8 +194,13 @@ const VisualEditor: FC<{}> = () => {
   });
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
   const [apiKeyError, setApiKeyError] = useState("");
-  const { fetchVisualChangeset, updateVisualChangeset, transformCopy, cspError, error } =
-    useApi({ apiKey, apiHost });
+  const {
+    fetchVisualChangeset,
+    updateVisualChangeset,
+    transformCopy,
+    cspError,
+    error,
+  } = useApi({ apiKey, apiHost });
   const [customJsError, setCustomJsError] = useState("");
 
   const forceUpdate = debounce(_forceUpdate, 100);
@@ -404,7 +409,7 @@ const VisualEditor: FC<{}> = () => {
     },
     [selector, addDomMutation]
   );
-  
+
   const humanReadableText = useMemo(() => {
     if (!selectedElement) return "";
     return getHumanReadableText(selectedElement);
@@ -414,40 +419,13 @@ const VisualEditor: FC<{}> = () => {
     return humanReadableText.length > 0;
   }, [humanReadableText]);
 
-  // load api key
-  useEffect(() => {
-    window.postMessage(
-      { type: "GB_REQUEST_API_CREDS" },
-      window.location.origin
-    );
-
-    const onMessage = (event: MessageEvent<Message>) => {
-      if (event.data.type === "GB_RESPONSE_API_CREDS") {
-        if (!event.data.apiKey) {
-          setApiKeyError(
-            "The Visual Editor was unable find its API key. Please try again or enter it manually through the chrome extension options."
-          );
-          return;
-        }
-        setApiKey(event.data.apiKey);
-      }
-    };
-
-    window.addEventListener("message", onMessage);
-
-    return () => window.removeEventListener("message", onMessage);
-  }, []);
-
-  // fetch visual changeset and experiment from api once we have credentials
-  useEffect(() => {
-    if (!apiHost || !apiKey || !fetchVisualChangeset || !visualChangesetId)
-      return;
-
-    const load = async () => {
-      const { visualChangeset, experiment } = await fetchVisualChangeset(
-        visualChangesetId
-      );
-
+  const loadVisualChangeset = useCallback(
+    async ({ visualChangeset, experiment }: any) => {
+      console.log("are we ....loaaaaaadinggggggg????", {
+        visualChangeset,
+        experiment,
+        yes: !visualChangeset || !experiment,
+      });
       // Visual editor will not load if we cannot load visual changeset
       if (!visualChangeset || !experiment) return;
 
@@ -462,10 +440,28 @@ const VisualEditor: FC<{}> = () => {
       cleanUpParams(params);
 
       setIsEnabled(true);
+    },
+    [setVariations, setIsEnabled, cleanUpParams]
+  );
+
+  // load visual changeset
+  useEffect(() => {
+    window.postMessage(
+      { type: "GB_REQUEST_LOAD_VISUAL_CHANGESET" },
+      window.location.origin
+    );
+
+    const onMessage = (event: MessageEvent<Message>) => {
+      console.log("DEBUG onMessage", event.data);
+      if (event.data.type === "GB_RESPONSE_LOAD_VISUAL_CHANGESET") {
+        loadVisualChangeset(event.data.data);
+      }
     };
 
-    load();
-  }, [apiKey, visualChangesetId, fetchVisualChangeset]);
+    window.addEventListener("message", onMessage);
+
+    return () => window.removeEventListener("message", onMessage);
+  }, [loadVisualChangeset]);
 
   // handle mode selection
   useEffect(() => {

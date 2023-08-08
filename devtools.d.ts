@@ -49,6 +49,16 @@ type OpenVisualEditorResponseMessage = {
   data: string;
 };
 
+type LoadVisualChangesetRequestMessage = {
+  type: "GB_REQUEST_LOAD_VISUAL_CHANGESET";
+  data: string;
+};
+
+type LoadVisualChangesetResponseMessage = {
+  type: "GB_RESPONSE_LOAD_VISUAL_CHANGESET";
+  data: string;
+};
+
 export type Message =
   | RequestRefreshMessage
   | SetOverridesMessage
@@ -57,7 +67,9 @@ export type Message =
   | ApiCredsRequest
   | ApiCredsResponse
   | OpenVisualEditorRequestMessage
-  | OpenVisualEditorResponseMessage;
+  | OpenVisualEditorResponseMessage
+  | LoadVisualChangesetRequestMessage
+  | LoadVisualChangesetResponseMessage;
 
 export interface ApiCreds {
   apiKey: string;
