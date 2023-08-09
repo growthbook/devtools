@@ -155,9 +155,6 @@ export type Message =
   | TransformCopyRequestMessage
   | TransformCopyResponseMessage;
 
-/**
- * Messages sent to background script
- */
 export type BGLoadVisualChangsetMessage = {
   type: "BG_LOAD_VISUAL_CHANGESET";
   data: {
@@ -184,6 +181,7 @@ export type BGTransformCopyMessage = {
   };
 };
 
+// Messages sent to background script
 export type BGMessage =
   | BGLoadVisualChangsetMessage
   | BGUpdateVisualChangsetMessage

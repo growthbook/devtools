@@ -42,9 +42,11 @@ const fetchVisualChangeset = async ({
       }
     );
 
-    if (response.status !== 200) throw new Error(response.statusText);
-
     const res = await response.json();
+
+    if (response.status !== 200)
+      throw new Error(res.message ?? response.statusText);
+
     const { visualChangeset, experiment } = res;
     return {
       visualChangeset,
@@ -79,18 +81,16 @@ const updateVisualChangeset = async ({
       }
     );
 
-    const { nModified } = await resp.json();
+    const res = await resp.json();
 
-    if (resp.status !== 200) {
-      return { visualChangeset: null, error: resp.statusText };
-    }
+    if (resp.status !== 200) throw new Error(res.message ?? resp.statusText);
 
     return {
-      nModified,
+      nModified: res.nModified,
       error: null,
     };
   } catch (e) {
-    return { error: `${e}` };
+    return { nModified: null, error: `${e}` };
   }
 };
 
@@ -124,9 +124,10 @@ const transformCopy = async ({
       }),
     });
 
-    if (response.status !== 200) throw new Error(response.statusText);
-
     const res = await response.json();
+
+    if (response.status !== 200)
+      throw new Error(res.message ?? response.statusText);
 
     return {
       transformed: res.transformed,
