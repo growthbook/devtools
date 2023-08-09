@@ -129,6 +129,7 @@ type TransformCopyRequestMessage = {
   type: "GB_REQUEST_TRANSFORM_COPY";
   data: {
     apiHost: string;
+    visualChangesetId: string;
     copy: string;
     mode: CopyMode;
   };
@@ -175,6 +176,7 @@ export type BGTransformCopyMessage = {
   type: "BG_TRANSFORM_COPY";
   data: {
     apiHost: string;
+    visualChangesetId: string;
     copy: string;
     mode: CopyMode;
   };

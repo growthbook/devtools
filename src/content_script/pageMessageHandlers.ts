@@ -11,6 +11,7 @@ import {
   BGLoadVisualChangsetMessage,
   UpdateVisualChangesetResponseMessage,
   LoadVisualChangesetResponseMessage,
+  TransformCopyResponseMessage,
 } from "../../devtools";
 import {
   FetchVisualChangesetPayload,
@@ -74,13 +75,10 @@ export const visualEditorLoadChangesetRequest = (
       },
     },
     (resp) => {
-      const { visualChangeset, experiment, error } = resp;
       const message: LoadVisualChangesetResponseMessage = {
         type: "GB_RESPONSE_LOAD_VISUAL_CHANGESET",
         data: {
-          visualChangeset,
-          experiment,
-          error,
+          ...resp,
         },
       };
 
@@ -108,8 +106,7 @@ export const visualEditorUpdateChangesetRequest = (
       const message: UpdateVisualChangesetResponseMessage = {
         type: "GB_RESPONSE_UPDATE_VISUAL_CHANGESET",
         data: {
-          visualChangeset: resp.visualChangeset,
-          error: resp.error,
+          ...resp,
         },
       };
 
@@ -125,23 +122,17 @@ export const visualEditorTransformCopyRequest = (
     {
       type: "BG_TRANSFORM_COPY",
       data: {
-        apiHost: msg.data.apiHost,
-        copy: msg.data.copy,
-        mode: msg.data.mode,
+        ...msg.data,
       },
     },
     (resp) => {
-      window.postMessage(
-        {
-          type: "GB_RESPONSE_TRANSFORM_COPY",
-          data: {
-            transformed: resp.transformed,
-            dailyLimitReached: resp.dailyLimitReached,
-            error: resp.error,
-          },
+      const message: TransformCopyResponseMessage = {
+        type: "GB_RESPONSE_TRANSFORM_COPY",
+        data: {
+          ...resp,
         },
-        window.location.origin
-      );
+      };
+      window.postMessage(message, window.location.origin);
     }
   );
 };

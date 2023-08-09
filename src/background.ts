@@ -107,15 +107,31 @@ const updateVisualChangeset = async ({
   }
 };
 
+export type TransformCopyPayload =
+  | {
+      visualChangeset: APIVisualChangeset;
+      transformed: string;
+      dailyLimitReached: boolean;
+      error: null;
+    }
+  | {
+      visualChangeset: null;
+      transformed: null;
+      dailyLimitReached: null;
+      error: string;
+    };
+
 const transformCopy = async ({
   apiHost,
+  visualChangesetId,
   copy,
   mode,
 }: {
   apiHost: string;
+  visualChangesetId: string;
   copy: string;
   mode: CopyMode;
-}) => {
+}): Promise<TransformCopyPayload> => {
   try {
     const apiKey = await loadApiKey();
 
@@ -125,15 +141,9 @@ const transformCopy = async ({
       headers: genHeaders(apiKey),
       method: "POST",
       body: JSON.stringify({
+        visualChangesetId,
         copy,
         mode,
-        metadata: {
-          url: window.location.href,
-          title: document.title,
-          description: document
-            .querySelector("meta[name='description']")
-            ?.getAttribute("content"),
-        },
       }),
     });
 
@@ -143,12 +153,14 @@ const transformCopy = async ({
       throw new Error(res.message ?? response.statusText);
 
     return {
+      visualChangeset: res.visualChangeset,
       transformed: res.transformed,
       dailyLimitReached: !!res.dailyLimitReached,
       error: null,
     };
   } catch (e) {
     return {
+      visualChangeset: null,
       transformed: null,
       dailyLimitReached: null,
       error: `There was an error transforming the copy: ${e}`,

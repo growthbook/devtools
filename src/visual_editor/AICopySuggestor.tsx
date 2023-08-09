@@ -9,46 +9,44 @@ const AICopySuggestor: FC<{
   parentElement: Element;
   setHTML: (html: string) => void;
   transformCopy: TransformCopyFn;
+  transformedCopy: string | null;
   copy: string;
-}> = ({ parentElement, setHTML, transformCopy, copy: _copy }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<"limit-reached" | "unknown" | null>(null);
+  loading: boolean;
+}> = ({
+  loading,
+  parentElement,
+  setHTML,
+  copy: _copy,
+  transformCopy,
+  transformedCopy,
+}) => {
   const [tone, setTone] = useState<"concise" | "energetic" | "humorous" | null>(
     null
   );
   const [generatedCopy, setGeneratedCopy] = useState<string>("");
   const [copy, setCopy] = useState(_copy);
 
-  useEffect(() => setCopy(_copy), [_copy]);
+  // the existing human-readble copy from selected element
+  useEffect(() => {
+    setCopy(_copy);
+  }, [_copy]);
+
+  // the generated copy from the AI
+  useEffect(() => {
+    setGeneratedCopy(transformedCopy ?? "");
+  }, [transformedCopy]);
 
   const generateCopy = useCallback(
     (mode: CopyMode) => async (e: MouseEvent<any>) => {
       e.stopPropagation();
 
-      if (isLoading) return;
-
-      setError(null);
-      setIsLoading(true);
+      if (loading) return;
 
       setGeneratedCopy("");
 
-      // @ts-expect-error TODO fix
-      const { transformed: newCopy, dailyLimitReached } = await transformCopy(
-        parentElement.innerHTML,
-        mode as CopyMode
-      );
-
-      if (dailyLimitReached) {
-        setError("limit-reached");
-      } else if (!newCopy) {
-        setError("unknown");
-      } else {
-        setGeneratedCopy(newCopy);
-      }
-
-      setIsLoading(false);
+      transformCopy(parentElement.innerHTML, mode);
     },
-    [parentElement, setIsLoading, transformCopy, setGeneratedCopy]
+    [parentElement, loading, transformCopy, setGeneratedCopy]
   );
 
   const reset = useCallback(() => {
@@ -168,7 +166,7 @@ const AICopySuggestor: FC<{
 
         <div
           className="gb-flex gb-mr-4 gb-mt-2 gb-text-sm gb-h-7 gb-z-20"
-          onMouseOut={() => !isLoading && setTone(null)}
+          onMouseOut={() => !loading && setTone(null)}
         >
           <div
             className={clsx(
@@ -195,7 +193,7 @@ const AICopySuggestor: FC<{
               )}
               style={{ margin: "1px" }}
               onClick={generateCopy("concise")}
-              onMouseOver={() => !isLoading && setTone("concise")}
+              onMouseOver={() => !loading && setTone("concise")}
             >
               concise
             </button>
@@ -220,7 +218,7 @@ const AICopySuggestor: FC<{
                 "gb-items-center"
               )}
               style={{ margin: "1px" }}
-              onMouseOver={() => !isLoading && setTone("energetic")}
+              onMouseOver={() => !loading && setTone("energetic")}
               onClick={generateCopy("energetic")}
             >
               energetic
@@ -241,7 +239,7 @@ const AICopySuggestor: FC<{
             <button
               className="gb-bg-slate-900 gb-flex-1 gb-flex gb-justify-center gb-items-center gb-rounded-r"
               style={{ margin: "1px" }}
-              onMouseOver={() => !isLoading && setTone("humorous")}
+              onMouseOver={() => !loading && setTone("humorous")}
               onClick={generateCopy("humorous")}
             >
               humorous
@@ -250,21 +248,13 @@ const AICopySuggestor: FC<{
         </div>
       </div>
 
-      {error && (
-        <div className="gb-text-xs gb-text-red-400 gb-mt-3">
-          {error === "limit-reached"
-            ? "Your daily limit for generative content has been reached."
-            : "An unknown error occurred."}
-        </div>
-      )}
-
       <div className="gb-overflow-hidden">
         <div
           className={clsx(
             "gb-flex gb-justify-center gb-items-center gb-transition-all",
             {
-              "-gb-mt-32": !isLoading,
-              "gb-mt-4": isLoading,
+              "-gb-mt-32": !loading,
+              "gb-mt-4": loading,
             }
           )}
         >

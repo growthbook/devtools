@@ -162,6 +162,7 @@ const VisualEditor: FC<{}> = () => {
     hasAiEnabled,
   });
   const [customJsError, setCustomJsError] = useState("");
+  const errorContainerRef = useRef<HTMLDivElement | null>(null);
 
   const forceUpdate = debounce(_forceUpdate, 100);
   const mutateRevert = useRef<(() => void) | null>(null);
@@ -474,6 +475,14 @@ const VisualEditor: FC<{}> = () => {
       "";
   }, [selectedVariation?.js]);
 
+  useEffect(() => {
+    if (!error && !cspError && !errorContainerRef.current) return;
+    errorContainerRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [error, cspError, errorContainerRef.current]);
+
   if (!isVisualEditorEnabled) return null;
 
   return (
@@ -513,10 +522,12 @@ const VisualEditor: FC<{}> = () => {
 
             <AIEditorSection isVisible={hasAiEnabled && selectedElementHasCopy}>
               <AICopySuggestor
+                loading={loading}
                 parentElement={selectedElement}
                 setHTML={setHTML}
                 copy={humanReadableText}
                 transformCopy={transformCopy}
+                transformedCopy={transformedCopy}
               />
             </AIEditorSection>
 
@@ -611,13 +622,13 @@ const VisualEditor: FC<{}> = () => {
         </div>
 
         {error || cspError ? (
-          <>
+          <div ref={errorContainerRef}>
             {error ? (
               <div className="gb-p-4 gb-text-red-400">{error}</div>
             ) : (
               <CSPErrorText cspError={cspError} />
             )}
-          </>
+          </div>
         ) : null}
       </VisualEditorPane>
 

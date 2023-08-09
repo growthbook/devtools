@@ -69,23 +69,24 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
             setVisualChangeset(msg.data.visualChangeset);
             setExperiment(msg.data.experiment);
           }
+          setLoading(false);
           break;
         case "GB_RESPONSE_UPDATE_VISUAL_CHANGESET":
           // TODO security check
           if (msg.data.error) setError(msg.data.error);
           else setVisualChangeset(msg.data.visualChangeset);
+          setLoading(false);
           break;
         case "GB_RESPONSE_TRANSFORM_COPY":
           // TODO security check
           if (msg.data.error) setError(msg.data.error);
           if (msg.data.dailyLimitReached) setError("Daily limit reached");
           if (msg.data.transformed) setTransformedCopy(msg.data.transformed);
+          setLoading(false);
           break;
         default:
           break;
       }
-
-      setLoading(false);
     };
 
     window.addEventListener("message", messageHandler);
@@ -109,6 +110,9 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
 
   const updateVisualChangeset = useCallback(
     async (variations: VisualEditorVariation[]) => {
+      setLoading(true);
+      setError("");
+
       const updatePayload: Partial<APIVisualChangeset> = {
         visualChanges: variations.map((v) => ({
           variation: v.variationId,
@@ -118,8 +122,6 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
           description: v.description,
         })),
       };
-
-      setLoading(true);
 
       const updateVisualChangesetMessage: UpdateVisualChangesetRequestMessage =
         {
@@ -139,11 +141,13 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
   const transformCopy = useCallback(
     async (copy: string, mode: CopyMode) => {
       setLoading(true);
+      setError("");
 
       const transformCopyMessage: TransformCopyRequestMessage = {
         type: "GB_REQUEST_TRANSFORM_COPY",
         data: {
           apiHost,
+          visualChangesetId,
           copy,
           mode,
         },
