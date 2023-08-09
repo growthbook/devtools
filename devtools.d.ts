@@ -48,18 +48,6 @@ export interface APIVisualChangeset {
 export type APIVisualChange = APIVisualChangeset["visualChanges"][number];
 export type APIDomMutation = APIVisualChange["domMutations"][number];
 
-export type ApiLoadVisualChangesetResponse =
-  | {
-      visualChangeset: APIVisualChangeset;
-      experiment: APIExperiment;
-      error: null;
-    }
-  | {
-      visualChangeset: null;
-      experiment: null;
-      error: string;
-    };
-
 export interface ApiUpdateVisualChangesetResponse {
   nModified: number;
   error: string | null;

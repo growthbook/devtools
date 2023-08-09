@@ -1,8 +1,9 @@
 import clsx from "clsx";
 import React, { FC, MouseEvent, useCallback, useEffect, useState } from "react";
-import { CopyMode, TransformCopyFn } from "./lib/hooks/useApi";
 import TextareaAutosize from "react-textarea-autosize";
 import { BiLoaderCircle } from "react-icons/bi";
+import { CopyMode } from "../../devtools";
+import { TransformCopyFn } from "./lib/hooks/useApi";
 
 const AICopySuggestor: FC<{
   parentElement: Element;
@@ -21,7 +22,7 @@ const AICopySuggestor: FC<{
   useEffect(() => setCopy(_copy), [_copy]);
 
   const generateCopy = useCallback(
-    (mode: string) => async (e: MouseEvent<any>) => {
+    (mode: CopyMode) => async (e: MouseEvent<any>) => {
       e.stopPropagation();
 
       if (isLoading) return;
@@ -31,6 +32,7 @@ const AICopySuggestor: FC<{
 
       setGeneratedCopy("");
 
+      // @ts-expect-error TODO fix
       const { transformed: newCopy, dailyLimitReached } = await transformCopy(
         parentElement.innerHTML,
         mode as CopyMode

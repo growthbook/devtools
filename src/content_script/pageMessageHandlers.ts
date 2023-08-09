@@ -1,17 +1,17 @@
 import {
-  BGFetchVisualChangsetMessage,
   BGUpdateVisualChangsetMessage,
   ErrorMessage,
   LoadVisualChangesetRequestMessage,
   OpenVisualEditorRequestMessage,
   RefreshMessage,
   UpdateVisualChangesetRequestMessage,
-  ApiLoadVisualChangesetResponse,
   ApiUpdateVisualChangesetResponse,
   TransformCopyRequestMessage,
   BGTransformCopyMessage,
   ApiTransformCopyResponse,
+  BGLoadVisualChangsetMessage,
 } from "../../devtools";
+import { FetchVisualChangesetPayload } from "../background";
 import {
   VISUAL_CHANGESET_ID_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
@@ -59,8 +59,8 @@ export const visualEditorLoadChangesetRequest = (
   msg: LoadVisualChangesetRequestMessage
 ) => {
   chrome.runtime.sendMessage<
-    BGFetchVisualChangsetMessage,
-    ApiLoadVisualChangesetResponse
+    BGLoadVisualChangsetMessage,
+    FetchVisualChangesetPayload
   >(
     {
       type: "BG_LOAD_VISUAL_CHANGESET",
@@ -132,7 +132,7 @@ export const visualEditorTransformCopyRequest = (
         {
           type: "GB_RESPONSE_TRANSFORM_COPY",
           data: {
-            copy: resp.copy,
+            transformed: resp.transformed,
             dailyLimitReached: resp.dailyLimitReached,
             error: resp.error,
           },

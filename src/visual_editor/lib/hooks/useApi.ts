@@ -19,6 +19,8 @@ export type CSPError = {
   violatedDirective: string;
 } | null;
 
+export type TransformCopyFn = (copy: string, mode: CopyMode) => void;
+
 type UseApiHook = (args: {
   apiHost: string;
   visualChangesetId: string;
@@ -53,43 +55,39 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
   });
 
   useEffect(() => {
+    if (!apiHost || !visualChangesetId) return;
+
     const messageHandler = (event: MessageEvent<Message>) => {
       const msg = event.data;
+
       switch (msg.type) {
         case "GB_RESPONSE_LOAD_VISUAL_CHANGESET":
-          if (msg.data.error) {
-            setError(msg.data.error);
-          }
+          if (msg.data.error) setError(msg.data.error);
           if (msg.data.visualChangeset) {
             setVisualChangeset(msg.data.visualChangeset);
             setExperiment(msg.data.experiment);
           }
           break;
         case "GB_RESPONSE_UPDATE_VISUAL_CHANGESET":
-          if (msg.data.error) {
-            setError(msg.data.error);
-          }
+          if (msg.data.error) setError(msg.data.error);
           break;
         case "GB_RESPONSE_TRANSFORM_COPY":
-          if (msg.data.error) {
-            setError(msg.data.error);
-          }
-          if (msg.data.dailyLimitReached) {
-            setError("Daily limit reached");
-          }
-          if (msg.data.transformed) {
-            setTransformedCopy(msg.data.transformed);
-          }
+          if (msg.data.error) setError(msg.data.error);
+          if (msg.data.dailyLimitReached) setError("Daily limit reached");
+          if (msg.data.transformed) setTransformedCopy(msg.data.transformed);
           break;
         default:
           break;
       }
+
       setLoading(false);
     };
 
     window.addEventListener("message", messageHandler);
 
     // load visual changeset on initial load
+    setLoading(true);
+
     const loadVisualChangesetMessage: LoadVisualChangesetRequestMessage = {
       type: "GB_REQUEST_LOAD_VISUAL_CHANGESET",
       data: {
@@ -98,11 +96,10 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
       },
     };
 
-    setLoading(true);
     window.postMessage(loadVisualChangesetMessage, window.location.origin);
 
     return () => window.removeEventListener("message", messageHandler);
-  }, [setVisualChangeset, setExperiment]);
+  }, [apiHost, visualChangesetId, setVisualChangeset, setExperiment]);
 
   const updateVisualChangeset = useCallback(
     async (variations: VisualEditorVariation[]) => {
@@ -116,6 +113,8 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
         })),
       };
 
+      setLoading(true);
+
       const updateVisualChangesetMessage: UpdateVisualChangesetRequestMessage =
         {
           type: "GB_REQUEST_UPDATE_VISUAL_CHANGESET",
@@ -126,7 +125,6 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
           },
         };
 
-      setLoading(true);
       window.postMessage(updateVisualChangesetMessage, window.location.origin);
     },
     [apiHost, visualChangesetId]
@@ -134,6 +132,8 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
 
   const transformCopy = useCallback(
     async (copy: string, mode: CopyMode) => {
+      setLoading(true);
+
       const transformCopyMessage: TransformCopyRequestMessage = {
         type: "GB_REQUEST_TRANSFORM_COPY",
         data: {
@@ -143,7 +143,6 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
         },
       };
 
-      setLoading(true);
       window.postMessage(transformCopyMessage, window.location.origin);
     },
     [apiHost]

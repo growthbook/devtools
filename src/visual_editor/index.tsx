@@ -11,20 +11,21 @@ import React, {
 } from "react";
 import * as ReactDOM from "react-dom/client";
 
-import { Message } from "../../devtools";
+import {
+  Message,
+  APIDomMutation,
+  APIExperiment,
+  APIExperimentVariation,
+  APIVisualChange,
+  APIVisualChangeset,
+} from "../../devtools";
 import {
   toggleSelectionMode,
   onSelectionModeUpdate,
 } from "./lib/selectionMode";
 import getSelector from "./lib/getSelector";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
-import useApi, {
-  APIDomMutation,
-  APIExperiment,
-  APIExperimentVariation,
-  APIVisualChange,
-  APIVisualChangeset,
-} from "./lib/hooks/useApi";
+import useApi from "./lib/hooks/useApi";
 
 import Toolbar, { ToolbarMode } from "./Toolbar";
 import ElementDetails from "./ElementDetails";
@@ -148,13 +149,14 @@ const VisualEditor: FC<{}> = () => {
   });
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
   const {
-    updateVisualChangeset,
-    transformCopy,
-    cspError,
     error,
+    cspError,
     loading,
+    experiment,
     visualChangeset,
     transformedCopy,
+    transformCopy,
+    updateVisualChangeset,
   } = useApi({
     apiHost,
     visualChangesetId,
@@ -400,21 +402,9 @@ const VisualEditor: FC<{}> = () => {
 
   // load visual changeset
   useEffect(() => {
-    window.postMessage(
-      { type: "GB_REQUEST_LOAD_VISUAL_CHANGESET" },
-      window.location.origin
-    );
-
-    const onMessage = (event: MessageEvent<Message>) => {
-      if (event.data.type === "GB_RESPONSE_LOAD_VISUAL_CHANGESET") {
-        loadVisualChangeset(event.data.data);
-      }
-    };
-
-    window.addEventListener("message", onMessage);
-
-    return () => window.removeEventListener("message", onMessage);
-  }, [loadVisualChangeset]);
+    if (!visualChangeset) return;
+    loadVisualChangeset({ visualChangeset, experiment });
+  }, [visualChangeset, loadVisualChangeset]);
 
   // handle mode selection
   useEffect(() => {

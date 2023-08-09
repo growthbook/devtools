@@ -1,4 +1,9 @@
-import { APIVisualChangeset, BGMessage, CopyMode } from "../devtools";
+import {
+  APIExperiment,
+  APIVisualChangeset,
+  BGMessage,
+  CopyMode,
+} from "../devtools";
 import { loadApiKey } from "./visual_editor/lib/storage";
 
 const genHeaders = (apiKey: string) => ({
@@ -6,15 +11,30 @@ const genHeaders = (apiKey: string) => ({
   ["Content-Type"]: "application/json",
 });
 
+export type FetchVisualChangesetPayload =
+  | {
+      visualChangeset: APIVisualChangeset;
+      experiment: APIExperiment;
+      error: null;
+    }
+  | {
+      visualChangeset: null;
+      experiment: null;
+      error: string;
+    };
+
 const fetchVisualChangeset = async ({
   apiHost,
   visualChangesetId,
 }: {
   apiHost: string;
   visualChangesetId: string;
-}) => {
-  const apiKey = await loadApiKey();
+}): Promise<FetchVisualChangesetPayload> => {
   try {
+    const apiKey = await loadApiKey();
+
+    if (!apiKey) throw new Error("No API key found");
+
     const response = await fetch(
       `${apiHost}/api/v1/visual-changesets/${visualChangesetId}?includeExperiment=1`,
       {
@@ -45,8 +65,11 @@ const updateVisualChangeset = async ({
   visualChangesetId: string;
   updatePayload: Partial<APIVisualChangeset>;
 }) => {
-  const apiKey = await loadApiKey();
   try {
+    const apiKey = await loadApiKey();
+
+    if (!apiKey) throw new Error("No API key found");
+
     const resp = await fetch(
       `${apiHost}/api/v1/visual-changesets/${visualChangesetId}`,
       {
@@ -80,9 +103,11 @@ const transformCopy = async ({
   copy: string;
   mode: CopyMode;
 }) => {
-  const apiKey = await loadApiKey();
-
   try {
+    const apiKey = await loadApiKey();
+
+    if (!apiKey) throw new Error("No API key found");
+
     const response = await fetch(`${apiHost}/api/v1/transform-copy`, {
       headers: genHeaders(apiKey),
       method: "POST",
@@ -117,6 +142,10 @@ const transformCopy = async ({
   }
 };
 
+/**
+ * Listen for messages from the devtools. We have to keep the handler synchronous
+ * so we can return true to indicate an async response.
+ */
 chrome.runtime.onMessage.addListener(
   (message: BGMessage, _sender, sendResponse) => {
     const { type, data } = message;
