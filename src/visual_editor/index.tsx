@@ -1,6 +1,5 @@
 import mutate, { DeclarativeMutation } from "dom-mutator";
 import { debounce } from "lodash";
-import qs from "query-string";
 import React, {
   FC,
   useCallback,
@@ -26,13 +25,6 @@ import useApi, {
   APIVisualChange,
   APIVisualChangeset,
 } from "./lib/hooks/useApi";
-import {
-  VISUAL_CHANGESET_ID_PARAMS_KEY,
-  VARIATION_INDEX_PARAMS_KEY,
-  EXPERIMENT_URL_PARAMS_KEY,
-  API_HOST_PARAMS_KEY,
-  AI_ENABLED_PARAMS_KEY,
-} from "./lib/constants";
 
 import Toolbar, { ToolbarMode } from "./Toolbar";
 import ElementDetails from "./ElementDetails";
@@ -56,6 +48,7 @@ import BackToGBButton from "./BackToGBButton";
 import AIEditorSection from "./AIEditorSection";
 import AICopySuggestor from "./AICopySuggestor";
 import "./targetPage.css";
+import useQueryParams from "./lib/hooks/useQueryParams";
 
 declare global {
   interface Window {
@@ -112,36 +105,6 @@ const genVisualEditorVariations = ({
   });
 };
 
-// normalize param values into number type
-const getVariationIndexFromParams = (
-  param: string | (string | null)[] | null
-): number => {
-  if (Array.isArray(param)) {
-    if (!param[0]) return 1;
-    return parseInt(param[0], 10);
-  }
-  return parseInt(param ?? "1", 10);
-};
-
-// remove visual editor params from url once loaded
-const cleanUpParams = (params: qs.ParsedQuery) => {
-  window.history.replaceState(
-    null,
-    "",
-    qs.stringifyUrl({
-      url: window.location.href,
-      query: {
-        ...params,
-        [VISUAL_CHANGESET_ID_PARAMS_KEY]: undefined,
-        [VARIATION_INDEX_PARAMS_KEY]: undefined,
-        [EXPERIMENT_URL_PARAMS_KEY]: undefined,
-        [API_HOST_PARAMS_KEY]: undefined,
-        [AI_ENABLED_PARAMS_KEY]: undefined,
-      },
-    })
-  );
-};
-
 const getHumanReadableText = (element: HTMLElement): string => {
   // ignore when selected is simply wrapper of another element
   if (element.innerHTML.startsWith("<")) return "";
@@ -154,24 +117,15 @@ const getHumanReadableText = (element: HTMLElement): string => {
 };
 
 const VisualEditor: FC<{}> = () => {
-  const params = qs.parse(window.location.search);
-  const [visualChangesetId] = useState(
-    params[VISUAL_CHANGESET_ID_PARAMS_KEY] as string
-  );
-  const [variationIndex] = useState(
-    getVariationIndexFromParams(params[VARIATION_INDEX_PARAMS_KEY])
-  );
-  const [experimentUrl] = useState(
-    decodeURIComponent(params[EXPERIMENT_URL_PARAMS_KEY] as string)
-  );
-  const [apiHost] = useState(
-    decodeURIComponent(params[API_HOST_PARAMS_KEY] as string)
-  );
-  const [hasAiEnabled] = useState(
-    decodeURIComponent((params[AI_ENABLED_PARAMS_KEY] as string) || "") ===
-      "true"
-  );
-  const [apiKey, setApiKey] = useState<string | undefined>("");
+  const {
+    params,
+    visualChangesetId,
+    variationIndex,
+    experimentUrl,
+    apiHost,
+    hasAiEnabled,
+    cleanUpParams,
+  } = useQueryParams();
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
   const [mode, setMode] = useState<ToolbarMode>("selection");
   const [variations, setVariations] = useState<VisualEditorVariation[]>([]);
@@ -193,14 +147,19 @@ const VisualEditor: FC<{}> = () => {
     rightAligned: true,
   });
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
-  const [apiKeyError, setApiKeyError] = useState("");
   const {
-    fetchVisualChangeset,
     updateVisualChangeset,
     transformCopy,
     cspError,
     error,
-  } = useApi({ apiKey, apiHost });
+    loading,
+    visualChangeset,
+    transformedCopy,
+  } = useApi({
+    apiHost,
+    visualChangesetId,
+    hasAiEnabled,
+  });
   const [customJsError, setCustomJsError] = useState("");
 
   const forceUpdate = debounce(_forceUpdate, 100);
@@ -225,7 +184,7 @@ const VisualEditor: FC<{}> = () => {
 
       if (!updateVisualChangeset) return;
 
-      updateVisualChangeset(visualChangesetId, newVariations);
+      updateVisualChangeset(newVariations);
     },
     [
       variations,
@@ -421,11 +380,6 @@ const VisualEditor: FC<{}> = () => {
 
   const loadVisualChangeset = useCallback(
     async ({ visualChangeset, experiment }: any) => {
-      console.log("are we ....loaaaaaadinggggggg????", {
-        visualChangeset,
-        experiment,
-        yes: !visualChangeset || !experiment,
-      });
       // Visual editor will not load if we cannot load visual changeset
       if (!visualChangeset || !experiment) return;
 
@@ -436,8 +390,8 @@ const VisualEditor: FC<{}> = () => {
 
       setVariations(visualEditorVariations);
 
-      // remove visual editor query param once loaded
-      cleanUpParams(params);
+      // remove visual editor query params once loaded
+      cleanUpParams();
 
       setIsEnabled(true);
     },
@@ -452,7 +406,6 @@ const VisualEditor: FC<{}> = () => {
     );
 
     const onMessage = (event: MessageEvent<Message>) => {
-      console.log("DEBUG onMessage", event.data);
       if (event.data.type === "GB_RESPONSE_LOAD_VISUAL_CHANGESET") {
         loadVisualChangeset(event.data.data);
       }
@@ -550,12 +503,12 @@ const VisualEditor: FC<{}> = () => {
       "";
   }, [selectedVariation?.js]);
 
-  if (error || cspError || apiKeyError) {
+  if (error || cspError) {
     return (
       <VisualEditorPane style={parentStyles}>
         <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
-        {error || apiKeyError ? (
-          <div className="gb-p-4 gb-text-red-400">{error || apiKeyError}</div>
+        {error ? (
+          <div className="gb-p-4 gb-text-red-400">{error}</div>
         ) : (
           <CSPErrorText cspError={cspError} />
         )}
@@ -563,10 +516,10 @@ const VisualEditor: FC<{}> = () => {
           <BackToGBButton experimentUrl={experimentUrl}>
             Back to GrowthBook
           </BackToGBButton>
-          {apiHost && apiKey ? (
+          {apiHost ? (
             <ReloadPageButton
-              apiCreds={{ apiHost, apiKey }}
               params={params}
+              apiHost={apiHost}
               experimentUrl={experimentUrl}
               variationIndex={variationIndex}
               visualChangesetId={visualChangesetId}
@@ -705,8 +658,8 @@ const VisualEditor: FC<{}> = () => {
             Done Editing
           </BackToGBButton>
           <ReloadPageButton
-            apiCreds={{ apiHost, apiKey }}
             params={params}
+            apiHost={apiHost}
             experimentUrl={experimentUrl}
             variationIndex={variationIndex}
             visualChangesetId={visualChangesetId}

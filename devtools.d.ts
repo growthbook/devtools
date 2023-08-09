@@ -6,6 +6,77 @@ import type {
 
 export type DebugLogs = [string, any][];
 
+export type CopyMode = "energetic" | "concise" | "humorous";
+
+export interface APIExperiment {
+  id: string;
+  variations: {
+    variationId: string;
+    key: string;
+    name: string;
+    description: string;
+    screenshots: string[];
+  }[];
+}
+export type APIExperimentVariation = APIExperiment["variations"][number];
+
+export interface APIVisualChangeset {
+  id: string;
+  urlPatterns: {
+    include?: boolean;
+    /** @enum {string} */
+    type: "simple" | "exact" | "regex";
+    pattern: string;
+  }[];
+  editorUrl: string;
+  experiment: string;
+  visualChanges: {
+    description?: string;
+    css?: string;
+    js?: string;
+    variation: string;
+    domMutations: {
+      selector: string;
+      /** @enum {string} */
+      action: "append" | "set" | "remove";
+      attribute: string;
+      value?: string;
+    }[];
+  }[];
+}
+
+export type APIVisualChange = APIVisualChangeset["visualChanges"][number];
+export type APIDomMutation = APIVisualChange["domMutations"][number];
+
+export type ApiLoadVisualChangesetResponse =
+  | {
+      visualChangeset: APIVisualChangeset;
+      experiment: APIExperiment;
+      error: null;
+    }
+  | {
+      visualChangeset: null;
+      experiment: null;
+      error: string;
+    };
+
+export interface ApiUpdateVisualChangesetResponse {
+  nModified: number;
+  error: string | null;
+}
+
+export type ApiTransformCopyResponse =
+  | {
+      transformed: string;
+      dailyLimitReached: boolean;
+      error: null;
+    }
+  | {
+      transformed: null;
+      dailyLimitReached: null;
+      error: string;
+    };
+
 export type RequestRefreshMessage = {
   type: "GB_REQUEST_REFRESH";
 };
@@ -30,15 +101,6 @@ export type ErrorMessage = {
   error: string;
 };
 
-type ApiCredsRequest = {
-  type: "GB_REQUEST_API_CREDS";
-};
-
-type ApiCredsResponse = {
-  type: "GB_RESPONSE_API_CREDS";
-  apiKey: string | null;
-};
-
 type OpenVisualEditorRequestMessage = {
   type: "GB_REQUEST_OPEN_VISUAL_EDITOR";
   data: string;
@@ -49,95 +111,92 @@ type OpenVisualEditorResponseMessage = {
   data: string;
 };
 
-export type BackgroundFetchVisualChangsetMessage = {
-  type: "GET_VISUAL_CHANGESET";
+type LoadVisualChangesetRequestMessage = {
+  type: "GB_REQUEST_LOAD_VISUAL_CHANGESET";
   data: {
     apiHost: string;
     visualChangesetId: string;
   };
 };
 
-type LoadVisualChangesetRequestMessage = {
-  type: "GB_REQUEST_LOAD_VISUAL_CHANGESET";
-  data: string;
-};
-
 type LoadVisualChangesetResponseMessage = {
   type: "GB_RESPONSE_LOAD_VISUAL_CHANGESET";
-  data: string;
+  data: ApiLoadVisualChangesetResponse;
 };
 
+type UpdateVisualChangesetRequestMessage = {
+  type: "GB_REQUEST_UPDATE_VISUAL_CHANGESET";
+  data: {
+    apiHost: string;
+    visualChangesetId: string;
+    updatePayload: Partial<APIVisualChangeset>;
+  };
+};
+
+type UpdateVisualChangesetResponseMessage = {
+  type: "GB_RESPONSE_UPDATE_VISUAL_CHANGESET";
+  data: ApiUpdateVisualChangesetResponse;
+};
+
+type TransformCopyRequestMessage = {
+  type: "GB_REQUEST_TRANSFORM_COPY";
+  data: {
+    apiHost: string;
+    copy: string;
+    mode: CopyMode;
+  };
+};
+
+type TransformCopyResponseMessage = {
+  type: "GB_RESPONSE_TRANSFORM_COPY";
+  data: ApiTransformCopyResponse;
+};
+
+// Messages sent to content script
 export type Message =
   | RequestRefreshMessage
   | SetOverridesMessage
   | RefreshMessage
   | ErrorMessage
-  | ApiCredsRequest
-  | ApiCredsResponse
   | OpenVisualEditorRequestMessage
   | OpenVisualEditorResponseMessage
   | LoadVisualChangesetRequestMessage
-  | LoadVisualChangesetResponseMessage;
+  | LoadVisualChangesetResponseMessage
+  | UpdateVisualChangesetRequestMessage
+  | UpdateVisualChangesetResponseMessage
+  | TransformCopyRequestMessage
+  | TransformCopyResponseMessage;
 
-export interface ApiCreds {
-  apiKey: string;
-  apiHost: string;
-}
+/**
+ * Messages sent to background script
+ */
+export type BGLoadVisualChangsetMessage = {
+  type: "BG_LOAD_VISUAL_CHANGESET";
+  data: {
+    apiHost: string;
+    visualChangesetId: string;
+  };
+};
 
-export interface VisualChangesetApiResponse {
-  visualChangeset: {
-    id?: string;
-    urlPatterns: {
-      include?: boolean;
-      type: "simple" | "regex";
-      pattern: string;
-    }[];
-    editorUrl: string;
-    experiment: string;
-    visualChanges: {
-      description?: string;
-      css?: string;
-      js?: string;
-      variation: string;
-      domMutations: {
-        selector: string;
-        /** @enum {string} */
-        action: "append" | "set" | "remove";
-        attribute: string;
-        value?: string;
-        parentSelector?: string;
-        insertBeforeSelector?: string;
-      }[];
-    }[];
+export type BGUpdateVisualChangsetMessage = {
+  type: "BG_UPDATE_VISUAL_CHANGESET";
+  data: {
+    apiHost: string;
+    visualChangesetId: string;
+    updatePayload: Partial<APIVisualChangeset>;
   };
-  experiment: {
-    id: string;
-    dateCreated: string;
-    dateUpdated: string;
-    name: string;
-    project: string;
-    hypothesis: string;
-    description: string;
-    tags: string[];
-    owner: string;
-    archived: boolean;
-    status: string;
-    autoRefresh: boolean;
-    hashAttribute: string;
-    variations: {
-      variationId: string;
-      key: string;
-      name: string;
-      description: string;
-      screenshots: string[];
-    }[];
-    resultSummary?: {
-      status: string;
-      winner: string;
-      conclusions: string;
-      releasedVariationId: string;
-      excludeFromPayload: boolean;
-    };
+};
+
+export type BGTransformCopyMessage = {
+  type: "BG_TRANSFORM_COPY";
+  data: {
+    apiHost: string;
+    copy: string;
+    mode: CopyMode;
   };
-  error: null;
-}
+};
+
+export type BGMessage =
+  | BGLoadVisualChangsetMessage
+  | BGUpdateVisualChangsetMessage
+  | BGTransformCopyMessage;

@@ -4,11 +4,13 @@ import {
   loadVisualEditorQueryParams,
   visualEditorLoadChangesetRequest,
   visualEditorOpenRequest,
+  visualEditorTransformCopyRequest,
+  visualEditorUpdateChangesetRequest,
 } from "./pageMessageHandlers";
 
 // Listen for messages from the page
-window.addEventListener("message", function (msg: MessageEvent<Message>) {
-  const data = msg.data;
+window.addEventListener("message", function (event: MessageEvent<Message>) {
+  const data = event.data;
   switch (data?.type) {
     case "GB_REFRESH":
     case "GB_ERROR":
@@ -18,7 +20,13 @@ window.addEventListener("message", function (msg: MessageEvent<Message>) {
       visualEditorOpenRequest(data);
       break;
     case "GB_REQUEST_LOAD_VISUAL_CHANGESET":
-      visualEditorLoadChangesetRequest();
+      visualEditorLoadChangesetRequest(data);
+      break;
+    case "GB_REQUEST_UPDATE_VISUAL_CHANGESET":
+      visualEditorUpdateChangesetRequest(data);
+      break;
+    case "GB_REQUEST_TRANSFORM_COPY":
+      visualEditorTransformCopyRequest(data);
       break;
     default:
       break;

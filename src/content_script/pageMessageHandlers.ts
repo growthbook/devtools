@@ -1,8 +1,16 @@
 import {
-  BackgroundFetchVisualChangsetMessage,
+  BGFetchVisualChangsetMessage,
+  BGUpdateVisualChangsetMessage,
   ErrorMessage,
+  LoadVisualChangesetRequestMessage,
   OpenVisualEditorRequestMessage,
   RefreshMessage,
+  UpdateVisualChangesetRequestMessage,
+  ApiLoadVisualChangesetResponse,
+  ApiUpdateVisualChangesetResponse,
+  TransformCopyRequestMessage,
+  BGTransformCopyMessage,
+  ApiTransformCopyResponse,
 } from "../../devtools";
 import {
   VISUAL_CHANGESET_ID_PARAMS_KEY,
@@ -47,35 +55,86 @@ export const loadVisualEditorQueryParams = () => {
   };
 };
 
-export const visualEditorLoadChangesetRequest = () => {
-  const visualEditorQueryParams = loadVisualEditorQueryParams();
-
-  if (!visualEditorQueryParams) return;
-
+export const visualEditorLoadChangesetRequest = (
+  msg: LoadVisualChangesetRequestMessage
+) => {
   chrome.runtime.sendMessage<
-    BackgroundFetchVisualChangsetMessage,
-    { visualChangeset: any; experiment: any; error: any }
+    BGFetchVisualChangsetMessage,
+    ApiLoadVisualChangesetResponse
   >(
     {
-      type: "GET_VISUAL_CHANGESET",
+      type: "BG_LOAD_VISUAL_CHANGESET",
       data: {
-        apiHost: visualEditorQueryParams.apiHost,
-        visualChangesetId: visualEditorQueryParams.visualChangesetId,
+        apiHost: msg.data.apiHost,
+        visualChangesetId: msg.data.visualChangesetId,
       },
     },
     (resp) => {
-      if (!resp || resp?.error) {
-        return;
-      }
-
-      const { visualChangeset, experiment } = resp;
-
+      const { visualChangeset, experiment, error } = resp;
       window.postMessage(
         {
           type: "GB_RESPONSE_LOAD_VISUAL_CHANGESET",
           data: {
             visualChangeset,
             experiment,
+            error,
+          },
+        },
+        window.location.origin
+      );
+    }
+  );
+};
+
+export const visualEditorUpdateChangesetRequest = (
+  msg: UpdateVisualChangesetRequestMessage
+) => {
+  chrome.runtime.sendMessage<
+    BGUpdateVisualChangsetMessage,
+    ApiUpdateVisualChangesetResponse
+  >(
+    {
+      type: "BG_UPDATE_VISUAL_CHANGESET",
+      data: {
+        apiHost: msg.data.apiHost,
+        visualChangesetId: msg.data.visualChangesetId,
+        updatePayload: msg.data.updatePayload,
+      },
+    },
+    (resp) => {
+      window.postMessage(
+        {
+          type: "GB_RESPONSE_UPDATE_VISUAL_CHANGESET",
+          data: {
+            error: resp.error,
+          },
+        },
+        window.location.origin
+      );
+    }
+  );
+};
+
+export const visualEditorTransformCopyRequest = (
+  msg: TransformCopyRequestMessage
+) => {
+  chrome.runtime.sendMessage<BGTransformCopyMessage, ApiTransformCopyResponse>(
+    {
+      type: "BG_TRANSFORM_COPY",
+      data: {
+        apiHost: msg.data.apiHost,
+        copy: msg.data.copy,
+        mode: msg.data.mode,
+      },
+    },
+    (resp) => {
+      window.postMessage(
+        {
+          type: "GB_RESPONSE_TRANSFORM_COPY",
+          data: {
+            copy: resp.copy,
+            dailyLimitReached: resp.dailyLimitReached,
+            error: resp.error,
           },
         },
         window.location.origin

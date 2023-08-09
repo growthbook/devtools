@@ -1,6 +1,5 @@
 import qs from "query-string";
 import React, { FC } from "react";
-import { ApiCreds } from "../../devtools";
 import {
   VISUAL_CHANGESET_ID_PARAMS_KEY,
   VARIATION_INDEX_PARAMS_KEY,
@@ -38,15 +37,15 @@ const refreshWithParams = ({
 };
 
 const ReloadPageButton: FC<{
-  apiCreds: Partial<ApiCreds>;
   params: qs.ParsedQuery<string>;
+  apiHost: string;
   experimentUrl: string;
   variationIndex: number;
   visualChangesetId: string;
   hasAiEnabled: boolean;
 }> = ({
-  apiCreds,
   params,
+  apiHost,
   experimentUrl,
   variationIndex,
   visualChangesetId,
@@ -57,7 +56,7 @@ const ReloadPageButton: FC<{
       className="gb-text-light gb-text-xs gb-mt-2"
       onClick={() =>
         refreshWithParams({
-          apiHost: apiCreds.apiHost || "",
+          apiHost: apiHost,
           experimentUrl,
           params,
           variationIndex: variationIndex.toString(),
