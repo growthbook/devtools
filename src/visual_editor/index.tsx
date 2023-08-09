@@ -12,7 +12,6 @@ import React, {
 import * as ReactDOM from "react-dom/client";
 
 import {
-  Message,
   APIDomMutation,
   APIExperiment,
   APIExperimentVariation,
@@ -182,20 +181,9 @@ const VisualEditor: FC<{}> = () => {
         ) ?? []),
       ];
 
-      setVariations(newVariations);
-
-      if (!updateVisualChangeset) return;
-
       updateVisualChangeset(newVariations);
     },
-    [
-      variations,
-      selectedVariation,
-      setVariations,
-      selectedVariationIndex,
-      visualChangesetId,
-      updateVisualChangeset,
-    ]
+    [variations, selectedVariationIndex, updateVisualChangeset]
   );
 
   const addDomMutations = useCallback(
@@ -380,31 +368,24 @@ const VisualEditor: FC<{}> = () => {
     return humanReadableText.length > 0;
   }, [humanReadableText]);
 
-  const loadVisualChangeset = useCallback(
-    async ({ visualChangeset, experiment }: any) => {
-      // Visual editor will not load if we cannot load visual changeset
-      if (!visualChangeset || !experiment) return;
-
-      const visualEditorVariations = genVisualEditorVariations({
-        experiment,
-        visualChangeset,
-      });
-
-      setVariations(visualEditorVariations);
-
-      // remove visual editor query params once loaded
-      cleanUpParams();
-
-      setIsEnabled(true);
-    },
-    [setVariations, setIsEnabled, cleanUpParams]
-  );
-
-  // load visual changeset
+  // on visual changeset change
   useEffect(() => {
-    if (!visualChangeset) return;
-    loadVisualChangeset({ visualChangeset, experiment });
-  }, [visualChangeset, loadVisualChangeset]);
+    if (!visualChangeset || !experiment) return;
+
+    const visualEditorVariations = genVisualEditorVariations({
+      experiment,
+      visualChangeset,
+    });
+
+    setVariations(visualEditorVariations);
+  }, [visualChangeset, experiment]);
+
+  // init visual editor
+  useEffect(() => {
+    if (!visualChangeset || !experiment || isVisualEditorEnabled) return;
+    cleanUpParams();
+    setIsEnabled(true);
+  }, [visualChangeset, experiment, isVisualEditorEnabled]);
 
   // handle mode selection
   useEffect(() => {
@@ -492,34 +473,6 @@ const VisualEditor: FC<{}> = () => {
       `try { ${selectedVariation?.js} } catch(e) { window.__gb_global_js_err(e.message); }` ??
       "";
   }, [selectedVariation?.js]);
-
-  if (error || cspError) {
-    return (
-      <VisualEditorPane style={parentStyles}>
-        <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
-        {error ? (
-          <div className="gb-p-4 gb-text-red-400">{error}</div>
-        ) : (
-          <CSPErrorText cspError={cspError} />
-        )}
-        <div className="gb-m-4 gb-text-center">
-          <BackToGBButton experimentUrl={experimentUrl}>
-            Back to GrowthBook
-          </BackToGBButton>
-          {apiHost ? (
-            <ReloadPageButton
-              params={params}
-              apiHost={apiHost}
-              experimentUrl={experimentUrl}
-              variationIndex={variationIndex}
-              visualChangesetId={visualChangesetId}
-              hasAiEnabled={hasAiEnabled}
-            />
-          ) : null}
-        </div>
-      </VisualEditorPane>
-    );
-  }
 
   if (!isVisualEditorEnabled) return null;
 
@@ -656,6 +609,16 @@ const VisualEditor: FC<{}> = () => {
             hasAiEnabled={hasAiEnabled}
           />
         </div>
+
+        {error || cspError ? (
+          <>
+            {error ? (
+              <div className="gb-p-4 gb-text-red-400">{error}</div>
+            ) : (
+              <CSPErrorText cspError={cspError} />
+            )}
+          </>
+        ) : null}
       </VisualEditorPane>
 
       {/** Overlays for highlighting selected/hovered elements **/}

@@ -27,8 +27,8 @@ type UseApiHook = (args: {
   hasAiEnabled: boolean;
 }) => {
   loading: boolean;
-  visualChangeset?: APIVisualChangeset;
-  experiment?: APIExperiment;
+  visualChangeset: APIVisualChangeset | null;
+  experiment: APIExperiment | null;
   transformedCopy: string | null;
   error: string;
   cspError: CSPError;
@@ -40,8 +40,9 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [cspError, setCSPError] = useState<CSPError>(null);
-  const [visualChangeset, setVisualChangeset] = useState<APIVisualChangeset>();
-  const [experiment, setExperiment] = useState<APIExperiment>();
+  const [visualChangeset, setVisualChangeset] =
+    useState<APIVisualChangeset | null>(null);
+  const [experiment, setExperiment] = useState<APIExperiment | null>(null);
   const [transformedCopy, setTransformedCopy] = useState<string | null>(null);
 
   document.addEventListener("securitypolicyviolation", (e) => {
@@ -62,16 +63,20 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
 
       switch (msg.type) {
         case "GB_RESPONSE_LOAD_VISUAL_CHANGESET":
+          // TODO security check
           if (msg.data.error) setError(msg.data.error);
-          if (msg.data.visualChangeset) {
+          else {
             setVisualChangeset(msg.data.visualChangeset);
             setExperiment(msg.data.experiment);
           }
           break;
         case "GB_RESPONSE_UPDATE_VISUAL_CHANGESET":
+          // TODO security check
           if (msg.data.error) setError(msg.data.error);
+          else setVisualChangeset(msg.data.visualChangeset);
           break;
         case "GB_RESPONSE_TRANSFORM_COPY":
+          // TODO security check
           if (msg.data.error) setError(msg.data.error);
           if (msg.data.dailyLimitReached) setError("Daily limit reached");
           if (msg.data.transformed) setTransformedCopy(msg.data.transformed);
@@ -86,6 +91,7 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
     window.addEventListener("message", messageHandler);
 
     // load visual changeset on initial load
+    // TODO pull into its own method
     setLoading(true);
 
     const loadVisualChangesetMessage: LoadVisualChangesetRequestMessage = {

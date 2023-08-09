@@ -3,6 +3,10 @@ import type {
   FeatureDefinition,
   ExperimentOverride,
 } from "@growthbook/growthbook";
+import {
+  FetchVisualChangesetPayload,
+  UpdateVisualChangesetPayload,
+} from "./src/background";
 
 export type DebugLogs = [string, any][];
 
@@ -47,11 +51,6 @@ export interface APIVisualChangeset {
 
 export type APIVisualChange = APIVisualChangeset["visualChanges"][number];
 export type APIDomMutation = APIVisualChange["domMutations"][number];
-
-export interface ApiUpdateVisualChangesetResponse {
-  nModified: number;
-  error: string | null;
-}
 
 export type ApiTransformCopyResponse =
   | {
@@ -109,7 +108,7 @@ type LoadVisualChangesetRequestMessage = {
 
 type LoadVisualChangesetResponseMessage = {
   type: "GB_RESPONSE_LOAD_VISUAL_CHANGESET";
-  data: ApiLoadVisualChangesetResponse;
+  data: FetchVisualChangesetPayload;
 };
 
 type UpdateVisualChangesetRequestMessage = {
@@ -123,7 +122,7 @@ type UpdateVisualChangesetRequestMessage = {
 
 type UpdateVisualChangesetResponseMessage = {
   type: "GB_RESPONSE_UPDATE_VISUAL_CHANGESET";
-  data: ApiUpdateVisualChangesetResponse;
+  data: UpdateVisualChangesetPayload;
 };
 
 type TransformCopyRequestMessage = {

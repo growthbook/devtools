@@ -58,6 +58,18 @@ const fetchVisualChangeset = async ({
   }
 };
 
+export type UpdateVisualChangesetPayload =
+  | {
+      nModified: number;
+      visualChangeset: APIVisualChangeset;
+      error: null;
+    }
+  | {
+      nModified: number;
+      visualChangeset: null;
+      error: string;
+    };
+
 const updateVisualChangeset = async ({
   apiHost,
   visualChangesetId,
@@ -66,7 +78,7 @@ const updateVisualChangeset = async ({
   apiHost: string;
   visualChangesetId: string;
   updatePayload: Partial<APIVisualChangeset>;
-}) => {
+}): Promise<UpdateVisualChangesetPayload> => {
   try {
     const apiKey = await loadApiKey();
 
@@ -87,10 +99,11 @@ const updateVisualChangeset = async ({
 
     return {
       nModified: res.nModified,
+      visualChangeset: res.visualChangeset,
       error: null,
     };
   } catch (e) {
-    return { nModified: null, error: `${e}` };
+    return { nModified: 0, visualChangeset: null, error: `${e}` };
   }
 };
 

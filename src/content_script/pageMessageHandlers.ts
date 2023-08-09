@@ -5,13 +5,17 @@ import {
   OpenVisualEditorRequestMessage,
   RefreshMessage,
   UpdateVisualChangesetRequestMessage,
-  ApiUpdateVisualChangesetResponse,
   TransformCopyRequestMessage,
   BGTransformCopyMessage,
   ApiTransformCopyResponse,
   BGLoadVisualChangsetMessage,
+  UpdateVisualChangesetResponseMessage,
+  LoadVisualChangesetResponseMessage,
 } from "../../devtools";
-import { FetchVisualChangesetPayload } from "../background";
+import {
+  FetchVisualChangesetPayload,
+  UpdateVisualChangesetPayload,
+} from "../background";
 import {
   VISUAL_CHANGESET_ID_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
@@ -71,17 +75,16 @@ export const visualEditorLoadChangesetRequest = (
     },
     (resp) => {
       const { visualChangeset, experiment, error } = resp;
-      window.postMessage(
-        {
-          type: "GB_RESPONSE_LOAD_VISUAL_CHANGESET",
-          data: {
-            visualChangeset,
-            experiment,
-            error,
-          },
+      const message: LoadVisualChangesetResponseMessage = {
+        type: "GB_RESPONSE_LOAD_VISUAL_CHANGESET",
+        data: {
+          visualChangeset,
+          experiment,
+          error,
         },
-        window.location.origin
-      );
+      };
+
+      window.postMessage(message, window.location.origin);
     }
   );
 };
@@ -91,7 +94,7 @@ export const visualEditorUpdateChangesetRequest = (
 ) => {
   chrome.runtime.sendMessage<
     BGUpdateVisualChangsetMessage,
-    ApiUpdateVisualChangesetResponse
+    UpdateVisualChangesetPayload
   >(
     {
       type: "BG_UPDATE_VISUAL_CHANGESET",
@@ -102,15 +105,15 @@ export const visualEditorUpdateChangesetRequest = (
       },
     },
     (resp) => {
-      window.postMessage(
-        {
-          type: "GB_RESPONSE_UPDATE_VISUAL_CHANGESET",
-          data: {
-            error: resp.error,
-          },
+      const message: UpdateVisualChangesetResponseMessage = {
+        type: "GB_RESPONSE_UPDATE_VISUAL_CHANGESET",
+        data: {
+          visualChangeset: resp.visualChangeset,
+          error: resp.error,
         },
-        window.location.origin
-      );
+      };
+
+      window.postMessage(message, window.location.origin);
     }
   );
 };
