@@ -63,7 +63,6 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
 
       switch (msg.type) {
         case "GB_RESPONSE_LOAD_VISUAL_CHANGESET":
-          // TODO security check
           if (msg.data.error) setError(msg.data.error);
           else {
             setVisualChangeset(msg.data.visualChangeset);
@@ -72,13 +71,11 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
           setLoading(false);
           break;
         case "GB_RESPONSE_UPDATE_VISUAL_CHANGESET":
-          // TODO security check
           if (msg.data.error) setError(msg.data.error);
           else setVisualChangeset(msg.data.visualChangeset);
           setLoading(false);
           break;
         case "GB_RESPONSE_TRANSFORM_COPY":
-          // TODO security check
           if (msg.data.error) setError(msg.data.error);
           if (msg.data.dailyLimitReached) setError("Daily limit reached");
           if (msg.data.transformed) setTransformedCopy(msg.data.transformed);
