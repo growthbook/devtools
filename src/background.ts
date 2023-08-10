@@ -11,6 +11,13 @@ const genHeaders = (apiKey: string) => ({
   ["Content-Type"]: "application/json",
 });
 
+export type BGErrorCode =
+  | "no-api-key"
+  | "load-viz-changeset-failed"
+  | "update-viz-changeset-failed"
+  | "transform-copy-failed"
+  | "transform-copy-daily-limit-reached";
+
 export type FetchVisualChangesetPayload =
   | {
       visualChangeset: APIVisualChangeset;
@@ -20,7 +27,7 @@ export type FetchVisualChangesetPayload =
   | {
       visualChangeset: null;
       experiment: null;
-      error: string;
+      error: BGErrorCode;
     };
 
 const fetchVisualChangeset = async ({
@@ -33,7 +40,13 @@ const fetchVisualChangeset = async ({
   try {
     const apiKey = await loadApiKey();
 
-    if (!apiKey) throw new Error("No API key found");
+    if (!apiKey) {
+      return {
+        visualChangeset: null,
+        experiment: null,
+        error: "no-api-key",
+      };
+    }
 
     const response = await fetch(
       `${apiHost}/api/v1/visual-changesets/${visualChangesetId}?includeExperiment=1`,
@@ -54,7 +67,11 @@ const fetchVisualChangeset = async ({
       error: null,
     };
   } catch (e) {
-    return { visualChangeset: null, experiment: null, error: `${e}` };
+    return {
+      visualChangeset: null,
+      experiment: null,
+      error: "load-viz-changeset-failed",
+    };
   }
 };
 
@@ -67,7 +84,7 @@ export type UpdateVisualChangesetPayload =
   | {
       nModified: number;
       visualChangeset: null;
-      error: string;
+      error: BGErrorCode;
     };
 
 const updateVisualChangeset = async ({
@@ -82,7 +99,13 @@ const updateVisualChangeset = async ({
   try {
     const apiKey = await loadApiKey();
 
-    if (!apiKey) throw new Error("No API key found");
+    if (!apiKey) {
+      return {
+        nModified: 0,
+        visualChangeset: null,
+        error: "no-api-key",
+      };
+    }
 
     const resp = await fetch(
       `${apiHost}/api/v1/visual-changesets/${visualChangesetId}`,
@@ -103,7 +126,11 @@ const updateVisualChangeset = async ({
       error: null,
     };
   } catch (e) {
-    return { nModified: 0, visualChangeset: null, error: `${e}` };
+    return {
+      nModified: 0,
+      visualChangeset: null,
+      error: "update-viz-changeset-failed",
+    };
   }
 };
 
@@ -118,7 +145,7 @@ export type TransformCopyPayload =
       visualChangeset: null;
       transformed: null;
       dailyLimitReached: null;
-      error: string;
+      error: BGErrorCode;
     };
 
 const transformCopy = async ({
@@ -135,7 +162,14 @@ const transformCopy = async ({
   try {
     const apiKey = await loadApiKey();
 
-    if (!apiKey) throw new Error("No API key found");
+    if (!apiKey) {
+      return {
+        visualChangeset: null,
+        transformed: null,
+        dailyLimitReached: null,
+        error: "no-api-key",
+      };
+    }
 
     const response = await fetch(`${apiHost}/api/v1/transform-copy`, {
       headers: genHeaders(apiKey),
@@ -163,7 +197,7 @@ const transformCopy = async ({
       visualChangeset: null,
       transformed: null,
       dailyLimitReached: null,
-      error: `There was an error transforming the copy: ${e}`,
+      error: "transform-copy-failed",
     };
   }
 };
@@ -194,6 +228,9 @@ chrome.runtime.onMessage.addListener(
           if (res.error) return sendResponse({ error: res.error });
           sendResponse(res);
         });
+        break;
+      case "BG_OPEN_OPTIONS_PAGE":
+        chrome.runtime.openOptionsPage();
         break;
       default:
         break;

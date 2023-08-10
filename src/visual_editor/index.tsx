@@ -43,7 +43,7 @@ import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
 import CustomJSEditor from "./CustomJSEditor";
 import CSSAttributeEditor from "./CSSAttributeEditor";
 import ReloadPageButton from "./ReloadPageButton";
-import CSPErrorText from "./CSPErrorText";
+import ErrorDisplay from "./ErrorDisplay";
 import BackToGBButton from "./BackToGBButton";
 import AIEditorSection from "./AIEditorSection";
 import AICopySuggestor from "./AICopySuggestor";
@@ -127,7 +127,7 @@ const VisualEditor: FC<{}> = () => {
     cleanUpParams,
   } = useQueryParams();
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
-  const [mode, setMode] = useState<ToolbarMode>("selection");
+  const [mode, setMode] = useState<ToolbarMode | null>(null);
   const [variations, setVariations] = useState<VisualEditorVariation[]>([]);
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(
     null
@@ -182,9 +182,11 @@ const VisualEditor: FC<{}> = () => {
         ) ?? []),
       ];
 
+      setVariations(newVariations);
+
       updateVisualChangeset(newVariations);
     },
-    [variations, selectedVariationIndex, updateVisualChangeset]
+    [variations, setVariations, selectedVariationIndex, updateVisualChangeset]
   );
 
   const addDomMutations = useCallback(
@@ -372,6 +374,7 @@ const VisualEditor: FC<{}> = () => {
   // on visual changeset change
   useEffect(() => {
     if (!visualChangeset || !experiment) return;
+    if (mode === null) setMode("selection");
 
     const visualEditorVariations = genVisualEditorVariations({
       experiment,
@@ -383,10 +386,10 @@ const VisualEditor: FC<{}> = () => {
 
   // init visual editor
   useEffect(() => {
-    if (!visualChangeset || !experiment || isVisualEditorEnabled) return;
+    if (isVisualEditorEnabled) return;
     cleanUpParams();
     setIsEnabled(true);
-  }, [visualChangeset, experiment, isVisualEditorEnabled]);
+  }, [visualChangeset, experiment, isVisualEditorEnabled, error]);
 
   // handle mode selection
   useEffect(() => {
@@ -475,6 +478,7 @@ const VisualEditor: FC<{}> = () => {
       "";
   }, [selectedVariation?.js]);
 
+  // scroll to error
   useEffect(() => {
     if (!error && !cspError && !errorContainerRef.current) return;
     errorContainerRef.current?.scrollIntoView({
@@ -497,6 +501,7 @@ const VisualEditor: FC<{}> = () => {
         />
 
         <Toolbar
+          disabled={!visualChangeset}
           mode={mode}
           setMode={setMode}
           clearSelectedElement={() => setSelectedElement(null)}
@@ -607,6 +612,12 @@ const VisualEditor: FC<{}> = () => {
           </VisualEditorSection>
         )}
 
+        {error ? (
+          <div ref={errorContainerRef}>
+            <ErrorDisplay error={error} cspError={cspError} />
+          </div>
+        ) : null}
+
         <div className="gb-m-4 gb-text-center">
           <BackToGBButton experimentUrl={experimentUrl}>
             Done Editing
@@ -620,16 +631,6 @@ const VisualEditor: FC<{}> = () => {
             hasAiEnabled={hasAiEnabled}
           />
         </div>
-
-        {error || cspError ? (
-          <div ref={errorContainerRef}>
-            {error ? (
-              <div className="gb-p-4 gb-text-red-400">{error}</div>
-            ) : (
-              <CSPErrorText cspError={cspError} />
-            )}
-          </div>
-        ) : null}
       </VisualEditorPane>
 
       {/** Overlays for highlighting selected/hovered elements **/}

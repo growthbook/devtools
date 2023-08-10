@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { VisualEditorVariation } from "../..";
 import {
+  ErrorCode,
   CopyMode,
   Message,
   APIVisualChangeset,
@@ -10,14 +11,9 @@ import {
   LoadVisualChangesetRequestMessage,
 } from "../../../../devtools";
 
-const genHeaders = (apiKey: string) => ({
-  Authorization: `Basic ${btoa(apiKey + ":")}`,
-  ["Content-Type"]: "application/json",
-});
-
 export type CSPError = {
   violatedDirective: string;
-} | null;
+};
 
 export type TransformCopyFn = (copy: string, mode: CopyMode) => void;
 
@@ -30,24 +26,23 @@ type UseApiHook = (args: {
   visualChangeset: APIVisualChangeset | null;
   experiment: APIExperiment | null;
   transformedCopy: string | null;
-  error: string;
-  cspError: CSPError;
+  error: ErrorCode | null;
+  cspError: CSPError | null;
   updateVisualChangeset: (variations: VisualEditorVariation[]) => void;
   transformCopy: (copy: string, mode: CopyMode) => void;
 };
 
 const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
-  const [error, setError] = useState("");
+  const [error, setError] = useState<ErrorCode | null>(null);
   const [loading, setLoading] = useState(false);
-  const [cspError, setCSPError] = useState<CSPError>(null);
+  const [cspError, setCSPError] = useState<CSPError | null>(null);
   const [visualChangeset, setVisualChangeset] =
     useState<APIVisualChangeset | null>(null);
   const [experiment, setExperiment] = useState<APIExperiment | null>(null);
   const [transformedCopy, setTransformedCopy] = useState<string | null>(null);
 
   document.addEventListener("securitypolicyviolation", (e) => {
-    setError("");
-
+    setError("csp-error");
     if (apiHost && e.blockedURI.includes(apiHost)) {
       setCSPError({
         violatedDirective: e.violatedDirective,
@@ -58,9 +53,9 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
   useEffect(() => {
     if (!apiHost || !visualChangesetId) return;
 
+    // handle responses from background script
     const messageHandler = (event: MessageEvent<Message>) => {
       const msg = event.data;
-
       switch (msg.type) {
         case "GB_RESPONSE_LOAD_VISUAL_CHANGESET":
           if (msg.data.error) setError(msg.data.error);
@@ -77,7 +72,8 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
           break;
         case "GB_RESPONSE_TRANSFORM_COPY":
           if (msg.data.error) setError(msg.data.error);
-          if (msg.data.dailyLimitReached) setError("Daily limit reached");
+          if (msg.data.dailyLimitReached)
+            setError("transform-copy-daily-limit-reached");
           if (msg.data.transformed) setTransformedCopy(msg.data.transformed);
           setLoading(false);
           break;
@@ -89,7 +85,6 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
     window.addEventListener("message", messageHandler);
 
     // load visual changeset on initial load
-    // TODO pull into its own method
     setLoading(true);
 
     const loadVisualChangesetMessage: LoadVisualChangesetRequestMessage = {
@@ -108,7 +103,7 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
   const updateVisualChangeset = useCallback(
     async (variations: VisualEditorVariation[]) => {
       setLoading(true);
-      setError("");
+      setError(null);
 
       const updatePayload: Partial<APIVisualChangeset> = {
         visualChanges: variations.map((v) => ({
@@ -138,7 +133,7 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
   const transformCopy = useCallback(
     async (copy: string, mode: CopyMode) => {
       setLoading(true);
-      setError("");
+      setError(null);
 
       const transformCopyMessage: TransformCopyRequestMessage = {
         type: "GB_REQUEST_TRANSFORM_COPY",

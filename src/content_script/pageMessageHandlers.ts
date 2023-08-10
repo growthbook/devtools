@@ -7,7 +7,6 @@ import {
   UpdateVisualChangesetRequestMessage,
   TransformCopyRequestMessage,
   BGTransformCopyMessage,
-  ApiTransformCopyResponse,
   BGLoadVisualChangsetMessage,
   UpdateVisualChangesetResponseMessage,
   LoadVisualChangesetResponseMessage,
@@ -15,6 +14,7 @@ import {
 } from "../../devtools";
 import {
   FetchVisualChangesetPayload,
+  TransformCopyPayload,
   UpdateVisualChangesetPayload,
 } from "../background";
 import {
@@ -118,7 +118,7 @@ export const visualEditorUpdateChangesetRequest = (
 export const visualEditorTransformCopyRequest = (
   msg: TransformCopyRequestMessage
 ) => {
-  chrome.runtime.sendMessage<BGTransformCopyMessage, ApiTransformCopyResponse>(
+  chrome.runtime.sendMessage<BGTransformCopyMessage, TransformCopyPayload>(
     {
       type: "BG_TRANSFORM_COPY",
       data: {

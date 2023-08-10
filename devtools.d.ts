@@ -4,13 +4,17 @@ import type {
   ExperimentOverride,
 } from "@growthbook/growthbook";
 import {
+  BGErrorCode,
   FetchVisualChangesetPayload,
+  TransformCopyPayload,
   UpdateVisualChangesetPayload,
 } from "./src/background";
 
 export type DebugLogs = [string, any][];
 
 export type CopyMode = "energetic" | "concise" | "humorous";
+
+export type ErrorCode = "csp-error" | BGErrorCode;
 
 export interface APIExperiment {
   id: string;
@@ -51,18 +55,6 @@ export interface APIVisualChangeset {
 
 export type APIVisualChange = APIVisualChangeset["visualChanges"][number];
 export type APIDomMutation = APIVisualChange["domMutations"][number];
-
-export type ApiTransformCopyResponse =
-  | {
-      transformed: string;
-      dailyLimitReached: boolean;
-      error: null;
-    }
-  | {
-      transformed: null;
-      dailyLimitReached: null;
-      error: string;
-    };
 
 export type RequestRefreshMessage = {
   type: "GB_REQUEST_REFRESH";
@@ -137,7 +129,11 @@ type TransformCopyRequestMessage = {
 
 type TransformCopyResponseMessage = {
   type: "GB_RESPONSE_TRANSFORM_COPY";
-  data: ApiTransformCopyResponse;
+  data: TransformCopyPayload;
+};
+
+type OpenOptionsPageMessage = {
+  type: "GB_OPEN_OPTIONS_PAGE";
 };
 
 // Messages sent to content script
@@ -153,7 +149,8 @@ export type Message =
   | UpdateVisualChangesetRequestMessage
   | UpdateVisualChangesetResponseMessage
   | TransformCopyRequestMessage
-  | TransformCopyResponseMessage;
+  | TransformCopyResponseMessage
+  | OpenOptionsPageMessage;
 
 export type BGLoadVisualChangsetMessage = {
   type: "BG_LOAD_VISUAL_CHANGESET";
@@ -182,8 +179,14 @@ export type BGTransformCopyMessage = {
   };
 };
 
+export type BGOpenOptionsPageMessage = {
+  type: "BG_OPEN_OPTIONS_PAGE";
+  data: null;
+};
+
 // Messages sent to background script
 export type BGMessage =
   | BGLoadVisualChangsetMessage
   | BGUpdateVisualChangsetMessage
-  | BGTransformCopyMessage;
+  | BGTransformCopyMessage
+  | BGOpenOptionsPageMessage;
