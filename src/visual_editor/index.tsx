@@ -25,6 +25,7 @@ import {
 import getSelector from "./lib/getSelector";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
 import useApi from "./lib/hooks/useApi";
+import useQueryParams from "./lib/hooks/useQueryParams";
 
 import Toolbar, { ToolbarMode } from "./Toolbar";
 import ElementDetails from "./ElementDetails";
@@ -48,7 +49,6 @@ import BackToGBButton from "./BackToGBButton";
 import AIEditorSection from "./AIEditorSection";
 import AICopySuggestor from "./AICopySuggestor";
 import "./targetPage.css";
-import useQueryParams from "./lib/hooks/useQueryParams";
 
 declare global {
   interface Window {

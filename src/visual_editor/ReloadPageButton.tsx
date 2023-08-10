@@ -56,7 +56,7 @@ const ReloadPageButton: FC<{
       className="gb-text-light gb-text-xs gb-mt-2"
       onClick={() =>
         refreshWithParams({
-          apiHost: apiHost,
+          apiHost,
           experimentUrl,
           params,
           variationIndex: variationIndex.toString(),
