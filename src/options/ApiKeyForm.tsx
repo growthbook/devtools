@@ -25,7 +25,7 @@ const ApiKeyForm: FC<{
       <label className="gb-flex gb-flex-col">
         <span className="gb-text-xs gb-px-1">API Host</span>
         <input
-          placeholder="secret_xyz..."
+          placeholder="https://api.growthbook.io"
           className="gb-border gb-p-2 gb-rounded gb-mb-4 gb-text-black"
           type="text"
           value={_apiHost}
