@@ -2,7 +2,7 @@ const NAMESPACE = "gb-devtools";
 const VERSION = "v1";
 const API_HOST = `${NAMESPACE}-${VERSION}-api-host`;
 const API_KEY = `${NAMESPACE}-${VERSION}-api-key`;
-const EXPERIMENT_URL = `${NAMESPACE}-${VERSION}-experiment-url`;
+const APP_ORIGIN = `${NAMESPACE}-${VERSION}-app-origin`;
 
 export const loadApiKey = async () => {
   const result = await chrome.storage.sync.get([API_KEY]);
@@ -28,15 +28,13 @@ export const saveApiHost = async (apiHost: string) => {
   return result[API_HOST];
 };
 
-export const clearApiHost = () => chrome.storage.sync.remove([API_HOST]);
-
-export const loadExperimentUrl = async () => {
-  const result = await chrome.storage.sync.get([EXPERIMENT_URL]);
-  return result[EXPERIMENT_URL] || null;
+export const loadAppOrigin = async () => {
+  const result = await chrome.storage.sync.get([APP_ORIGIN]);
+  return result[APP_ORIGIN] || null;
 };
 
-export const saveExperimentUrl = async (experimentUrl: string) => {
-  await chrome.storage.sync.set({ [EXPERIMENT_URL]: experimentUrl });
-  const result = await chrome.storage.sync.get([EXPERIMENT_URL]);
-  return result[EXPERIMENT_URL];
+export const saveAppOrigin = async (appOrigin: string) => {
+  await chrome.storage.sync.set({ [APP_ORIGIN]: appOrigin });
+  const result = await chrome.storage.sync.get([APP_ORIGIN]);
+  return result[APP_ORIGIN];
 };

@@ -7,7 +7,8 @@ import {
 import {
   loadApiHost,
   loadApiKey,
-  loadExperimentUrl,
+  loadAppOrigin,
+  saveAppOrigin,
 } from "./visual_editor/lib/storage";
 
 const genHeaders = (apiKey: string) => ({
@@ -42,11 +43,7 @@ const fetchVisualChangeset = async ({
   visualChangesetId: string;
 }): Promise<FetchVisualChangesetPayload> => {
   try {
-    const [apiHost, apiKey, experimentUrl] = await Promise.all([
-      loadApiHost(),
-      loadApiKey(),
-      loadExperimentUrl(),
-    ]);
+    const [apiHost, apiKey] = await Promise.all([loadApiHost(), loadApiKey()]);
 
     if (!apiKey || !apiHost)
       throw new Error(!apiKey ? "no-api-key" : "no-api-host");
@@ -65,10 +62,23 @@ const fetchVisualChangeset = async ({
 
     const { visualChangeset, experiment } = res;
 
+    let appOrigin: string | null = await loadAppOrigin();
+    // fetch latest appOrigin to keep up to date
+    try {
+      appOrigin = await fetch(apiHost)
+        .then((res) => res.json())
+        .then((json) => json.app_origin);
+      if (appOrigin) await saveAppOrigin(appOrigin);
+    } catch (e) {
+      // fail silently
+    }
+
     return {
       visualChangeset,
       experiment,
-      experimentUrl,
+      experimentUrl: appOrigin
+        ? `${appOrigin}/experiment/${experiment.id}`
+        : null,
       error: null,
     };
   } catch (e: any) {

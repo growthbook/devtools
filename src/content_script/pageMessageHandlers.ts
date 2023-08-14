@@ -17,15 +17,8 @@ import {
   TransformCopyPayload,
   UpdateVisualChangesetPayload,
 } from "../background";
-import {
-  VISUAL_CHANGESET_ID_PARAMS_KEY,
-  EXPERIMENT_URL_PARAMS_KEY,
-} from "../visual_editor/lib/constants";
-import {
-  saveApiHost,
-  saveApiKey,
-  saveExperimentUrl,
-} from "../visual_editor/lib/storage";
+import { VISUAL_CHANGESET_ID_PARAMS_KEY } from "../visual_editor/lib/constants";
+import { saveApiHost, saveApiKey } from "../visual_editor/lib/storage";
 
 export const genericDevtoolsMessagePassThrough = (
   message: RefreshMessage | ErrorMessage
@@ -49,7 +42,6 @@ export const visualEditorOpenRequest = (
 
   saveApiHost(message.data.apiHost);
   saveApiKey(message.data.apiKey);
-  saveExperimentUrl(message.data.experimentUrl);
 
   window.postMessage(
     { type: "GB_RESPONSE_OPEN_VISUAL_EDITOR" },
