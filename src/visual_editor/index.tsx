@@ -121,7 +121,6 @@ const VisualEditor: FC<{}> = () => {
     params,
     visualChangesetId,
     variationIndex,
-    experimentUrl,
     hasAiEnabled,
     cleanUpParams,
   } = useQueryParams();
@@ -146,11 +145,13 @@ const VisualEditor: FC<{}> = () => {
     rightAligned: true,
   });
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
+
   const {
     error,
     cspError,
     loading,
     experiment,
+    experimentUrl,
     visualChangeset,
     transformedCopy,
     transformCopy,
@@ -159,6 +160,7 @@ const VisualEditor: FC<{}> = () => {
     visualChangesetId,
     hasAiEnabled,
   });
+
   const [customJsError, setCustomJsError] = useState("");
   const errorContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -622,7 +624,6 @@ const VisualEditor: FC<{}> = () => {
           </BackToGBButton>
           <ReloadPageButton
             params={params}
-            experimentUrl={experimentUrl}
             variationIndex={variationIndex}
             visualChangesetId={visualChangesetId}
             hasAiEnabled={hasAiEnabled}

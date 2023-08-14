@@ -24,6 +24,7 @@ type UseApiHook = (args: {
   loading: boolean;
   visualChangeset: APIVisualChangeset | null;
   experiment: APIExperiment | null;
+  experimentUrl: string | null;
   transformedCopy: string | null;
   error: ErrorCode | null;
   cspError: CSPError | null;
@@ -38,6 +39,7 @@ const useApi: UseApiHook = ({ visualChangesetId }) => {
   const [visualChangeset, setVisualChangeset] =
     useState<APIVisualChangeset | null>(null);
   const [experiment, setExperiment] = useState<APIExperiment | null>(null);
+  const [experimentUrl, setExperimentUrl] = useState<string | null>(null);
   const [transformedCopy, setTransformedCopy] = useState<string | null>(null);
 
   document.addEventListener("securitypolicyviolation", (e) => {
@@ -59,6 +61,7 @@ const useApi: UseApiHook = ({ visualChangesetId }) => {
           else {
             setVisualChangeset(msg.data.visualChangeset);
             setExperiment(msg.data.experiment);
+            setExperimentUrl(msg.data.experimentUrl);
           }
           setLoading(false);
           break;
@@ -151,6 +154,7 @@ const useApi: UseApiHook = ({ visualChangesetId }) => {
     loading,
     visualChangeset,
     experiment,
+    experimentUrl,
     transformedCopy,
     error,
     cspError,

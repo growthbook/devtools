@@ -36,7 +36,7 @@
     "style-to-object": "^0.4.1"
   },
   "devDependencies": {
-    "@types/chrome": "0.0.158",
+    "@types/chrome": "^0.0.243",
     "@types/jest": "^27.0.2",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",

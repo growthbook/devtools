@@ -12,7 +12,6 @@ type UseQueryParamsHook = () => {
   params: qs.ParsedQuery;
   visualChangesetId: string;
   variationIndex: number;
-  experimentUrl: string;
   hasAiEnabled: boolean;
   cleanUpParams: () => void;
 };
@@ -39,10 +38,11 @@ const cleanUpParams = (params: qs.ParsedQuery) => () => {
         ...params,
         [VISUAL_CHANGESET_ID_PARAMS_KEY]: undefined,
         [VARIATION_INDEX_PARAMS_KEY]: undefined,
-        [EXPERIMENT_URL_PARAMS_KEY]: undefined,
         [AI_ENABLED_PARAMS_KEY]: undefined,
-        // depcrecated but still in use by old versions of GB app
+        // deprecated but still in use by old versions of GB app
         [API_HOST_PARAMS_KEY]: undefined,
+        // deprecated but still in use by old versions of GB app
+        [EXPERIMENT_URL_PARAMS_KEY]: undefined,
       },
     })
   );
@@ -56,9 +56,6 @@ const useQueryParams: UseQueryParamsHook = () => {
   const [variationIndex] = useState(
     getVariationIndexFromParams(params[VARIATION_INDEX_PARAMS_KEY])
   );
-  const [experimentUrl] = useState(
-    decodeURIComponent((params[EXPERIMENT_URL_PARAMS_KEY] || "") as string)
-  );
   const [hasAiEnabled] = useState(
     decodeURIComponent((params[AI_ENABLED_PARAMS_KEY] || "") as string) ===
       "true"
@@ -67,7 +64,6 @@ const useQueryParams: UseQueryParamsHook = () => {
     params,
     visualChangesetId,
     variationIndex,
-    experimentUrl,
     hasAiEnabled,
     cleanUpParams: cleanUpParams(params),
   };

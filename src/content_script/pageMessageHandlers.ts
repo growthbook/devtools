@@ -21,7 +21,11 @@ import {
   VISUAL_CHANGESET_ID_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
 } from "../visual_editor/lib/constants";
-import { saveApiHost, saveApiKey } from "../visual_editor/lib/storage";
+import {
+  saveApiHost,
+  saveApiKey,
+  saveExperimentUrl,
+} from "../visual_editor/lib/storage";
 
 export const genericDevtoolsMessagePassThrough = (
   message: RefreshMessage | ErrorMessage
@@ -45,6 +49,7 @@ export const visualEditorOpenRequest = (
 
   saveApiHost(message.data.apiHost);
   saveApiKey(message.data.apiKey);
+  saveExperimentUrl(message.data.experimentUrl);
 
   window.postMessage(
     { type: "GB_RESPONSE_OPEN_VISUAL_EDITOR" },
@@ -56,15 +61,13 @@ export const visualEditorOpenRequest = (
 export const loadVisualEditorQueryParams = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const visualChangesetId = urlParams.get(VISUAL_CHANGESET_ID_PARAMS_KEY);
-  const experimentUrl = urlParams.get(EXPERIMENT_URL_PARAMS_KEY);
 
-  if (!visualChangesetId || !experimentUrl) {
+  if (!visualChangesetId) {
     return null;
   }
 
   return {
     visualChangesetId: decodeURIComponent(visualChangesetId),
-    experimentUrl: decodeURIComponent(experimentUrl),
   };
 };
 

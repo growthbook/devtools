@@ -4,7 +4,11 @@ import {
   BGMessage,
   CopyMode,
 } from "../devtools";
-import { loadApiHost, loadApiKey } from "./visual_editor/lib/storage";
+import {
+  loadApiHost,
+  loadApiKey,
+  loadExperimentUrl,
+} from "./visual_editor/lib/storage";
 
 const genHeaders = (apiKey: string) => ({
   Authorization: `Basic ${btoa(apiKey + ":")}`,
@@ -23,6 +27,7 @@ export type FetchVisualChangesetPayload =
   | {
       visualChangeset: APIVisualChangeset;
       experiment: APIExperiment;
+      experimentUrl: string | null;
       error: null;
     }
   | {
@@ -37,8 +42,11 @@ const fetchVisualChangeset = async ({
   visualChangesetId: string;
 }): Promise<FetchVisualChangesetPayload> => {
   try {
-    const apiHost = await loadApiHost();
-    const apiKey = await loadApiKey();
+    const [apiHost, apiKey, experimentUrl] = await Promise.all([
+      loadApiHost(),
+      loadApiKey(),
+      loadExperimentUrl(),
+    ]);
 
     if (!apiKey || !apiHost)
       throw new Error(!apiKey ? "no-api-key" : "no-api-host");
@@ -56,9 +64,11 @@ const fetchVisualChangeset = async ({
       throw new Error(res.message ?? response.statusText);
 
     const { visualChangeset, experiment } = res;
+
     return {
       visualChangeset,
       experiment,
+      experimentUrl,
       error: null,
     };
   } catch (e: any) {
@@ -96,8 +106,7 @@ const updateVisualChangeset = async ({
   updatePayload: Partial<APIVisualChangeset>;
 }): Promise<UpdateVisualChangesetPayload> => {
   try {
-    const apiHost = await loadApiHost();
-    const apiKey = await loadApiKey();
+    const [apiHost, apiKey] = await Promise.all([loadApiHost(), loadApiKey()]);
 
     if (!apiKey || !apiHost)
       throw new Error(!apiKey ? "no-api-key" : "no-api-host");
@@ -159,8 +168,7 @@ const transformCopy = async ({
   mode: CopyMode;
 }): Promise<TransformCopyPayload> => {
   try {
-    const apiKey = await loadApiKey();
-    const apiHost = await loadApiHost();
+    const [apiHost, apiKey] = await Promise.all([loadApiHost(), loadApiKey()]);
 
     if (!apiKey || !apiHost)
       throw new Error(!apiKey ? "no-api-key" : "no-api-host");

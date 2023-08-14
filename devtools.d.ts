@@ -85,6 +85,7 @@ type OpenVisualEditorRequestMessage = {
   data: {
     apiHost: string;
     apiKey: string;
+    experimentUrl: string;
   };
 };
 
