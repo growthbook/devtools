@@ -32,17 +32,20 @@ const ErrorDisplay: FC<{ error: ErrorCode; cspError: CSPError | null }> = ({
     case "no-api-host":
     case "no-api-key":
       return (
-        <div className="gb-p-4 gb-text-red-400">
-          GrowthBook API credentials did not reach the Chrome Extension. Please
-          set your API host and key in the{" "}
-          <a
-            className="gb-underline"
-            href="#"
-            onClick={() => openOptionsPage()}
-          >
-            Chrome Extension Options page
-          </a>
-          .
+        <div className="gb-p-4 gb-text-red-400 gb-text-sm">
+          <p className="gb-mb-2">
+            GrowthBook API credentials did not reach the Chrome Extension.
+          </p>
+          <p>
+            Please set your API host and key in the{" "}
+            <a
+              className="gb-underline gb-cursor-pointer"
+              onClick={() => openOptionsPage()}
+            >
+              Chrome Extension Options
+            </a>{" "}
+            and reload the page.
+          </p>
         </div>
       );
     case "csp-error":

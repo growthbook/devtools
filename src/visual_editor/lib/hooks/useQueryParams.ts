@@ -5,6 +5,7 @@ import {
   VARIATION_INDEX_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
   AI_ENABLED_PARAMS_KEY,
+  API_HOST_PARAMS_KEY,
 } from "../../lib/constants";
 
 type UseQueryParamsHook = () => {
@@ -40,6 +41,8 @@ const cleanUpParams = (params: qs.ParsedQuery) => () => {
         [VARIATION_INDEX_PARAMS_KEY]: undefined,
         [EXPERIMENT_URL_PARAMS_KEY]: undefined,
         [AI_ENABLED_PARAMS_KEY]: undefined,
+        // depcrecated but still in use by old versions of GB app
+        [API_HOST_PARAMS_KEY]: undefined,
       },
     })
   );
