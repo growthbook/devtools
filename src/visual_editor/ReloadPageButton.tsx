@@ -4,7 +4,6 @@ import {
   VISUAL_CHANGESET_ID_PARAMS_KEY,
   VARIATION_INDEX_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
-  API_HOST_PARAMS_KEY,
   AI_ENABLED_PARAMS_KEY,
 } from "./lib/constants";
 
@@ -12,14 +11,12 @@ const refreshWithParams = ({
   visualChangesetId,
   variationIndex,
   experimentUrl,
-  apiHost,
   params,
   hasAiEnabled,
 }: {
   visualChangesetId: string;
   variationIndex: string;
   experimentUrl: string;
-  apiHost: string;
   params: qs.ParsedQuery;
   hasAiEnabled: boolean;
 }) => {
@@ -30,7 +27,6 @@ const refreshWithParams = ({
       [VISUAL_CHANGESET_ID_PARAMS_KEY]: visualChangesetId,
       [VARIATION_INDEX_PARAMS_KEY]: variationIndex,
       [EXPERIMENT_URL_PARAMS_KEY]: experimentUrl,
-      [API_HOST_PARAMS_KEY]: apiHost,
       [AI_ENABLED_PARAMS_KEY]: hasAiEnabled,
     },
   });
@@ -38,14 +34,12 @@ const refreshWithParams = ({
 
 const ReloadPageButton: FC<{
   params: qs.ParsedQuery<string>;
-  apiHost: string;
   experimentUrl: string;
   variationIndex: number;
   visualChangesetId: string;
   hasAiEnabled: boolean;
 }> = ({
   params,
-  apiHost,
   experimentUrl,
   variationIndex,
   visualChangesetId,
@@ -56,7 +50,6 @@ const ReloadPageButton: FC<{
       className="gb-text-light gb-text-xs gb-mt-2"
       onClick={() =>
         refreshWithParams({
-          apiHost,
           experimentUrl,
           params,
           variationIndex: variationIndex.toString(),

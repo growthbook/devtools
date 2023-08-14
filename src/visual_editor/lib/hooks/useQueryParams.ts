@@ -4,7 +4,6 @@ import {
   VISUAL_CHANGESET_ID_PARAMS_KEY,
   VARIATION_INDEX_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
-  API_HOST_PARAMS_KEY,
   AI_ENABLED_PARAMS_KEY,
 } from "../../lib/constants";
 
@@ -13,7 +12,6 @@ type UseQueryParamsHook = () => {
   visualChangesetId: string;
   variationIndex: number;
   experimentUrl: string;
-  apiHost: string;
   hasAiEnabled: boolean;
   cleanUpParams: () => void;
 };
@@ -41,7 +39,6 @@ const cleanUpParams = (params: qs.ParsedQuery) => () => {
         [VISUAL_CHANGESET_ID_PARAMS_KEY]: undefined,
         [VARIATION_INDEX_PARAMS_KEY]: undefined,
         [EXPERIMENT_URL_PARAMS_KEY]: undefined,
-        [API_HOST_PARAMS_KEY]: undefined,
         [AI_ENABLED_PARAMS_KEY]: undefined,
       },
     })
@@ -59,9 +56,6 @@ const useQueryParams: UseQueryParamsHook = () => {
   const [experimentUrl] = useState(
     decodeURIComponent((params[EXPERIMENT_URL_PARAMS_KEY] || "") as string)
   );
-  const [apiHost] = useState(
-    decodeURIComponent((params[API_HOST_PARAMS_KEY] || "") as string)
-  );
   const [hasAiEnabled] = useState(
     decodeURIComponent((params[AI_ENABLED_PARAMS_KEY] || "") as string) ===
       "true"
@@ -71,7 +65,6 @@ const useQueryParams: UseQueryParamsHook = () => {
     visualChangesetId,
     variationIndex,
     experimentUrl,
-    apiHost,
     hasAiEnabled,
     cleanUpParams: cleanUpParams(params),
   };

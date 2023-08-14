@@ -122,7 +122,6 @@ const VisualEditor: FC<{}> = () => {
     visualChangesetId,
     variationIndex,
     experimentUrl,
-    apiHost,
     hasAiEnabled,
     cleanUpParams,
   } = useQueryParams();
@@ -157,7 +156,6 @@ const VisualEditor: FC<{}> = () => {
     transformCopy,
     updateVisualChangeset,
   } = useApi({
-    apiHost,
     visualChangesetId,
     hasAiEnabled,
   });
@@ -624,7 +622,6 @@ const VisualEditor: FC<{}> = () => {
           </BackToGBButton>
           <ReloadPageButton
             params={params}
-            apiHost={apiHost}
             experimentUrl={experimentUrl}
             variationIndex={variationIndex}
             visualChangesetId={visualChangesetId}

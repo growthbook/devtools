@@ -1,5 +1,6 @@
 const NAMESPACE = "gb-devtools";
 const VERSION = "v1";
+const API_HOST = `${NAMESPACE}-${VERSION}-api-host`;
 const API_KEY = `${NAMESPACE}-${VERSION}-api-key`;
 
 export const loadApiKey = async () => {
@@ -14,3 +15,14 @@ export const saveApiKey = async (apiKey: string) => {
 };
 
 export const clearApiKey = () => chrome.storage.sync.remove([API_KEY]);
+
+export const loadApiHost = async () => {
+  const result = await chrome.storage.sync.get([API_HOST]);
+  return result[API_HOST] || null;
+};
+
+export const saveApiHost = async (apiHost: string) => {
+  await chrome.storage.sync.set({ [API_HOST]: apiHost });
+  const result = await chrome.storage.sync.get([API_HOST]);
+  return result[API_HOST];
+};

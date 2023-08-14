@@ -4,7 +4,7 @@ import {
   BGMessage,
   CopyMode,
 } from "../devtools";
-import { loadApiKey } from "./visual_editor/lib/storage";
+import { loadApiHost, loadApiKey } from "./visual_editor/lib/storage";
 
 const genHeaders = (apiKey: string) => ({
   Authorization: `Basic ${btoa(apiKey + ":")}`,
@@ -13,6 +13,7 @@ const genHeaders = (apiKey: string) => ({
 
 export type BGErrorCode =
   | "no-api-key"
+  | "no-api-host"
   | "load-viz-changeset-failed"
   | "update-viz-changeset-failed"
   | "transform-copy-failed"
@@ -31,22 +32,16 @@ export type FetchVisualChangesetPayload =
     };
 
 const fetchVisualChangeset = async ({
-  apiHost,
   visualChangesetId,
 }: {
-  apiHost: string;
   visualChangesetId: string;
 }): Promise<FetchVisualChangesetPayload> => {
   try {
+    const apiHost = await loadApiHost();
     const apiKey = await loadApiKey();
 
-    if (!apiKey) {
-      return {
-        visualChangeset: null,
-        experiment: null,
-        error: "no-api-key",
-      };
-    }
+    if (!apiKey || !apiHost)
+      throw new Error(!apiKey ? "no-api-key" : "no-api-host");
 
     const response = await fetch(
       `${apiHost}/api/v1/visual-changesets/${visualChangesetId}?includeExperiment=1`,
@@ -66,11 +61,17 @@ const fetchVisualChangeset = async ({
       experiment,
       error: null,
     };
-  } catch (e) {
+  } catch (e: any) {
+    let error: BGErrorCode = "load-viz-changeset-failed";
+
+    if (e.message === "no-api-key" || e.message === "no-api-host") {
+      error = e.message;
+    }
+
     return {
       visualChangeset: null,
       experiment: null,
-      error: "load-viz-changeset-failed",
+      error,
     };
   }
 };
@@ -88,24 +89,18 @@ export type UpdateVisualChangesetPayload =
     };
 
 const updateVisualChangeset = async ({
-  apiHost,
   visualChangesetId,
   updatePayload,
 }: {
-  apiHost: string;
   visualChangesetId: string;
   updatePayload: Partial<APIVisualChangeset>;
 }): Promise<UpdateVisualChangesetPayload> => {
   try {
+    const apiHost = await loadApiHost();
     const apiKey = await loadApiKey();
 
-    if (!apiKey) {
-      return {
-        nModified: 0,
-        visualChangeset: null,
-        error: "no-api-key",
-      };
-    }
+    if (!apiKey || !apiHost)
+      throw new Error(!apiKey ? "no-api-key" : "no-api-host");
 
     const resp = await fetch(
       `${apiHost}/api/v1/visual-changesets/${visualChangesetId}`,
@@ -125,11 +120,17 @@ const updateVisualChangeset = async ({
       visualChangeset: res.visualChangeset,
       error: null,
     };
-  } catch (e) {
+  } catch (e: any) {
+    let error: BGErrorCode = "update-viz-changeset-failed";
+
+    if (e.message === "no-api-key" || e.message === "no-api-host") {
+      error = e.message;
+    }
+
     return {
       nModified: 0,
       visualChangeset: null,
-      error: "update-viz-changeset-failed",
+      error,
     };
   }
 };
@@ -149,27 +150,20 @@ export type TransformCopyPayload =
     };
 
 const transformCopy = async ({
-  apiHost,
   visualChangesetId,
   copy,
   mode,
 }: {
-  apiHost: string;
   visualChangesetId: string;
   copy: string;
   mode: CopyMode;
 }): Promise<TransformCopyPayload> => {
   try {
     const apiKey = await loadApiKey();
+    const apiHost = await loadApiHost();
 
-    if (!apiKey) {
-      return {
-        visualChangeset: null,
-        transformed: null,
-        dailyLimitReached: null,
-        error: "no-api-key",
-      };
-    }
+    if (!apiKey || !apiHost)
+      throw new Error(!apiKey ? "no-api-key" : "no-api-host");
 
     const response = await fetch(`${apiHost}/api/v1/transform-copy`, {
       headers: genHeaders(apiKey),
@@ -192,19 +186,25 @@ const transformCopy = async ({
       dailyLimitReached: !!res.dailyLimitReached,
       error: null,
     };
-  } catch (e) {
+  } catch (e: any) {
+    let error: BGErrorCode = "transform-copy-failed";
+
+    if (e.message === "no-api-key" || e.message === "no-api-host") {
+      error = e.message;
+    }
+
     return {
       visualChangeset: null,
       transformed: null,
       dailyLimitReached: null,
-      error: "transform-copy-failed",
+      error,
     };
   }
 };
 
 /**
  * Listen for messages from the devtools. We have to keep the handler synchronous
- * so we can return true to indicate an async response.
+ * so we can return true to indicate an async response to chrome.
  */
 chrome.runtime.onMessage.addListener(
   (message: BGMessage, _sender, sendResponse) => {

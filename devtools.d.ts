@@ -82,7 +82,10 @@ export type ErrorMessage = {
 
 type OpenVisualEditorRequestMessage = {
   type: "GB_REQUEST_OPEN_VISUAL_EDITOR";
-  data: string;
+  data: {
+    apiHost: string;
+    apiKey: string;
+  };
 };
 
 type OpenVisualEditorResponseMessage = {
@@ -93,7 +96,6 @@ type OpenVisualEditorResponseMessage = {
 type LoadVisualChangesetRequestMessage = {
   type: "GB_REQUEST_LOAD_VISUAL_CHANGESET";
   data: {
-    apiHost: string;
     visualChangesetId: string;
   };
 };
@@ -106,7 +108,6 @@ type LoadVisualChangesetResponseMessage = {
 type UpdateVisualChangesetRequestMessage = {
   type: "GB_REQUEST_UPDATE_VISUAL_CHANGESET";
   data: {
-    apiHost: string;
     visualChangesetId: string;
     updatePayload: Partial<APIVisualChangeset>;
   };
@@ -120,7 +121,6 @@ type UpdateVisualChangesetResponseMessage = {
 type TransformCopyRequestMessage = {
   type: "GB_REQUEST_TRANSFORM_COPY";
   data: {
-    apiHost: string;
     visualChangesetId: string;
     copy: string;
     mode: CopyMode;
@@ -155,7 +155,6 @@ export type Message =
 export type BGLoadVisualChangsetMessage = {
   type: "BG_LOAD_VISUAL_CHANGESET";
   data: {
-    apiHost: string;
     visualChangesetId: string;
   };
 };
@@ -163,7 +162,6 @@ export type BGLoadVisualChangsetMessage = {
 export type BGUpdateVisualChangsetMessage = {
   type: "BG_UPDATE_VISUAL_CHANGESET";
   data: {
-    apiHost: string;
     visualChangesetId: string;
     updatePayload: Partial<APIVisualChangeset>;
   };
@@ -172,7 +170,6 @@ export type BGUpdateVisualChangsetMessage = {
 export type BGTransformCopyMessage = {
   type: "BG_TRANSFORM_COPY";
   data: {
-    apiHost: string;
     visualChangesetId: string;
     copy: string;
     mode: CopyMode;

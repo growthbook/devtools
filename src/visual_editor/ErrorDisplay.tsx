@@ -29,10 +29,12 @@ const ErrorDisplay: FC<{ error: ErrorCode; cspError: CSPError | null }> = ({
   };
 
   switch (error) {
+    case "no-api-host":
     case "no-api-key":
       return (
         <div className="gb-p-4 gb-text-red-400">
-          No API key found. Please set your API key in the{" "}
+          GrowthBook API credentials did not reach the Chrome Extension. Please
+          set your API host and key in the{" "}
           <a
             className="gb-underline"
             href="#"

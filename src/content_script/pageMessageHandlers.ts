@@ -20,9 +20,8 @@ import {
 import {
   VISUAL_CHANGESET_ID_PARAMS_KEY,
   EXPERIMENT_URL_PARAMS_KEY,
-  API_HOST_PARAMS_KEY,
 } from "../visual_editor/lib/constants";
-import { saveApiKey } from "../visual_editor/lib/storage";
+import { saveApiHost, saveApiKey } from "../visual_editor/lib/storage";
 
 export const genericDevtoolsMessagePassThrough = (
   message: RefreshMessage | ErrorMessage
@@ -35,7 +34,18 @@ export const genericDevtoolsMessagePassThrough = (
 export const visualEditorOpenRequest = (
   message: OpenVisualEditorRequestMessage
 ) => {
-  saveApiKey(message.data);
+  if (!message.data?.apiKey || !message.data?.apiHost) {
+    // TODO send error message back
+    console.error(
+      "For some reason, the message data is missing either the API key or API host.",
+      message.data
+    );
+    return;
+  }
+
+  saveApiHost(message.data.apiHost);
+  saveApiKey(message.data.apiKey);
+
   window.postMessage(
     { type: "GB_RESPONSE_OPEN_VISUAL_EDITOR" },
     window.location.origin
@@ -47,16 +57,14 @@ export const loadVisualEditorQueryParams = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const visualChangesetId = urlParams.get(VISUAL_CHANGESET_ID_PARAMS_KEY);
   const experimentUrl = urlParams.get(EXPERIMENT_URL_PARAMS_KEY);
-  const apiHost = urlParams.get(API_HOST_PARAMS_KEY);
 
-  if (!visualChangesetId || !experimentUrl || !apiHost) {
+  if (!visualChangesetId || !experimentUrl) {
     return null;
   }
 
   return {
     visualChangesetId: decodeURIComponent(visualChangesetId),
     experimentUrl: decodeURIComponent(experimentUrl),
-    apiHost: decodeURIComponent(apiHost),
   };
 };
 
@@ -70,7 +78,6 @@ export const visualEditorLoadChangesetRequest = (
     {
       type: "BG_LOAD_VISUAL_CHANGESET",
       data: {
-        apiHost: msg.data.apiHost,
         visualChangesetId: msg.data.visualChangesetId,
       },
     },
@@ -97,7 +104,6 @@ export const visualEditorUpdateChangesetRequest = (
     {
       type: "BG_UPDATE_VISUAL_CHANGESET",
       data: {
-        apiHost: msg.data.apiHost,
         visualChangesetId: msg.data.visualChangesetId,
         updatePayload: msg.data.updatePayload,
       },
@@ -122,7 +128,9 @@ export const visualEditorTransformCopyRequest = (
     {
       type: "BG_TRANSFORM_COPY",
       data: {
-        ...msg.data,
+        visualChangesetId: msg.data.visualChangesetId,
+        copy: msg.data.copy,
+        mode: msg.data.mode,
       },
     },
     (resp) => {

@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
-import { loadApiKey, saveApiKey, clearApiKey } from "../storage";
+import {
+  loadApiHost,
+  saveApiHost,
+  loadApiKey,
+  saveApiKey,
+  clearApiKey,
+} from "../storage";
 
 export default () => {
   const [loading, setLoading] = useState(true);
   const [apiKey, setApiKey] = useState<string | null>(null);
+  const [apiHost, setApiHost] = useState<string | null>(null);
 
   const _loadApiKey = async () => {
     setApiKey(await loadApiKey());
+  };
+
+  const _loadApiHost = async () => {
+    setApiHost(await loadApiHost());
   };
 
   const _saveApiKey = async (apiKey: string) => {
@@ -16,6 +27,12 @@ export default () => {
     setApiKey(apiKey);
 
     setLoading(false);
+  };
+
+  const _saveApiHost = async (apiHost: string) => {
+    setLoading(true);
+    await saveApiHost(apiHost);
+    setApiHost(apiHost);
   };
 
   const _clearApiKey = async () => {
@@ -30,15 +47,17 @@ export default () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      await _loadApiKey();
+      await Promise.all([_loadApiKey(), _loadApiHost()]);
       setLoading(false);
     };
     load();
   }, []);
 
   return {
+    apiHost,
     apiKey,
     loading,
+    saveApiHost: _saveApiHost,
     saveApiKey: _saveApiKey,
     clearApiKey: _clearApiKey,
   };

@@ -18,7 +18,6 @@ export type CSPError = {
 export type TransformCopyFn = (copy: string, mode: CopyMode) => void;
 
 type UseApiHook = (args: {
-  apiHost: string;
   visualChangesetId: string;
   hasAiEnabled: boolean;
 }) => {
@@ -32,7 +31,7 @@ type UseApiHook = (args: {
   transformCopy: (copy: string, mode: CopyMode) => void;
 };
 
-const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
+const useApi: UseApiHook = ({ visualChangesetId }) => {
   const [error, setError] = useState<ErrorCode | null>(null);
   const [loading, setLoading] = useState(false);
   const [cspError, setCSPError] = useState<CSPError | null>(null);
@@ -43,15 +42,13 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
 
   document.addEventListener("securitypolicyviolation", (e) => {
     setError("csp-error");
-    if (apiHost && e.blockedURI.includes(apiHost)) {
-      setCSPError({
-        violatedDirective: e.violatedDirective,
-      });
-    }
+    setCSPError({
+      violatedDirective: e.violatedDirective,
+    });
   });
 
   useEffect(() => {
-    if (!apiHost || !visualChangesetId) return;
+    if (!visualChangesetId) return;
 
     // handle responses from background script
     const messageHandler = (event: MessageEvent<Message>) => {
@@ -91,7 +88,6 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
     const loadVisualChangesetMessage: LoadVisualChangesetRequestMessage = {
       type: "GB_REQUEST_LOAD_VISUAL_CHANGESET",
       data: {
-        apiHost,
         visualChangesetId,
       },
     };
@@ -99,7 +95,7 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
     window.postMessage(loadVisualChangesetMessage, window.location.origin);
 
     return () => window.removeEventListener("message", messageHandler);
-  }, [apiHost, visualChangesetId, setVisualChangeset, setExperiment]);
+  }, [visualChangesetId, setVisualChangeset, setExperiment]);
 
   const updateVisualChangeset = useCallback(
     async (variations: VisualEditorVariation[]) => {
@@ -120,7 +116,6 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
         {
           type: "GB_REQUEST_UPDATE_VISUAL_CHANGESET",
           data: {
-            apiHost,
             visualChangesetId,
             updatePayload,
           },
@@ -128,7 +123,7 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
 
       window.postMessage(updateVisualChangesetMessage, window.location.origin);
     },
-    [apiHost, visualChangesetId]
+    [visualChangesetId]
   );
 
   const transformCopy = useCallback(
@@ -139,7 +134,6 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
       const transformCopyMessage: TransformCopyRequestMessage = {
         type: "GB_REQUEST_TRANSFORM_COPY",
         data: {
-          apiHost,
           visualChangesetId,
           copy,
           mode,
@@ -148,7 +142,7 @@ const useApi: UseApiHook = ({ apiHost, visualChangesetId }) => {
 
       window.postMessage(transformCopyMessage, window.location.origin);
     },
-    [apiHost]
+    [visualChangesetId]
   );
 
   return {
