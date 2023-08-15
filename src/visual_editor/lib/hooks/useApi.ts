@@ -42,6 +42,7 @@ const useApi: UseApiHook = ({ visualChangesetId }) => {
   const [experimentUrl, setExperimentUrl] = useState<string | null>(null);
   const [transformedCopy, setTransformedCopy] = useState<string | null>(null);
 
+  // TODO refine this to only catch inline script errors
   document.addEventListener("securitypolicyviolation", (e) => {
     setError("csp-error");
     setCSPError({
