@@ -1,127 +1,109 @@
 import { useCallback, useEffect, useState } from "react";
 import { VisualEditorVariation } from "../..";
-import { ApiCreds } from "../../../../devtools";
-
-export type CopyMode = "energetic" | "concise" | "humorous";
-
-const genHeaders = (apiKey: string) => ({
-  Authorization: `Basic ${btoa(apiKey + ":")}`,
-  ["Content-Type"]: "application/json",
-});
-
-export interface APIExperiment {
-  id: string;
-  variations: {
-    variationId: string;
-    key: string;
-    name: string;
-    description: string;
-    screenshots: string[];
-  }[];
-}
-export type APIExperimentVariation = APIExperiment["variations"][number];
-
-export interface APIVisualChangeset {
-  id: string;
-  urlPatterns: {
-    include?: boolean;
-    /** @enum {string} */
-    type: "simple" | "exact" | "regex";
-    pattern: string;
-  }[];
-  editorUrl: string;
-  experiment: string;
-  visualChanges: {
-    description?: string;
-    css?: string;
-    js?: string;
-    variation: string;
-    domMutations: {
-      selector: string;
-      /** @enum {string} */
-      action: "append" | "set" | "remove";
-      attribute: string;
-      value?: string;
-    }[];
-  }[];
-}
-export type APIVisualChange = APIVisualChangeset["visualChanges"][number];
-export type APIDomMutation = APIVisualChange["domMutations"][number];
+import {
+  ErrorCode,
+  CopyMode,
+  Message,
+  APIVisualChangeset,
+  APIExperiment,
+  TransformCopyRequestMessage,
+  UpdateVisualChangesetRequestMessage,
+  LoadVisualChangesetRequestMessage,
+} from "../../../../devtools";
 
 export type CSPError = {
   violatedDirective: string;
-} | null;
-
-export type TransformCopyFn = (
-  copy: string,
-  mode: CopyMode
-) => Promise<{ transformed?: string; dailyLimitReached?: boolean }>;
-
-type UseApiHook = (creds: Partial<ApiCreds>) => {
-  fetchVisualChangeset?: (visualChangesetId: string) => Promise<{
-    visualChangeset?: APIVisualChangeset;
-    experiment?: APIExperiment;
-  }>;
-  updateVisualChangeset?: (
-    visualChangesetId: string,
-    payload: any
-  ) => Promise<{ nModified?: number }>;
-  transformCopy: TransformCopyFn;
-  error: string;
-  cspError: CSPError;
 };
 
-const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
-  const [error, setError] = useState("");
-  const [cspError, setCSPError] = useState<CSPError>(null);
+export type TransformCopyFn = (copy: string, mode: CopyMode) => void;
+
+type UseApiHook = (args: {
+  visualChangesetId: string;
+  hasAiEnabled: boolean;
+}) => {
+  loading: boolean;
+  visualChangeset: APIVisualChangeset | null;
+  experiment: APIExperiment | null;
+  experimentUrl: string | null;
+  transformedCopy: string | null;
+  error: ErrorCode | null;
+  cspError: CSPError | null;
+  updateVisualChangeset: (variations: VisualEditorVariation[]) => void;
+  transformCopy: (copy: string, mode: CopyMode) => void;
+};
+
+const useApi: UseApiHook = ({ visualChangesetId }) => {
+  const [error, setError] = useState<ErrorCode | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [cspError, setCSPError] = useState<CSPError | null>(null);
+  const [visualChangeset, setVisualChangeset] =
+    useState<APIVisualChangeset | null>(null);
+  const [experiment, setExperiment] = useState<APIExperiment | null>(null);
+  const [experimentUrl, setExperimentUrl] = useState<string | null>(null);
+  const [transformedCopy, setTransformedCopy] = useState<string | null>(null);
 
   document.addEventListener("securitypolicyviolation", (e) => {
-    setError("");
-
-    if (apiHost && e.blockedURI.includes(apiHost)) {
-      setCSPError({
-        violatedDirective: e.violatedDirective,
-      });
-    }
+    setError("csp-error");
+    setCSPError({
+      violatedDirective: e.violatedDirective,
+    });
   });
 
-  const fetchVisualChangeset = useCallback(
-    async (visualChangesetId: string) => {
-      if (!apiHost || !apiKey) return {};
+  useEffect(() => {
+    if (!visualChangesetId) return;
 
-      try {
-        const response = await fetch(
-          `${apiHost}/api/v1/visual-changesets/${visualChangesetId}?includeExperiment=1`,
-          {
-            headers: genHeaders(apiKey),
+    // handle responses from background script
+    const messageHandler = (event: MessageEvent<Message>) => {
+      const msg = event.data;
+      switch (msg.type) {
+        case "GB_RESPONSE_LOAD_VISUAL_CHANGESET":
+          if (msg.data.error) setError(msg.data.error);
+          else {
+            setVisualChangeset(msg.data.visualChangeset);
+            setExperiment(msg.data.experiment);
+            setExperimentUrl(msg.data.experimentUrl);
           }
-        );
-
-        if (response.status !== 200) throw new Error(response.statusText);
-
-        const res = await response.json();
-
-        const { visualChangeset, experiment } = res;
-
-        setError("");
-
-        return {
-          visualChangeset,
-          experiment,
-        };
-      } catch (e) {
-        setError(
-          "There was an error reaching the API. Please check your API key and host."
-        );
-        return {};
+          setLoading(false);
+          break;
+        case "GB_RESPONSE_UPDATE_VISUAL_CHANGESET":
+          if (msg.data.error) setError(msg.data.error);
+          // TODO uncomment when GB supports this
+          // else setVisualChangeset(msg.data.visualChangeset);
+          setLoading(false);
+          break;
+        case "GB_RESPONSE_TRANSFORM_COPY":
+          if (msg.data.error) setError(msg.data.error);
+          if (msg.data.dailyLimitReached)
+            setError("transform-copy-daily-limit-reached");
+          if (msg.data.transformed) setTransformedCopy(msg.data.transformed);
+          setLoading(false);
+          break;
+        default:
+          break;
       }
-    },
-    [apiHost, apiKey]
-  );
+    };
+
+    window.addEventListener("message", messageHandler);
+
+    // load visual changeset on initial load
+    setLoading(true);
+
+    const loadVisualChangesetMessage: LoadVisualChangesetRequestMessage = {
+      type: "GB_REQUEST_LOAD_VISUAL_CHANGESET",
+      data: {
+        visualChangesetId,
+      },
+    };
+
+    window.postMessage(loadVisualChangesetMessage, window.location.origin);
+
+    return () => window.removeEventListener("message", messageHandler);
+  }, [visualChangesetId, setVisualChangeset, setExperiment]);
 
   const updateVisualChangeset = useCallback(
-    async (visualChangesetId: string, variations: VisualEditorVariation[]) => {
-      if (!apiHost || !apiKey) return {};
+    async (variations: VisualEditorVariation[]) => {
+      setLoading(true);
+      setError(null);
 
       const updatePayload: Partial<APIVisualChangeset> = {
         visualChanges: variations.map((v) => ({
@@ -133,76 +115,47 @@ const useApi: UseApiHook = ({ apiKey, apiHost }: Partial<ApiCreds>) => {
         })),
       };
 
-      try {
-        const response = await fetch(
-          `${apiHost}/api/v1/visual-changesets/${visualChangesetId}`,
-          {
-            headers: genHeaders(apiKey),
-            method: "PUT",
-            body: JSON.stringify(updatePayload),
-          }
-        );
+      const updateVisualChangesetMessage: UpdateVisualChangesetRequestMessage =
+        {
+          type: "GB_REQUEST_UPDATE_VISUAL_CHANGESET",
+          data: {
+            visualChangesetId,
+            updatePayload,
+          },
+        };
 
-        if (response.status !== 200) throw new Error(response.statusText);
-
-        const res = await response.json();
-
-        setError("");
-
-        return { nModified: res.nModified };
-      } catch (e) {
-        setError(
-          "There was an error reaching the API. Please check your API key and host."
-        );
-        return {};
-      }
+      window.postMessage(updateVisualChangesetMessage, window.location.origin);
     },
-    [apiHost, apiKey]
+    [visualChangesetId]
   );
 
   const transformCopy = useCallback(
     async (copy: string, mode: CopyMode) => {
-      if (!apiHost || !apiKey) return {};
+      setLoading(true);
+      setError(null);
 
-      try {
-        const response = await fetch(`${apiHost}/api/v1/transform-copy`, {
-          headers: genHeaders(apiKey),
-          method: "POST",
-          body: JSON.stringify({
-            copy,
-            mode,
-            metadata: {
-              url: window.location.href,
-              title: document.title,
-              description: document
-                .querySelector("meta[name='description']")
-                ?.getAttribute("content"),
-            },
-          }),
-        });
+      const transformCopyMessage: TransformCopyRequestMessage = {
+        type: "GB_REQUEST_TRANSFORM_COPY",
+        data: {
+          visualChangesetId,
+          copy,
+          mode,
+        },
+      };
 
-        if (response.status !== 200) throw new Error(response.statusText);
-
-        const res = await response.json();
-
-        setError("");
-
-        return {
-          transformed: res.transformed,
-          dailyLimitReached: !!res.dailyLimitReached,
-        };
-      } catch (e) {
-        console.error("There was an error transforming the copy", e);
-      }
-      return {};
+      window.postMessage(transformCopyMessage, window.location.origin);
     },
-    [apiHost, apiKey]
+    [visualChangesetId]
   );
 
   return {
-    fetchVisualChangeset,
     updateVisualChangeset,
     transformCopy,
+    loading,
+    visualChangeset,
+    experiment,
+    experimentUrl,
+    transformedCopy,
     error,
     cspError,
   };

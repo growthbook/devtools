@@ -3,8 +3,58 @@ import type {
   FeatureDefinition,
   ExperimentOverride,
 } from "@growthbook/growthbook";
+import {
+  BGErrorCode,
+  FetchVisualChangesetPayload,
+  TransformCopyPayload,
+  UpdateVisualChangesetPayload,
+} from "./src/background";
 
 export type DebugLogs = [string, any][];
+
+export type CopyMode = "energetic" | "concise" | "humorous";
+
+export type ErrorCode = "csp-error" | BGErrorCode;
+
+export interface APIExperiment {
+  id: string;
+  variations: {
+    variationId: string;
+    key: string;
+    name: string;
+    description: string;
+    screenshots: string[];
+  }[];
+}
+export type APIExperimentVariation = APIExperiment["variations"][number];
+
+export interface APIVisualChangeset {
+  id: string;
+  urlPatterns: {
+    include?: boolean;
+    /** @enum {string} */
+    type: "simple" | "exact" | "regex";
+    pattern: string;
+  }[];
+  editorUrl: string;
+  experiment: string;
+  visualChanges: {
+    description?: string;
+    css?: string;
+    js?: string;
+    variation: string;
+    domMutations: {
+      selector: string;
+      /** @enum {string} */
+      action: "append" | "set" | "remove";
+      attribute: string;
+      value?: string;
+    }[];
+  }[];
+}
+
+export type APIVisualChange = APIVisualChangeset["visualChanges"][number];
+export type APIDomMutation = APIVisualChange["domMutations"][number];
 
 export type RequestRefreshMessage = {
   type: "GB_REQUEST_REFRESH";
@@ -30,18 +80,12 @@ export type ErrorMessage = {
   error: string;
 };
 
-type ApiCredsRequest = {
-  type: "GB_REQUEST_API_CREDS";
-};
-
-type ApiCredsResponse = {
-  type: "GB_RESPONSE_API_CREDS";
-  apiKey: string | null;
-};
-
 type OpenVisualEditorRequestMessage = {
   type: "GB_REQUEST_OPEN_VISUAL_EDITOR";
-  data: string;
+  data: {
+    apiHost: string;
+    apiKey: string;
+  };
 };
 
 type OpenVisualEditorResponseMessage = {
@@ -49,17 +93,97 @@ type OpenVisualEditorResponseMessage = {
   data: string;
 };
 
+type LoadVisualChangesetRequestMessage = {
+  type: "GB_REQUEST_LOAD_VISUAL_CHANGESET";
+  data: {
+    visualChangesetId: string;
+  };
+};
+
+type LoadVisualChangesetResponseMessage = {
+  type: "GB_RESPONSE_LOAD_VISUAL_CHANGESET";
+  data: FetchVisualChangesetPayload;
+};
+
+type UpdateVisualChangesetRequestMessage = {
+  type: "GB_REQUEST_UPDATE_VISUAL_CHANGESET";
+  data: {
+    visualChangesetId: string;
+    updatePayload: Partial<APIVisualChangeset>;
+  };
+};
+
+type UpdateVisualChangesetResponseMessage = {
+  type: "GB_RESPONSE_UPDATE_VISUAL_CHANGESET";
+  data: UpdateVisualChangesetPayload;
+};
+
+type TransformCopyRequestMessage = {
+  type: "GB_REQUEST_TRANSFORM_COPY";
+  data: {
+    visualChangesetId: string;
+    copy: string;
+    mode: CopyMode;
+  };
+};
+
+type TransformCopyResponseMessage = {
+  type: "GB_RESPONSE_TRANSFORM_COPY";
+  data: TransformCopyPayload;
+};
+
+type OpenOptionsPageMessage = {
+  type: "GB_OPEN_OPTIONS_PAGE";
+};
+
+// Messages sent to content script
 export type Message =
   | RequestRefreshMessage
   | SetOverridesMessage
   | RefreshMessage
   | ErrorMessage
-  | ApiCredsRequest
-  | ApiCredsResponse
   | OpenVisualEditorRequestMessage
-  | OpenVisualEditorResponseMessage;
+  | OpenVisualEditorResponseMessage
+  | LoadVisualChangesetRequestMessage
+  | LoadVisualChangesetResponseMessage
+  | UpdateVisualChangesetRequestMessage
+  | UpdateVisualChangesetResponseMessage
+  | TransformCopyRequestMessage
+  | TransformCopyResponseMessage
+  | OpenOptionsPageMessage;
 
-export interface ApiCreds {
-  apiKey: string;
-  apiHost: string;
-}
+export type BGLoadVisualChangsetMessage = {
+  type: "BG_LOAD_VISUAL_CHANGESET";
+  data: {
+    visualChangesetId: string;
+  };
+};
+
+export type BGUpdateVisualChangsetMessage = {
+  type: "BG_UPDATE_VISUAL_CHANGESET";
+  data: {
+    visualChangesetId: string;
+    updatePayload: Partial<APIVisualChangeset>;
+  };
+};
+
+export type BGTransformCopyMessage = {
+  type: "BG_TRANSFORM_COPY";
+  data: {
+    visualChangesetId: string;
+    copy: string;
+    mode: CopyMode;
+  };
+};
+
+export type BGOpenOptionsPageMessage = {
+  type: "BG_OPEN_OPTIONS_PAGE";
+  data: null;
+};
+
+// Messages sent to background script
+export type BGMessage =
+  | BGLoadVisualChangsetMessage
+  | BGUpdateVisualChangsetMessage
+  | BGTransformCopyMessage
+  | BGOpenOptionsPageMessage;

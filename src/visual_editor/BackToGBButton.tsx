@@ -2,7 +2,7 @@ import clsx from "clsx";
 import React, { FC } from "react";
 
 const BackToGBButton: FC<{
-  experimentUrl: string;
+  experimentUrl: string | null;
   children: React.ReactNode;
 }> = ({ experimentUrl, children }) => (
   <button
@@ -15,7 +15,13 @@ const BackToGBButton: FC<{
       "gb-font-semibold",
       "gb-text-lg"
     )}
-    onClick={() => (window.location.href = experimentUrl)}
+    onClick={() => {
+      if (experimentUrl) {
+        window.location.href = experimentUrl;
+      } else {
+        window.history.back();
+      }
+    }}
   >
     {children}
   </button>

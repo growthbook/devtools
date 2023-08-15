@@ -80,8 +80,8 @@ function requestRefresh() {
 }
 
 // Listen for events from content script
-window.addEventListener("message", function (msg: MessageEvent<Message>) {
-  const data = msg.data;
+window.addEventListener("message", function (event: MessageEvent<Message>) {
+  const data = event.data;
   if (data.type === "GB_REQUEST_REFRESH") {
     requestRefresh();
   } else if (data.type === "GB_SET_OVERRIDES") {

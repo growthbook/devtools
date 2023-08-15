@@ -1,6 +1,5 @@
 import mutate, { DeclarativeMutation } from "dom-mutator";
 import { debounce } from "lodash";
-import qs from "query-string";
 import React, {
   FC,
   useCallback,
@@ -12,27 +11,21 @@ import React, {
 } from "react";
 import * as ReactDOM from "react-dom/client";
 
-import { Message } from "../../devtools";
+import {
+  APIDomMutation,
+  APIExperiment,
+  APIExperimentVariation,
+  APIVisualChange,
+  APIVisualChangeset,
+} from "../../devtools";
 import {
   toggleSelectionMode,
   onSelectionModeUpdate,
 } from "./lib/selectionMode";
 import getSelector from "./lib/getSelector";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
-import useApi, {
-  APIDomMutation,
-  APIExperiment,
-  APIExperimentVariation,
-  APIVisualChange,
-  APIVisualChangeset,
-} from "./lib/hooks/useApi";
-import {
-  VISUAL_CHANGESET_ID_PARAMS_KEY,
-  VARIATION_INDEX_PARAMS_KEY,
-  EXPERIMENT_URL_PARAMS_KEY,
-  API_HOST_PARAMS_KEY,
-  AI_ENABLED_PARAMS_KEY,
-} from "./lib/constants";
+import useApi from "./lib/hooks/useApi";
+import useQueryParams from "./lib/hooks/useQueryParams";
 
 import Toolbar, { ToolbarMode } from "./Toolbar";
 import ElementDetails from "./ElementDetails";
@@ -51,7 +44,7 @@ import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
 import CustomJSEditor from "./CustomJSEditor";
 import CSSAttributeEditor from "./CSSAttributeEditor";
 import ReloadPageButton from "./ReloadPageButton";
-import CSPErrorText from "./CSPErrorText";
+import ErrorDisplay from "./ErrorDisplay";
 import BackToGBButton from "./BackToGBButton";
 import AIEditorSection from "./AIEditorSection";
 import AICopySuggestor from "./AICopySuggestor";
@@ -112,36 +105,6 @@ const genVisualEditorVariations = ({
   });
 };
 
-// normalize param values into number type
-const getVariationIndexFromParams = (
-  param: string | (string | null)[] | null
-): number => {
-  if (Array.isArray(param)) {
-    if (!param[0]) return 1;
-    return parseInt(param[0], 10);
-  }
-  return parseInt(param ?? "1", 10);
-};
-
-// remove visual editor params from url once loaded
-const cleanUpParams = (params: qs.ParsedQuery) => {
-  window.history.replaceState(
-    null,
-    "",
-    qs.stringifyUrl({
-      url: window.location.href,
-      query: {
-        ...params,
-        [VISUAL_CHANGESET_ID_PARAMS_KEY]: undefined,
-        [VARIATION_INDEX_PARAMS_KEY]: undefined,
-        [EXPERIMENT_URL_PARAMS_KEY]: undefined,
-        [API_HOST_PARAMS_KEY]: undefined,
-        [AI_ENABLED_PARAMS_KEY]: undefined,
-      },
-    })
-  );
-};
-
 const getHumanReadableText = (element: HTMLElement): string => {
   // ignore when selected is simply wrapper of another element
   if (element.innerHTML.startsWith("<")) return "";
@@ -154,26 +117,15 @@ const getHumanReadableText = (element: HTMLElement): string => {
 };
 
 const VisualEditor: FC<{}> = () => {
-  const params = qs.parse(window.location.search);
-  const [visualChangesetId] = useState(
-    params[VISUAL_CHANGESET_ID_PARAMS_KEY] as string
-  );
-  const [variationIndex] = useState(
-    getVariationIndexFromParams(params[VARIATION_INDEX_PARAMS_KEY])
-  );
-  const [experimentUrl] = useState(
-    decodeURIComponent(params[EXPERIMENT_URL_PARAMS_KEY] as string)
-  );
-  const [apiHost] = useState(
-    decodeURIComponent(params[API_HOST_PARAMS_KEY] as string)
-  );
-  const [hasAiEnabled] = useState(
-    decodeURIComponent((params[AI_ENABLED_PARAMS_KEY] as string) || "") ===
-      "true"
-  );
-  const [apiKey, setApiKey] = useState<string | undefined>("");
+  const {
+    params,
+    visualChangesetId,
+    variationIndex,
+    hasAiEnabled,
+    cleanUpParams,
+  } = useQueryParams();
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
-  const [mode, setMode] = useState<ToolbarMode>("selection");
+  const [mode, setMode] = useState<ToolbarMode | null>(null);
   const [variations, setVariations] = useState<VisualEditorVariation[]>([]);
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(
     null
@@ -193,10 +145,24 @@ const VisualEditor: FC<{}> = () => {
     rightAligned: true,
   });
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
-  const [apiKeyError, setApiKeyError] = useState("");
-  const { fetchVisualChangeset, updateVisualChangeset, transformCopy, cspError, error } =
-    useApi({ apiKey, apiHost });
+
+  const {
+    error,
+    cspError,
+    loading,
+    experiment,
+    experimentUrl,
+    visualChangeset,
+    transformedCopy,
+    transformCopy,
+    updateVisualChangeset,
+  } = useApi({
+    visualChangesetId,
+    hasAiEnabled,
+  });
+
   const [customJsError, setCustomJsError] = useState("");
+  const errorContainerRef = useRef<HTMLDivElement | null>(null);
 
   const forceUpdate = debounce(_forceUpdate, 100);
   const mutateRevert = useRef<(() => void) | null>(null);
@@ -218,18 +184,9 @@ const VisualEditor: FC<{}> = () => {
 
       setVariations(newVariations);
 
-      if (!updateVisualChangeset) return;
-
-      updateVisualChangeset(visualChangesetId, newVariations);
+      updateVisualChangeset(newVariations);
     },
-    [
-      variations,
-      selectedVariation,
-      setVariations,
-      selectedVariationIndex,
-      visualChangesetId,
-      updateVisualChangeset,
-    ]
+    [variations, setVariations, selectedVariationIndex, updateVisualChangeset]
   );
 
   const addDomMutations = useCallback(
@@ -404,7 +361,7 @@ const VisualEditor: FC<{}> = () => {
     },
     [selector, addDomMutation]
   );
-  
+
   const humanReadableText = useMemo(() => {
     if (!selectedElement) return "";
     return getHumanReadableText(selectedElement);
@@ -414,58 +371,25 @@ const VisualEditor: FC<{}> = () => {
     return humanReadableText.length > 0;
   }, [humanReadableText]);
 
-  // load api key
+  // on visual changeset change
   useEffect(() => {
-    window.postMessage(
-      { type: "GB_REQUEST_API_CREDS" },
-      window.location.origin
-    );
+    if (!visualChangeset || !experiment) return;
+    if (mode === null) setMode("selection");
 
-    const onMessage = (event: MessageEvent<Message>) => {
-      if (event.data.type === "GB_RESPONSE_API_CREDS") {
-        if (!event.data.apiKey) {
-          setApiKeyError(
-            "The Visual Editor was unable find its API key. Please try again or enter it manually through the chrome extension options."
-          );
-          return;
-        }
-        setApiKey(event.data.apiKey);
-      }
-    };
+    const visualEditorVariations = genVisualEditorVariations({
+      experiment,
+      visualChangeset,
+    });
 
-    window.addEventListener("message", onMessage);
+    setVariations(visualEditorVariations);
+  }, [visualChangeset, experiment]);
 
-    return () => window.removeEventListener("message", onMessage);
-  }, []);
-
-  // fetch visual changeset and experiment from api once we have credentials
+  // init visual editor
   useEffect(() => {
-    if (!apiHost || !apiKey || !fetchVisualChangeset || !visualChangesetId)
-      return;
-
-    const load = async () => {
-      const { visualChangeset, experiment } = await fetchVisualChangeset(
-        visualChangesetId
-      );
-
-      // Visual editor will not load if we cannot load visual changeset
-      if (!visualChangeset || !experiment) return;
-
-      const visualEditorVariations = genVisualEditorVariations({
-        experiment,
-        visualChangeset,
-      });
-
-      setVariations(visualEditorVariations);
-
-      // remove visual editor query param once loaded
-      cleanUpParams(params);
-
-      setIsEnabled(true);
-    };
-
-    load();
-  }, [apiKey, visualChangesetId, fetchVisualChangeset]);
+    if (isVisualEditorEnabled) return;
+    cleanUpParams();
+    setIsEnabled(true);
+  }, [visualChangeset, experiment, isVisualEditorEnabled, error]);
 
   // handle mode selection
   useEffect(() => {
@@ -554,33 +478,14 @@ const VisualEditor: FC<{}> = () => {
       "";
   }, [selectedVariation?.js]);
 
-  if (error || cspError || apiKeyError) {
-    return (
-      <VisualEditorPane style={parentStyles}>
-        <VisualEditorHeader reverseX x={x} y={y} setX={setX} setY={setY} />
-        {error || apiKeyError ? (
-          <div className="gb-p-4 gb-text-red-400">{error || apiKeyError}</div>
-        ) : (
-          <CSPErrorText cspError={cspError} />
-        )}
-        <div className="gb-m-4 gb-text-center">
-          <BackToGBButton experimentUrl={experimentUrl}>
-            Back to GrowthBook
-          </BackToGBButton>
-          {apiHost && apiKey ? (
-            <ReloadPageButton
-              apiCreds={{ apiHost, apiKey }}
-              params={params}
-              experimentUrl={experimentUrl}
-              variationIndex={variationIndex}
-              visualChangesetId={visualChangesetId}
-              hasAiEnabled={hasAiEnabled}
-            />
-          ) : null}
-        </div>
-      </VisualEditorPane>
-    );
-  }
+  // scroll to error
+  useEffect(() => {
+    if (!error && !cspError && !errorContainerRef.current) return;
+    errorContainerRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [error, cspError, errorContainerRef.current]);
 
   if (!isVisualEditorEnabled) return null;
 
@@ -596,6 +501,7 @@ const VisualEditor: FC<{}> = () => {
         />
 
         <Toolbar
+          disabled={!visualChangeset}
           mode={mode}
           setMode={setMode}
           clearSelectedElement={() => setSelectedElement(null)}
@@ -621,10 +527,12 @@ const VisualEditor: FC<{}> = () => {
 
             <AIEditorSection isVisible={hasAiEnabled && selectedElementHasCopy}>
               <AICopySuggestor
+                loading={loading}
                 parentElement={selectedElement}
                 setHTML={setHTML}
                 copy={humanReadableText}
                 transformCopy={transformCopy}
+                transformedCopy={transformedCopy}
               />
             </AIEditorSection>
 
@@ -704,14 +612,18 @@ const VisualEditor: FC<{}> = () => {
           </VisualEditorSection>
         )}
 
+        {error ? (
+          <div ref={errorContainerRef}>
+            <ErrorDisplay error={error} cspError={cspError} />
+          </div>
+        ) : null}
+
         <div className="gb-m-4 gb-text-center">
           <BackToGBButton experimentUrl={experimentUrl}>
             Done Editing
           </BackToGBButton>
           <ReloadPageButton
-            apiCreds={{ apiHost, apiKey }}
             params={params}
-            experimentUrl={experimentUrl}
             variationIndex={variationIndex}
             visualChangesetId={visualChangesetId}
             hasAiEnabled={hasAiEnabled}
