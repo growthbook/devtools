@@ -47,7 +47,7 @@ const FloatingFrame: FC<{ parentElement: Element | null }> = ({
     <>
       <div
         gb-highlight-frame="true"
-        className="gb-fixed gb-border-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
+        className="gb-fixed gb-border-t-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
         style={{
           top: domRect.top,
           left: domRect.left,
@@ -57,7 +57,7 @@ const FloatingFrame: FC<{ parentElement: Element | null }> = ({
       ></div>
       <div
         gb-highlight-frame="true"
-        className="gb-fixed gb-border-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
+        className="gb-fixed gb-border-r-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
         style={{
           top: domRect.top,
           left: domRect.left + domRect.width,
@@ -67,7 +67,7 @@ const FloatingFrame: FC<{ parentElement: Element | null }> = ({
       ></div>
       <div
         gb-highlight-frame="true"
-        className="gb-fixed gb-border-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
+        className="gb-fixed gb-border-b-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
         style={{
           top: domRect.top + domRect.height,
           left: domRect.left,
@@ -77,7 +77,7 @@ const FloatingFrame: FC<{ parentElement: Element | null }> = ({
       ></div>
       <div
         gb-highlight-frame="true"
-        className="gb-fixed gb-border-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
+        className="gb-fixed gb-border-l-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
         style={{
           top: domRect.top,
           left: domRect.left,

@@ -1,5 +1,6 @@
 import { finder } from "@medv/finder";
 import { DeclarativeMutation } from "dom-mutator";
+import { throttle } from "lodash";
 import { CONTAINER_ID } from "..";
 import { onDrag, teardown as moveElementTeardown } from "./moveElement";
 import getSelector from "./getSelector";
@@ -29,7 +30,8 @@ const clearHoverAttribute = () => {
 
 let _draggedToParent: Element | null = null;
 let _draggedToSibling: Element | null = null;
-const pointerMoveHandler = (event: MouseEvent) => {
+const pointerMoveHandler = throttle((event: MouseEvent) => {
+  console.log("pointerMoveHandler");
   const { clientX: x, clientY: y } = event;
   const domNode = document.elementFromPoint(x, y);
   // return prevNode if current node is our frame component
@@ -54,7 +56,7 @@ const pointerMoveHandler = (event: MouseEvent) => {
     // use default finder since this is for display only
     _setHighlightedElementSelector?.(finder(domNode));
   }
-};
+}, 50);
 
 // only the 'click' event can prevent the default behavior when clicking on
 // a link or button or similar
