@@ -249,8 +249,10 @@ chrome.runtime.onMessage.addListener(
         break;
       case "BG_OPEN_OPTIONS_PAGE":
         chrome.runtime.openOptionsPage();
+        sendResponse();
         break;
       default:
+        sendResponse();
         break;
     }
 
