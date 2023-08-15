@@ -74,7 +74,7 @@ const ErrorDisplay: FC<{ error: ErrorCode; cspError: CSPError | null }> = ({
     case "transform-copy-daily-limit-reached":
       return (
         <div className="gb-p-4 gb-text-red-400">
-          You have reached your daily limit for copying experiments. Please try
+          You have reached your daily limit for generating copy. Please try
           again tomorrow.
         </div>
       );

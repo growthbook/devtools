@@ -62,8 +62,8 @@ const fetchVisualChangeset = async ({
 
     const { visualChangeset, experiment } = res;
 
-    let appOrigin: string | null = await loadAppOrigin();
     // fetch latest appOrigin to keep up to date
+    let appOrigin: string | null = await loadAppOrigin();
     try {
       appOrigin = await fetch(apiHost)
         .then((res) => res.json())
