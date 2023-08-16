@@ -48,7 +48,6 @@ import ErrorDisplay from "./ErrorDisplay";
 import BackToGBButton from "./BackToGBButton";
 import AIEditorSection from "./AIEditorSection";
 import AICopySuggestor from "./AICopySuggestor";
-import MoveTag from "./MoveTag";
 import "./targetPage.css";
 
 declare global {
@@ -635,9 +634,11 @@ const VisualEditor: FC<{}> = () => {
       {/** Overlays for highlighting selected/hovered elements **/}
       {mode === "selection" && selectedElement ? (
         <>
-          <FloatingFrame parentElement={selectedElement} />
+          <FloatingFrame
+            parentElement={selectedElement}
+            clearSelectedElement={() => setSelectedElement(null)}
+          />
           <SelectorDisplay selector={selector} />
-          <MoveTag parentElement={selectedElement} />
         </>
       ) : null}
       {mode === "selection" ? (
