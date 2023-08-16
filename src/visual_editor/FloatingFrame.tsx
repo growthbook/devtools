@@ -37,7 +37,6 @@ const FloatingFrameEdge = ({
 }) => {
   return (
     <div
-      gb-highlight-frame="true"
       className={clsx("gb-fixed", "gb-z-max", "gb-border-indigo-600", {
         "gb-border-t": position === "top" || position === "bottom",
         "gb-border-l": position === "right" || position === "left",
