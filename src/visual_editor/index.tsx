@@ -48,6 +48,7 @@ import ErrorDisplay from "./ErrorDisplay";
 import BackToGBButton from "./BackToGBButton";
 import AIEditorSection from "./AIEditorSection";
 import AICopySuggestor from "./AICopySuggestor";
+import MoveTag from "./MoveTag";
 import "./targetPage.css";
 
 declare global {
@@ -636,6 +637,7 @@ const VisualEditor: FC<{}> = () => {
         <>
           <FloatingFrame parentElement={selectedElement} />
           <SelectorDisplay selector={selector} />
+          <MoveTag parentElement={selectedElement} />
         </>
       ) : null}
       {mode === "selection" ? (
