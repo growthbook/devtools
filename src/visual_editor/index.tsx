@@ -634,7 +634,10 @@ const VisualEditor: FC<{}> = () => {
       {/** Overlays for highlighting selected/hovered elements **/}
       {mode === "selection" && selectedElement ? (
         <>
-          <FloatingFrame parentElement={selectedElement} />
+          <FloatingFrame
+            parentElement={selectedElement}
+            clearSelectedElement={() => setSelectedElement(null)}
+          />
           <SelectorDisplay selector={selector} />
         </>
       ) : null}

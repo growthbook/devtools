@@ -1,6 +1,49 @@
 import clsx from "clsx";
 import React, { FC, useEffect, useState } from "react";
 
+const overlayStyles = (domRect: DOMRect) => ({
+  top: {
+    top: 0,
+    left: 0,
+    height: domRect.top,
+    width: "100vw",
+  },
+  right: {
+    top: domRect.top,
+    left: domRect.left + domRect.width,
+    height: domRect.height,
+    width: window.innerWidth - domRect.left - domRect.width,
+  },
+  bottom: {
+    top: domRect.top + domRect.height,
+    left: 0,
+    height: window.innerHeight - domRect.top - domRect.height,
+    width: "100vw",
+  },
+  left: {
+    top: domRect.top,
+    left: 0,
+    height: domRect.height,
+    width: domRect.left,
+  },
+});
+
+const FloatingFrameOverlay = ({
+  domRect,
+  position,
+  clear,
+}: {
+  domRect: DOMRect;
+  position: "top" | "right" | "bottom" | "left";
+  clear: () => void;
+}) => (
+  <div
+    className={clsx("gb-fixed", "gb-z-front", "gb-bg-white/75")}
+    style={overlayStyles(domRect)[position]}
+    onClick={clear}
+  ></div>
+);
+
 const edgeStyles = (domRect: DOMRect) => ({
   top: {
     top: domRect.top,
@@ -34,21 +77,20 @@ const FloatingFrameEdge = ({
 }: {
   domRect: DOMRect;
   position: "top" | "right" | "bottom" | "left";
-}) => {
-  return (
-    <div
-      className={clsx("gb-fixed", "gb-z-max", "gb-border-indigo-600", {
-        "gb-border-t": position === "top" || position === "bottom",
-        "gb-border-l": position === "right" || position === "left",
-      })}
-      style={edgeStyles(domRect)[position]}
-    ></div>
-  );
-};
+}) => (
+  <div
+    className={clsx("gb-fixed", "gb-z-front", "gb-border-indigo-600", {
+      "gb-border-t": position === "top" || position === "bottom",
+      "gb-border-l": position === "right" || position === "left",
+    })}
+    style={edgeStyles(domRect)[position]}
+  ></div>
+);
 
-const FloatingFrame: FC<{ parentElement: Element | null }> = ({
-  parentElement,
-}) => {
+const FloatingFrame: FC<{
+  parentElement: Element | null;
+  clearSelectedElement?: () => void;
+}> = ({ parentElement, clearSelectedElement }) => {
   let _rafId: number;
   let _lastTime: number = 0;
 
@@ -95,6 +137,31 @@ const FloatingFrame: FC<{ parentElement: Element | null }> = ({
       <FloatingFrameEdge domRect={domRect} position="right" />
       <FloatingFrameEdge domRect={domRect} position="bottom" />
       <FloatingFrameEdge domRect={domRect} position="left" />
+
+      {clearSelectedElement ? (
+        <>
+          <FloatingFrameOverlay
+            clear={clearSelectedElement}
+            domRect={domRect}
+            position="top"
+          />
+          <FloatingFrameOverlay
+            clear={clearSelectedElement}
+            domRect={domRect}
+            position="right"
+          />
+          <FloatingFrameOverlay
+            clear={clearSelectedElement}
+            domRect={domRect}
+            position="bottom"
+          />
+          <FloatingFrameOverlay
+            clear={clearSelectedElement}
+            domRect={domRect}
+            position="left"
+          />
+        </>
+      ) : null}
     </>
   );
 };
