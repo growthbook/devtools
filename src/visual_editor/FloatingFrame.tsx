@@ -1,4 +1,51 @@
+import clsx from "clsx";
 import React, { FC, useEffect, useState } from "react";
+
+const edgeStyles = (domRect: DOMRect) => ({
+  top: {
+    top: domRect.top,
+    left: domRect.left,
+    height: "4px",
+    width: domRect.width,
+  },
+  right: {
+    top: domRect.top,
+    left: domRect.left + domRect.width,
+    height: domRect.height,
+    width: "4px",
+  },
+  bottom: {
+    top: domRect.top + domRect.height,
+    left: domRect.left,
+    height: "4px",
+    width: domRect.width + 1,
+  },
+  left: {
+    top: domRect.top,
+    left: domRect.left,
+    height: domRect.height,
+    width: "4px",
+  },
+});
+
+const FloatingFrameEdge = ({
+  domRect,
+  position,
+}: {
+  domRect: DOMRect;
+  position: "top" | "right" | "bottom" | "left";
+}) => {
+  return (
+    <div
+      gb-highlight-frame="true"
+      className={clsx("gb-fixed", "gb-z-max", "gb-border-indigo-600", {
+        "gb-border-t": position === "top" || position === "bottom",
+        "gb-border-l": position === "right" || position === "left",
+      })}
+      style={edgeStyles(domRect)[position]}
+    ></div>
+  );
+};
 
 const FloatingFrame: FC<{ parentElement: Element | null }> = ({
   parentElement,
@@ -45,46 +92,10 @@ const FloatingFrame: FC<{ parentElement: Element | null }> = ({
 
   return (
     <>
-      <div
-        gb-highlight-frame="true"
-        className="gb-fixed gb-border-t-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
-        style={{
-          top: domRect.top,
-          left: domRect.left,
-          height: "4px",
-          width: domRect.width,
-        }}
-      ></div>
-      <div
-        gb-highlight-frame="true"
-        className="gb-fixed gb-border-r-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
-        style={{
-          top: domRect.top,
-          left: domRect.left + domRect.width,
-          height: domRect.height,
-          width: "4px",
-        }}
-      ></div>
-      <div
-        gb-highlight-frame="true"
-        className="gb-fixed gb-border-b-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
-        style={{
-          top: domRect.top + domRect.height,
-          left: domRect.left,
-          height: "4px",
-          width: domRect.width,
-        }}
-      ></div>
-      <div
-        gb-highlight-frame="true"
-        className="gb-fixed gb-border-l-2 gb-z-max gb-border-indigo-600 gb-border-dashed"
-        style={{
-          top: domRect.top,
-          left: domRect.left,
-          height: domRect.height,
-          width: "4px",
-        }}
-      ></div>
+      <FloatingFrameEdge domRect={domRect} position="top" />
+      <FloatingFrameEdge domRect={domRect} position="right" />
+      <FloatingFrameEdge domRect={domRect} position="bottom" />
+      <FloatingFrameEdge domRect={domRect} position="left" />
     </>
   );
 };
