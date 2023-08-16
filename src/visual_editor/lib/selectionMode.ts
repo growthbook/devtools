@@ -31,11 +31,11 @@ const clearHoverAttribute = () => {
 let _draggedToParent: Element | null = null;
 let _draggedToSibling: Element | null = null;
 const pointerMoveHandler = throttle((event: MouseEvent) => {
-  console.log("pointerMoveHandler");
   const { clientX: x, clientY: y } = event;
   const domNode = document.elementFromPoint(x, y);
-  // return prevNode if current node is our frame component
-  if (domNode?.hasAttribute("gb-highlight-frame")) return;
+
+  // return early if we are over the visual editor itself (e.g. frame)
+  if (domNode?.id === CONTAINER_ID) return;
 
   if (_isDragging && _selectedElement) {
     ({
