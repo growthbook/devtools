@@ -1,18 +1,16 @@
 import React, { FC } from "react";
+import useFloatingAnchor from "./lib/hooks/useFloatingAnchor";
 
 const SelectorDisplay: FC<{ selector: string | null }> = ({ selector }) => {
-  if (!selector) return null;
+  const parentElement = selector ? document.querySelector(selector) : null;
+  const domRect = useFloatingAnchor(parentElement);
 
-  const parentElement = document.querySelector(selector);
-
-  if (!parentElement) return null;
-
-  const { left, bottom } = parentElement.getBoundingClientRect();
+  if (!domRect) return null;
 
   return (
     <div
-      className="gb-fixed gb-p-2 gb-bg-indigo-800 gb-text-white gb-text-xs gb-z-center"
-      style={{ top: bottom + 8, left }}
+      className="gb-fixed gb-p-2 gb-bg-indigo-800 gb-text-white gb-text-xs gb-z-front"
+      style={{ top: domRect.bottom + 8, left: domRect.left }}
     >
       {selector}
     </div>
