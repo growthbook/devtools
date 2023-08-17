@@ -49,7 +49,7 @@ import BackToGBButton from "./BackToGBButton";
 import AIEditorSection from "./AIEditorSection";
 import AICopySuggestor from "./AICopySuggestor";
 import "./targetPage.css";
-import FloatingContextMenu from "./FloatingContextMenu";
+import SelectedElementPopover from "./SelectedElementPopover";
 
 declare global {
   interface Window {
@@ -640,7 +640,7 @@ const VisualEditor: FC<{}> = () => {
             clearSelectedElement={() => setSelectedElement(null)}
           />
           <SelectorDisplay selector={selector} />
-          <FloatingContextMenu parentElement={selectedElement} />
+          <SelectedElementPopover parentElement={selectedElement} />
         </>
       ) : null}
       {mode === "selection" ? (

@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import React, { FC, useEffect, useState } from "react";
+import useFloatingAnchor from "./lib/hooks/useFloatingAnchor";
 
 const overlayStyles = (domRect: DOMRect) => ({
   top: {
@@ -91,43 +92,7 @@ const FloatingFrame: FC<{
   parentElement: Element | null;
   clearSelectedElement?: () => void;
 }> = ({ parentElement, clearSelectedElement }) => {
-  let _rafId: number;
-  let _lastTime: number = 0;
-
-  const [domRect, setDomRect] = useState<DOMRect | null>(null);
-
-  useEffect(() => {
-    const onScroll = () => {
-      const rect = parentElement?.getBoundingClientRect();
-      setDomRect(rect ?? null);
-    };
-
-    // for dom animations that run continuously
-    // this reframes our frame at 60fps
-    const animate = (time: DOMHighResTimeStamp) => {
-      if (time - _lastTime > 1000 / 60) {
-        onScroll();
-        _lastTime = time;
-      }
-      _rafId = requestAnimationFrame(animate);
-    };
-
-    if (!parentElement && domRect) {
-      setDomRect(null);
-    }
-
-    if (parentElement) {
-      // initialize
-      onScroll();
-      window.addEventListener("scroll", onScroll);
-      _rafId = requestAnimationFrame(animate);
-    }
-
-    return () => {
-      cancelAnimationFrame(_rafId);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, [parentElement]);
+  const domRect = useFloatingAnchor(parentElement);
 
   if (!domRect) return null;
 
