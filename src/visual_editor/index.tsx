@@ -49,6 +49,7 @@ import BackToGBButton from "./BackToGBButton";
 import AIEditorSection from "./AIEditorSection";
 import AICopySuggestor from "./AICopySuggestor";
 import "./targetPage.css";
+import FloatingContextMenu from "./FloatingContextMenu";
 
 declare global {
   interface Window {
@@ -639,6 +640,7 @@ const VisualEditor: FC<{}> = () => {
             clearSelectedElement={() => setSelectedElement(null)}
           />
           <SelectorDisplay selector={selector} />
+          <FloatingContextMenu parentElement={selectedElement} />
         </>
       ) : null}
       {mode === "selection" ? (
