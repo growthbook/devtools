@@ -17,15 +17,17 @@ const refreshWithParams = ({
   params: qs.ParsedQuery;
   hasAiEnabled: boolean;
 }) => {
-  window.location.href = qs.stringifyUrl({
-    url: window.location.href,
-    query: {
-      ...params,
-      [VISUAL_CHANGESET_ID_PARAMS_KEY]: visualChangesetId,
-      [VARIATION_INDEX_PARAMS_KEY]: variationIndex,
-      [AI_ENABLED_PARAMS_KEY]: hasAiEnabled,
-    },
-  });
+  window.location.replace(
+    qs.stringifyUrl({
+      url: window.location.href,
+      query: {
+        ...params,
+        [VISUAL_CHANGESET_ID_PARAMS_KEY]: visualChangesetId,
+        [VARIATION_INDEX_PARAMS_KEY]: variationIndex,
+        [AI_ENABLED_PARAMS_KEY]: hasAiEnabled,
+      },
+    })
+  );
 };
 
 const ReloadPageButton: FC<{
