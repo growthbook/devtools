@@ -48,8 +48,8 @@ import ErrorDisplay from "./ErrorDisplay";
 import BackToGBButton from "./BackToGBButton";
 import AIEditorSection from "./AIEditorSection";
 import AICopySuggestor from "./AICopySuggestor";
+import SelectedElementMenu from "./SelectedElementMenu";
 import "./targetPage.css";
-import SelectedElementPopover from "./SelectedElementPopover";
 
 declare global {
   interface Window {
@@ -640,7 +640,10 @@ const VisualEditor: FC<{}> = () => {
             clearSelectedElement={() => setSelectedElement(null)}
           />
           <SelectorDisplay selector={selector} />
-          <SelectedElementPopover parentElement={selectedElement} />
+          <SelectedElementMenu
+            selectedElement={selectedElement}
+            clearSelectedElement={() => setSelectedElement(null)}
+          />
         </>
       ) : null}
       {mode === "selection" ? (
