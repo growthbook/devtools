@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { VisualEditorVariation } from "../..";
 import {
+  VisualEditorVariation,
   ErrorCode,
   CopyMode,
   Message,

@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import { VisualEditorVariation } from "..";
+import { VisualEditorVariation } from "../../../devtools";
 
 const VariationSelector: FC<{
   variations: VisualEditorVariation[];
