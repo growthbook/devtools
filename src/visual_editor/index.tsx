@@ -27,28 +27,32 @@ import useFixedPositioning from "./lib/hooks/useFixedPositioning";
 import useApi from "./lib/hooks/useApi";
 import useQueryParams from "./lib/hooks/useQueryParams";
 
-import Toolbar, { ToolbarMode } from "./Toolbar";
-import ElementDetails from "./ElementDetails";
-import SelectorDisplay from "./SelectorDisplay";
-import FloatingFrame from "./FloatingFrame";
-import VisualEditorCss from "./index.css";
-import GlobalCSSEditor from "./GlobalCSSEditor";
-import VisualEditorPane from "./VisualEditorPane";
-import VisualEditorSection from "./VisualEditorSection";
-import BreadcrumbsView from "./BreadcrumbsView";
-import ClassNamesEdit from "./ClassNamesEdit";
-import DOMMutationList from "./DOMMutationList";
-import VariationSelector from "./VariationSelector";
-import VisualEditorHeader from "./VisualEditorHeader";
-import AttributeEdit, { Attribute, IGNORED_ATTRS } from "./AttributeEdit";
-import CustomJSEditor from "./CustomJSEditor";
-import CSSAttributeEditor from "./CSSAttributeEditor";
-import ReloadPageButton from "./ReloadPageButton";
-import ErrorDisplay from "./ErrorDisplay";
-import BackToGBButton from "./BackToGBButton";
-import AIEditorSection from "./AIEditorSection";
-import AICopySuggestor from "./AICopySuggestor";
-import SelectedElementMenu from "./SelectedElementMenu";
+import Toolbar, { ToolbarMode } from "./components/Toolbar";
+import ElementDetails from "./components/ElementDetails";
+import SelectorDisplay from "./components/SelectorDisplay";
+import FloatingFrame from "./components/FloatingFrame";
+import GlobalCSSEditor from "./components/GlobalCSSEditor";
+import VisualEditorPane from "./components/VisualEditorPane";
+import VisualEditorSection from "./components/VisualEditorSection";
+import BreadcrumbsView from "./components/BreadcrumbsView";
+import ClassNamesEdit from "./components/ClassNamesEdit";
+import DOMMutationList from "./components/DOMMutationList";
+import VariationSelector from "./components/VariationSelector";
+import VisualEditorHeader from "./components/VisualEditorHeader";
+import AttributeEdit, {
+  Attribute,
+  IGNORED_ATTRS,
+} from "./components/AttributeEdit";
+import CustomJSEditor from "./components/CustomJSEditor";
+import CSSAttributeEditor from "./components/CSSAttributeEditor";
+import ReloadPageButton from "./components/ReloadPageButton";
+import ErrorDisplay from "./components/ErrorDisplay";
+import BackToGBButton from "./components/BackToGBButton";
+import AIEditorSection from "./components/AIEditorSection";
+import AICopySuggestor from "./components/AICopySuggestor";
+import SelectedElementMenu from "./components/SelectedElementMenu";
+
+import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
 
 declare global {

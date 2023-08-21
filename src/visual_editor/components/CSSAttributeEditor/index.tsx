@@ -1,4 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from "react";
+import { IconType } from "react-icons";
 import {
   BiAlignLeft,
   BiBold,
@@ -29,7 +30,6 @@ import { MdBorderColor } from "react-icons/md";
 import { TbFloatCenter } from "react-icons/tb";
 import styleToObject from "style-to-object";
 import CSSTextInput from "./CSSTextInput";
-import { IconType } from "react-icons";
 
 interface CSSAttribute {
   name: string;

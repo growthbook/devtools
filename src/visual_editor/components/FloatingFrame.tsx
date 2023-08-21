@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import React, { FC } from "react";
-import useFloatingAnchor from "./lib/hooks/useFloatingAnchor";
+import useFloatingAnchor from "../lib/hooks/useFloatingAnchor";
 
 const overlayStyles = (domRect: DOMRect) => ({
   top: {

@@ -2,7 +2,7 @@ import React from "react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { BiChevronRight } from "react-icons/bi";
 import { BsCodeSlash } from "react-icons/bs";
-import { MdMoveUp, MdMp } from "react-icons/md";
+import { MdMoveUp } from "react-icons/md";
 export default function SelectedElementPopoverMenu({
   selectedElement,
 }: {

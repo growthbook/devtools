@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import useFloatingAnchor from "./lib/hooks/useFloatingAnchor";
+import useFloatingAnchor from "../lib/hooks/useFloatingAnchor";
 
 const SelectorDisplay: FC<{ selector: string | null }> = ({ selector }) => {
   const parentElement = selector ? document.querySelector(selector) : null;

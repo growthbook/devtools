@@ -1,6 +1,6 @@
 import * as Dropdown from "@radix-ui/react-dropdown-menu";
 import React from "react";
-import useFloatingAnchor from "../lib/hooks/useFloatingAnchor";
+import useFloatingAnchor from "../../lib/hooks/useFloatingAnchor";
 import Menu from "./Menu";
 
 export default function SelectedElementMenu({
