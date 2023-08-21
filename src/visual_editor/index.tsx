@@ -11,18 +11,16 @@ import React, {
 } from "react";
 import * as ReactDOM from "react-dom/client";
 
-import { VisualEditorVariation } from "../../devtools";
+import { ErrorCode, VisualEditorVariation } from "../../devtools";
 import {
   toggleSelectionMode,
   onSelectionModeUpdate,
 } from "./lib/selectionMode";
 import getSelector from "./lib/getSelector";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
-import useApi from "./lib/hooks/useApi";
 import useQueryParams from "./lib/hooks/useQueryParams";
 import useGlobalCSS from "./lib/hooks/useGlobalCSS";
 import useCustomJs from "./lib/hooks/useCustomJs";
-import normalizeVariations from "./lib/normalizeVariations";
 import getHumanReadableText from "./lib/getHumanReadableText";
 
 import Toolbar, { ToolbarMode } from "./components/Toolbar";
@@ -51,10 +49,10 @@ import AICopySuggestor from "./components/AICopySuggestor";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
+import useVisualChangeset from "./lib/hooks/useVisualChangeset";
+import useAiCopySuggestion from "./lib/hooks/useAiCopySuggestion";
 
 const VisualEditor: FC<{}> = () => {
-  // forceUpdate is used to force a re-render of the component
-  const [, _forceUpdate] = useReducer((x) => x + 1, 0);
   const {
     params,
     visualChangesetId,
@@ -62,12 +60,18 @@ const VisualEditor: FC<{}> = () => {
     hasAiEnabled,
     cleanUpParams,
   } = useQueryParams();
-  const [isVisualEditorEnabled, setIsEnabled] = useState(false);
+  const { error, cspError, variations, updateVariationAtIndex, experimentUrl } =
+    useVisualChangeset(visualChangesetId);
+  const {
+    loading: aiLoading,
+    error: aiError,
+    transformCopy,
+    transformedCopy,
+  } = useAiCopySuggestion(visualChangesetId);
   const [mode, setMode] = useState<ToolbarMode | null>(null);
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(
     null
   );
-  const [variations, setVariations] = useState<VisualEditorVariation[]>([]);
   const [selectedVariationIndex, setSelectedVariationIndex] =
     useState<number>(variationIndex);
   const [highlightedElementSelector, setHighlightedElementSelector] = useState<
@@ -79,50 +83,22 @@ const VisualEditor: FC<{}> = () => {
     return document.querySelector(highlightedElementSelector);
   }, [highlightedElementSelector]);
 
+  // used to allow moving the floating frame around
   const { x, y, setX, setY, parentStyles } = useFixedPositioning({
     x: 24,
     y: 24,
     rightAligned: true,
   });
 
-  const {
-    error,
-    cspError,
-    loading,
-    experiment,
-    experimentUrl,
-    visualChangeset,
-    transformedCopy,
-    transformCopy,
-    updateVisualChangeset,
-  } = useApi({
-    visualChangesetId,
-    hasAiEnabled,
-  });
-
-  const forceUpdate = debounce(_forceUpdate, 100);
   const mutateRevert = useRef<(() => void) | null>(null);
 
   const selectedVariation = variations?.[selectedVariationIndex] ?? null;
 
   const updateSelectedVariation = useCallback(
     (updates: Partial<VisualEditorVariation>) => {
-      const updatedVariation = {
-        ...variations[selectedVariationIndex],
-        ...updates,
-      };
-
-      const newVariations = [
-        ...(variations?.map((v, i) =>
-          i === selectedVariationIndex ? updatedVariation : v
-        ) ?? []),
-      ];
-
-      setVariations(newVariations);
-
-      updateVisualChangeset(newVariations);
+      updateVariationAtIndex(selectedVariationIndex, updates);
     },
-    [variations, setVariations, selectedVariationIndex, updateVisualChangeset]
+    [selectedVariationIndex, updateVariationAtIndex]
   );
 
   const { globalCss, setGlobalCss } = useGlobalCSS({
@@ -302,42 +278,30 @@ const VisualEditor: FC<{}> = () => {
     [humanReadableText]
   );
 
-  // on visual changeset change
+  // forceUpdate is used to force a re-render of the component
+  const [, _forceUpdate] = useReducer((x) => x + 1, 0);
+  // limit the forceUpdate calls to 1 per 100ms
+  const forceUpdate = debounce(_forceUpdate, 100);
+
   useEffect(() => {
-    if (!visualChangeset || !experiment) return;
+    if (!variations.length) return;
     if (mode === null) setMode("selection");
-
-    const visualEditorVariations = normalizeVariations({
-      experiment,
-      visualChangeset,
-    });
-
-    setVariations(visualEditorVariations);
-  }, [visualChangeset, experiment]);
-
-  // init visual editor
-  useEffect(() => {
-    if (isVisualEditorEnabled) return;
     cleanUpParams();
-    setIsEnabled(true);
-  }, [visualChangeset, experiment, isVisualEditorEnabled, error]);
+  }, [variations]);
 
   // handle mode selection
   useEffect(() => {
     toggleSelectionMode({
-      isEnabled: !isVisualEditorEnabled
-        ? isVisualEditorEnabled
-        : mode === "selection",
+      isEnabled: mode === "selection",
       selectedElement,
       setSelectedElement,
       setHighlightedElementSelector,
       addDomMutation,
     });
-  }, [isVisualEditorEnabled, mode]);
+  }, [mode]);
 
   // selection mode - update on select
   useEffect(() => {
-    if (!isVisualEditorEnabled) return;
     if (mode !== "selection") return;
 
     onSelectionModeUpdate({
@@ -350,7 +314,6 @@ const VisualEditor: FC<{}> = () => {
     selectedElement,
     setSelectedElement,
     setHighlightedElementSelector,
-    isVisualEditorEnabled,
     mode,
   ]);
 
@@ -386,8 +349,6 @@ const VisualEditor: FC<{}> = () => {
     return () => observer.disconnect();
   }, []);
 
-  if (!isVisualEditorEnabled) return null;
-
   return (
     <>
       <VisualEditorPane style={parentStyles}>
@@ -400,7 +361,7 @@ const VisualEditor: FC<{}> = () => {
         />
 
         <Toolbar
-          disabled={!visualChangeset}
+          disabled={!variations.length}
           mode={mode}
           setMode={setMode}
           clearSelectedElement={() => setSelectedElement(null)}
@@ -426,7 +387,7 @@ const VisualEditor: FC<{}> = () => {
 
             <AIEditorSection isVisible={hasAiEnabled && selectedElementHasCopy}>
               <AICopySuggestor
-                loading={loading}
+                loading={aiLoading}
                 parentElement={selectedElement}
                 setHTML={setHTML}
                 copy={humanReadableText}
@@ -504,7 +465,12 @@ const VisualEditor: FC<{}> = () => {
           </VisualEditorSection>
         )}
 
-        {error ? <ErrorDisplay error={error} cspError={cspError} /> : null}
+        {error || aiError ? (
+          <ErrorDisplay
+            error={(error || aiError) as ErrorCode}
+            cspError={cspError}
+          />
+        ) : null}
 
         <div className="gb-m-4 gb-text-center">
           <BackToGBButton experimentUrl={experimentUrl}>

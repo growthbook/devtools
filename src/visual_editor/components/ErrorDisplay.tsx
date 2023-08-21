@@ -1,6 +1,5 @@
 import React, { useRef, FC, useEffect } from "react";
-import { ErrorCode, OpenOptionsPageMessage } from "../../../devtools";
-import { CSPError } from "../lib/hooks/useApi";
+import { CSPError, ErrorCode, OpenOptionsPageMessage } from "../../../devtools";
 
 const CSPErrorDisplay = ({ cspError }: { cspError: CSPError | null }) => (
   <div className="gb-p-4 gb-text-red-400">
