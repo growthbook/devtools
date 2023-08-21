@@ -23,6 +23,7 @@ import useQueryParams from "./lib/hooks/useQueryParams";
 import useGlobalCSS from "./lib/hooks/useGlobalCSS";
 import useCustomJs from "./lib/hooks/useCustomJs";
 import normalizeVariations from "./lib/normalizeVariations";
+import getHumanReadableText from "./lib/getHumanReadableText";
 
 import Toolbar, { ToolbarMode } from "./components/Toolbar";
 import ElementDetails from "./components/ElementDetails";
@@ -51,18 +52,9 @@ import AICopySuggestor from "./components/AICopySuggestor";
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
 
-const getHumanReadableText = (element: HTMLElement): string => {
-  // ignore when selected is simply wrapper of another element
-  if (element.innerHTML.startsWith("<")) return "";
-  // hard-limit on text length
-  if (element.innerHTML.length > 800) return "";
-  const parser = new DOMParser();
-  const parsed = parser.parseFromString(element.innerHTML, "text/html");
-  const text = parsed.body.textContent || "";
-  return text.trim();
-};
-
 const VisualEditor: FC<{}> = () => {
+  // forceUpdate is used to force a re-render of the component
+  const [, _forceUpdate] = useReducer((x) => x + 1, 0);
   const {
     params,
     visualChangesetId,
@@ -72,25 +64,26 @@ const VisualEditor: FC<{}> = () => {
   } = useQueryParams();
   const [isVisualEditorEnabled, setIsEnabled] = useState(false);
   const [mode, setMode] = useState<ToolbarMode | null>(null);
-  const [variations, setVariations] = useState<VisualEditorVariation[]>([]);
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(
     null
   );
+  const [variations, setVariations] = useState<VisualEditorVariation[]>([]);
   const [selectedVariationIndex, setSelectedVariationIndex] =
     useState<number>(variationIndex);
   const [highlightedElementSelector, setHighlightedElementSelector] = useState<
     string | null
   >(null);
+
   const highlightedElement = useMemo(() => {
     if (!highlightedElementSelector) return null;
     return document.querySelector(highlightedElementSelector);
   }, [highlightedElementSelector]);
+
   const { x, y, setX, setY, parentStyles } = useFixedPositioning({
     x: 24,
     y: 24,
     rightAligned: true,
   });
-  const [, _forceUpdate] = useReducer((x) => x + 1, 0);
 
   const {
     error,
@@ -306,9 +299,10 @@ const VisualEditor: FC<{}> = () => {
     return getHumanReadableText(selectedElement);
   }, [getHumanReadableText, selectedElement, selectedElement?.innerHTML]);
 
-  const selectedElementHasCopy = useMemo(() => {
-    return humanReadableText.length > 0;
-  }, [humanReadableText]);
+  const selectedElementHasCopy = useMemo(
+    () => humanReadableText.length > 0,
+    [humanReadableText]
+  );
 
   // on visual changeset change
   useEffect(() => {
