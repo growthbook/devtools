@@ -1,6 +1,8 @@
 import React from "react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { BiChevronRight } from "react-icons/bi";
+import { BsCodeSlash } from "react-icons/bs";
+import { MdMoveUp, MdMp } from "react-icons/md";
 export default function SelectedElementPopoverMenu({
   selectedElement,
 }: {
@@ -17,13 +19,15 @@ export default function SelectedElementPopoverMenu({
         {tagName}
       </div>
       <DropdownMenu.Item>
-        <div className="gb-text-gray-700 gb-bg-white  gb-py-2 gb-px-4 gb-cursor-pointer">
+        <div className="gb-flex gb-text-gray-700 gb-bg-white  gb-py-2 gb-px-4 gb-cursor-pointer">
+          <BsCodeSlash className="gb-mr-2" />
           Edit innerHTML
         </div>
       </DropdownMenu.Item>
       <DropdownMenu.Separator />
       <DropdownMenu.Item>
-        <div className="gb-text-gray-700 gb-bg-white  gb-py-2 gb-px-4 gb-cursor-pointer">
+        <div className="gb-flex gb-text-gray-700 gb-bg-white gb-py-2 gb-px-4 gb-cursor-pointer">
+          <MdMoveUp className="gb-mr-2" />
           Rearrange
         </div>
       </DropdownMenu.Item>
