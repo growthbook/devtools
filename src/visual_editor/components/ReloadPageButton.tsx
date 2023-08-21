@@ -4,7 +4,7 @@ import {
   VISUAL_CHANGESET_ID_PARAMS_KEY,
   VARIATION_INDEX_PARAMS_KEY,
   AI_ENABLED_PARAMS_KEY,
-} from "./lib/constants";
+} from "../lib/constants";
 
 const refreshWithParams = ({
   visualChangesetId,

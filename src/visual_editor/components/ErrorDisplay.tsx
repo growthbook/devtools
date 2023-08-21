@@ -1,6 +1,6 @@
 import React, { FC } from "react";
-import { ErrorCode, OpenOptionsPageMessage } from "../../devtools";
-import { CSPError } from "./lib/hooks/useApi";
+import { ErrorCode, OpenOptionsPageMessage } from "../../../devtools";
+import { CSPError } from "../lib/hooks/useApi";
 
 const CSPErrorDisplay = ({ cspError }: { cspError: CSPError | null }) => (
   <div className="gb-p-4 gb-text-red-400">
