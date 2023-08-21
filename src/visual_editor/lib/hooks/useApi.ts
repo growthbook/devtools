@@ -68,8 +68,7 @@ const useApi: UseApiHook = ({ visualChangesetId }) => {
           break;
         case "GB_RESPONSE_UPDATE_VISUAL_CHANGESET":
           if (msg.data.error) setError(msg.data.error);
-          // TODO uncomment when GB supports this
-          // else setVisualChangeset(msg.data.visualChangeset);
+          else setVisualChangeset(msg.data.visualChangeset);
           setLoading(false);
           break;
         case "GB_RESPONSE_TRANSFORM_COPY":
