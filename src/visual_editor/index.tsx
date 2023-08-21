@@ -11,13 +11,7 @@ import React, {
 } from "react";
 import * as ReactDOM from "react-dom/client";
 
-import {
-  APIDomMutation,
-  APIExperiment,
-  APIExperimentVariation,
-  APIVisualChange,
-  APIVisualChangeset,
-} from "../../devtools";
+import { VisualEditorVariation } from "../../devtools";
 import {
   toggleSelectionMode,
   onSelectionModeUpdate,
@@ -26,6 +20,9 @@ import getSelector from "./lib/getSelector";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
 import useApi from "./lib/hooks/useApi";
 import useQueryParams from "./lib/hooks/useQueryParams";
+import useGlobalCSS from "./lib/hooks/useGlobalCSS";
+import useCustomJs from "./lib/hooks/useCustomJs";
+import normalizeVariations from "./lib/normalizeVariations";
 
 import Toolbar, { ToolbarMode } from "./components/Toolbar";
 import ElementDetails from "./components/ElementDetails";
@@ -53,61 +50,6 @@ import AICopySuggestor from "./components/AICopySuggestor";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
-
-declare global {
-  interface Window {
-    __gb_global_js_err?: (error: string) => void;
-  }
-}
-
-export interface VisualEditorVariation {
-  name: string;
-  description: string;
-  css?: string;
-  js?: string;
-  domMutations: APIDomMutation[];
-  variationId: string;
-}
-
-let _globalStyleTag: HTMLStyleElement | null = null;
-let _globalScriptTag: HTMLScriptElement | null = null;
-
-// normalize API payloads into local object shape
-const genVisualEditorVariations = ({
-  experiment,
-  visualChangeset,
-}: {
-  experiment: APIExperiment;
-  visualChangeset: APIVisualChangeset;
-}): VisualEditorVariation[] => {
-  const { variations } = experiment;
-  const { visualChanges } = visualChangeset;
-  const visualChangesByVariationId = visualChanges.reduce(
-    (acc: Record<string, APIVisualChange>, visualChange: APIVisualChange) => {
-      const { variation } = visualChange;
-      acc[variation] = visualChange;
-      return acc;
-    },
-    {}
-  );
-
-  return variations.map((variation: APIExperimentVariation) => {
-    const { name, description, variationId } = variation;
-    const {
-      css = "",
-      js = "",
-      domMutations = [],
-    } = visualChangesByVariationId[variation.variationId] ?? {};
-    return {
-      name,
-      description,
-      variationId,
-      css,
-      js,
-      domMutations,
-    };
-  });
-};
 
 const getHumanReadableText = (element: HTMLElement): string => {
   // ignore when selected is simply wrapper of another element
@@ -165,7 +107,6 @@ const VisualEditor: FC<{}> = () => {
     hasAiEnabled,
   });
 
-  const [customJsError, setCustomJsError] = useState("");
   const errorContainerRef = useRef<HTMLDivElement | null>(null);
 
   const forceUpdate = debounce(_forceUpdate, 100);
@@ -193,6 +134,16 @@ const VisualEditor: FC<{}> = () => {
     [variations, setVariations, selectedVariationIndex, updateVisualChangeset]
   );
 
+  const { globalCss, setGlobalCss } = useGlobalCSS({
+    variation: selectedVariation,
+    updateVariation: updateSelectedVariation,
+  });
+
+  const { customJs, setCustomJs, customJsError } = useCustomJs({
+    variation: selectedVariation,
+    updateVariation: updateSelectedVariation,
+  });
+
   const addDomMutations = useCallback(
     (domMutations: DeclarativeMutation[]) => {
       updateSelectedVariation({
@@ -207,22 +158,6 @@ const VisualEditor: FC<{}> = () => {
       addDomMutations([domMutation]);
     },
     [addDomMutations]
-  );
-
-  // debounced since we accept text input from the user here
-  const setGlobalCSS = useCallback(
-    debounce((css: string) => {
-      updateSelectedVariation({ css });
-    }, 500),
-    [updateSelectedVariation]
-  );
-
-  const setCustomJs = useCallback(
-    (js: string) => {
-      setCustomJsError("");
-      updateSelectedVariation({ js });
-    },
-    [updateSelectedVariation]
   );
 
   // the generated selector of the currently selected element
@@ -380,7 +315,7 @@ const VisualEditor: FC<{}> = () => {
     if (!visualChangeset || !experiment) return;
     if (mode === null) setMode("selection");
 
-    const visualEditorVariations = genVisualEditorVariations({
+    const visualEditorVariations = normalizeVariations({
       experiment,
       visualChangeset,
     });
@@ -458,29 +393,6 @@ const VisualEditor: FC<{}> = () => {
     });
     return () => observer.disconnect();
   }, []);
-
-  // generate a style tag to hold the global CSS
-  useEffect(() => {
-    if (_globalStyleTag) _globalStyleTag.remove();
-    if (!selectedVariation?.css) return;
-    _globalStyleTag = document.createElement("style");
-    document.head.appendChild(_globalStyleTag);
-    _globalStyleTag.innerHTML = selectedVariation?.css ?? "";
-  }, [selectedVariation]);
-
-  // generate a script tag to hold custom JS
-  // renders only when js changes
-  useEffect(() => {
-    setCustomJsError("");
-    if (_globalScriptTag) _globalScriptTag?.remove();
-    if (!selectedVariation?.js) return;
-    _globalScriptTag = document.createElement("script");
-    document.body.appendChild(_globalScriptTag);
-    window.__gb_global_js_err = setCustomJsError;
-    _globalScriptTag.innerHTML =
-      `try { ${selectedVariation?.js} } catch(e) { window.__gb_global_js_err(e.message); }` ??
-      "";
-  }, [selectedVariation?.js]);
 
   // scroll to error
   useEffect(() => {
@@ -576,11 +488,7 @@ const VisualEditor: FC<{}> = () => {
 
         {mode === "js" && (
           <VisualEditorSection title="Custom JS">
-            <CustomJSEditor
-              js={selectedVariation.js}
-              onSubmit={setCustomJs}
-              onError={setCustomJsError}
-            />
+            <CustomJSEditor js={customJs} onSubmit={setCustomJs} />
             {customJsError && (
               <div className="gb-px-4 gb-py-2 gb-text-rose-500">
                 JS error: {customJsError}
@@ -591,10 +499,7 @@ const VisualEditor: FC<{}> = () => {
 
         {mode === "css" && (
           <VisualEditorSection title="Global CSS">
-            <GlobalCSSEditor
-              css={selectedVariation.css}
-              onSubmit={setGlobalCSS}
-            />
+            <GlobalCSSEditor css={globalCss} onSubmit={setGlobalCss} />
           </VisualEditorSection>
         )}
 
@@ -606,9 +511,9 @@ const VisualEditor: FC<{}> = () => {
           >
             <DOMMutationList
               addMutation={addDomMutation}
-              globalCss={selectedVariation.css}
-              clearGlobalCss={() => setGlobalCSS("")}
-              customJs={selectedVariation.js}
+              globalCss={globalCss}
+              clearGlobalCss={() => setGlobalCss("")}
+              customJs={customJs}
               clearCustomJs={() => setCustomJs("")}
               removeDomMutation={removeDomMutation}
               mutations={selectedVariation?.domMutations ?? []}
@@ -635,7 +540,7 @@ const VisualEditor: FC<{}> = () => {
         </div>
       </VisualEditorPane>
 
-      {/** Overlays for highlighting selected/hovered elements **/}
+      {/** Overlays for highlighting selected elements **/}
       {mode === "selection" && selectedElement ? (
         <>
           <FloatingFrame
@@ -645,6 +550,7 @@ const VisualEditor: FC<{}> = () => {
           <SelectorDisplay selector={selector} />
         </>
       ) : null}
+      {/** Overlays for highlighting hovered elements **/}
       {mode === "selection" ? (
         <>
           <FloatingFrame parentElement={highlightedElement} />
