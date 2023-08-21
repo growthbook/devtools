@@ -39,7 +39,7 @@ const FloatingFrameOverlay = ({
   clear: () => void;
 }) => (
   <div
-    className={clsx("gb-fixed", "gb-z-front", "gb-bg-white/75")}
+    className={clsx("gb-fixed", "gb-z-front", "gb-bg-black/25")}
     style={overlayStyles(domRect)[position]}
     onClick={clear}
   ></div>
