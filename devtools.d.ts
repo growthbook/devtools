@@ -22,6 +22,10 @@ export type CopyMode = "energetic" | "concise" | "humorous";
 
 export type ErrorCode = "csp-error" | BGErrorCode;
 
+export type CSPError = {
+  violatedDirective: string;
+};
+
 export interface VisualEditorVariation {
   name: string;
   description: string;
