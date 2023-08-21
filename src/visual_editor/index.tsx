@@ -100,8 +100,6 @@ const VisualEditor: FC<{}> = () => {
     hasAiEnabled,
   });
 
-  const errorContainerRef = useRef<HTMLDivElement | null>(null);
-
   const forceUpdate = debounce(_forceUpdate, 100);
   const mutateRevert = useRef<(() => void) | null>(null);
 
@@ -388,15 +386,6 @@ const VisualEditor: FC<{}> = () => {
     return () => observer.disconnect();
   }, []);
 
-  // scroll to error
-  useEffect(() => {
-    if (!error && !cspError && !errorContainerRef.current) return;
-    errorContainerRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
-  }, [error, cspError, errorContainerRef.current]);
-
   if (!isVisualEditorEnabled) return null;
 
   return (
@@ -515,11 +504,7 @@ const VisualEditor: FC<{}> = () => {
           </VisualEditorSection>
         )}
 
-        {error ? (
-          <div ref={errorContainerRef}>
-            <ErrorDisplay error={error} cspError={cspError} />
-          </div>
-        ) : null}
+        {error ? <ErrorDisplay error={error} cspError={cspError} /> : null}
 
         <div className="gb-m-4 gb-text-center">
           <BackToGBButton experimentUrl={experimentUrl}>
