@@ -22,6 +22,8 @@ import useQueryParams from "./lib/hooks/useQueryParams";
 import useGlobalCSS from "./lib/hooks/useGlobalCSS";
 import useCustomJs from "./lib/hooks/useCustomJs";
 import getHumanReadableText from "./lib/getHumanReadableText";
+import useVisualChangeset from "./lib/hooks/useVisualChangeset";
+import useAiCopySuggestion from "./lib/hooks/useAiCopySuggestion";
 
 import Toolbar, { VisualEditorMode } from "./components/Toolbar";
 import ElementDetails from "./components/ElementDetails";
@@ -49,8 +51,6 @@ import AICopySuggestor from "./components/AICopySuggestor";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
-import useVisualChangeset from "./lib/hooks/useVisualChangeset";
-import useAiCopySuggestion from "./lib/hooks/useAiCopySuggestion";
 
 const VisualEditor: FC<{}> = () => {
   const {
@@ -70,13 +70,13 @@ const VisualEditor: FC<{}> = () => {
   } = useAiCopySuggestion(visualChangesetId);
   const [selectedVariationIndex, setSelectedVariationIndex] =
     useState<number>(variationIndex);
-  const selectedVariation = variations?.[selectedVariationIndex] ?? null;
   const updateSelectedVariation = useCallback(
     (updates: Partial<VisualEditorVariation>) => {
       updateVariationAtIndex(selectedVariationIndex, updates);
     },
     [selectedVariationIndex, updateVariationAtIndex]
   );
+  const selectedVariation = variations?.[selectedVariationIndex] ?? null;
   const { globalCss, setGlobalCss } = useGlobalCSS({
     variation: selectedVariation,
     updateVariation: updateSelectedVariation,
@@ -91,6 +91,7 @@ const VisualEditor: FC<{}> = () => {
     y: 24,
     rightAligned: true,
   });
+
   const [mode, setMode] = useState<VisualEditorMode | null>(null);
 
   /** TODO useSelectionMode or useEditingMode */
@@ -110,6 +111,7 @@ const VisualEditor: FC<{}> = () => {
    *   selectedElementMutations,
    * } = useEditingMode(mode === 'selection');
    */
+
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(
     null
   );
@@ -486,9 +488,7 @@ const VisualEditor: FC<{}> = () => {
         ) : null}
 
         <div className="gb-m-4 gb-text-center">
-          <BackToGBButton experimentUrl={experimentUrl}>
-            Done Editing
-          </BackToGBButton>
+          <BackToGBButton experimentUrl={experimentUrl} />
           <ReloadPageButton
             params={params}
             variationIndex={variationIndex}
