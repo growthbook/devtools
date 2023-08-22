@@ -1,10 +1,8 @@
-import mutate, { DeclarativeMutation } from "dom-mutator";
 import { debounce } from "lodash";
 import React, {
   FC,
   useCallback,
   useEffect,
-  useRef,
   useReducer,
   useState,
   useMemo,
@@ -12,16 +10,10 @@ import React, {
 import * as ReactDOM from "react-dom/client";
 
 import { ErrorCode, VisualEditorVariation } from "../../devtools";
-import {
-  toggleSelectionMode,
-  onSelectionModeUpdate,
-} from "./lib/selectionMode";
-import getSelector from "./lib/getSelector";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
 import useQueryParams from "./lib/hooks/useQueryParams";
 import useGlobalCSS from "./lib/hooks/useGlobalCSS";
 import useCustomJs from "./lib/hooks/useCustomJs";
-import getHumanReadableText from "./lib/getHumanReadableText";
 import useVisualChangeset from "./lib/hooks/useVisualChangeset";
 import useAiCopySuggestion from "./lib/hooks/useAiCopySuggestion";
 
@@ -37,10 +29,7 @@ import ClassNamesEdit from "./components/ClassNamesEdit";
 import DOMMutationList from "./components/DOMMutationList";
 import VariationSelector from "./components/VariationSelector";
 import VisualEditorHeader from "./components/VisualEditorHeader";
-import AttributeEdit, {
-  Attribute,
-  IGNORED_ATTRS,
-} from "./components/AttributeEdit";
+import AttributeEdit from "./components/AttributeEdit";
 import CustomJSEditor from "./components/CustomJSEditor";
 import CSSAttributeEditor from "./components/CSSAttributeEditor";
 import ReloadPageButton from "./components/ReloadPageButton";
@@ -52,8 +41,15 @@ import SelectedElementMenu from "./components/SelectedElementMenu";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
+import useEditMode from "./lib/hooks/useEditMode";
 
 const VisualEditor: FC<{}> = () => {
+  const { x, y, setX, setY, parentStyles } = useFixedPositioning({
+    x: 24,
+    y: 24,
+    rightAligned: true,
+  });
+
   const {
     params,
     visualChangesetId,
@@ -61,125 +57,63 @@ const VisualEditor: FC<{}> = () => {
     hasAiEnabled,
     cleanUpParams,
   } = useQueryParams();
+
   const { error, cspError, variations, updateVariationAtIndex, experimentUrl } =
     useVisualChangeset(visualChangesetId);
+
   const {
     loading: aiLoading,
     error: aiError,
     transformCopy,
     transformedCopy,
   } = useAiCopySuggestion(visualChangesetId);
+
   const [selectedVariationIndex, setSelectedVariationIndex] =
     useState<number>(variationIndex);
+
+  const selectedVariation = variations?.[selectedVariationIndex] ?? null;
+
   const updateSelectedVariation = useCallback(
     (updates: Partial<VisualEditorVariation>) => {
       updateVariationAtIndex(selectedVariationIndex, updates);
     },
     [selectedVariationIndex, updateVariationAtIndex]
   );
-  const selectedVariation = variations?.[selectedVariationIndex] ?? null;
+
   const { globalCss, setGlobalCss } = useGlobalCSS({
     variation: selectedVariation,
     updateVariation: updateSelectedVariation,
   });
+
   const { customJs, setCustomJs, customJsError } = useCustomJs({
     variation: selectedVariation,
     updateVariation: updateSelectedVariation,
   });
-  // used to allow moving the floating frame around
-  const { x, y, setX, setY, parentStyles } = useFixedPositioning({
-    x: 24,
-    y: 24,
-    rightAligned: true,
-  });
 
   const [mode, setMode] = useState<VisualEditorMode | null>(null);
 
-  /** TODO useSelectionMode or useEditingMode */
-
-  /**
-   * const {
-   *   selectedElement,
-   *   highlightedElement,
-   *   addDomMutations,
-   *   removeDomMutations,
-   *   addClassNamesToSelectedElement,
-   *   removeClassNamesFromSelectedElement,
-   *   setAttributesForSelectedElement,
-   *   setCSSForSelectedElement,
-   *   setHTMLForSelectedElement,
-   *   undoHTMLMutations,
-   *   selectedElementMutations,
-   * } = useEditingMode(mode === 'selection');
-   */
-
-  const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(
-    null
-  );
-  const [highlightedElementSelector, setHighlightedElementSelector] = useState<
-    string | null
-  >(null);
-
-  const highlightedElement = useMemo(() => {
-    if (!highlightedElementSelector) return null;
-    return document.querySelector(highlightedElementSelector);
-  }, [highlightedElementSelector]);
-
-  const mutateRevert = useRef<(() => void) | null>(null);
-
-  const addDomMutations = useCallback(
-    (domMutations: DeclarativeMutation[]) => {
-      updateSelectedVariation({
-        domMutations: [...selectedVariation.domMutations, ...domMutations],
-      });
-    },
-    [updateSelectedVariation, selectedVariation]
-  );
-
-  const addDomMutation = useCallback(
-    (domMutation: DeclarativeMutation) => {
-      addDomMutations([domMutation]);
-    },
-    [addDomMutations]
-  );
-
-  // the generated selector of the currently selected element
-  const selector = useMemo(
-    () => (selectedElement ? getSelector(selectedElement) : ""),
-    [selectedElement]
-  );
-
-  const setHTML = useCallback(
-    (html: string) => {
-      addDomMutation({
-        action: "set",
-        attribute: "html",
-        value: html,
-        selector,
-      });
-    },
-    [selector, addDomMutation]
-  );
-
-  const undoHTMLMutations = useMemo(() => {
-    const htmlMutations = (selectedVariation?.domMutations ?? []).filter(
-      (mutation) =>
-        mutation.attribute === "html" && mutation.selector === selector
-    );
-    if (htmlMutations.length === 0) return;
-    return () => {
-      removeDomMutations(htmlMutations);
-    };
-  }, [selectedVariation, selector]);
-
-  // the dom mutations that apply to the currently selected element
-  const selectedElementMutations = useMemo(
-    () =>
-      selectedVariation?.domMutations.filter((m) =>
-        selectedElement && selector ? m.selector === selector : true
-      ) ?? [],
-    [selectedElement, selectedVariation, selector]
-  );
+  const {
+    elementUnderEdit,
+    setElementUnderEdit,
+    clearElementUnderEdit,
+    elementUnderEditSelector,
+    elementUnderEditCopy,
+    highlightedElement,
+    highlightedElementSelector,
+    setInnerHTML,
+    undoInnerHTMLMutations,
+    setHTMLAttributes,
+    addClassNames,
+    removeClassNames,
+    setCSS,
+    elementUnderEditMutations,
+    addDomMutation,
+    removeDomMutation,
+  } = useEditMode({
+    isEnabled: mode === "edit",
+    variation: selectedVariation,
+    updateVariation: updateSelectedVariation,
+  });
 
   const selectedVariationTotalChangesLength = useMemo(
     () =>
@@ -189,170 +123,18 @@ const VisualEditor: FC<{}> = () => {
     [selectedVariation]
   );
 
-  const addClassNames = useCallback(
-    (classNames: string) => {
-      if (!selector) return;
-      addDomMutations(
-        classNames.split(" ").map((className) => ({
-          action: "append",
-          attribute: "class",
-          value: className,
-          selector,
-        }))
-      );
-    },
-    [selectedElement, addDomMutations]
-  );
-
-  const removeClassNames = useCallback(
-    (classNames: string) => {
-      if (!selector) return;
-      addDomMutation({
-        action: "remove",
-        attribute: "class",
-        value: classNames,
-        selector,
-      });
-    },
-    [selectedElement, addDomMutation]
-  );
-
-  const removeDomMutation = useCallback(
-    (mutation: DeclarativeMutation) => {
-      updateSelectedVariation({
-        domMutations: selectedVariation.domMutations.filter(
-          (m) => mutation !== m
-        ),
-      });
-    },
-    [updateSelectedVariation, selectedVariation]
-  );
-
-  const removeDomMutations = useCallback(
-    (mutations: DeclarativeMutation[]) => {
-      updateSelectedVariation({
-        domMutations: selectedVariation.domMutations.filter(
-          (m) => !mutations.includes(m)
-        ),
-      });
-    },
-    [updateSelectedVariation, selectedVariation]
-  );
-
-  const setAttributes = useCallback(
-    (attrs: Attribute[]) => {
-      if (!selectedElement) return;
-      const existing = [...selectedElement.attributes];
-      const removed = existing.filter(
-        (e) =>
-          !attrs.find((a) => a.name === e.name) &&
-          !IGNORED_ATTRS.includes(e.name)
-      );
-      const changed = attrs.filter(
-        (attr) => attr.value !== selectedElement.getAttribute(attr.name)
-      );
-      removed.forEach((attr) => {
-        addDomMutation({
-          action: "remove",
-          attribute: attr.name,
-          selector,
-          value: attr.value,
-        });
-      });
-      changed.forEach((attr) => {
-        addDomMutation({
-          action: selectedElement.hasAttribute(attr.name) ? "set" : "append",
-          attribute: attr.name,
-          selector,
-          value: attr.value,
-        });
-      });
-    },
-    [selectedElement, addDomMutation]
-  );
-
-  const setCSS = useCallback(
-    (css: string) => {
-      if (!selector) return;
-      addDomMutation({
-        action: "set",
-        attribute: "style",
-        value: css,
-        selector,
-      });
-    },
-    [selector, addDomMutation]
-  );
-
-  const humanReadableText = useMemo(() => {
-    if (!selectedElement) return "";
-    return getHumanReadableText(selectedElement);
-  }, [getHumanReadableText, selectedElement, selectedElement?.innerHTML]);
-
-  const selectedElementHasCopy = useMemo(
-    () => humanReadableText.length > 0,
-    [humanReadableText]
-  );
-
-  // forceUpdate is used to force a re-render of the component
-  const [, _forceUpdate] = useReducer((x) => x + 1, 0);
-  // limit the forceUpdate calls to 1 per 100ms
-  const forceUpdate = debounce(_forceUpdate, 100);
-
   useEffect(() => {
     if (!variations.length) return;
-    if (mode === null) setMode("selection");
+    if (mode === null) setMode("edit");
     cleanUpParams();
   }, [variations]);
 
-  // handle mode selection
-  useEffect(() => {
-    toggleSelectionMode({
-      isEnabled: mode === "selection",
-      selectedElement,
-      setSelectedElement,
-      setHighlightedElementSelector,
-      addDomMutation,
-    });
-  }, [mode]);
-
-  // selection mode - update on select
-  useEffect(() => {
-    if (mode !== "selection") return;
-
-    onSelectionModeUpdate({
-      selectedElement,
-      setSelectedElement,
-      setHighlightedElementSelector,
-      addDomMutation,
-    });
-  }, [
-    selectedElement,
-    setSelectedElement,
-    setHighlightedElementSelector,
-    mode,
-  ]);
-
-  // upon every DOM mutation, we revert all changes and replay them to ensure
-  // that the DOM is in the correct state
-  useEffect(() => {
-    // run reverts if they exist
-    if (mutateRevert?.current) mutateRevert.current();
-
-    const revertCallbacks: Array<() => void> = [];
-
-    selectedVariation?.domMutations.forEach((mutation) => {
-      const controller = mutate.declarative(mutation);
-      revertCallbacks.push(controller.revert);
-    });
-
-    mutateRevert.current = () => {
-      revertCallbacks.reverse().forEach((c) => c());
-    };
-  }, [variations, selectedVariation]);
-
   // Upon any DOM change on the page, we trigger a refresh of visual editor to
-  // keep it in sync
+  // keep it in sync.
+  // Limit the forceUpdate calls to 1 per 100ms.
+  const [, _forceUpdate] = useReducer((x) => x + 1, 0);
+  const forceUpdate = debounce(_forceUpdate, 100);
+
   useEffect(() => {
     const observer = new MutationObserver(() =>
       setTimeout(() => forceUpdate(), 0)
@@ -380,47 +162,52 @@ const VisualEditor: FC<{}> = () => {
           disabled={!variations.length}
           mode={mode}
           setMode={setMode}
-          clearSelectedElement={() => setSelectedElement(null)}
+          clearSelectedElement={clearElementUnderEdit}
         />
 
-        {mode === "selection" && selectedElement ? (
+        {mode === "edit" && elementUnderEdit ? (
           <>
             <VisualEditorSection title="Breadcrumbs">
               <BreadcrumbsView
-                element={selectedElement}
-                setElement={setSelectedElement}
+                element={elementUnderEdit}
+                setElement={setElementUnderEdit}
               />
             </VisualEditorSection>
 
             <VisualEditorSection title="Element Details">
               <ElementDetails
-                selector={selector}
-                element={selectedElement}
-                setHTML={setHTML}
-                undoHTMLMutations={undoHTMLMutations}
+                selector={elementUnderEditSelector}
+                element={elementUnderEdit}
+                setHTML={setInnerHTML}
+                undoHTMLMutations={undoInnerHTMLMutations}
               />
             </VisualEditorSection>
 
-            <AIEditorSection isVisible={hasAiEnabled && selectedElementHasCopy}>
+            <AIEditorSection
+              isVisible={hasAiEnabled && !!elementUnderEditCopy.length}
+            >
               <AICopySuggestor
                 loading={aiLoading}
-                parentElement={selectedElement}
-                setHTML={setHTML}
-                copy={humanReadableText}
+                parentElement={elementUnderEdit}
+                setHTML={setInnerHTML}
+                copy={elementUnderEditCopy}
                 transformCopy={transformCopy}
                 transformedCopy={transformedCopy}
               />
             </AIEditorSection>
 
             <VisualEditorSection title="Attributes">
-              <AttributeEdit element={selectedElement} onSave={setAttributes} />
+              <AttributeEdit
+                element={elementUnderEdit}
+                onSave={setHTMLAttributes}
+              />
             </VisualEditorSection>
 
             {/** SVGs do not work with class name editor ATM; See issue GB-194 **/}
-            {!["svg", "path"].includes(selectedElement.tagName) && (
+            {!["svg", "path"].includes(elementUnderEdit.tagName) && (
               <VisualEditorSection title="Class names">
                 <ClassNamesEdit
-                  element={selectedElement}
+                  element={elementUnderEdit}
                   onRemove={removeClassNames}
                   onAdd={addClassNames}
                 />
@@ -429,17 +216,17 @@ const VisualEditor: FC<{}> = () => {
 
             <VisualEditorSection isCollapsible title={`CSS attributes`}>
               <CSSAttributeEditor
-                selectedElement={selectedElement}
+                selectedElement={elementUnderEdit}
                 setCSS={setCSS}
               />
             </VisualEditorSection>
 
             <VisualEditorSection
               isCollapsible
-              title={`Changes (${selectedElementMutations.length})`}
+              title={`Changes (${elementUnderEditMutations.length})`}
             >
               <DOMMutationList
-                mutations={selectedElementMutations ?? []}
+                mutations={elementUnderEditMutations ?? []}
                 removeDomMutation={removeDomMutation}
               />
             </VisualEditorSection>
@@ -500,21 +287,21 @@ const VisualEditor: FC<{}> = () => {
       </VisualEditorPane>
 
       {/** Overlays for highlighting selected elements **/}
-      {mode === "selection" && selectedElement ? (
+      {mode === "edit" && elementUnderEdit ? (
         <>
           <FloatingFrame
-            parentElement={selectedElement}
-            clearSelectedElement={() => setSelectedElement(null)}
+            parentElement={elementUnderEdit}
+            clearSelectedElement={() => setElementUnderEdit(null)}
           />
-          <SelectorDisplay selector={selector} />
+          <SelectorDisplay selector={elementUnderEditSelector} />
           <SelectedElementMenu
-            selectedElement={selectedElement}
-            clearSelectedElement={() => setSelectedElement(null)}
+            selectedElement={elementUnderEdit}
+            clearSelectedElement={() => setElementUnderEdit(null)}
           />
         </>
       ) : null}
       {/** Overlays for highlighting hovered elements **/}
-      {mode === "selection" ? (
+      {mode === "edit" ? (
         <>
           <FloatingFrame parentElement={highlightedElement} />
           <SelectorDisplay selector={highlightedElementSelector} />

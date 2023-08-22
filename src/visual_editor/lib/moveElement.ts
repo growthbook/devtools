@@ -1,5 +1,5 @@
-const dragTargetAttributeName = "gb-selection-mode-drag-target";
-const dragTargetEdgeAttributeName = "gb-selection-mode-drag-target-edge";
+const dragTargetAttributeName = "gb-edit-mode-drag-target";
+const dragTargetEdgeAttributeName = "gb-edit-mode-drag-target-edge";
 
 const clearDragTargetEdges = () => {
   const targetEdges = document.querySelectorAll(

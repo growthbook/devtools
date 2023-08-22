@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { throttle } from "lodash";
 
 // TODO watch for window resize events!!!!!!
+// TODO resize on element resize as well (e.g. when element becomes bigger from content change)
 export default function useFloatingAnchor(parentElement: Element | null) {
   const [domRect, setDomRect] = useState<DOMRect | null>(null);
 
