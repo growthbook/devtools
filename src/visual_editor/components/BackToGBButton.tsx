@@ -3,8 +3,7 @@ import React, { FC } from "react";
 
 const BackToGBButton: FC<{
   experimentUrl: string | null;
-  children: React.ReactNode;
-}> = ({ experimentUrl, children }) => (
+}> = ({ experimentUrl }) => (
   <button
     className={clsx(
       "gb-w-full",
@@ -23,7 +22,7 @@ const BackToGBButton: FC<{
       }
     }}
   >
-    {children}
+    Back to GrowthBook
   </button>
 );
 
