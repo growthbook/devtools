@@ -23,7 +23,7 @@ import useGlobalCSS from "./lib/hooks/useGlobalCSS";
 import useCustomJs from "./lib/hooks/useCustomJs";
 import getHumanReadableText from "./lib/getHumanReadableText";
 
-import Toolbar, { ToolbarMode } from "./components/Toolbar";
+import Toolbar, { VisualEditorMode } from "./components/Toolbar";
 import ElementDetails from "./components/ElementDetails";
 import SelectorDisplay from "./components/SelectorDisplay";
 import FloatingFrame from "./components/FloatingFrame";
@@ -68,12 +68,51 @@ const VisualEditor: FC<{}> = () => {
     transformCopy,
     transformedCopy,
   } = useAiCopySuggestion(visualChangesetId);
-  const [mode, setMode] = useState<ToolbarMode | null>(null);
+  const [selectedVariationIndex, setSelectedVariationIndex] =
+    useState<number>(variationIndex);
+  const selectedVariation = variations?.[selectedVariationIndex] ?? null;
+  const updateSelectedVariation = useCallback(
+    (updates: Partial<VisualEditorVariation>) => {
+      updateVariationAtIndex(selectedVariationIndex, updates);
+    },
+    [selectedVariationIndex, updateVariationAtIndex]
+  );
+  const { globalCss, setGlobalCss } = useGlobalCSS({
+    variation: selectedVariation,
+    updateVariation: updateSelectedVariation,
+  });
+  const { customJs, setCustomJs, customJsError } = useCustomJs({
+    variation: selectedVariation,
+    updateVariation: updateSelectedVariation,
+  });
+  // used to allow moving the floating frame around
+  const { x, y, setX, setY, parentStyles } = useFixedPositioning({
+    x: 24,
+    y: 24,
+    rightAligned: true,
+  });
+  const [mode, setMode] = useState<VisualEditorMode | null>(null);
+
+  /** TODO useSelectionMode or useEditingMode */
+
+  /**
+   * const {
+   *   selectedElement,
+   *   highlightedElement,
+   *   addDomMutations,
+   *   removeDomMutations,
+   *   addClassNamesToSelectedElement,
+   *   removeClassNamesFromSelectedElement,
+   *   setAttributesForSelectedElement,
+   *   setCSSForSelectedElement,
+   *   setHTMLForSelectedElement,
+   *   undoHTMLMutations,
+   *   selectedElementMutations,
+   * } = useEditingMode(mode === 'selection');
+   */
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(
     null
   );
-  const [selectedVariationIndex, setSelectedVariationIndex] =
-    useState<number>(variationIndex);
   const [highlightedElementSelector, setHighlightedElementSelector] = useState<
     string | null
   >(null);
@@ -83,33 +122,7 @@ const VisualEditor: FC<{}> = () => {
     return document.querySelector(highlightedElementSelector);
   }, [highlightedElementSelector]);
 
-  // used to allow moving the floating frame around
-  const { x, y, setX, setY, parentStyles } = useFixedPositioning({
-    x: 24,
-    y: 24,
-    rightAligned: true,
-  });
-
   const mutateRevert = useRef<(() => void) | null>(null);
-
-  const selectedVariation = variations?.[selectedVariationIndex] ?? null;
-
-  const updateSelectedVariation = useCallback(
-    (updates: Partial<VisualEditorVariation>) => {
-      updateVariationAtIndex(selectedVariationIndex, updates);
-    },
-    [selectedVariationIndex, updateVariationAtIndex]
-  );
-
-  const { globalCss, setGlobalCss } = useGlobalCSS({
-    variation: selectedVariation,
-    updateVariation: updateSelectedVariation,
-  });
-
-  const { customJs, setCustomJs, customJsError } = useCustomJs({
-    variation: selectedVariation,
-    updateVariation: updateSelectedVariation,
-  });
 
   const addDomMutations = useCallback(
     (domMutations: DeclarativeMutation[]) => {

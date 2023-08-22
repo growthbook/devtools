@@ -10,7 +10,7 @@ import { IconType } from "react-icons";
 import { BsFiletypeCss } from "react-icons/bs";
 import { IoLogoJavascript } from "react-icons/io";
 
-export type ToolbarMode =
+export type VisualEditorMode =
   | "interactive"
   | "selection"
   | "js"
@@ -18,7 +18,7 @@ export type ToolbarMode =
   | "screenshot"
   | "changes";
 
-const modeToIcon: Record<ToolbarMode, IconType | FC<{}>> = {
+const modeToIcon: Record<VisualEditorMode, IconType | FC<{}>> = {
   interactive: RxCursorArrow,
   selection: RxPencil1,
   js: IoLogoJavascript,
@@ -36,7 +36,7 @@ const ToolbarButton = ({
   title,
 }: {
   disabled: boolean;
-  mode: ToolbarMode;
+  mode: VisualEditorMode;
   activate: () => void;
   deactivate?: () => void;
   isActive: boolean;
@@ -63,8 +63,8 @@ const ToolbarButton = ({
 
 const Toolbar: FC<{
   disabled: boolean;
-  mode: ToolbarMode | null;
-  setMode: (mode: ToolbarMode) => void;
+  mode: VisualEditorMode | null;
+  setMode: (mode: VisualEditorMode) => void;
   clearSelectedElement: () => void;
 }> = ({ disabled, mode, setMode, clearSelectedElement }) => {
   return (
