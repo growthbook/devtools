@@ -6,7 +6,7 @@ import { RxCross2, RxPlus, RxCheck } from "react-icons/rx";
 import {
   hoverAttributeName,
   selectedAttributeName,
-} from "../lib/selectionMode";
+} from "../lib/hooks/useEditMode";
 
 export const IGNORED_ATTRS = [
   "class",
