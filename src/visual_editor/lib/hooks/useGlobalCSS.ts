@@ -4,6 +4,10 @@ import { VisualEditorVariation } from "../../../../devtools";
 
 let _globalStyleTag: HTMLStyleElement | null = null;
 
+/**
+ * This hook is used to update the global CSS for the variation. It manages
+ * the creation and removal of the style tag in the head of the document.
+ */
 export default function useGlobalCSS({
   variation,
   updateVariation,

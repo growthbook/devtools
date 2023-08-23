@@ -15,6 +15,10 @@ type UseAiCopySuggestionHook = (visualChangesetId: string) => {
   transformCopy: TransformCopyFn;
 };
 
+/**
+ * This hook is used to communicate with the background script to request
+ * AI copy suggestions.
+ */
 const useAiCopySuggestion: UseAiCopySuggestionHook = (visualChangesetId) => {
   const [error, setError] = useState<ErrorCode | null>(null);
   const [loading, setLoading] = useState(false);

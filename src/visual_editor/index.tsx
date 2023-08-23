@@ -12,10 +12,11 @@ import * as ReactDOM from "react-dom/client";
 import { ErrorCode, VisualEditorVariation } from "../../devtools";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
 import useQueryParams from "./lib/hooks/useQueryParams";
-import useGlobalCSS from "./lib/hooks/useGlobalCSS";
-import useCustomJs from "./lib/hooks/useCustomJs";
 import useVisualChangeset from "./lib/hooks/useVisualChangeset";
 import useAiCopySuggestion from "./lib/hooks/useAiCopySuggestion";
+import useGlobalCSS from "./lib/hooks/useGlobalCSS";
+import useCustomJs from "./lib/hooks/useCustomJs";
+import useEditMode from "./lib/hooks/useEditMode";
 
 import Toolbar, { VisualEditorMode } from "./components/Toolbar";
 import ElementDetails from "./components/ElementDetails";
@@ -37,11 +38,10 @@ import ErrorDisplay from "./components/ErrorDisplay";
 import BackToGBButton from "./components/BackToGBButton";
 import AIEditorSection from "./components/AIEditorSection";
 import AICopySuggestor from "./components/AICopySuggestor";
-import SelectedElementMenu from "./components/SelectedElementMenu";
+import EditElementMenu from "./components/EditElementMenu";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
-import useEditMode from "./lib/hooks/useEditMode";
 
 const VisualEditor: FC<{}> = () => {
   const { x, y, setX, setY, parentStyles } = useFixedPositioning({
@@ -130,8 +130,7 @@ const VisualEditor: FC<{}> = () => {
   }, [variations]);
 
   // Upon any DOM change on the page, we trigger a refresh of visual editor to
-  // keep it in sync.
-  // Limit the forceUpdate calls to 1 per 100ms.
+  // keep it in sync. We use debounce to limit forceUpdate calls to 1 per 100ms.
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
   const forceUpdate = debounce(_forceUpdate, 100);
 
@@ -294,10 +293,7 @@ const VisualEditor: FC<{}> = () => {
             clearSelectedElement={() => setElementUnderEdit(null)}
           />
           <SelectorDisplay selector={elementUnderEditSelector} />
-          <SelectedElementMenu
-            selectedElement={elementUnderEdit}
-            clearSelectedElement={() => setElementUnderEdit(null)}
-          />
+          <EditElementMenu selectedElement={elementUnderEdit} />
         </>
       ) : null}
       {/** Overlays for highlighting hovered elements **/}
