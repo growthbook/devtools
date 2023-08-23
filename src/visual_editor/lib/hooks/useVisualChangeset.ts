@@ -22,6 +22,10 @@ type UseVisualChangesetHook = (visualChangesetId: string) => {
   cspError: CSPError | null;
 };
 
+/**
+ * This hook is responsible for loading and updating a visual changeset. It utilizes the
+ * `window.postMessage` API to communicate with the background script.
+ */
 const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
   const [error, setError] = useState<ErrorCode | null>(null);
   const [loading, setLoading] = useState(false);

@@ -13,6 +13,11 @@ const validate = (js: string) => {
 
 let _globalScriptTag: HTMLScriptElement | null = null;
 
+/**
+ * This hook is used to manage the custom js for the visual editor. It manages
+ * the validation and execution of the js. It also manages the creation and
+ * removal of the script tag that is used to execute the js.
+ */
 export default function useCustomJs({
   variation,
   updateVariation,

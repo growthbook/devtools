@@ -5,10 +5,16 @@ import { Attribute } from "../../components/AttributeEdit";
 import { CONTAINER_ID } from "../..";
 import getSelector from "../getSelector";
 import { VisualEditorVariation } from "../../../../devtools";
-import { IGNORED_ATTRS } from "../../components/AttributeEdit";
 
 export const hoverAttributeName = "gb-edit-mode-hover";
 export const selectedAttributeName = "gb-edit-mode-selected";
+
+// HTML attriibute names to ignore when editing
+export const IGNORED_ATTRS = [
+  "class",
+  hoverAttributeName,
+  selectedAttributeName,
+];
 
 const clearSelectedElementAttr = () => {
   const selected = document.querySelectorAll(`[${selectedAttributeName}]`)?.[0];
@@ -52,6 +58,11 @@ type UseEditModeHook = (args: {
   removeDomMutation: (mutation: DeclarativeMutation) => void;
 };
 
+/**
+ * This hook is responsible for managing the edit mode state. It exposes
+ * the currently selected element, the highlighted element, and  a number
+ * of functions that can be used to mutate the DOM.
+ */
 const useEditMode: UseEditModeHook = ({
   isEnabled,
   variation,
