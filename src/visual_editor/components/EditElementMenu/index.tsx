@@ -1,17 +1,8 @@
 import React, { useState } from "react";
-import { IconType } from "react-icons";
 import { BsCodeSlash } from "react-icons/bs";
 import { MdMoveUp } from "react-icons/md";
-import { RiBearSmileFill } from "react-icons/ri";
 import FloatingMenu from "../FloatingMenu";
 import RearrangePopover from "./RearrangePopover";
-
-interface MenuItem {
-  icon?: IconType;
-  label: string;
-  onSelect?: () => void;
-  children?: MenuItem[];
-}
 
 interface EditElementMenuProps {
   selectedElement: Element | null;
