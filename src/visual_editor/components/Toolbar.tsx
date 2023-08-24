@@ -5,6 +5,7 @@ import {
   RxListBullet,
   RxPencil1,
 } from "react-icons/rx";
+import { MdMoveUp } from "react-icons/md";
 import clsx from "clsx";
 import { IconType } from "react-icons";
 import { BsFiletypeCss } from "react-icons/bs";
@@ -16,7 +17,8 @@ export type VisualEditorMode =
   | "js"
   | "css"
   | "screenshot"
-  | "changes";
+  | "changes"
+  | "rearrange";
 
 const modeToIcon: Record<VisualEditorMode, IconType | FC<{}>> = {
   interactive: RxCursorArrow,
@@ -25,6 +27,7 @@ const modeToIcon: Record<VisualEditorMode, IconType | FC<{}>> = {
   css: BsFiletypeCss,
   screenshot: RxCamera,
   changes: RxListBullet,
+  rearrange: MdMoveUp,
 };
 
 const ToolbarButton = ({

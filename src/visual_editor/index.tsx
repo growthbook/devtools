@@ -17,6 +17,7 @@ import useAiCopySuggestion from "./lib/hooks/useAiCopySuggestion";
 import useGlobalCSS from "./lib/hooks/useGlobalCSS";
 import useCustomJs from "./lib/hooks/useCustomJs";
 import useEditMode from "./lib/hooks/useEditMode";
+import useRearrangeMode from "./lib/hooks/useRearrangeMode";
 
 import Toolbar, { VisualEditorMode } from "./components/Toolbar";
 import ElementDetails from "./components/ElementDetails";
@@ -39,6 +40,7 @@ import BackToGBButton from "./components/BackToGBButton";
 import AIEditorSection from "./components/AIEditorSection";
 import AICopySuggestor from "./components/AICopySuggestor";
 import EditElementMenu from "./components/EditElementMenu";
+import RearrangePopover from "./components/EditElementMenu/RearrangePopover";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
@@ -110,7 +112,17 @@ const VisualEditor: FC<{}> = () => {
     addDomMutation,
     removeDomMutation,
   } = useEditMode({
+    // TODO rename from isEnabled to hoverModeEnabled?
     isEnabled: mode === "edit",
+    variation: selectedVariation,
+    updateVariation: updateSelectedVariation,
+  });
+
+  const { elementToBeDragged } = useRearrangeMode({
+    isEnabled: mode === "rearrange",
+    elementToBeDragged: elementUnderEdit,
+    addDomMutation,
+    removeDomMutation,
     variation: selectedVariation,
     updateVariation: updateSelectedVariation,
   });
@@ -293,9 +305,21 @@ const VisualEditor: FC<{}> = () => {
             clearSelectedElement={() => setElementUnderEdit(null)}
           />
           <SelectorDisplay selector={elementUnderEditSelector} />
-          <EditElementMenu selectedElement={elementUnderEdit} />
+          <EditElementMenu
+            selectedElement={elementUnderEdit}
+            mode={mode}
+            setMode={setMode}
+          />
         </>
       ) : null}
+
+      {mode == "rearrange" && elementToBeDragged ? (
+        <>
+          <RearrangePopover elementToBeDragged={elementToBeDragged} />
+          <FloatingFrame parentElement={elementUnderEdit} />
+        </>
+      ) : null}
+
       {/** Overlays for highlighting hovered elements **/}
       {mode === "edit" ? (
         <>

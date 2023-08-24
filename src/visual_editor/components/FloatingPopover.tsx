@@ -26,16 +26,14 @@ export default function FloatingPopover({
           style={{
             position: "fixed",
             top,
-            left,
-            width,
-            height,
+            left: left + width,
+            width: 0,
+            height: 0,
           }}
         />
       </Popover.Trigger>
       <Popover.Portal container={containerRef.current}>
         <Popover.Content side="right" sideOffset={8} align="start">
-          <Popover.Close />
-          <Popover.Arrow />
           <div
             className="gb-relative gb-bg-white gb-rounded gb-shadow gb-overflow-hidden gb-text-sm"
             style={{ minWidth: "12rem" }}

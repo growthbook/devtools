@@ -2,12 +2,15 @@ import React from "react";
 import FloatingPopover from "../FloatingPopover";
 
 export default function RearrangePopover({
-  selectedElement,
+  elementToBeDragged,
 }: {
-  selectedElement: Element | null;
+  elementToBeDragged: Element | null;
 }) {
   return (
-    <FloatingPopover title="Rearrange element" anchorElement={selectedElement}>
+    <FloatingPopover
+      title="Rearrange element"
+      anchorElement={elementToBeDragged}
+    >
       Click and drag the element now!{" "}
     </FloatingPopover>
   );

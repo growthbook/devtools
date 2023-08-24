@@ -1,23 +1,22 @@
-import React, { useState } from "react";
+import React from "react";
 import { BsCodeSlash } from "react-icons/bs";
 import { MdMoveUp } from "react-icons/md";
 import FloatingMenu from "../FloatingMenu";
-import RearrangePopover from "./RearrangePopover";
+import { VisualEditorMode } from "../Toolbar";
 
 interface EditElementMenuProps {
+  mode: VisualEditorMode;
+  setMode: (mode: VisualEditorMode) => void;
   selectedElement: Element | null;
 }
 
 export default function EditElementMenu({
   selectedElement,
+  setMode,
 }: EditElementMenuProps) {
-  const [mode, setMode] = useState<"rearrange" | null>(null);
-
   if (!selectedElement) return null;
 
-  return mode === "rearrange" ? (
-    <RearrangePopover selectedElement={selectedElement} />
-  ) : (
+  return (
     <FloatingMenu
       key="default"
       title={selectedElement.tagName}
@@ -34,7 +33,6 @@ export default function EditElementMenu({
           icon: MdMoveUp,
           label: "Rearrange",
           onSelect: () => {
-            console.log("rearrange");
             setMode("rearrange");
           },
         },
