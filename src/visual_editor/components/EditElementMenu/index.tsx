@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { IconType } from "react-icons";
 import { BsCodeSlash } from "react-icons/bs";
 import { MdMoveUp } from "react-icons/md";
+import { RiBearSmileFill } from "react-icons/ri";
 import FloatingMenu from "../FloatingMenu";
+import RearrangePopover from "./RearrangePopover";
 
 interface MenuItem {
   icon?: IconType;
@@ -11,40 +13,6 @@ interface MenuItem {
   children?: MenuItem[];
 }
 
-const menuItems: MenuItem[] = [
-  {
-    icon: BsCodeSlash,
-    label: "Edit innerHTML",
-    onSelect: () => {
-      console.log("edit innerHTML");
-    },
-  },
-  {
-    icon: MdMoveUp,
-    label: "Rearrange",
-    onSelect: () => {
-      console.log("rearrange");
-    },
-  },
-  {
-    label: "Select parent",
-    children: [
-      {
-        label: "div",
-        onSelect: () => {
-          console.log("select parent div");
-        },
-      },
-      {
-        label: "div",
-        onSelect: () => {
-          console.log("select parent div");
-        },
-      },
-    ],
-  },
-];
-
 interface EditElementMenuProps {
   selectedElement: Element | null;
 }
@@ -52,12 +20,51 @@ interface EditElementMenuProps {
 export default function EditElementMenu({
   selectedElement,
 }: EditElementMenuProps) {
+  const [mode, setMode] = useState<"rearrange" | null>(null);
+
   if (!selectedElement) return null;
-  return (
+
+  return mode === "rearrange" ? (
+    <RearrangePopover selectedElement={selectedElement} />
+  ) : (
     <FloatingMenu
+      key="default"
       title={selectedElement.tagName}
       anchorElement={selectedElement}
-      menuItems={menuItems}
+      menuItems={[
+        {
+          icon: BsCodeSlash,
+          label: "Edit innerHTML",
+          onSelect: () => {
+            console.log("edit innerHTML");
+          },
+        },
+        {
+          icon: MdMoveUp,
+          label: "Rearrange",
+          onSelect: () => {
+            console.log("rearrange");
+            setMode("rearrange");
+          },
+        },
+        {
+          label: "Select parent",
+          children: [
+            {
+              label: "div",
+              onSelect: () => {
+                console.log("select parent div");
+              },
+            },
+            {
+              label: "div",
+              onSelect: () => {
+                console.log("select parent div");
+              },
+            },
+          ],
+        },
+      ]}
     />
   );
 }
