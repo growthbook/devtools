@@ -59,32 +59,41 @@ type UseEditModeHook = (args: {
 };
 
 /**
- * This hook is responsible for managing the edit mode state. It exposes
- * the currently selected element, the highlighted element, and  a number
- * of functions that can be used to mutate the DOM.
+ * This hook is responsible for managing the edit mode state. It exposes the
+ * currently selected element, the highlighted (hovered-over) element, and
+ * functions that can be used to mutate the DOM.
  */
 const useEditMode: UseEditModeHook = ({
   isEnabled,
   variation,
   updateVariation,
 }) => {
+  const [elementMutationsMap, setElementMutationsMap] = useState(
+    new Map<HTMLElement, DeclarativeMutation[]>()
+  );
+
   const [elementUnderEdit, setElementUnderEdit] = useState<HTMLElement | null>(
     null
   );
   const [highlightedElement, setHighlightedElement] =
     useState<HTMLElement | null>(null);
+
   const clearElementUnderEdit = useCallback(
     () => setElementUnderEdit(null),
     [setElementUnderEdit]
   );
+
   const elementUnderEditSelector = useMemo(
     () => (elementUnderEdit ? getSelector(elementUnderEdit) : ""),
     [elementUnderEdit]
   );
+
   const highlightedElementSelector = useMemo(
     () => (highlightedElement ? getSelector(highlightedElement) : ""),
     [highlightedElement]
   );
+
+  // human-readable copy of the element under edit
   const elementUnderEditCopy = useMemo(() => {
     if (!elementUnderEdit) return "";
     // ignore when selected is simply wrapper of another element
@@ -144,16 +153,20 @@ const useEditMode: UseEditModeHook = ({
   );
 
   const undoInnerHTMLMutations = useMemo(() => {
-    const htmlMutations = (variation?.domMutations ?? []).filter(
-      (mutation) =>
-        mutation.attribute === "html" &&
-        mutation.selector === elementUnderEditSelector
-    );
+    if (!elementUnderEdit) return;
+    const htmlMutations = (
+      elementMutationsMap.get(elementUnderEdit) ?? []
+    ).filter((m) => m.attribute === "html");
     if (htmlMutations.length === 0) return;
     return () => {
       removeDomMutations(htmlMutations);
     };
-  }, [variation, elementUnderEditSelector, removeDomMutations]);
+  }, [
+    variation,
+    elementUnderEditSelector,
+    removeDomMutations,
+    elementMutationsMap,
+  ]);
 
   const setHTMLAttributes = useCallback(
     (attrs: Attribute[]) => {
@@ -238,12 +251,8 @@ const useEditMode: UseEditModeHook = ({
 
   const elementUnderEditMutations = useMemo(
     () =>
-      variation?.domMutations.filter((m) =>
-        elementUnderEdit && elementUnderEditSelector
-          ? m.selector === elementUnderEditSelector
-          : true
-      ) ?? [],
-    [elementUnderEdit, variation, elementUnderEditSelector]
+      elementUnderEdit ? elementMutationsMap.get(elementUnderEdit) ?? [] : [],
+    [elementUnderEdit, elementMutationsMap]
   );
 
   const removeDomMutation = useCallback(
@@ -257,6 +266,8 @@ const useEditMode: UseEditModeHook = ({
   // that the DOM is in the correct state
   const mutateRevert = useRef<(() => void) | null>(null);
   useEffect(() => {
+    const newElementMutationsMap = new Map();
+
     // run reverts if they exist
     if (mutateRevert?.current) mutateRevert.current();
 
@@ -264,8 +275,19 @@ const useEditMode: UseEditModeHook = ({
 
     variation?.domMutations.forEach((mutation) => {
       const controller = mutate.declarative(mutation);
+
+      // @ts-expect-error TODO get dom-mutator types working
+      controller.mutation?.elements.forEach((e) => {
+        newElementMutationsMap.set(e, [
+          ...(newElementMutationsMap.get(e) ?? []),
+          mutation,
+        ]);
+      });
+
       revertCallbacks.push(controller.revert);
     });
+
+    setElementMutationsMap(newElementMutationsMap);
 
     mutateRevert.current = () => {
       revertCallbacks.reverse().forEach((c) => c());
