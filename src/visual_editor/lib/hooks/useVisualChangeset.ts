@@ -46,6 +46,7 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
 
   const updateVisualChangeset = useCallback(
     async (variations: VisualEditorVariation[]) => {
+      console.log("debug: calling updateVisualChangeset");
       setLoading(true);
       setError(null);
 

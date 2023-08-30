@@ -92,6 +92,8 @@ const fetchVisualChangeset = async ({
       error: null,
     };
   } catch (e: any) {
+    console.log("background script error", e);
+
     let error: BGErrorCode = "load-viz-changeset-failed";
 
     if (e.message === "no-api-key" || e.message === "no-api-host") {
@@ -150,6 +152,8 @@ const updateVisualChangeset = async ({
       error: null,
     };
   } catch (e: any) {
+    console.log("background script error", e);
+
     let error: BGErrorCode = "update-viz-changeset-failed";
 
     if (e.message === "no-api-key" || e.message === "no-api-host") {

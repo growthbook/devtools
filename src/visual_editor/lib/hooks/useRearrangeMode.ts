@@ -4,8 +4,9 @@ import { nanoid } from "nanoid";
 import { CONTAINER_ID } from "../..";
 import { onDrag } from "../moveElement";
 import getSelector from "../getSelector";
+import useGhostElement from "./useGhostElement";
 
-const TAG_CLASSNAME_PREFIX = "rearrange-mode-tag-";
+const REARRANGE_CLASSNAME_PREFIX = "rearrange-mode-tag-";
 
 type UseRearrangeModeHook = (args: {
   isEnabled: boolean;
@@ -29,11 +30,23 @@ const useRearrangeMode: UseRearrangeModeHook = ({
   removeDomMutation,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [pointerXY, setPointerXY] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
   const [elementDraggedTo, setElementDraggedTo] = useState<Element | null>(
     null
   );
   const [elementDraggedToSibling, setElementDraggedToSibling] =
     useState<Element | null>(null);
+
+  // draws a ghost element that follows the cursor when dragging
+  useGhostElement({
+    isEnabled: isDragging,
+    pointerX: pointerXY?.x,
+    pointerY: pointerXY?.y,
+    targetElement: elementToBeDragged,
+  });
 
   // TODO
   // - ensure these dom mutations are marked as hidden
@@ -42,10 +55,11 @@ const useRearrangeMode: UseRearrangeModeHook = ({
   const ensureClassNameTag = useCallback(() => {
     const hasTag = mutations.some(
       (m) =>
-        m.attribute === "class" && m.value?.startsWith(TAG_CLASSNAME_PREFIX)
+        m.attribute === "class" &&
+        m.value?.startsWith(REARRANGE_CLASSNAME_PREFIX)
     );
     if (hasTag) return;
-    addClassNames(`${TAG_CLASSNAME_PREFIX}${nanoid(10)}`);
+    addClassNames(`${REARRANGE_CLASSNAME_PREFIX}${nanoid(10)}`);
   }, [addClassNames, mutations]);
 
   // if there are no position mutations, we can remove the tag
@@ -57,7 +71,8 @@ const useRearrangeMode: UseRearrangeModeHook = ({
     mutations
       .filter(
         (m) =>
-          m.attribute === "class" && m.value?.startsWith(TAG_CLASSNAME_PREFIX)
+          m.attribute === "class" &&
+          m.value?.startsWith(REARRANGE_CLASSNAME_PREFIX)
       )
       .forEach(removeDomMutation);
   }, [mutations, removeDomMutation]);
@@ -73,7 +88,7 @@ const useRearrangeMode: UseRearrangeModeHook = ({
       event.stopPropagation();
 
       // if the user is clicking on an already selected element, we begin dragging
-      if (elementToBeDragged === element) setIsDragging(true);
+      if (elementToBeDragged?.contains(element)) setIsDragging(true);
     },
     [elementToBeDragged, setIsDragging]
   );
@@ -108,17 +123,19 @@ const useRearrangeMode: UseRearrangeModeHook = ({
 
   const onPointerMove = useCallback(
     (event: MouseEvent) => {
+      setPointerXY({ x: event.clientX, y: event.clientY });
+
       if (!isDragging) return;
 
-      const { draggedToParent, draggedToSibling } = onDrag({
-        x: event.clientX,
-        y: event.clientY,
-        elementUnderCursor: event.target as HTMLElement,
-        draggedElement: elementToBeDragged as Element,
-      });
+      // const { draggedToParent, draggedToSibling } = onDrag({
+      //   x: event.clientX,
+      //   y: event.clientY,
+      //   elementUnderCursor: event.target as HTMLElement,
+      //   draggedElement: elementToBeDragged as Element,
+      // });
 
-      setElementDraggedTo(draggedToParent);
-      setElementDraggedToSibling(draggedToSibling);
+      // setElementDraggedTo(draggedToParent);
+      // setElementDraggedToSibling(draggedToSibling);
     },
     [
       isDragging,
@@ -128,11 +145,13 @@ const useRearrangeMode: UseRearrangeModeHook = ({
     ]
   );
 
+  // manage the classname tag we use to identify elements that are being dragged
   useEffect(() => {
     if (isEnabled) ensureClassNameTag();
     else cleanUpClassNameTag();
   }, [isEnabled, mutations]);
 
+  // manage the drag and drop event listeners
   useEffect(() => {
     if (!elementToBeDragged) return;
 
