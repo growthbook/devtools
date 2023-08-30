@@ -54,6 +54,7 @@ const useGhostElement: UseGhostElementHook = ({
       _ghostElement.style.left = `${pointerX}px`;
       _ghostElement.style.opacity = "0.5";
       _ghostElement.style.zIndex = "2147483647";
+      _ghostElement.style.pointerEvents = "none";
 
       document.body.appendChild(_ghostElement);
       setGhostElement(_ghostElement);

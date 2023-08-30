@@ -96,58 +96,45 @@ const createHighlightEdge = ({
 };
 
 const getEdgePosition = ({
-  top,
-  bottom,
-  left,
-  right,
-  mouseX,
-  mouseY,
-  orientation,
-}: {
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-  mouseX: number;
-  mouseY: number;
-  orientation: "horizontal" | "vertical";
-}): "left" | "right" | "top" | "bottom" => {
-  if (orientation === "horizontal") {
-    return mouseX - left < right - mouseX ? "left" : "right";
-  }
-  return mouseY - top < bottom - mouseY ? "top" : "bottom";
-};
-
-let _lastTargetElement: Element | null = null;
-let _lastEdgePosition: "top" | "bottom" | "left" | "right" | null = null;
-const highlightEdge = ({
   element,
-  orientation,
   mouseX,
   mouseY,
 }: {
   element: Element;
-  orientation: "vertical" | "horizontal";
+  mouseX: number;
+  mouseY: number;
+}): "left" | "right" | "top" | "bottom" => {
+  const { x, y, width, height } = element.getBoundingClientRect();
+  const distances: {
+    edge: "left" | "right" | "top" | "bottom";
+    distance: number;
+  }[] = [
+    { edge: "top", distance: Math.abs(mouseY - y) },
+    { edge: "right", distance: Math.abs(mouseX - (x + width)) },
+    { edge: "bottom", distance: Math.abs(mouseY - (y + height)) },
+    { edge: "left", distance: Math.abs(mouseX - x) },
+  ];
+  return distances.sort((a, b) => a.distance - b.distance)[0].edge;
+};
+
+let _lastTargetElement: Element | null = null;
+let _lastEdgePosition: "top" | "bottom" | "left" | "right" | null = null;
+
+const highlightEdge = ({
+  element,
+  mouseX,
+  mouseY,
+}: {
+  element: Element;
   mouseX: number;
   mouseY: number;
 }) => {
-  const {
-    x: elementX,
-    y: elementY,
-    bottom: elementBottom,
-    right: elementRight,
-  } = element.getBoundingClientRect();
-
   element.setAttribute(dragTargetAttributeName, "");
 
   const edgePosition = getEdgePosition({
-    top: elementY,
-    bottom: elementBottom,
-    left: elementX,
-    right: elementRight,
+    element,
     mouseX,
     mouseY,
-    orientation,
   });
 
   const landedParent = element.parentElement;
@@ -160,6 +147,13 @@ const highlightEdge = ({
     _lastEdgePosition = edgePosition;
 
     clearDragTargetEdges();
+
+    const {
+      x: elementX,
+      y: elementY,
+      bottom: elementBottom,
+      right: elementRight,
+    } = element.getBoundingClientRect();
 
     createHighlightEdge({
       elementX,
@@ -176,7 +170,6 @@ const highlightEdge = ({
 let _lastElementUnderCursor: Element | null = null;
 let _lastLandedParent: Element | null = null;
 let _lastLandedSibling: Element | null = null;
-let _lastContainerFlow: "vertical" | "horizontal" = "vertical";
 
 export const onDrag = ({
   x,
@@ -193,32 +186,28 @@ export const onDrag = ({
     // if there is no element under cursor, return
     !elementUnderCursor ||
     // if the element under cursor is the dragged element, return
-    elementUnderCursor === draggedElement ||
     // if the element under cursor is a child of the dragged element, return
     draggedElement.contains(elementUnderCursor) ||
     // if the dragged element has no parent, it's not in the DOM, return
-    !draggedElement.parentElement ||
+    !draggedElement.parentElement
+
+    // TODO determine if we need the following restrictions or not.
+    //
     // if the element under cursor is the parent element, return
-    draggedElement.parentElement === elementUnderCursor ||
+    // draggedElement.parentElement === elementUnderCursor ||
     // if the element under cursor is NOT a sibling, return
-    draggedElement.parentElement !== elementUnderCursor.parentElement
+    // draggedElement.parentElement !== elementUnderCursor.parentElement
   )
     return {
       draggedToParent: _lastLandedParent,
       draggedToSibling: _lastLandedSibling,
     };
 
-  if (elementUnderCursor !== _lastElementUnderCursor) {
+  if (elementUnderCursor !== _lastElementUnderCursor)
     clearDragTargetAttribute();
-    _lastContainerFlow = getContainerFlow(elementUnderCursor);
-  }
 
-  // on hover of element
-  //  1. get container flow
-  //  2. highlight appropriate edge based on flow and position of cursor
   const { landedParent, landedSibling } = highlightEdge({
     element: elementUnderCursor,
-    orientation: _lastContainerFlow,
     mouseX: x,
     mouseY: y,
   });

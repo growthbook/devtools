@@ -127,15 +127,15 @@ const useRearrangeMode: UseRearrangeModeHook = ({
 
       if (!isDragging) return;
 
-      // const { draggedToParent, draggedToSibling } = onDrag({
-      //   x: event.clientX,
-      //   y: event.clientY,
-      //   elementUnderCursor: event.target as HTMLElement,
-      //   draggedElement: elementToBeDragged as Element,
-      // });
+      const { draggedToParent, draggedToSibling } = onDrag({
+        x: event.clientX,
+        y: event.clientY,
+        elementUnderCursor: event.target as HTMLElement,
+        draggedElement: elementToBeDragged as Element,
+      });
 
-      // setElementDraggedTo(draggedToParent);
-      // setElementDraggedToSibling(draggedToSibling);
+      setElementDraggedTo(draggedToParent);
+      setElementDraggedToSibling(draggedToSibling);
     },
     [
       isDragging,
