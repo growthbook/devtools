@@ -6,7 +6,7 @@ import { onDrag } from "../moveElement";
 import getSelector from "../getSelector";
 import useGhostElement from "./useGhostElement";
 
-const REARRANGE_CLASSNAME_PREFIX = "rearrange-mode-tag-";
+export const REARRANGE_CLASSNAME_PREFIX = "rearrange-mode-tag-";
 
 type UseRearrangeModeHook = (args: {
   isEnabled: boolean;
