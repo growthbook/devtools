@@ -248,6 +248,7 @@ chrome.runtime.onMessage.addListener(
     switch (type) {
       case "BG_LOAD_VISUAL_CHANGESET":
         fetchVisualChangeset(data).then((res) => {
+          if (res.error) return sendResponse({ error: res.error });
           const editorUrl = res.visualChangeset?.editorUrl;
           if (
             !editorUrl ||
@@ -257,13 +258,13 @@ chrome.runtime.onMessage.addListener(
             return sendResponse({
               error: `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`,
             });
-          if (res.error) return sendResponse({ error: res.error });
           sendResponse(res);
         });
         break;
       case "BG_UPDATE_VISUAL_CHANGESET":
         fetchVisualChangeset(data)
           .then((res) => {
+            if (res.error) throw new Error(res.error);
             const editorUrl = res.visualChangeset?.editorUrl;
             if (
               !editorUrl ||
@@ -273,7 +274,6 @@ chrome.runtime.onMessage.addListener(
               throw new Error(
                 `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`
               );
-            if (res.error) throw new Error(res.error);
             return updateVisualChangeset(data);
           })
           .then((res) => {
