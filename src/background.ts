@@ -62,6 +62,9 @@ const fetchVisualChangeset = async ({
 
     const { visualChangeset, experiment } = res;
 
+    if (!visualChangeset || !experiment)
+      throw new Error("load-viz-changeset-failed");
+
     // fetch latest appOrigin to keep up to date
     let appOrigin: string | null = await loadAppOrigin();
     try {
@@ -220,26 +223,66 @@ const transformCopy = async ({
   }
 };
 
+const isSameOrigin = (url: string, origin: string) => {
+  try {
+    const urlHostname = new URL(url).hostname;
+    const originHostname = new URL(origin).hostname;
+    const urlMainDomain = urlHostname.split(".").slice(-2).join(".");
+    const originMainDomain = originHostname.split(".").slice(-2).join(".");
+    return urlMainDomain === originMainDomain;
+  } catch (e) {
+    console.error("isSameOrigin - Error checking origin", e);
+    return false;
+  }
+};
+
 /**
  * Listen for messages from the devtools. We have to keep the handler synchronous
  * so we can return true to indicate an async response to chrome.
  */
 chrome.runtime.onMessage.addListener(
-  (message: BGMessage, _sender, sendResponse) => {
+  (message: BGMessage, sender, sendResponse) => {
     const { type, data } = message;
+    const senderOrigin = sender.origin;
 
     switch (type) {
       case "BG_LOAD_VISUAL_CHANGESET":
         fetchVisualChangeset(data).then((res) => {
+          const editorUrl = res.visualChangeset?.editorUrl;
+          if (
+            !editorUrl ||
+            !senderOrigin ||
+            !isSameOrigin(editorUrl, senderOrigin)
+          )
+            return sendResponse({
+              error: `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`,
+            });
           if (res.error) return sendResponse({ error: res.error });
           sendResponse(res);
         });
         break;
       case "BG_UPDATE_VISUAL_CHANGESET":
-        updateVisualChangeset(data).then((res) => {
-          if (res.error) return sendResponse({ error: res.error });
-          sendResponse(res);
-        });
+        fetchVisualChangeset(data)
+          .then((res) => {
+            const editorUrl = res.visualChangeset?.editorUrl;
+            if (
+              !editorUrl ||
+              !senderOrigin ||
+              !isSameOrigin(editorUrl, senderOrigin)
+            )
+              throw new Error(
+                `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`
+              );
+            if (res.error) throw new Error(res.error);
+            return updateVisualChangeset(data);
+          })
+          .then((res) => {
+            if (res.error) throw new Error(res.error);
+            sendResponse(res);
+          })
+          .catch((e) => {
+            sendResponse({ error: e });
+          });
         break;
       case "BG_TRANSFORM_COPY":
         transformCopy(data).then((res) => {
