@@ -262,7 +262,6 @@ const VisualEditor: FC<{}> = () => {
 
         {mode === "changes" && (
           <VisualEditorSection
-            isCollapsible
             isExpanded
             title={`Changes (${selectedVariationTotalChangesLength})`}
           >
