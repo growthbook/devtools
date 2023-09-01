@@ -1,3 +1,10 @@
+import { isEqual } from "lodash";
+import {
+  fromUrl,
+  parseDomain,
+  ParseResultType,
+  Validation,
+} from "parse-domain";
 import {
   APIExperiment,
   APIVisualChangeset,
@@ -225,11 +232,39 @@ const transformCopy = async ({
 
 const isSameOrigin = (url: string, origin: string) => {
   try {
-    const urlHostname = new URL(url).hostname;
-    const originHostname = new URL(origin).hostname;
-    const urlMainDomain = urlHostname.split(".").slice(-2).join(".");
-    const originMainDomain = originHostname.split(".").slice(-2).join(".");
-    return urlMainDomain === originMainDomain;
+    const urlParseResult = parseDomain(fromUrl(url), {
+      validation: Validation.Lax,
+    });
+    const originParseResult = parseDomain(fromUrl(origin), {
+      validation: Validation.Lax,
+    });
+    if (
+      urlParseResult.type === ParseResultType.Listed &&
+      originParseResult.type === ParseResultType.Listed
+    ) {
+      const { domain: urlDomain } = urlParseResult;
+      const { domain: originDomain } = originParseResult;
+
+      return urlDomain === originDomain;
+    } else if (
+      urlParseResult.type === ParseResultType.Reserved &&
+      originParseResult.type === ParseResultType.Reserved
+    ) {
+      return isEqual(urlParseResult.labels, originParseResult.labels);
+    } else if (
+      urlParseResult.type === ParseResultType.NotListed &&
+      originParseResult.type === ParseResultType.NotListed
+    ) {
+      return isEqual(urlParseResult.labels, originParseResult.labels);
+    } else {
+      console.error('Unrecognizable domain type for either "url" or "origin"', {
+        url,
+        origin,
+      });
+      throw new Error(
+        'Unrecognizable domain type for either "url" or "origin"'
+      );
+    }
   } catch (e) {
     console.error("isSameOrigin - Error checking origin", e);
     return false;
@@ -248,6 +283,7 @@ chrome.runtime.onMessage.addListener(
     switch (type) {
       case "BG_LOAD_VISUAL_CHANGESET":
         fetchVisualChangeset(data).then((res) => {
+          if (res.error) return sendResponse({ error: res.error });
           const editorUrl = res.visualChangeset?.editorUrl;
           if (
             !editorUrl ||
@@ -257,13 +293,13 @@ chrome.runtime.onMessage.addListener(
             return sendResponse({
               error: `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`,
             });
-          if (res.error) return sendResponse({ error: res.error });
           sendResponse(res);
         });
         break;
       case "BG_UPDATE_VISUAL_CHANGESET":
         fetchVisualChangeset(data)
           .then((res) => {
+            if (res.error) throw new Error(res.error);
             const editorUrl = res.visualChangeset?.editorUrl;
             if (
               !editorUrl ||
@@ -273,7 +309,6 @@ chrome.runtime.onMessage.addListener(
               throw new Error(
                 `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`
               );
-            if (res.error) throw new Error(res.error);
             return updateVisualChangeset(data);
           })
           .then((res) => {
