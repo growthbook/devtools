@@ -36,20 +36,22 @@ const DOMMutationAccordian: FC<{
               {[
                 "action",
                 "attribute",
+                "value",
                 "selector",
                 "parentSelector",
                 "insertBeforeSelector",
-                "value",
-              ].map((key) => (
-                <div className="gb-flex gb-flex-col gb-mb-2  last:gb-mb-0">
-                  <div className="gb-text-xs gb-text-slate-400 gb-mb-1">
-                    {key}
+              ]
+                .filter((key) => !!m[key as keyof DeclarativeMutation])
+                .map((key) => (
+                  <div className="gb-flex gb-flex-col gb-mb-2  last:gb-mb-0">
+                    <div className="gb-text-xs gb-text-slate-400 gb-mb-1">
+                      {key}
+                    </div>
+                    <div className="gb-text-light">
+                      <code>{m[key as keyof DeclarativeMutation]}</code>
+                    </div>
                   </div>
-                  <div className="gb-text-light">
-                    <code>{(m as any)[key] ?? "--"}</code>
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
             <div className="gb-w-full gb-flex gb-justify-end gb-p-2">
               <span
