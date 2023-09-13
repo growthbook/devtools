@@ -1,4 +1,5 @@
 const fs = require("fs");
+const fetch = require("node-fetch");
 
 async function checkVersion() {
   const packageName = "@growthbook/growthbook"; // Replace this with the package name you want to check

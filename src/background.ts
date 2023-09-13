@@ -280,7 +280,7 @@ chrome.runtime.onMessage.addListener(
     const { type, data } = message;
     const senderOrigin = sender.origin;
 
-    consle.log("debug");
+    console.log("debug");
 
     switch (type) {
       case "BG_LOAD_VISUAL_CHANGESET":
