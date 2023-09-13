@@ -15,7 +15,7 @@ async function checkVersion() {
 
   if (localVersion !== latestVersion) {
     console.error(
-      `The local version ${localVersion} is not the latest version ${latestVersion}.`
+      `The local version of @growthbook/growthbook (${localVersion}) is not the latest version ${latestVersion}.`
     );
     process.exit(1);
   }
