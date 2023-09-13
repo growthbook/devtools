@@ -11,7 +11,7 @@ async function checkVersion() {
   const data = await response.json();
   const latestVersion = data["dist-tags"].latest;
 
-  if (localVersion !== latestVersion) {
+  if (localVersion.replace(/\^/, "") !== latestVersion) {
     console.error(
       `The local version of @growthbook/growthbook (${localVersion}) is not the latest version ${latestVersion}.`
     );
