@@ -280,8 +280,6 @@ chrome.runtime.onMessage.addListener(
     const { type, data } = message;
     const senderOrigin = sender.origin;
 
-    console.log("debug");
-
     switch (type) {
       case "BG_LOAD_VISUAL_CHANGESET":
         fetchVisualChangeset(data).then((res) => {
