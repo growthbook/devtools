@@ -3,6 +3,7 @@ name: Check Package Version
 on:
   pull_request:
     paths:
+      - 'src/**/*.ts'
       - 'package.json'
 
 jobs:
