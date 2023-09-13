@@ -1,4 +1,4 @@
-name: Check Package Version
+name: Check Growthbook SDK version is latest
 
 on:
   pull_request:
