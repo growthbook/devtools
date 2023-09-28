@@ -1,0 +1,31 @@
+name: Check Growthbook SDK version is latest
+
+on:
+  pull_request:
+    paths:
+      - 'src/**/*.ts'
+      - 'package.json'
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Check package version
+        run: node .github/scripts/check-pkg-version.js
+
+      - name: Alert on failure
+        if: ${{ failure() }}
+        run: echo "@growthbook/growthbook not up-to-date with what is published on npm."
+
