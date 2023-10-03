@@ -18,9 +18,10 @@ export type VisualEditorMode =
   | "css"
   | "screenshot"
   | "changes"
-  | "rearrange";
+  | "rearrange"
+  | "edit-innerHtml";
 
-const modeToIcon: Record<VisualEditorMode, IconType | FC<{}>> = {
+const modeToIcon: Partial<Record<VisualEditorMode, IconType | FC<{}>>> = {
   interactive: RxCursorArrow,
   edit: RxPencil1,
   js: IoLogoJavascript,
@@ -46,6 +47,7 @@ const ToolbarButton = ({
   title: string;
 }) => {
   const Icon = modeToIcon[mode];
+  if (!Icon) return null;
   return (
     <button
       title={title}

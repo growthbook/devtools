@@ -26,7 +26,7 @@ export default function EditElementMenu({
           icon: BsCodeSlash,
           label: "Edit innerHTML",
           onSelect: () => {
-            console.log("edit innerHTML");
+            setMode("edit-innerHtml");
           },
         },
         {

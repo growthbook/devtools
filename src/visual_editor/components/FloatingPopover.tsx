@@ -6,10 +6,12 @@ export default function FloatingPopover({
   anchorElement,
   title,
   children,
+  onClose,
 }: {
   anchorElement: Element | null;
   title: string;
   children: React.ReactNode;
+  onClose?: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const domRect = useFloatingAnchor(anchorElement);
@@ -18,7 +20,14 @@ export default function FloatingPopover({
 
   const { top, left, width, height } = domRect;
   return (
-    <Popover.Root defaultOpen open={!!anchorElement} modal={false}>
+    <Popover.Root
+      defaultOpen
+      open={!!anchorElement}
+      modal={false}
+      onOpenChange={(open) => {
+        if (!open) onClose?.();
+      }}
+    >
       <Popover.Trigger asChild>
         <div
           ref={containerRef}

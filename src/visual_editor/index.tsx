@@ -41,6 +41,7 @@ import AIEditorSection from "./components/AIEditorSection";
 import AICopySuggestor from "./components/AICopySuggestor";
 import EditElementMenu from "./components/EditElementMenu";
 import RearrangePopover from "./components/RearrangePopover";
+import EditInnerHTMLPopover from "./components/EditInnerHTMLPopover";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
@@ -311,9 +312,26 @@ const VisualEditor: FC<{}> = () => {
         </>
       ) : null}
 
+      {mode == "edit-innerHtml" && elementToBeDragged ? (
+        <>
+          <FloatingFrame
+            parentElement={elementUnderEdit}
+            clearSelectedElement={() => setElementUnderEdit(null)}
+          />
+          <SelectorDisplay selector={elementUnderEditSelector} />
+          <EditInnerHTMLPopover
+            elementUnderEdit={elementUnderEdit}
+            cancel={() => setMode("edit")}
+          />
+        </>
+      ) : null}
+
       {mode == "rearrange" && elementToBeDragged ? (
         <>
-          <RearrangePopover elementToBeDragged={elementToBeDragged} />
+          <RearrangePopover
+            elementToBeDragged={elementToBeDragged}
+            cancel={() => setMode("edit")}
+          />
           <FloatingFrame parentElement={elementUnderEdit} />
         </>
       ) : null}
