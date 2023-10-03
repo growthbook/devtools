@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { DeclarativeMutation } from "dom-mutator";
 import { nanoid } from "nanoid";
 import { CONTAINER_ID } from "../..";
-import { onDrag } from "../moveElement";
+import { onDrag, teardown as draggingTeardown } from "../moveElement";
 import getSelector from "../getSelector";
 import useGhostElement from "./useGhostElement";
 
@@ -111,6 +111,7 @@ const useRearrangeMode: UseRearrangeModeHook = ({
         });
       }
       setIsDragging(false);
+      draggingTeardown();
     },
     [
       isDragging,
@@ -146,14 +147,14 @@ const useRearrangeMode: UseRearrangeModeHook = ({
   );
 
   // manage the classname tag we use to identify elements that are being dragged
-  useEffect(() => {
-    if (isEnabled) ensureClassNameTag();
-    else cleanUpClassNameTag();
-  }, [isEnabled, mutations]);
+  // useEffect(() => {
+  //   // if (isEnabled) ensureClassNameTag();
+  //   // else cleanUpClassNameTag();
+  // }, [isEnabled, mutations]);
 
   // manage the drag and drop event listeners
   useEffect(() => {
-    if (!elementToBeDragged) return;
+    if (!isEnabled || !elementToBeDragged) return;
 
     elementToBeDragged.style.cursor = "move";
 

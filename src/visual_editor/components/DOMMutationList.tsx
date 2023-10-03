@@ -16,6 +16,7 @@ const DOMMutationAccordian: FC<{
     >
       {mutations.map((m, i) => (
         <Accordion.Item
+          key={i}
           value={`item-${i}`}
           className="gb-bg-slate-700 odd:gb-bg-slate-600"
         >
