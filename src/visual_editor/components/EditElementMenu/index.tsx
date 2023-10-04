@@ -36,23 +36,23 @@ export default function EditElementMenu({
             setMode("rearrange");
           },
         },
-        {
-          label: "Select parent",
-          children: [
-            {
-              label: "div",
-              onSelect: () => {
-                console.log("select parent div");
-              },
-            },
-            {
-              label: "div",
-              onSelect: () => {
-                console.log("select parent div");
-              },
-            },
-          ],
-        },
+        // {
+        //   label: "Select parent",
+        //   children: [
+        //     {
+        //       label: "div",
+        //       onSelect: () => {
+        //         console.log("select parent div");
+        //       },
+        //     },
+        //     {
+        //       label: "div",
+        //       onSelect: () => {
+        //         console.log("select parent div");
+        //       },
+        //     },
+        //   ],
+        // },
       ]}
     />
   );

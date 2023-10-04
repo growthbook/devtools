@@ -320,8 +320,9 @@ const VisualEditor: FC<{}> = () => {
           />
           <SelectorDisplay selector={elementUnderEditSelector} />
           <EditInnerHTMLPopover
+            setInnerHTML={setInnerHTML}
             elementUnderEdit={elementUnderEdit}
-            cancel={() => setMode("edit")}
+            close={() => setMode("edit")}
           />
         </>
       ) : null}
