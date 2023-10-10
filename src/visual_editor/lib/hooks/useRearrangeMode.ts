@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { DeclarativeMutation } from "dom-mutator";
-import { nanoid } from "nanoid";
 import { CONTAINER_ID } from "../..";
 import { onDrag, teardown as draggingTeardown } from "../moveElement";
 import getSelector from "../getSelector";
@@ -11,10 +10,7 @@ export const REARRANGE_CLASSNAME_PREFIX = "rearrange-mode-tag-";
 type UseRearrangeModeHook = (args: {
   isEnabled: boolean;
   elementToBeDragged: HTMLElement | null;
-  mutations: DeclarativeMutation[];
-  addClassNames: (classNames: string) => void;
   addDomMutation: (mutation: DeclarativeMutation) => void;
-  removeDomMutation: (mutation: DeclarativeMutation) => void;
 }) => {
   elementToBeDragged: HTMLElement | null;
 };
@@ -24,10 +20,7 @@ type UseRearrangeModeHook = (args: {
 const useRearrangeMode: UseRearrangeModeHook = ({
   isEnabled,
   elementToBeDragged,
-  mutations,
-  addClassNames,
   addDomMutation,
-  removeDomMutation,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [pointerXY, setPointerXY] = useState<{ x: number; y: number }>({
@@ -47,35 +40,6 @@ const useRearrangeMode: UseRearrangeModeHook = ({
     pointerY: pointerXY?.y,
     targetElement: elementToBeDragged,
   });
-
-  // TODO
-  // - ensure these dom mutations are marked as hidden
-  // - ensure we actually hide these dom mutations
-  // - ensure we clean up classnames when drag and drop mutation is deleted
-  const ensureClassNameTag = useCallback(() => {
-    const hasTag = mutations.some(
-      (m) =>
-        m.attribute === "class" &&
-        m.value?.startsWith(REARRANGE_CLASSNAME_PREFIX)
-    );
-    if (hasTag) return;
-    addClassNames(`${REARRANGE_CLASSNAME_PREFIX}${nanoid(10)}`);
-  }, [addClassNames, mutations]);
-
-  // if there are no position mutations, we can remove the tag
-  const cleanUpClassNameTag = useCallback(() => {
-    const hasPositionMutation = mutations.some(
-      (m) => m.attribute === "position"
-    );
-    if (hasPositionMutation) return;
-    mutations
-      .filter(
-        (m) =>
-          m.attribute === "class" &&
-          m.value?.startsWith(REARRANGE_CLASSNAME_PREFIX)
-      )
-      .forEach(removeDomMutation);
-  }, [mutations, removeDomMutation]);
 
   const onPointerDown = useCallback(
     (event: MouseEvent) => {
@@ -146,12 +110,6 @@ const useRearrangeMode: UseRearrangeModeHook = ({
     ]
   );
 
-  // manage the classname tag we use to identify elements that are being dragged
-  // useEffect(() => {
-  //   // if (isEnabled) ensureClassNameTag();
-  //   // else cleanUpClassNameTag();
-  // }, [isEnabled, mutations]);
-
   // manage the drag and drop event listeners
   useEffect(() => {
     if (!isEnabled || !elementToBeDragged) return;
@@ -168,14 +126,7 @@ const useRearrangeMode: UseRearrangeModeHook = ({
       document.removeEventListener("pointerup", onPointerUp, true);
       document.removeEventListener("pointermove", onPointerMove, true);
     };
-  }, [
-    elementToBeDragged,
-    elementDraggedTo,
-    isEnabled,
-    isDragging,
-    ensureClassNameTag,
-    cleanUpClassNameTag,
-  ]);
+  }, [elementToBeDragged, elementDraggedTo, isEnabled, isDragging]);
 
   return { elementToBeDragged };
 };

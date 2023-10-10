@@ -109,7 +109,6 @@ const VisualEditor: FC<{}> = () => {
     addClassNames,
     removeClassNames,
     setCSS,
-    elementUnderEditMutations,
     addDomMutation,
     removeDomMutation,
   } = useEditMode({
@@ -121,10 +120,7 @@ const VisualEditor: FC<{}> = () => {
   const { elementToBeDragged } = useRearrangeMode({
     isEnabled: mode === "rearrange",
     elementToBeDragged: elementUnderEdit,
-    mutations: elementUnderEditMutations,
     addDomMutation,
-    addClassNames,
-    removeDomMutation,
   });
 
   const selectedVariationTotalChangesLength = useMemo(
@@ -232,6 +228,7 @@ const VisualEditor: FC<{}> = () => {
               />
             </VisualEditorSection>
 
+            {/*
             <VisualEditorSection
               isCollapsible
               title={`Changes (${elementUnderEditMutations.length})`}
@@ -241,6 +238,7 @@ const VisualEditor: FC<{}> = () => {
                 removeDomMutation={removeDomMutation}
               />
             </VisualEditorSection>
+            */}
           </>
         ) : null}
 
@@ -312,7 +310,7 @@ const VisualEditor: FC<{}> = () => {
         </>
       ) : null}
 
-      {mode == "edit-innerHtml" && elementToBeDragged ? (
+      {mode == "edit-innerHtml" && elementUnderEdit ? (
         <>
           <FloatingFrame
             parentElement={elementUnderEdit}

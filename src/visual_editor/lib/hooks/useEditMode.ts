@@ -53,7 +53,6 @@ type UseEditModeHook = (args: {
 
   setCSS: (css: string) => void;
 
-  elementUnderEditMutations: DeclarativeMutation[];
   addDomMutation: (mutation: DeclarativeMutation) => void;
   removeDomMutation: (mutation: DeclarativeMutation) => void;
 };
@@ -249,12 +248,6 @@ const useEditMode: UseEditModeHook = ({
     [elementUnderEditSelector, addDomMutations]
   );
 
-  const elementUnderEditMutations = useMemo(
-    () =>
-      elementUnderEdit ? elementMutationsMap.get(elementUnderEdit) ?? [] : [],
-    [elementUnderEdit, elementMutationsMap]
-  );
-
   const removeDomMutation = useCallback(
     (mutation: DeclarativeMutation) => {
       removeDomMutations([mutation]);
@@ -266,8 +259,6 @@ const useEditMode: UseEditModeHook = ({
   // that the DOM is in the correct state
   const mutateRevert = useRef<(() => void) | null>(null);
   useEffect(() => {
-    const newElementMutationsMap = new Map();
-
     // run reverts if they exist
     if (mutateRevert?.current) mutateRevert.current();
 
@@ -275,19 +266,8 @@ const useEditMode: UseEditModeHook = ({
 
     variation?.domMutations.forEach((mutation) => {
       const controller = mutate.declarative(mutation);
-
-      // @ts-expect-error TODO get dom-mutator types working
-      controller.mutation?.elements.forEach((e) => {
-        newElementMutationsMap.set(e, [
-          ...(newElementMutationsMap.get(e) ?? []),
-          mutation,
-        ]);
-      });
-
       revertCallbacks.push(controller.revert);
     });
-
-    setElementMutationsMap(newElementMutationsMap);
 
     mutateRevert.current = () => {
       revertCallbacks.reverse().forEach((c) => c());
@@ -363,7 +343,6 @@ const useEditMode: UseEditModeHook = ({
     addClassNames,
     removeClassNames,
     setCSS,
-    elementUnderEditMutations,
     removeDomMutation,
     addDomMutation,
   };

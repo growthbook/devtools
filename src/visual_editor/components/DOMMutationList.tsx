@@ -44,7 +44,10 @@ const DOMMutationAccordian: FC<{
               ]
                 .filter((key) => !!m[key as keyof DeclarativeMutation])
                 .map((key) => (
-                  <div className="gb-flex gb-flex-col gb-mb-2  last:gb-mb-0">
+                  <div
+                    key={key}
+                    className="gb-flex gb-flex-col gb-mb-2  last:gb-mb-0"
+                  >
                     <div className="gb-text-xs gb-text-slate-400 gb-mb-1">
                       {key}
                     </div>
