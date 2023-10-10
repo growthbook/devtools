@@ -300,7 +300,6 @@ const useEditMode: UseEditModeHook = ({
       event.preventDefault();
       event.stopPropagation();
 
-      element.setAttribute(selectedAttributeName, "");
       setElementUnderEdit(element);
     };
 
@@ -317,6 +316,9 @@ const useEditMode: UseEditModeHook = ({
     document.addEventListener("click", clickHandler, true);
     document.addEventListener("pointermove", onPointerMove, true);
     document.addEventListener("pointerdown", onPointerDown, true);
+
+    if (elementUnderEdit)
+      elementUnderEdit.setAttribute(selectedAttributeName, "");
 
     return () => {
       clearSelectedElementAttr();
