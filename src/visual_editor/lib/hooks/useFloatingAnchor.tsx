@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { throttle } from "lodash";
 
-// TODO watch for window resize events!!!!!!
-// TODO resize on element resize as well (e.g. when element becomes bigger from content change)
 export default function useFloatingAnchor(parentElement: Element | null) {
   const [domRect, setDomRect] = useState<DOMRect | null>(null);
 
-  const onScroll = useCallback(
+  const onChange = useCallback(
     throttle(() => {
       const rect = parentElement?.getBoundingClientRect();
       setDomRect(rect ?? null);
@@ -16,16 +14,26 @@ export default function useFloatingAnchor(parentElement: Element | null) {
 
   useEffect(() => {
     if (!parentElement && domRect) setDomRect(null);
+    if (!parentElement) return;
 
-    if (parentElement) {
-      onScroll();
-      window.addEventListener("scroll", onScroll);
-    }
+    onChange();
+
+    window.addEventListener("scroll", onChange);
+    window.addEventListener("resize", onChange);
+
+    const observer = new MutationObserver(onChange);
+    observer.observe(parentElement, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", onChange);
+      window.removeEventListener("resize", onChange);
+      observer.disconnect();
     };
-  }, [setDomRect, parentElement, onScroll]);
+  }, [setDomRect, parentElement, onChange]);
 
   return domRect;
 }

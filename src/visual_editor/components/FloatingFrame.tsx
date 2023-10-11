@@ -89,9 +89,10 @@ const FloatingFrameEdge = ({
 );
 
 const FloatingFrame: FC<{
+  hideOverlay?: boolean;
   parentElement: Element | null;
   clearSelectedElement?: () => void;
-}> = ({ parentElement, clearSelectedElement }) => {
+}> = ({ parentElement, clearSelectedElement, hideOverlay }) => {
   const domRect = useFloatingAnchor(parentElement);
 
   if (!domRect) return null;
@@ -103,7 +104,7 @@ const FloatingFrame: FC<{
       <FloatingFrameEdge domRect={domRect} position="bottom" />
       <FloatingFrameEdge domRect={domRect} position="left" />
 
-      {clearSelectedElement ? (
+      {clearSelectedElement && !hideOverlay ? (
         <>
           <FloatingFrameOverlay
             clear={clearSelectedElement}

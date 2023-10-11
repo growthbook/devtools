@@ -17,6 +17,7 @@ import useAiCopySuggestion from "./lib/hooks/useAiCopySuggestion";
 import useGlobalCSS from "./lib/hooks/useGlobalCSS";
 import useCustomJs from "./lib/hooks/useCustomJs";
 import useEditMode from "./lib/hooks/useEditMode";
+import useDragAndDrop from "./lib/hooks/useDragAndDrop";
 
 import Toolbar, { VisualEditorMode } from "./components/Toolbar";
 import ElementDetails from "./components/ElementDetails";
@@ -112,6 +113,12 @@ const VisualEditor: FC<{}> = () => {
     isEnabled: mode === "edit",
     variation: selectedVariation,
     updateVariation: updateSelectedVariation,
+  });
+
+  const { isDragging } = useDragAndDrop({
+    isEnabled: mode === "edit",
+    elementToDrag: elementUnderEdit,
+    addDomMutation,
   });
 
   const selectedVariationTotalChangesLength = useMemo(
@@ -288,6 +295,7 @@ const VisualEditor: FC<{}> = () => {
       {mode === "edit" && elementUnderEdit ? (
         <>
           <FloatingFrame
+            hideOverlay={isDragging}
             parentElement={elementUnderEdit}
             clearSelectedElement={() => setElementUnderEdit(null)}
           />
