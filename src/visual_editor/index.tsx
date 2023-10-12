@@ -303,7 +303,7 @@ const VisualEditor: FC<{}> = () => {
         </>
       ) : null}
       {/** Overlays for highlighting hovered elements **/}
-      {mode === "edit" ? (
+      {mode === "edit" && !isDragging ? (
         <>
           <FloatingFrame parentElement={highlightedElement} />
           <SelectorDisplay selector={highlightedElementSelector} />
@@ -336,8 +336,4 @@ const root = ReactDOM.createRoot(
   shadowRoot.querySelector("#visual-editor-root")!
 );
 
-root.render(
-  <React.StrictMode>
-    <VisualEditor />
-  </React.StrictMode>
-);
+root.render(<VisualEditor />);
