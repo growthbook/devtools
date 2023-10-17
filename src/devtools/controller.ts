@@ -7,16 +7,10 @@ import {
 
 // Send message to content script
 function sendMessage(msg: Message) {
-  chrome.tabs &&
-    chrome.tabs.query(
-      {
-        active: true,
-        currentWindow: true,
-      },
-      (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id || 0, msg);
-      }
-    );
+  if (chrome.tabs && chrome.devtools?.inspectedWindow) {
+    const  { tabId } = chrome.devtools.inspectedWindow;
+    chrome.tabs.sendMessage(tabId || 0, msg);
+  }
 }
 
 // Listen for updates from content script and forward to any listeners
