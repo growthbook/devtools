@@ -4,6 +4,7 @@ import {
   RefreshMessage,
   SetOverridesMessage,
 } from "../../devtools";
+import MessageSender = chrome.runtime.MessageSender;
 
 // Send message to content script
 function sendMessage(msg: Message) {
@@ -26,7 +27,11 @@ export function onGrowthBookData(
 }
 
 chrome.runtime.onMessage.addListener(
-  async (msg: RefreshMessage | ErrorMessage) => {
+  async (msg: RefreshMessage | ErrorMessage, sender: MessageSender) => {
+    if (sender.tab?.id !== chrome.devtools?.inspectedWindow?.tabId) {
+      return;
+    }
+
     if (msg.type === "GB_REFRESH") {
       refreshListeners.forEach((cb) => {
         cb("", msg);
