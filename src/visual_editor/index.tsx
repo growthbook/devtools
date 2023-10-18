@@ -292,7 +292,7 @@ const VisualEditor: FC<{}> = () => {
       </VisualEditorPane>
 
       {/** Overlays for highlighting selected elements **/}
-      {mode === "edit" && elementUnderEdit ? (
+      {mode === "edit" && elementUnderEdit && !isDragging ? (
         <>
           <FloatingFrame
             hideOverlay={isDragging}

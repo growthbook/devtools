@@ -82,9 +82,6 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
       const newVariations = [
         ...(variations?.map((v, i) => (i === index ? newVariation : v)) ?? []),
       ];
-
-      setVariations(newVariations);
-
       updateVisualChangeset(newVariations);
     },
     [variations, setVariations, updateVisualChangeset]
@@ -100,7 +97,7 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
     });
 
     setVariations(visualEditorVariations);
-  }, [visualChangeset, experiment]);
+  }, [visualChangeset, experiment, setVariations]);
 
   // listen for responses from background script
   useEffect(() => {
