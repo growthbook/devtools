@@ -71,6 +71,7 @@ const useDragAndDrop: UseDragAndDropHook = ({
         });
       }
       setIsDragging(false);
+      setDragDestination(null);
       draggingTeardown();
     },
     [isDragging, elementToDrag, dragDestination, addDomMutation]

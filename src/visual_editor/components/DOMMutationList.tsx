@@ -1,17 +1,76 @@
-import React, { ReactNode, useCallback } from "react";
+import React, { useCallback } from "react";
 import { DeclarativeMutation } from "dom-mutator";
 import { FC } from "react";
-import { RxCross2 } from "react-icons/rx";
+import { RxChevronDown } from "react-icons/rx";
+import * as Accordion from "@radix-ui/react-accordion";
 import DOMMutationEditor from "./DOMMutationEditor";
 
-const DOMAttrColumn: FC<{ children: ReactNode }> = ({ children }) => (
-  <div
-    title={children?.toString()}
-    className="gb-mr-1 gb-w-1/5 gb-text-ellipsis gb-overflow-x-hidden gb-whitespace-nowrap"
-  >
-    {children}
-  </div>
-);
+const DOMMutationAccordian: FC<{
+  mutations: DeclarativeMutation[];
+  onRemoveMutation: (mutation: DeclarativeMutation) => void;
+}> = ({ mutations, onRemoveMutation }) => {
+  return (
+    <Accordion.Root
+      className="gb-text-xs gb-rounded gb-overflow-hidden"
+      type="multiple"
+    >
+      {mutations.map((m, i) => (
+        <Accordion.Item
+          key={i}
+          value={`item-${i}`}
+          className="gb-bg-slate-700 odd:gb-bg-slate-600"
+        >
+          <Accordion.Header>
+            <Accordion.Trigger className="gb-p-2 gb-text-sm gb-text-light gb-flex gb-w-full gb-justify-between">
+              <div className="gb-flex gb-w-full">
+                <div className="gb-w-6">#{i + 1}.</div>
+                <div className="gb-w-12 gb-text-left gb-mx-2">
+                  <code>{m.action}</code>
+                </div>
+                <code>{m.attribute}</code>
+              </div>
+              <RxChevronDown aria-hidden />
+            </Accordion.Trigger>
+          </Accordion.Header>
+          <Accordion.Content className="gb-flex gb-flex-col gb-rounded gb-overflow-hidden">
+            <div className="gb-p-2 gb-pb-0">
+              {[
+                "action",
+                "attribute",
+                "value",
+                "selector",
+                "parentSelector",
+                "insertBeforeSelector",
+              ]
+                .filter((key) => !!m[key as keyof DeclarativeMutation])
+                .map((key) => (
+                  <div
+                    key={key}
+                    className="gb-flex gb-flex-col gb-mb-2  last:gb-mb-0"
+                  >
+                    <div className="gb-text-xs gb-text-slate-400 gb-mb-1">
+                      {key}
+                    </div>
+                    <div className="gb-text-light">
+                      <code>{m[key as keyof DeclarativeMutation]}</code>
+                    </div>
+                  </div>
+                ))}
+            </div>
+            <div className="gb-w-full gb-flex gb-justify-end gb-p-2">
+              <span
+                className="gb-text-red-500 hover:gb-underline gb-cursor-pointer"
+                onClick={() => onRemoveMutation(m)}
+              >
+                delete
+              </span>
+            </div>
+          </Accordion.Content>
+        </Accordion.Item>
+      ))}
+    </Accordion.Root>
+  );
+};
 
 const DOMMutationList: FC<{
   globalCss?: string;
@@ -73,28 +132,10 @@ const DOMMutationList: FC<{
   return (
     <div className="gb-px-4">
       <div className="gb-mb-4">
-        {mutations.map((mutation, index) => (
-          <div
-            key={index}
-            className="gb-bg-slate-700 odd:gb-bg-slate-600 gb-py-2 gb-text-xs gb-px-2 gb-text-light gb-flex"
-          >
-            <div className="gb-mr-1 gb-w-8">#{index + 1}</div>
-
-            <DOMAttrColumn>{mutation.action}</DOMAttrColumn>
-            <DOMAttrColumn>{mutation.selector}</DOMAttrColumn>
-            <DOMAttrColumn>{mutation.attribute}</DOMAttrColumn>
-            <DOMAttrColumn>{mutation.value}</DOMAttrColumn>
-
-            {removeDomMutation && (
-              <div className="gb-w-8 flex gb-justify-end">
-                <RxCross2
-                  className="gb-w-4 gb-h-4 gb-cursor-pointer gb-text-link"
-                  onClick={() => onRemoveMutation(mutation)}
-                />
-              </div>
-            )}
-          </div>
-        ))}
+        <DOMMutationAccordian
+          mutations={mutations}
+          onRemoveMutation={onRemoveMutation}
+        />
       </div>
 
       {addMutation && !showEditor && (
