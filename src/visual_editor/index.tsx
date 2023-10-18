@@ -99,7 +99,6 @@ const VisualEditor: FC<{}> = () => {
     elementUnderEditSelector,
     elementUnderEditCopy,
     highlightedElement,
-    highlightedElementSelector,
     setInnerHTML,
     undoInnerHTMLMutations,
     setHTMLAttributes,
@@ -299,14 +298,14 @@ const VisualEditor: FC<{}> = () => {
             parentElement={elementUnderEdit}
             clearSelectedElement={() => setElementUnderEdit(null)}
           />
-          <SelectorDisplay selector={elementUnderEditSelector} />
+          <SelectorDisplay parentElement={elementUnderEdit} />
         </>
       ) : null}
       {/** Overlays for highlighting hovered elements **/}
       {mode === "edit" && !isDragging ? (
         <>
           <FloatingFrame parentElement={highlightedElement} />
-          <SelectorDisplay selector={highlightedElementSelector} />
+          <SelectorDisplay parentElement={highlightedElement} />
         </>
       ) : null}
     </>

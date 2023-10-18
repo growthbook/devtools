@@ -102,11 +102,13 @@ const useDragAndDrop: UseDragAndDropHook = ({
   useEffect(() => {
     if (!isEnabled || !elementToDrag) return;
 
+    elementToDrag.style.cursor = "move";
     document.addEventListener("pointerdown", onPointerDown, true);
     document.addEventListener("pointerup", onPointerUp, true);
     document.addEventListener("pointermove", onPointerMove, true);
 
     return () => {
+      elementToDrag.style.cursor = "";
       document.removeEventListener("pointerdown", onPointerDown, true);
       document.removeEventListener("pointerup", onPointerUp, true);
       document.removeEventListener("pointermove", onPointerMove, true);

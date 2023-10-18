@@ -2,10 +2,6 @@
   cursor: crosshair;
 }
 
-[gb-edit-mode-selected] {
-  cursor: move;
-}
-
 /* drag element highlight edges */
 [gb-edit-mode-drag-target] {
   position: relative;

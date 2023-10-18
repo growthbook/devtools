@@ -7,19 +7,9 @@ import getSelector from "../getSelector";
 import { VisualEditorVariation } from "../../../../devtools";
 
 export const hoverAttributeName = "gb-edit-mode-hover";
-export const selectedAttributeName = "gb-edit-mode-selected";
 
 // HTML attriibute names to ignore when editing
-export const IGNORED_ATTRS = [
-  "class",
-  hoverAttributeName,
-  selectedAttributeName,
-];
-
-const clearSelectedElementAttr = () => {
-  const selected = document.querySelectorAll(`[${selectedAttributeName}]`)?.[0];
-  selected?.removeAttribute(selectedAttributeName);
-};
+export const IGNORED_ATTRS = ["class", hoverAttributeName];
 
 const clearHoverAttribute = () => {
   const hoveredElements = document.querySelectorAll(`[${hoverAttributeName}]`);
@@ -106,6 +96,7 @@ const useEditMode: UseEditModeHook = ({
       updateVariation({
         domMutations: [...variation.domMutations, ...domMutations],
       });
+      setHighlightedElement(null);
     },
     [variation, updateVariation]
   );
@@ -317,11 +308,7 @@ const useEditMode: UseEditModeHook = ({
     document.addEventListener("pointermove", onPointerMove, true);
     document.addEventListener("pointerdown", onPointerDown, true);
 
-    if (elementUnderEdit)
-      elementUnderEdit.setAttribute(selectedAttributeName, "");
-
     return () => {
-      clearSelectedElementAttr();
       clearHoverAttribute();
       document.addEventListener("click", clickHandler, true);
       document.removeEventListener("pointermove", onPointerMove, true);

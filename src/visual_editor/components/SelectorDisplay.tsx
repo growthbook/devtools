@@ -1,11 +1,19 @@
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
 import useFloatingAnchor from "../lib/hooks/useFloatingAnchor";
+import getSelector from "../lib/getSelector";
 
-const SelectorDisplay: FC<{ selector: string | null }> = ({ selector }) => {
-  const parentElement = selector ? document.querySelector(selector) : null;
+const SelectorDisplay: FC<{
+  parentElement: Element | null;
+}> = ({ parentElement }) => {
   const domRect = useFloatingAnchor(parentElement);
 
+  const selector = useMemo(() => {
+    if (!parentElement) return null;
+    return getSelector(parentElement);
+  }, [parentElement]);
+
   if (!domRect) return null;
+  if (!parentElement) return null;
 
   return (
     <div
