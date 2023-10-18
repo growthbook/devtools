@@ -4,19 +4,14 @@ import {
   RefreshMessage,
   SetOverridesMessage,
 } from "../../devtools";
+import MessageSender = chrome.runtime.MessageSender;
 
 // Send message to content script
 function sendMessage(msg: Message) {
-  chrome.tabs &&
-    chrome.tabs.query(
-      {
-        active: true,
-        currentWindow: true,
-      },
-      (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id || 0, msg);
-      }
-    );
+  if (chrome.tabs && chrome.devtools?.inspectedWindow) {
+    const  { tabId } = chrome.devtools.inspectedWindow;
+    chrome.tabs.sendMessage(tabId || 0, msg);
+  }
 }
 
 // Listen for updates from content script and forward to any listeners
@@ -32,7 +27,11 @@ export function onGrowthBookData(
 }
 
 chrome.runtime.onMessage.addListener(
-  async (msg: RefreshMessage | ErrorMessage) => {
+  async (msg: RefreshMessage | ErrorMessage, sender: MessageSender) => {
+    if (sender.tab?.id !== chrome.devtools?.inspectedWindow?.tabId) {
+      return;
+    }
+
     if (msg.type === "GB_REFRESH") {
       refreshListeners.forEach((cb) => {
         cb("", msg);
