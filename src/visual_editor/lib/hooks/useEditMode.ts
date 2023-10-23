@@ -272,14 +272,18 @@ const useEditMode: UseEditModeHook = ({
       const domNode = document.elementFromPoint(x, y);
 
       // return early if we are over the visual editor itself (e.g. frame)
-      if (domNode?.id === CONTAINER_ID) return;
+      if (domNode?.id === CONTAINER_ID) {
+        clearHoverAttribute();
+        setHighlightedElement(null);
+        return;
+      }
 
       // if already hovered, return early
       if (!domNode || domNode.hasAttribute(hoverAttributeName)) return;
 
       clearHoverAttribute();
       domNode.setAttribute(hoverAttributeName, "");
-      setHighlightedElement?.(domNode as HTMLElement);
+      setHighlightedElement(domNode as HTMLElement);
     }, 50);
 
     const onPointerDown = (event: MouseEvent) => {
@@ -310,7 +314,8 @@ const useEditMode: UseEditModeHook = ({
 
     return () => {
       clearHoverAttribute();
-      document.addEventListener("click", clickHandler, true);
+      setHighlightedElement(null);
+      document.removeEventListener("click", clickHandler, true);
       document.removeEventListener("pointermove", onPointerMove, true);
       document.removeEventListener("pointerdown", onPointerDown, true);
     };
