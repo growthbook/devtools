@@ -39,6 +39,7 @@ import ErrorDisplay from "./components/ErrorDisplay";
 import BackToGBButton from "./components/BackToGBButton";
 import AIEditorSection from "./components/AIEditorSection";
 import AICopySuggestor from "./components/AICopySuggestor";
+import FloatingUndoButton from "./components/FloatingUndoButton";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
@@ -299,6 +300,14 @@ const VisualEditor: FC<{}> = () => {
             clearSelectedElement={() => setElementUnderEdit(null)}
           />
           <SelectorDisplay parentElement={elementUnderEdit} />
+          {elementUnderEditMutations.length > 0 ? (
+            <FloatingUndoButton
+              parentElement={elementUnderEdit}
+              undo={() =>
+                removeDomMutation(elementUnderEditMutations.slice(-1)[0])
+              }
+            />
+          ) : null}
         </>
       ) : null}
       {/** Overlays for highlighting hovered elements **/}
