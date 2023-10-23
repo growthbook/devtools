@@ -1,4 +1,5 @@
 import { DeclarativeMutation } from "dom-mutator";
+import { PresenceContext } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { CONTAINER_ID } from "../..";
 import getSelector from "../getSelector";
@@ -9,6 +10,8 @@ type UseDragAndDropHook = (args: {
   isEnabled?: boolean;
   elementToDrag: HTMLElement | null;
   addDomMutation: (mutation: DeclarativeMutation) => void;
+  elementUnderEditMutations: DeclarativeMutation[];
+  setDomMutations: (mutations: DeclarativeMutation[]) => void;
 }) => {
   isDragging: boolean;
 };
@@ -17,6 +20,8 @@ const useDragAndDrop: UseDragAndDropHook = ({
   isEnabled,
   addDomMutation,
   elementToDrag,
+  elementUnderEditMutations,
+  setDomMutations,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [pointerXY, setPointerXY] = useState<{ x: number; y: number }>({
@@ -62,13 +67,28 @@ const useDragAndDrop: UseDragAndDropHook = ({
           : undefined;
         const elementSelector = getSelector(elementToDrag);
 
-        addDomMutation?.({
-          action: "set",
-          attribute: "position",
-          parentSelector,
-          insertBeforeSelector,
-          selector: elementSelector,
-        });
+        const precedingPositionMut = elementUnderEditMutations.slice(-1)?.[0];
+        if (precedingPositionMut?.attribute === "position") {
+          // replace preceding position mutation with new one
+          setDomMutations([
+            ...elementUnderEditMutations.slice(0, -1),
+            {
+              action: "set",
+              attribute: "position",
+              parentSelector,
+              insertBeforeSelector,
+              selector: elementSelector,
+            },
+          ]);
+        } else {
+          addDomMutation?.({
+            action: "set",
+            attribute: "position",
+            parentSelector,
+            insertBeforeSelector,
+            selector: elementSelector,
+          });
+        }
       }
       setIsDragging(false);
       setDragDestination(null);

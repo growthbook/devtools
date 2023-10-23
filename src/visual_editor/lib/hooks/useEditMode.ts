@@ -46,6 +46,7 @@ type UseEditModeHook = (args: {
   elementUnderEditMutations: DeclarativeMutation[];
   addDomMutation: (mutation: DeclarativeMutation) => void;
   removeDomMutation: (mutation: DeclarativeMutation) => void;
+  setDomMutations: (mutations: DeclarativeMutation[]) => void;
 };
 
 /**
@@ -117,6 +118,17 @@ const useEditMode: UseEditModeHook = ({
         ),
       });
     },
+    [updateVariation, variation]
+  );
+
+  const setDomMutations = useCallback(
+    (mutations: DeclarativeMutation[]) => {
+      if (!variation || !updateVariation) return;
+      updateVariation({
+        domMutations: mutations,
+      });
+    },
+
     [updateVariation, variation]
   );
 
@@ -338,6 +350,7 @@ const useEditMode: UseEditModeHook = ({
     elementUnderEditMutations,
     removeDomMutation,
     addDomMutation,
+    setDomMutations,
   };
 };
 

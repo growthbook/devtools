@@ -109,6 +109,7 @@ const VisualEditor: FC<{}> = () => {
     elementUnderEditMutations,
     addDomMutation,
     removeDomMutation,
+    setDomMutations,
   } = useEditMode({
     isEnabled: mode === "edit",
     variation: selectedVariation,
@@ -119,6 +120,8 @@ const VisualEditor: FC<{}> = () => {
     isEnabled: mode === "edit",
     elementToDrag: elementUnderEdit,
     addDomMutation,
+    elementUnderEditMutations,
+    setDomMutations,
   });
 
   const selectedVariationTotalChangesLength = useMemo(
