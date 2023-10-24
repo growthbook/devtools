@@ -1,3 +1,7 @@
+#__gb_visual_editor {
+  display: block !important;
+}
+
 [gb-edit-mode-hover] {
   cursor: crosshair;
 }
