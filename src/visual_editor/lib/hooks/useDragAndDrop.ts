@@ -1,6 +1,5 @@
 import { DeclarativeMutation } from "dom-mutator";
-import { PresenceContext } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { RefObject, useCallback, useEffect, useState } from "react";
 import { CONTAINER_ID } from "../..";
 import getSelector from "../getSelector";
 import { onDrag, teardown as draggingTeardown } from "../moveElement";
@@ -12,6 +11,7 @@ type UseDragAndDropHook = (args: {
   addDomMutation: (mutation: DeclarativeMutation) => void;
   elementUnderEditMutations: DeclarativeMutation[];
   setDomMutations: (mutations: DeclarativeMutation[]) => void;
+  moveHandleRef: RefObject<HTMLDivElement | null>;
 }) => {
   isDragging: boolean;
 };
@@ -22,6 +22,7 @@ const useDragAndDrop: UseDragAndDropHook = ({
   elementToDrag,
   elementUnderEditMutations,
   setDomMutations,
+  moveHandleRef,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [pointerXY, setPointerXY] = useState<{ x: number; y: number }>({
@@ -55,6 +56,15 @@ const useDragAndDrop: UseDragAndDropHook = ({
       if (elementToDrag?.contains(element)) setIsDragging(true);
     },
     [elementToDrag, setIsDragging]
+  );
+
+  const onMoveHandlerPointerDown = useCallback(
+    (event: MouseEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setIsDragging(true);
+    },
+    [setIsDragging]
   );
 
   const onPointerUp = useCallback(
@@ -127,13 +137,32 @@ const useDragAndDrop: UseDragAndDropHook = ({
     document.addEventListener("pointerup", onPointerUp, true);
     document.addEventListener("pointermove", onPointerMove, true);
 
+    const moveHandlerElem = moveHandleRef.current;
+    moveHandlerElem?.addEventListener(
+      "pointerdown",
+      onMoveHandlerPointerDown,
+      true
+    );
+
     return () => {
       elementToDrag.style.cursor = "";
       document.removeEventListener("pointerdown", onPointerDown, true);
       document.removeEventListener("pointerup", onPointerUp, true);
       document.removeEventListener("pointermove", onPointerMove, true);
+      moveHandlerElem?.removeEventListener(
+        "pointerdown",
+        onMoveHandlerPointerDown,
+        true
+      );
     };
-  }, [isEnabled, elementToDrag, onPointerDown, onPointerUp, onPointerMove]);
+  }, [
+    isEnabled,
+    elementToDrag,
+    onPointerDown,
+    onPointerUp,
+    onPointerMove,
+    moveHandleRef.current,
+  ]);
 
   return { isDragging };
 };

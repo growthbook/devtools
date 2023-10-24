@@ -6,6 +6,7 @@ import React, {
   useReducer,
   useState,
   useMemo,
+  useRef,
 } from "react";
 import * as ReactDOM from "react-dom/client";
 
@@ -40,6 +41,7 @@ import BackToGBButton from "./components/BackToGBButton";
 import AIEditorSection from "./components/AIEditorSection";
 import AICopySuggestor from "./components/AICopySuggestor";
 import FloatingUndoButton from "./components/FloatingUndoButton";
+import MoveElementHandle from "./components/MoveElementHandle";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
@@ -116,12 +118,15 @@ const VisualEditor: FC<{}> = () => {
     updateVariation: updateSelectedVariation,
   });
 
+  const moveHandleRef = useRef<HTMLDivElement | null>(null);
+
   const { isDragging } = useDragAndDrop({
     isEnabled: mode === "edit",
     elementToDrag: elementUnderEdit,
     addDomMutation,
     elementUnderEditMutations,
     setDomMutations,
+    moveHandleRef,
   });
 
   const selectedVariationTotalChangesLength = useMemo(
@@ -312,6 +317,12 @@ const VisualEditor: FC<{}> = () => {
             />
           ) : null}
         </>
+      ) : null}
+      {mode === "edit" && elementUnderEdit ? (
+        <MoveElementHandle
+          ref={moveHandleRef}
+          parentElement={elementUnderEdit}
+        />
       ) : null}
       {/** Overlays for highlighting hovered elements **/}
       {mode === "edit" && !isDragging ? (
