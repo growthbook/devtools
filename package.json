@@ -23,7 +23,7 @@
     "@medv/finder": "^2.1.0",
     "@radix-ui/react-accordion": "^1.1.2",
     "clsx": "^1.2.1",
-    "dom-mutator": "^0.5.0",
+    "dom-mutator": "^0.6.0",
     "framer-motion": "^8.4.3",
     "json-stringify-pretty-compact": "^4.0.0",
     "lodash": "^4.17.21",
