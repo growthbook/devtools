@@ -31,7 +31,7 @@ export default function SDKWarning() {
           <>GrowthBook SDK not detected on this page.</>
         ) : (
           <>
-            GrowthBook SDK in this page is out of date. Features may not work as
+            GrowthBook SDK on this page is out of date. Features may not work as
             expected.
           </>
         )}
