@@ -1219,12 +1219,12 @@
   resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.3.0.tgz#ea89004119dc42db2e1dba0f97d553f7372f6fcb"
   integrity sha512-AHPmaAx+RYfZz0eYu6Gviiagpmiyw98ySSlQvCUhVGDRtDFe4DBS0x1bSjdF3gqUDYOczB+yYvBTtEylYSdRhg==
 
-"@growthbook/growthbook@^0.29.0":
-  version "0.29.0"
-  resolved "https://registry.yarnpkg.com/@growthbook/growthbook/-/growthbook-0.29.0.tgz#357f005d9fc28b4b018358d1dd2839066fca807a"
-  integrity sha512-hRYtBw1cg3fqjBRKRfazkRfCJyFpIxjdEUjmwkFaSBorzVDiX35gcp8x83vytQdx5E9xfQo3x/m9Z1yEMDrN7A==
+"@growthbook/growthbook@^0.30.0":
+  version "0.30.0"
+  resolved "https://registry.yarnpkg.com/@growthbook/growthbook/-/growthbook-0.30.0.tgz#52532c2d5dfa7c017815027678bb241421c308b1"
+  integrity sha512-ennMHKZIhAZokHHcnA9/tOTLFdBB4DQR0WHT8Lf1pD80jWVv8JBCAzsV1jzSjYUQhb8R8pLR2Kho0IfgjzIZGQ==
   dependencies:
-    dom-mutator "^0.5.0"
+    dom-mutator "^0.6.0"
 
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
@@ -2717,11 +2717,6 @@ dlv@^1.1.3:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/dlv/-/dlv-1.1.3.tgz#5c198a8a11453596e751494d49874bc7732f2e79"
   integrity sha512-+HlytyjlPKnIG8XuRG8WvmBP8xs8P71y+SKKS6ZXWoEgLuePxtDoUEiH7WkdePWrQ5JBpE6aoVqfZfJUQkjXwA==
-
-dom-mutator@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/dom-mutator/-/dom-mutator-0.5.0.tgz#cd59f0afcc012e7f018717a9c79ce6a225c46782"
-  integrity sha512-bbeX8HWE8JGzraFgbVBX4ws2g3heZFuTtrleQBuN7huy+7n2n7etSuVnot3/1z3jdY2MiwuvoS4Ep1UT2rrGBw==
 
 dom-mutator@^0.6.0:
   version "0.6.0"
