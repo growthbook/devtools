@@ -42,6 +42,7 @@ import AIEditorSection from "./components/AIEditorSection";
 import AICopySuggestor from "./components/AICopySuggestor";
 import FloatingUndoButton from "./components/FloatingUndoButton";
 import MoveElementHandle from "./components/MoveElementHandle";
+import SDKWarning from "./components/SDKWarning";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
@@ -296,6 +297,7 @@ const VisualEditor: FC<{}> = () => {
             visualChangesetId={visualChangesetId}
             hasAiEnabled={hasAiEnabled}
           />
+          <SDKWarning />
         </div>
       </VisualEditorPane>
 
