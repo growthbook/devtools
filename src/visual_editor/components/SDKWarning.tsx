@@ -13,10 +13,16 @@ export default function SDKWarning() {
 
   useEffect(() => {
     if (!window) return;
-    setSDKStatus({
-      hasSDK: !!window._growthbook,
-      hasLatest: window._growthbook?.version === LATEST_SDK_VERSION,
-    });
+    const onLoad = () => {
+      setSDKStatus({
+        hasSDK: !!window._growthbook,
+        hasLatest: window._growthbook?.version === LATEST_SDK_VERSION,
+      });
+    };
+    window.addEventListener("load", onLoad);
+    return () => {
+      window.removeEventListener("load", onLoad);
+    };
   }, []);
 
   if (hasSDK && hasLatest) return null;

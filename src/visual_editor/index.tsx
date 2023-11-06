@@ -43,6 +43,7 @@ import AICopySuggestor from "./components/AICopySuggestor";
 import FloatingUndoButton from "./components/FloatingUndoButton";
 import MoveElementHandle from "./components/MoveElementHandle";
 import SDKWarning from "./components/SDKWarning";
+import DebugPanel from "./components/DebugPanel";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
@@ -62,8 +63,15 @@ const VisualEditor: FC<{}> = () => {
     cleanUpParams,
   } = useQueryParams();
 
-  const { error, cspError, variations, updateVariationAtIndex, experimentUrl } =
-    useVisualChangeset(visualChangesetId);
+  const {
+    error,
+    cspError,
+    variations,
+    updateVariationAtIndex,
+    experimentUrl,
+    experiment,
+    visualChangeset,
+  } = useVisualChangeset(visualChangesetId);
 
   const {
     loading: aiLoading,
@@ -278,6 +286,15 @@ const VisualEditor: FC<{}> = () => {
               clearCustomJs={() => setCustomJs("")}
               removeDomMutation={removeDomMutation}
               mutations={selectedVariation?.domMutations ?? []}
+            />
+          </VisualEditorSection>
+        )}
+
+        {mode === "debug" && (
+          <VisualEditorSection title="Debug panel">
+            <DebugPanel
+              experiment={experiment}
+              visualChangeset={visualChangeset}
             />
           </VisualEditorSection>
         )}

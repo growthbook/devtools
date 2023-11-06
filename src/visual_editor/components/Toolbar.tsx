@@ -9,6 +9,7 @@ import clsx from "clsx";
 import { IconType } from "react-icons";
 import { BsFiletypeCss } from "react-icons/bs";
 import { IoLogoJavascript } from "react-icons/io";
+import { BiBug } from "react-icons/bi";
 
 export type VisualEditorMode =
   | "interactive"
@@ -16,7 +17,8 @@ export type VisualEditorMode =
   | "js"
   | "css"
   | "screenshot"
-  | "changes";
+  | "changes"
+  | "debug";
 
 const modeToIcon: Record<VisualEditorMode, IconType | FC<{}>> = {
   interactive: RxCursorArrow,
@@ -25,6 +27,7 @@ const modeToIcon: Record<VisualEditorMode, IconType | FC<{}>> = {
   css: BsFiletypeCss,
   screenshot: RxCamera,
   changes: RxListBullet,
+  debug: BiBug,
 };
 
 const ToolbarButton = ({
@@ -109,6 +112,13 @@ const Toolbar: FC<{
           mode="changes"
           activate={() => setMode("changes")}
           title="All Changes"
+        />
+        <ToolbarButton
+          disabled={disabled}
+          isActive={mode === "debug"}
+          mode="debug"
+          activate={() => setMode("debug")}
+          title="Debug mode"
         />
         {/*
         <ToolbarButton

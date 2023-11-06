@@ -20,6 +20,8 @@ type UseVisualChangesetHook = (visualChangesetId: string) => {
   ) => void;
   error: ErrorCode | null;
   cspError: CSPError | null;
+  experiment: APIExperiment | null;
+  visualChangeset: APIVisualChangeset | null;
 };
 
 /**
@@ -109,6 +111,7 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
         case "GB_RESPONSE_LOAD_VISUAL_CHANGESET":
           if (msg.data.error) setError(msg.data.error);
           else {
+            console.log("DEBUG GB_RESPONSE_LOAD_VISUAL_CHANGESET", msg.data);
             setVisualChangeset(msg.data.visualChangeset);
             setExperiment(msg.data.experiment);
             setExperimentUrl(msg.data.experimentUrl);
@@ -149,6 +152,8 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
     updateVariationAtIndex,
     error,
     cspError,
+    experiment,
+    visualChangeset,
   };
 };
 
