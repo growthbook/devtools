@@ -111,7 +111,6 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
         case "GB_RESPONSE_LOAD_VISUAL_CHANGESET":
           if (msg.data.error) setError(msg.data.error);
           else {
-            console.log("DEBUG GB_RESPONSE_LOAD_VISUAL_CHANGESET", msg.data);
             setVisualChangeset(msg.data.visualChangeset);
             setExperiment(msg.data.experiment);
             setExperimentUrl(msg.data.experimentUrl);
