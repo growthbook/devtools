@@ -1,30 +1,13 @@
+import React from "react";
 import { RxExclamationTriangle } from "react-icons/rx";
-import React, { useEffect, useState } from "react";
 
-// technically doesn't have to be the latest version but the most recent version
-// with breaking changes
-const LATEST_SDK_VERSION = "0.30.0";
-
-export default function SDKWarning() {
-  const [{ hasSDK, hasLatest }, setSDKStatus] = useState({
-    hasSDK: false,
-    hasLatest: false,
-  });
-
-  useEffect(() => {
-    if (!window) return;
-    const onLoad = () => {
-      setSDKStatus({
-        hasSDK: !!window._growthbook,
-        hasLatest: window._growthbook?.version === LATEST_SDK_VERSION,
-      });
-    };
-    window.addEventListener("load", onLoad);
-    return () => {
-      window.removeEventListener("load", onLoad);
-    };
-  }, []);
-
+export default function SDKWarning({
+  hasSDK,
+  hasLatest,
+}: {
+  hasSDK: boolean;
+  hasLatest: boolean;
+}) {
   if (hasSDK && hasLatest) return null;
 
   return (

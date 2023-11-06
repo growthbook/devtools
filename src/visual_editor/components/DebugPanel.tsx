@@ -20,9 +20,13 @@ const RedX = () => (
 export default function DebugPanel({
   experiment,
   visualChangeset,
+  hasSDK,
+  sdkVersion,
 }: {
   experiment: APIExperiment | null;
   visualChangeset: APIVisualChangeset | null;
+  hasSDK: boolean;
+  sdkVersion: string;
 }) {
   return (
     <div className="gb-text-light gb-px-4 gb-text-sm">
@@ -44,7 +48,7 @@ export default function DebugPanel({
         GrowthBook SDK:
         <ul className="gb-list-disc gb-ml-4">
           <li className="gb-text-white">
-            {!!window._growthbook ? (
+            {hasSDK ? (
               <>
                 <GreenCheck /> Detected
               </>
@@ -55,7 +59,7 @@ export default function DebugPanel({
             )}
           </li>
           <li className="gb-text-white">
-            Version: {window._growthbook?.version || "Not detected"}
+            Version: {sdkVersion ? sdkVersion : "Not detected"}
           </li>
         </ul>
       </Row>
@@ -63,7 +67,7 @@ export default function DebugPanel({
       <Row>
         URL Targets:{" "}
         {visualChangeset?.urlPatterns.map((pattern, i) => (
-          <div key={i} className="gb-my-1 gb-text-white">
+          <div key={i} className="gb-my-2 gb-text-white">
             <Tooltip label={pattern.pattern}>
               <code className="gb-text-xs gb-block gb-w-full gb-whitespace-nowrap gb-text-ellipsis gb-overflow-hidden gb-bg-white gb-text-red-600 gb-rounded gb-px-1">
                 {pattern.pattern}

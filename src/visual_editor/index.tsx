@@ -1,4 +1,4 @@
-import { debounce } from "lodash";
+import { debounce, has } from "lodash";
 import React, {
   FC,
   useCallback,
@@ -19,6 +19,7 @@ import useGlobalCSS from "./lib/hooks/useGlobalCSS";
 import useCustomJs from "./lib/hooks/useCustomJs";
 import useEditMode from "./lib/hooks/useEditMode";
 import useDragAndDrop from "./lib/hooks/useDragAndDrop";
+import useSDKDiagnostics from "./lib/hooks/useSDKDiagnostics";
 
 import Toolbar, { VisualEditorMode } from "./components/Toolbar";
 import ElementDetails from "./components/ElementDetails";
@@ -54,6 +55,8 @@ const VisualEditor: FC<{}> = () => {
     y: 24,
     rightAligned: true,
   });
+
+  const { hasSDK, hasLatest, version } = useSDKDiagnostics();
 
   const {
     params,
@@ -136,6 +139,8 @@ const VisualEditor: FC<{}> = () => {
     elementUnderEditMutations,
     setDomMutations,
     moveHandleRef,
+    hasSDK,
+    sdkVersion: version,
   });
 
   const selectedVariationTotalChangesLength = useMemo(
@@ -295,6 +300,8 @@ const VisualEditor: FC<{}> = () => {
             <DebugPanel
               experiment={experiment}
               visualChangeset={visualChangeset}
+              hasSDK={hasSDK}
+              sdkVersion={version}
             />
           </VisualEditorSection>
         )}
@@ -314,7 +321,7 @@ const VisualEditor: FC<{}> = () => {
             visualChangesetId={visualChangesetId}
             hasAiEnabled={hasAiEnabled}
           />
-          <SDKWarning />
+          <SDKWarning hasSDK={hasSDK} hasLatest={hasLatest} />
         </div>
       </VisualEditorPane>
 
