@@ -19,20 +19,13 @@ const useSDKDiagnostics: UseSDKDiagnosticsHook = () => {
 
   useEffect(() => {
     if (!window) return;
-    const onLoad = () => {
-      setSDKStatus({
-        hasSDK: !!window._growthbook,
-        hasLatest: window._growthbook?.version === LATEST_SDK_VERSION,
-      });
-
-      if (window._growthbook?.version)
-        setVersion(window._growthbook?.version || "");
-    };
-    window.addEventListener("load", onLoad);
-    return () => {
-      window.removeEventListener("load", onLoad);
-    };
-  }, []);
+    setSDKStatus({
+      hasSDK: !!window._growthbook,
+      hasLatest: window._growthbook?.version === LATEST_SDK_VERSION,
+    });
+    if (window._growthbook?.version)
+      setVersion(window._growthbook?.version || "");
+  }, [setSDKStatus]);
 
   return {
     hasSDK,

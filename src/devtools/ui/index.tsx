@@ -57,6 +57,7 @@ function WaitForGrowthBook() {
 
   return (
     <App
+      url={data.url}
       features={data.features}
       experiments={data.experiments}
       attributes={data.attributes}

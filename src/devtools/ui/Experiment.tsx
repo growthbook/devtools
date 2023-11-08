@@ -103,6 +103,7 @@ export default function Experiment({
                   const color = COLORS[i % COLORS.length];
                   return (
                     <Box
+                      key={i}
                       bg={`${color}.500`}
                       overflowX="hidden"
                       h="18px"
