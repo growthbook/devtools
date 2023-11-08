@@ -1,5 +1,5 @@
-const dragTargetAttributeName = "gb-selection-mode-drag-target";
-const dragTargetEdgeAttributeName = "gb-selection-mode-drag-target-edge";
+const dragTargetAttributeName = "gb-edit-mode-drag-target";
+const dragTargetEdgeAttributeName = "gb-edit-mode-drag-target-edge";
 
 const clearDragTargetEdges = () => {
   const targetEdges = document.querySelectorAll(
@@ -198,9 +198,7 @@ export const onDrag = ({
     // if the dragged element has no parent, it's not in the DOM, return
     !draggedElement.parentElement ||
     // if the element under cursor is the parent element, return
-    draggedElement.parentElement === elementUnderCursor ||
-    // if the element under cursor is NOT a sibling, return
-    draggedElement.parentElement !== elementUnderCursor.parentElement
+    draggedElement.parentElement === elementUnderCursor
   )
     return {
       draggedToParent: _lastLandedParent,

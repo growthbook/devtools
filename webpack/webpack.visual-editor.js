@@ -25,7 +25,7 @@ module.exports = {
       {
         test: /\.css$/,
         // visual editor css loaded separately
-        exclude: [path.join(srcDir, "visual_editor", "index.css")],
+        exclude: [path.join(srcDir, "visual_editor", "shadowDom.css")],
         use: ["style-loader", "css-loader", "postcss-loader"],
       },
       {
@@ -37,7 +37,7 @@ module.exports = {
         ],
       },
       {
-        include: path.join(srcDir, "visual_editor", "index.css"),
+        include: path.join(srcDir, "visual_editor", "shadowDom.css"),
         type: "asset/source",
         loader: "postcss-loader",
       },

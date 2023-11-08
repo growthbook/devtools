@@ -1,6 +1,6 @@
 {
   "name": "gb-devtools",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": true,
   "scripts": {
     "dev": "webpack --config webpack/webpack.dev.js --watch",
@@ -19,10 +19,12 @@
     "@chakra-ui/react": "^2.4.9",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
-    "@growthbook/growthbook": "^0.29.0",
+    "@growthbook/growthbook": "^0.30.0",
     "@medv/finder": "^2.1.0",
+    "@radix-ui/react-accordion": "^1.1.2",
+    "@radix-ui/react-tooltip": "^1.0.7",
     "clsx": "^1.2.1",
-    "dom-mutator": "^0.5.0",
+    "dom-mutator": "^0.6.0",
     "framer-motion": "^8.4.3",
     "json-stringify-pretty-compact": "^4.0.0",
     "lodash": "^4.17.21",

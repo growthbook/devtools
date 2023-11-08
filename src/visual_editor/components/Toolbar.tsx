@@ -9,22 +9,25 @@ import clsx from "clsx";
 import { IconType } from "react-icons";
 import { BsFiletypeCss } from "react-icons/bs";
 import { IoLogoJavascript } from "react-icons/io";
+import { BiBug } from "react-icons/bi";
 
-export type ToolbarMode =
+export type VisualEditorMode =
   | "interactive"
-  | "selection"
+  | "edit"
   | "js"
   | "css"
   | "screenshot"
-  | "changes";
+  | "changes"
+  | "debug";
 
-const modeToIcon: Record<ToolbarMode, IconType | FC<{}>> = {
+const modeToIcon: Record<VisualEditorMode, IconType | FC<{}>> = {
   interactive: RxCursorArrow,
-  selection: RxPencil1,
+  edit: RxPencil1,
   js: IoLogoJavascript,
   css: BsFiletypeCss,
   screenshot: RxCamera,
   changes: RxListBullet,
+  debug: BiBug,
 };
 
 const ToolbarButton = ({
@@ -36,7 +39,7 @@ const ToolbarButton = ({
   title,
 }: {
   disabled: boolean;
-  mode: ToolbarMode;
+  mode: VisualEditorMode;
   activate: () => void;
   deactivate?: () => void;
   isActive: boolean;
@@ -63,8 +66,8 @@ const ToolbarButton = ({
 
 const Toolbar: FC<{
   disabled: boolean;
-  mode: ToolbarMode | null;
-  setMode: (mode: ToolbarMode) => void;
+  mode: VisualEditorMode | null;
+  setMode: (mode: VisualEditorMode) => void;
   clearSelectedElement: () => void;
 }> = ({ disabled, mode, setMode, clearSelectedElement }) => {
   return (
@@ -79,10 +82,10 @@ const Toolbar: FC<{
         />
         <ToolbarButton
           disabled={disabled}
-          isActive={mode === "selection"}
-          mode="selection"
+          isActive={mode === "edit"}
+          mode="edit"
           activate={() => {
-            setMode("selection");
+            setMode("edit");
           }}
           deactivate={() => {
             clearSelectedElement();
@@ -109,6 +112,13 @@ const Toolbar: FC<{
           mode="changes"
           activate={() => setMode("changes")}
           title="All Changes"
+        />
+        <ToolbarButton
+          disabled={disabled}
+          isActive={mode === "debug"}
+          mode="debug"
+          activate={() => setMode("debug")}
+          title="Debug mode"
         />
         {/*
         <ToolbarButton

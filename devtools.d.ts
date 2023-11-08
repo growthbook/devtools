@@ -10,11 +10,30 @@ import {
   UpdateVisualChangesetPayload,
 } from "./src/background";
 
+declare global {
+  interface Window {
+    __gb_global_js_err?: (error: string) => void;
+  }
+}
+
 export type DebugLogs = [string, any][];
 
 export type CopyMode = "energetic" | "concise" | "humorous";
 
 export type ErrorCode = "csp-error" | BGErrorCode;
+
+export type CSPError = {
+  violatedDirective: string;
+};
+
+export interface VisualEditorVariation {
+  name: string;
+  description: string;
+  css?: string;
+  js?: string;
+  domMutations: APIDomMutation[];
+  variationId: string;
+}
 
 export interface APIExperiment {
   id: string;
@@ -31,9 +50,9 @@ export type APIExperimentVariation = APIExperiment["variations"][number];
 export interface APIVisualChangeset {
   id: string;
   urlPatterns: {
-    include?: boolean;
+    include: boolean;
     /** @enum {string} */
-    type: "simple" | "exact" | "regex";
+    type: "simple" | "regex";
     pattern: string;
   }[];
   editorUrl: string;

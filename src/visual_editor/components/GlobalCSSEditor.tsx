@@ -3,16 +3,16 @@ import React, { FC, useEffect, useState } from "react";
 const GlobalCSSEditor: FC<{
   css?: string;
   onSubmit: (css: string) => void;
-}> = ({ css: _css = "", onSubmit }) => {
-  const [css, setCss] = useState(_css);
+}> = ({ css: incomingCss = "", onSubmit }) => {
+  const [css, setCss] = useState(incomingCss);
 
   useEffect(() => {
     onSubmit(css);
   }, [css]);
 
   useEffect(() => {
-    setCss(_css);
-  }, [_css]);
+    setCss(incomingCss);
+  }, [incomingCss]);
 
   return (
     <div className="gb-px-4 gb-pb-4">

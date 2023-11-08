@@ -55,6 +55,9 @@ module.exports = {
     extend: {
       zIndex: {
         max: "2147483647",
+        front: "2147483646",
+        center: "500",
+        back: "-9999",
       },
     },
   },

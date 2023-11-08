@@ -1,6 +1,5 @@
-import React, { FC } from "react";
-import { ErrorCode, OpenOptionsPageMessage } from "../../devtools";
-import { CSPError } from "./lib/hooks/useApi";
+import React, { useRef, FC, useEffect } from "react";
+import { CSPError, ErrorCode, OpenOptionsPageMessage } from "../../../devtools";
 
 const CSPErrorDisplay = ({ cspError }: { cspError: CSPError | null }) => (
   <div className="gb-p-4 gb-text-red-400">
@@ -19,10 +18,11 @@ const CSPErrorDisplay = ({ cspError }: { cspError: CSPError | null }) => (
   </div>
 );
 
-const ErrorDisplay: FC<{ error: ErrorCode; cspError: CSPError | null }> = ({
-  error,
-  cspError,
-}) => {
+interface ErrorDisplayProps {
+  error: ErrorCode;
+  cspError: CSPError | null;
+}
+const ErrorDisplay: FC<ErrorDisplayProps> = ({ error, cspError }) => {
   const openOptionsPage = () => {
     const msg: OpenOptionsPageMessage = { type: "GB_OPEN_OPTIONS_PAGE" };
     window.postMessage(msg, window.location.origin);
@@ -88,4 +88,22 @@ const ErrorDisplay: FC<{ error: ErrorCode; cspError: CSPError | null }> = ({
   }
 };
 
-export default ErrorDisplay;
+export default (props: ErrorDisplayProps) => {
+  const { error, cspError } = props;
+  const errorContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // scroll to error
+  useEffect(() => {
+    if (!error && !cspError && !errorContainerRef.current) return;
+    errorContainerRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [error, cspError, errorContainerRef.current]);
+
+  return (
+    <div ref={errorContainerRef}>
+      <ErrorDisplay {...props} />
+    </div>
+  );
+};

@@ -2,8 +2,8 @@ import clsx from "clsx";
 import React, { FC, MouseEvent, useCallback, useEffect, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { BiLoaderCircle } from "react-icons/bi";
-import { CopyMode } from "../../devtools";
-import { TransformCopyFn } from "./lib/hooks/useApi";
+import { CopyMode } from "../../../devtools";
+import { TransformCopyFn } from "../lib/hooks/useAiCopySuggestion";
 
 const AICopySuggestor: FC<{
   parentElement: Element;

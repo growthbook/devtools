@@ -1,17 +1,17 @@
-[gb-selection-mode-hover] {
+#__gb_visual_editor {
+  display: block !important;
+}
+
+[gb-edit-mode-hover] {
   cursor: crosshair;
 }
 
-[gb-selection-mode-selected] {
-  cursor: move;
-}
-
 /* drag element highlight edges */
-[gb-selection-mode-drag-target] {
+[gb-edit-mode-drag-target] {
   position: relative;
 }
 
-[gb-selection-mode-drag-target-edge] {
+[gb-edit-mode-drag-target-edge] {
   position: fixed;
   @apply gb-z-max;
 }
