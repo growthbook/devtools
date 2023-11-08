@@ -39,8 +39,10 @@
     "style-to-object": "^0.4.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.39.0",
     "@types/chrome": "^0.0.243",
     "@types/jest": "^27.0.2",
+    "@types/node": "^20.9.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@types/react-syntax-highlighter": "^15.5.6",
