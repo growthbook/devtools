@@ -1,4 +1,4 @@
-import { debounce } from "lodash";
+import { debounce, has } from "lodash";
 import React, {
   FC,
   useCallback,
@@ -19,6 +19,7 @@ import useGlobalCSS from "./lib/hooks/useGlobalCSS";
 import useCustomJs from "./lib/hooks/useCustomJs";
 import useEditMode from "./lib/hooks/useEditMode";
 import useDragAndDrop from "./lib/hooks/useDragAndDrop";
+import useSDKDiagnostics from "./lib/hooks/useSDKDiagnostics";
 
 import Toolbar, { VisualEditorMode } from "./components/Toolbar";
 import ElementDetails from "./components/ElementDetails";
@@ -43,6 +44,7 @@ import AICopySuggestor from "./components/AICopySuggestor";
 import FloatingUndoButton from "./components/FloatingUndoButton";
 import MoveElementHandle from "./components/MoveElementHandle";
 import SDKWarning from "./components/SDKWarning";
+import DebugPanel from "./components/DebugPanel";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
@@ -54,6 +56,8 @@ const VisualEditor: FC<{}> = () => {
     rightAligned: true,
   });
 
+  const { hasSDK, hasLatest, version } = useSDKDiagnostics();
+
   const {
     params,
     visualChangesetId,
@@ -62,8 +66,15 @@ const VisualEditor: FC<{}> = () => {
     cleanUpParams,
   } = useQueryParams();
 
-  const { error, cspError, variations, updateVariationAtIndex, experimentUrl } =
-    useVisualChangeset(visualChangesetId);
+  const {
+    error,
+    cspError,
+    variations,
+    updateVariationAtIndex,
+    experimentUrl,
+    experiment,
+    visualChangeset,
+  } = useVisualChangeset(visualChangesetId);
 
   const {
     loading: aiLoading,
@@ -128,6 +139,8 @@ const VisualEditor: FC<{}> = () => {
     elementUnderEditMutations,
     setDomMutations,
     moveHandleRef,
+    hasSDK,
+    sdkVersion: version,
   });
 
   const selectedVariationTotalChangesLength = useMemo(
@@ -282,6 +295,17 @@ const VisualEditor: FC<{}> = () => {
           </VisualEditorSection>
         )}
 
+        {mode === "debug" && (
+          <VisualEditorSection title="Debug panel">
+            <DebugPanel
+              experiment={experiment}
+              visualChangeset={visualChangeset}
+              hasSDK={hasSDK}
+              sdkVersion={version}
+            />
+          </VisualEditorSection>
+        )}
+
         {error || aiError ? (
           <ErrorDisplay
             error={(error || aiError) as ErrorCode}
@@ -297,7 +321,7 @@ const VisualEditor: FC<{}> = () => {
             visualChangesetId={visualChangesetId}
             hasAiEnabled={hasAiEnabled}
           />
-          <SDKWarning />
+          <SDKWarning hasSDK={hasSDK} hasLatest={hasLatest} />
         </div>
       </VisualEditorPane>
 

@@ -20,6 +20,8 @@ type UseVisualChangesetHook = (visualChangesetId: string) => {
   ) => void;
   error: ErrorCode | null;
   cspError: CSPError | null;
+  experiment: APIExperiment | null;
+  visualChangeset: APIVisualChangeset | null;
 };
 
 /**
@@ -149,6 +151,8 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
     updateVariationAtIndex,
     error,
     cspError,
+    experiment,
+    visualChangeset,
   };
 };
 

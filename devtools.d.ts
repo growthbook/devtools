@@ -50,9 +50,9 @@ export type APIExperimentVariation = APIExperiment["variations"][number];
 export interface APIVisualChangeset {
   id: string;
   urlPatterns: {
-    include?: boolean;
+    include: boolean;
     /** @enum {string} */
-    type: "simple" | "exact" | "regex";
+    type: "simple" | "regex";
     pattern: string;
   }[];
   editorUrl: string;

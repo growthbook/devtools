@@ -12,6 +12,8 @@ type UseDragAndDropHook = (args: {
   elementUnderEditMutations: DeclarativeMutation[];
   setDomMutations: (mutations: DeclarativeMutation[]) => void;
   moveHandleRef: RefObject<HTMLDivElement | null>;
+  hasSDK: boolean;
+  sdkVersion: string | undefined;
 }) => {
   isDragging: boolean;
 };
@@ -23,6 +25,8 @@ const useDragAndDrop: UseDragAndDropHook = ({
   elementUnderEditMutations,
   setDomMutations,
   moveHandleRef,
+  hasSDK,
+  sdkVersion,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [pointerXY, setPointerXY] = useState<{ x: number; y: number }>({
@@ -131,6 +135,9 @@ const useDragAndDrop: UseDragAndDropHook = ({
 
   useEffect(() => {
     if (!isEnabled || !elementToDrag) return;
+
+    // disable drag and drop for old version of SDK
+    if (hasSDK && sdkVersion && sdkVersion < "0.30.0") return;
 
     elementToDrag.style.cursor = "move";
     document.addEventListener("pointerdown", onPointerDown, true);
