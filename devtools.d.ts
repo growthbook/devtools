@@ -92,6 +92,7 @@ export type RefreshMessage = {
   experiments: Record<string, Experiment<any>>;
   attributes: Record<string, any>;
   overrides: Record<string, ExperimentOverride>;
+  url: string;
 };
 
 export type ErrorMessage = {

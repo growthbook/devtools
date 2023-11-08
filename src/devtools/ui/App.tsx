@@ -23,6 +23,7 @@ export interface Props {
   features: Record<string, FeatureDefinition>;
   experiments: Record<string, ExperimentInterface<any>>;
   attributes: Record<string, any>;
+  url: string;
 }
 
 function App(props: Props) {
@@ -49,11 +50,12 @@ function App(props: Props) {
   const { features, experiments, attributes } = useMemo(() => {
     const forcedFeatureMap = new Map(Object.entries(forcedFeatureValues));
 
-    const { features, experiments, attributes, overrides } = props;
+    const { features, experiments, attributes, overrides, url } = props;
 
     // Local GrowthBook instance for debugging
     let log: DebugLogs = [];
     const growthbook = new GrowthBook({
+      url,
       attributes,
       features,
       overrides,

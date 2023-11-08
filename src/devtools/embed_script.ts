@@ -56,6 +56,7 @@ function getRefreshMessage(gb: GrowthBook): RefreshMessage {
     features: gb.getFeatures(),
     overrides: (gb as any).context?.overrides || {},
     experiments,
+    url: window.location.href,
   };
 
   return msg;
