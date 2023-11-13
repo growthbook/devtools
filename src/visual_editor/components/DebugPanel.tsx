@@ -43,30 +43,6 @@ export default function DebugPanel({
       </Row>
 
       <Row>
-        Hash Attribute:{" "}
-        <div className="gb-text-white">
-          <ul className="gb-ml-4 gb-list-disc">
-            <li>
-              <code className="gb-text-xs gb-inline-block gb-max-w-full gb-whitespace-nowrap gb-text-ellipsis gb-overflow-hidden gb-bg-white gb-text-red-600 gb-rounded gb-px-1">
-                {hashAttribute ? hashAttribute : ""}
-              </code>
-            </li>
-            <li>
-              {hasHashAttribute ? (
-                <>
-                  <GreenCheck /> Attribute is set
-                </>
-              ) : (
-                <>
-                  <RedX /> Attribute is not set
-                </>
-              )}
-            </li>
-          </ul>
-        </div>
-      </Row>
-
-      <Row>
         Visual Changeset ID:{" "}
         <div className="gb-text-white">
           {visualChangeset ? visualChangeset.id : "N/A"}
@@ -91,6 +67,30 @@ export default function DebugPanel({
             Version: {sdkVersion ? sdkVersion : "Not detected"}
           </li>
         </ul>
+      </Row>
+
+      <Row>
+        Hash Attribute:{" "}
+        <div className="gb-text-white">
+          <ul className="gb-ml-4 gb-list-disc">
+            <li>
+              <code className="gb-text-xs gb-inline-block gb-max-w-full gb-whitespace-nowrap gb-text-ellipsis gb-overflow-hidden gb-bg-white gb-text-red-600 gb-rounded gb-px-1">
+                {hashAttribute ? hashAttribute : ""}
+              </code>
+            </li>
+            <li>
+              {hasHashAttribute ? (
+                <>
+                  <GreenCheck /> Attribute is set
+                </>
+              ) : (
+                <>
+                  <RedX /> Attribute is not set
+                </>
+              )}
+            </li>
+          </ul>
+        </div>
       </Row>
 
       <Row>
