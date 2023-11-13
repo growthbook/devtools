@@ -17,16 +17,21 @@ const GreenCheck = () => (
 const RedX = () => (
   <IoMdCloseCircle className="gb-text-red-400 gb-w-4 gb-h-4 gb-inline" />
 );
+
 export default function DebugPanel({
   experiment,
   visualChangeset,
   hasSDK,
   sdkVersion,
+  hashAttribute,
+  hasHashAttribute,
 }: {
   experiment: APIExperiment | null;
   visualChangeset: APIVisualChangeset | null;
   hasSDK: boolean;
   sdkVersion: string;
+  hashAttribute: string;
+  hasHashAttribute: boolean;
 }) {
   return (
     <div className="gb-text-light gb-px-4 gb-text-sm">
@@ -65,11 +70,35 @@ export default function DebugPanel({
       </Row>
 
       <Row>
+        Hash Attribute:{" "}
+        <div className="gb-text-white">
+          <ul className="gb-ml-4 gb-list-disc">
+            <li>
+              <code className="gb-text-xs gb-inline-block gb-max-w-full gb-whitespace-nowrap gb-text-ellipsis gb-overflow-hidden gb-bg-white gb-text-red-600 gb-rounded gb-px-1">
+                {hashAttribute ? hashAttribute : ""}
+              </code>
+            </li>
+            <li>
+              {hasHashAttribute ? (
+                <>
+                  <GreenCheck /> Attribute is set
+                </>
+              ) : (
+                <>
+                  <RedX /> Attribute is not set
+                </>
+              )}
+            </li>
+          </ul>
+        </div>
+      </Row>
+
+      <Row>
         URL Targets:{" "}
         {visualChangeset?.urlPatterns.map((pattern, i) => (
           <div key={i} className="gb-my-2 gb-text-white">
             <Tooltip label={pattern.pattern}>
-              <code className="gb-text-xs gb-block gb-w-full gb-whitespace-nowrap gb-text-ellipsis gb-overflow-hidden gb-bg-white gb-text-red-600 gb-rounded gb-px-1">
+              <code className="gb-text-xs gb-inline-block gb-max-w-full gb-whitespace-nowrap gb-text-ellipsis gb-overflow-hidden gb-bg-white gb-text-red-600 gb-rounded gb-px-1">
                 {pattern.pattern}
               </code>
             </Tooltip>
