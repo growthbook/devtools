@@ -12,7 +12,7 @@ const MoveElementHandle = forwardRef<
   return (
     <div
       ref={ref}
-      className="gb-fixed gb-px-2 gb-py-1 gb-text-indigo-800 gb-bg-white gb-text-xs gb-z-front gb-cursor-move gb-font-semibold"
+      className="gb-fixed gb-px-2 gb-py-1 gb-text-white gb-bg-indigo-800 gb-text-xs gb-z-front gb-cursor-move gb-font-semibold"
       style={{
         top: domRect.bottom + 8,
         left: domRect.left + domRect.width - 40,

@@ -56,8 +56,6 @@ const VisualEditor: FC<{}> = () => {
     rightAligned: true,
   });
 
-  const { hasSDK, hasLatest, version } = useSDKDiagnostics();
-
   const {
     params,
     visualChangesetId,
@@ -75,6 +73,11 @@ const VisualEditor: FC<{}> = () => {
     experiment,
     visualChangeset,
   } = useVisualChangeset(visualChangesetId);
+
+  const { hasSDK, hasLatest, version, hashAttribute, hasHashAttribute } =
+    useSDKDiagnostics({
+      experiment,
+    });
 
   const {
     loading: aiLoading,
@@ -302,6 +305,8 @@ const VisualEditor: FC<{}> = () => {
               visualChangeset={visualChangeset}
               hasSDK={hasSDK}
               sdkVersion={version}
+              hashAttribute={hashAttribute}
+              hasHashAttribute={hasHashAttribute}
             />
           </VisualEditorSection>
         )}
@@ -321,7 +326,12 @@ const VisualEditor: FC<{}> = () => {
             visualChangesetId={visualChangesetId}
             hasAiEnabled={hasAiEnabled}
           />
-          <SDKWarning hasSDK={hasSDK} hasLatest={hasLatest} />
+          <SDKWarning
+            hasSDK={hasSDK}
+            hasLatest={hasLatest}
+            hasHashAttribute={hasHashAttribute}
+            hashAttribute={hashAttribute}
+          />
         </div>
       </VisualEditorPane>
 
