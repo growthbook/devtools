@@ -37,11 +37,10 @@ const useSDKDiagnostics: UseSDKDiagnosticsHook = ({ experiment }) => {
   }, [experiment]);
 
   useEffect(() => {
-    // @ts-expect-error we are accessing a private property on gb sdk obj
-    const sdkAttributes = hasSDK ? window._growthbook?._ctx?.attributes : {};
+    const sdkAttributes = hasSDK ? window._growthbook?.getAttributes() : {};
     setHasHashAttr(
       hasSDK
-        ? sdkAttributes.hasOwnProperty(experiment?.hashAttribute || "")
+        ? !!sdkAttributes?.hasOwnProperty(experiment?.hashAttribute || "")
         : false
     );
   }, [hasSDK, hashAttribute]);
