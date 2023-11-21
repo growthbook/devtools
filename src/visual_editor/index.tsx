@@ -1,4 +1,4 @@
-import { debounce, has } from "lodash";
+import { debounce } from "lodash";
 import React, {
   FC,
   useCallback,
@@ -43,7 +43,6 @@ import AIEditorSection from "./components/AIEditorSection";
 import AICopySuggestor from "./components/AICopySuggestor";
 import FloatingUndoButton from "./components/FloatingUndoButton";
 import MoveElementHandle from "./components/MoveElementHandle";
-import SDKWarning from "./components/SDKWarning";
 import DebugPanel from "./components/DebugPanel";
 
 import VisualEditorCss from "./shadowDom.css";
@@ -304,6 +303,7 @@ const VisualEditor: FC<{}> = () => {
               experiment={experiment}
               visualChangeset={visualChangeset}
               hasSDK={hasSDK}
+              hasLatest={hasLatest}
               sdkVersion={version}
               hashAttribute={hashAttribute}
               hasHashAttribute={hasHashAttribute}
@@ -325,12 +325,6 @@ const VisualEditor: FC<{}> = () => {
             variationIndex={variationIndex}
             visualChangesetId={visualChangesetId}
             hasAiEnabled={hasAiEnabled}
-          />
-          <SDKWarning
-            hasSDK={hasSDK}
-            hasLatest={hasLatest}
-            hasHashAttribute={hasHashAttribute}
-            hashAttribute={hashAttribute}
           />
         </div>
       </VisualEditorPane>

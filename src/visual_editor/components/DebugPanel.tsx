@@ -22,6 +22,7 @@ export default function DebugPanel({
   experiment,
   visualChangeset,
   hasSDK,
+  hasLatest,
   sdkVersion,
   hashAttribute,
   hasHashAttribute,
@@ -29,6 +30,7 @@ export default function DebugPanel({
   experiment: APIExperiment | null;
   visualChangeset: APIVisualChangeset | null;
   hasSDK: boolean;
+  hasLatest: boolean;
   sdkVersion: string;
   hashAttribute: string;
   hasHashAttribute: boolean;
@@ -65,6 +67,17 @@ export default function DebugPanel({
           </li>
           <li className="gb-text-white">
             Version: {sdkVersion ? sdkVersion : "Not detected"}
+          </li>
+          <li className="gb-text-white">
+            {hasLatest ? (
+              <>
+                <GreenCheck /> Up to date
+              </>
+            ) : (
+              <>
+                <RedX /> Out of date
+              </>
+            )}
           </li>
         </ul>
       </Row>
