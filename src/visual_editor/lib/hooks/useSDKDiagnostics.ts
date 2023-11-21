@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { APIExperiment } from "../../../../devtools";
+import {
+  APIExperiment,
+  ErrorMessage,
+  Message,
+  RefreshMessage,
+  SetOverridesMessage,
+} from "../../../../devtools";
+import MessageSender = chrome.runtime.MessageSender;
 
 // technically doesn't have to be the latest version but the most recent version
 // with breaking changes
@@ -23,28 +30,43 @@ const useSDKDiagnostics: UseSDKDiagnosticsHook = ({ experiment }) => {
   const [hasHashAttribute, setHasHashAttr] = useState(false);
 
   useEffect(() => {
-    if (!window) return;
-    setSDKStatus({
-      hasSDK: !!window._growthbook,
-      hasLatest: window._growthbook?.version === LATEST_SDK_VERSION,
-    });
-    if (window._growthbook?.version)
-      setVersion(window._growthbook?.version || "");
-  }, [setSDKStatus]);
-
-  useEffect(() => {
     setHashAttr(experiment?.hashAttribute || "");
   }, [experiment]);
 
   useEffect(() => {
-    // @ts-expect-error we are accessing a private property on gb sdk obj
-    const sdkAttributes = hasSDK ? window._growthbook?._ctx?.attributes : {};
+    const sdkAttributes = hasSDK ? window._growthbook?.getAttributes() : {};
     setHasHashAttr(
       hasSDK
-        ? sdkAttributes.hasOwnProperty(experiment?.hashAttribute || "")
+        ? !!sdkAttributes?.hasOwnProperty(experiment?.hashAttribute || "")
         : false
     );
   }, [hasSDK, hashAttribute]);
+
+  useEffect(() => {
+    const update = () => {
+      setSDKStatus({
+        hasSDK: !!window._growthbook,
+        hasLatest:
+          (window._growthbook?.version || "0.0.0") > LATEST_SDK_VERSION,
+      });
+      if (window._growthbook?.version)
+        setVersion(window._growthbook?.version || "");
+    };
+
+    const messageHandler = async (event: MessageEvent<any>) => {
+      const data = event.data ?? {};
+      if (data.type !== "GB_REFRESH") return;
+      update();
+    };
+
+    window.addEventListener("message", messageHandler);
+
+    // send ping to SDK
+    window.postMessage("GB_REQUEST_REFRESH", "*");
+    update();
+
+    return () => window.removeEventListener("message", messageHandler);
+  }, []);
 
   return {
     hasSDK,

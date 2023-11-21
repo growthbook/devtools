@@ -38,8 +38,8 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
   const [experimentUrl, setExperimentUrl] = useState<string | null>(null);
   const [variations, setVariations] = useState<VisualEditorVariation[]>([]);
 
-  // TODO refine this to only catch inline script errors
   document.addEventListener("securitypolicyviolation", (e) => {
+    if (e.violatedDirective !== "script-src") return;
     setError("csp-error");
     setCSPError({
       violatedDirective: e.violatedDirective,
