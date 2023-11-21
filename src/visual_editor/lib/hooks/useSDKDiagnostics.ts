@@ -26,7 +26,7 @@ const useSDKDiagnostics: UseSDKDiagnosticsHook = ({ experiment }) => {
     if (!window) return;
     setSDKStatus({
       hasSDK: !!window._growthbook,
-      hasLatest: window._growthbook?.version === LATEST_SDK_VERSION,
+      hasLatest: (window._growthbook?.version || "0.0.0") > LATEST_SDK_VERSION,
     });
     if (window._growthbook?.version)
       setVersion(window._growthbook?.version || "");
