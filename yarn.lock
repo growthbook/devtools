@@ -1246,10 +1246,10 @@
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.1.6.tgz#22958c042e10b67463997bd6ea7115fe28cbcaf9"
   integrity sha512-OfX7E2oUDYxtBvsuS4e/jSn4Q9Qb6DzgeYtsAdkPZ47znpoNsMgZw0+tVijiv3uGNR6dgNlty6r9rzIzHjtd/A==
 
-"@growthbook/growthbook@^0.30.0":
-  version "0.30.0"
-  resolved "https://registry.yarnpkg.com/@growthbook/growthbook/-/growthbook-0.30.0.tgz#52532c2d5dfa7c017815027678bb241421c308b1"
-  integrity sha512-ennMHKZIhAZokHHcnA9/tOTLFdBB4DQR0WHT8Lf1pD80jWVv8JBCAzsV1jzSjYUQhb8R8pLR2Kho0IfgjzIZGQ==
+"@growthbook/growthbook@^0.31.0":
+  version "0.31.0"
+  resolved "https://registry.yarnpkg.com/@growthbook/growthbook/-/growthbook-0.31.0.tgz#66273344805c45dc406940ab719856385afa4750"
+  integrity sha512-VtI5IibZHhvtrlZhfopGYhVXZ++FewgY0BtQQyEqFSrhCYFvEEtq+GkuSm4GcC0JxNuHiYJr9/R3GpffJV/T4Q==
   dependencies:
     dom-mutator "^0.6.0"
 

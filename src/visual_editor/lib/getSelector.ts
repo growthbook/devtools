@@ -5,6 +5,7 @@ export default function getSelector(element: Element) {
   try {
     selector = finder(element, {
       seedMinLength: 3,
+      attr: (name) => name === "data-growthbook-element-id",
     });
   } catch (e) {
     selector =
