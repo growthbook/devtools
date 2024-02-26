@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/layout";
 import { Textarea } from "@chakra-ui/textarea";
 import stringify from "json-stringify-pretty-compact";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MdEdit, MdHistory } from "react-icons/md";
 import DebugLog from "./DebugLog";
@@ -58,6 +58,12 @@ export default function Feature({
   });
 
   const isBoolean = result.value === true || result.value === false;
+
+  // ensure we persist the forced value when page is reloaded
+  useEffect(() => {
+    if (!isForced) return;
+    forceValue(result.value);
+  }, [result, feature, isForced]);
 
   return (
     <AccordionItem>
