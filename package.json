@@ -1,6 +1,6 @@
 {
   "name": "gb-devtools",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "private": true,
   "scripts": {
     "dev": "webpack --config webpack/webpack.dev.js --watch",
