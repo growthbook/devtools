@@ -63,7 +63,7 @@ export default function Feature({
   useEffect(() => {
     if (!isForced) return;
     forceValue(result.value);
-  }, [result, feature, isForced]);
+  }, [feature, isForced]);
 
   return (
     <AccordionItem>
