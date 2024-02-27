@@ -30,7 +30,7 @@ To release a new version of the extension to the Chrome Web Store:
 
 1. Increment the version in `public/manifest.json` and `package.json` (they should be the same)
 2. Run `yarn package` to create a `build.zip` file
-3. On the Chrome Web Store Developer Dashboard, go to Packages and upload the `build.zip` file
+3. On the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole/), go to Packages and upload the `build.zip` file
 4. Add a changelog entry to the description describing your changes
 5. Save the draft and submit for review
 6. Make sure to commit and push the changes to GitHub as well
