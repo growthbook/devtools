@@ -26,3 +26,7 @@ yarn-error.log*
 
 dist/
 tmp/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
