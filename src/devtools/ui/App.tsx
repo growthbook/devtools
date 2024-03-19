@@ -37,6 +37,15 @@ function App(props: Props) {
   // Filter search term
   const [q, setQ] = useState("");
 
+  // run on every render
+  useEffect(() => {
+    setOverrides({
+      attributes: attrOverrides || {},
+      features: forcedFeatureValues,
+      variations: forcedVars,
+    });
+  });
+
   // When overrides change, update the page
   useEffect(() => {
     setOverrides({
