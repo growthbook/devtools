@@ -46,9 +46,12 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
 
 function getRefreshMessage(gb: GrowthBook): RefreshMessage {
   let experiments: Record<string, Experiment<any>> = {};
+
   gb.getAllResults().forEach((v, k) => {
     experiments[k] = v.experiment;
   });
+
+  const [apiHost, clientKey] = gb.getApiInfo();
 
   const msg: RefreshMessage = {
     type: "GB_REFRESH",
@@ -57,6 +60,8 @@ function getRefreshMessage(gb: GrowthBook): RefreshMessage {
     overrides: (gb as any).context?.overrides || {},
     experiments,
     url: window.location.href,
+    clientKey,
+    apiHost,
   };
 
   return msg;

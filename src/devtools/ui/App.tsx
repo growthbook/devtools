@@ -17,6 +17,7 @@ import { MdHistory } from "react-icons/md";
 import { DebugLogs } from "../../../devtools";
 import { setOverrides } from "../controller";
 import Layout from "./Layout";
+import ClientInfo from "./ClientInfo";
 
 export interface Props {
   overrides: Record<string, ExperimentOverride>;
@@ -24,6 +25,8 @@ export interface Props {
   experiments: Record<string, ExperimentInterface<any>>;
   attributes: Record<string, any>;
   url: string;
+  clientKey: string;
+  apiHost: string;
 }
 
 function App(props: Props) {
@@ -126,6 +129,7 @@ function App(props: Props) {
           setQ(e.target.value);
         }}
       />
+
       <Box pb={4}>
         <HStack>
           <Heading as="h2" size="md" mb="2">
@@ -227,13 +231,16 @@ function App(props: Props) {
           <Text color="gray.500">No Experiments</Text>
         )}
       </Box>
-      <AttributesSection
-        attrs={attributes}
-        hasOverrides={!!attrOverrides}
-        setAttrs={(val) => {
-          setAttrOverrides(val);
-        }}
-      />
+      <Box mb={2}>
+        <AttributesSection
+          attrs={attributes}
+          hasOverrides={!!attrOverrides}
+          setAttrs={(val) => {
+            setAttrOverrides(val);
+          }}
+        />
+      </Box>
+      <ClientInfo clientKey={props.clientKey} apiHost={props.apiHost} />
     </Layout>
   );
 }

@@ -94,6 +94,8 @@ export type RefreshMessage = {
   attributes: Record<string, any>;
   overrides: Record<string, ExperimentOverride>;
   url: string;
+  clientKey: string;
+  apiHost: string;
 };
 
 export type ErrorMessage = {
