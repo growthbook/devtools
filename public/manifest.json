@@ -44,5 +44,6 @@
     "128": "logo192.png"
   },
 
-  "devtools_page": "devtools.html"
+  "devtools_page": "devtools.html",
+  "incognito": "split"
 }
