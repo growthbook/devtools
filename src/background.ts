@@ -23,14 +23,6 @@ const genHeaders = (apiKey: string) => ({
   ["Content-Type"]: "application/json",
 });
 
-export type BGErrorCode =
-  | "no-api-key"
-  | "no-api-host"
-  | "load-viz-changeset-failed"
-  | "update-viz-changeset-failed"
-  | "transform-copy-failed"
-  | "transform-copy-daily-limit-reached";
-
 export type FetchVisualChangesetPayload =
   | {
       visualChangeset: APIVisualChangeset;
@@ -41,7 +33,8 @@ export type FetchVisualChangesetPayload =
   | {
       visualChangeset: null;
       experiment: null;
-      error: BGErrorCode;
+      experimentUrl: null;
+      error: string;
     };
 
 const fetchVisualChangeset = async ({
@@ -92,7 +85,7 @@ const fetchVisualChangeset = async ({
       error: null,
     };
   } catch (e: any) {
-    let error: BGErrorCode = "load-viz-changeset-failed";
+    let error: string = e.message;
 
     if (e.message === "no-api-key" || e.message === "no-api-host") {
       error = e.message;
@@ -101,6 +94,7 @@ const fetchVisualChangeset = async ({
     return {
       visualChangeset: null,
       experiment: null,
+      experimentUrl: null,
       error,
     };
   }
@@ -115,7 +109,7 @@ export type UpdateVisualChangesetPayload =
   | {
       nModified: number;
       visualChangeset: null;
-      error: BGErrorCode;
+      error: string;
     };
 
 const updateVisualChangeset = async ({
@@ -150,7 +144,7 @@ const updateVisualChangeset = async ({
       error: null,
     };
   } catch (e: any) {
-    let error: BGErrorCode = "update-viz-changeset-failed";
+    let error = e.string;
 
     if (e.message === "no-api-key" || e.message === "no-api-host") {
       error = e.message;
@@ -175,7 +169,7 @@ export type TransformCopyPayload =
       visualChangeset: null;
       transformed: null;
       dailyLimitReached: null;
-      error: BGErrorCode;
+      error: string;
     };
 
 const transformCopy = async ({
@@ -215,7 +209,7 @@ const transformCopy = async ({
       error: null,
     };
   } catch (e: any) {
-    let error: BGErrorCode = "transform-copy-failed";
+    let error = e.message;
 
     if (e.message === "no-api-key" || e.message === "no-api-host") {
       error = e.message;

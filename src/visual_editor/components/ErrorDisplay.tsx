@@ -1,5 +1,5 @@
 import React, { useRef, FC, useEffect } from "react";
-import { CSPError, ErrorCode, OpenOptionsPageMessage } from "../../../devtools";
+import { CSPError, OpenOptionsPageMessage } from "../../../devtools";
 
 const CSPErrorDisplay = ({ cspError }: { cspError: CSPError | null }) => (
   <div className="gb-p-4 gb-text-red-400">
@@ -19,7 +19,7 @@ const CSPErrorDisplay = ({ cspError }: { cspError: CSPError | null }) => (
 );
 
 interface ErrorDisplayProps {
-  error: ErrorCode;
+  error: string | null;
   cspError: CSPError | null;
 }
 const ErrorDisplay: FC<ErrorDisplayProps> = ({ error, cspError }) => {
@@ -50,34 +50,6 @@ const ErrorDisplay: FC<ErrorDisplayProps> = ({ error, cspError }) => {
       );
     case "csp-error":
       return <CSPErrorDisplay cspError={cspError} />;
-    case "load-viz-changeset-failed":
-      return (
-        <div className="gb-p-4 gb-text-red-400">
-          Failed to load the visual experiment from the server. Please try
-          again, or contact support with the error code: '{error}'.
-        </div>
-      );
-    case "update-viz-changeset-failed":
-      return (
-        <div className="gb-p-4 gb-text-red-400">
-          Failed to save updates to the visual experiment. Please try again, or
-          contact support with the error code: '{error}'.
-        </div>
-      );
-    case "transform-copy-failed":
-      return (
-        <div className="gb-p-4 gb-text-red-400">
-          Something went wrong while trying to generate copy. Please try again,
-          or contact support with the error code: '{error}'.
-        </div>
-      );
-    case "transform-copy-daily-limit-reached":
-      return (
-        <div className="gb-p-4 gb-text-red-400">
-          You have reached your daily limit for generating copy. Please try
-          again tomorrow.
-        </div>
-      );
     default:
       return (
         <div className="gb-p-4 gb-text-red-400">
