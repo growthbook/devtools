@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   Message,
-  ErrorCode,
   CopyMode,
   TransformCopyRequestMessage,
 } from "../../../../devtools";
@@ -10,7 +9,7 @@ export type TransformCopyFn = (copy: string, mode: CopyMode) => void;
 
 type UseAiCopySuggestionHook = (visualChangesetId: string) => {
   loading: boolean;
-  error: ErrorCode | null;
+  error: string | null;
   transformedCopy: string | null;
   transformCopy: TransformCopyFn;
 };
@@ -20,7 +19,7 @@ type UseAiCopySuggestionHook = (visualChangesetId: string) => {
  * AI copy suggestions.
  */
 const useAiCopySuggestion: UseAiCopySuggestionHook = (visualChangesetId) => {
-  const [error, setError] = useState<ErrorCode | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [transformedCopy, setTransformedCopy] = useState<string | null>(null);
 

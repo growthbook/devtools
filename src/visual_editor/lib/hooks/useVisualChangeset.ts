@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import {
-  ErrorCode,
   CSPError,
   VisualEditorVariation,
   Message,
@@ -18,7 +17,7 @@ type UseVisualChangesetHook = (visualChangesetId: string) => {
     index: number,
     updates: Partial<VisualEditorVariation>
   ) => void;
-  error: ErrorCode | null;
+  error: string | null;
   cspError: CSPError | null;
   experiment: APIExperiment | null;
   visualChangeset: APIVisualChangeset | null;
@@ -29,7 +28,7 @@ type UseVisualChangesetHook = (visualChangesetId: string) => {
  * `window.postMessage` API to communicate with the background script.
  */
 const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
-  const [error, setError] = useState<ErrorCode | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [cspError, setCSPError] = useState<CSPError | null>(null);
   const [visualChangeset, setVisualChangeset] =
@@ -85,6 +84,7 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
         ...(variations?.map((v, i) => (i === index ? newVariation : v)) ?? []),
       ];
       updateVisualChangeset(newVariations);
+      setVariations(newVariations);
     },
     [variations, setVariations, updateVisualChangeset]
   );
@@ -119,7 +119,6 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
           break;
         case "GB_RESPONSE_UPDATE_VISUAL_CHANGESET":
           if (msg.data.error) setError(msg.data.error);
-          else setVisualChangeset(msg.data.visualChangeset);
           setLoading(false);
           break;
         default:

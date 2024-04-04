@@ -10,7 +10,7 @@ import React, {
 } from "react";
 import * as ReactDOM from "react-dom/client";
 
-import { ErrorCode, VisualEditorVariation } from "../../devtools";
+import { VisualEditorVariation } from "../../devtools";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
 import useQueryParams from "./lib/hooks/useQueryParams";
 import useVisualChangeset from "./lib/hooks/useVisualChangeset";
@@ -312,10 +312,7 @@ const VisualEditor: FC<{}> = () => {
         )}
 
         {error || aiError ? (
-          <ErrorDisplay
-            error={(error || aiError) as ErrorCode}
-            cspError={cspError}
-          />
+          <ErrorDisplay error={error || aiError} cspError={cspError} />
         ) : null}
 
         <div className="gb-m-4 gb-text-center">

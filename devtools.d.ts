@@ -4,7 +4,6 @@ import type {
   ExperimentOverride,
 } from "@growthbook/growthbook";
 import {
-  BGErrorCode,
   FetchVisualChangesetPayload,
   TransformCopyPayload,
   UpdateVisualChangesetPayload,
@@ -19,8 +18,6 @@ declare global {
 export type DebugLogs = [string, any][];
 
 export type CopyMode = "energetic" | "concise" | "humorous";
-
-export type ErrorCode = "csp-error" | BGErrorCode;
 
 export type CSPError = {
   violatedDirective: string;
