@@ -7,17 +7,17 @@ const GlobalCSSEditor: FC<{
   const [css, setCss] = useState(incomingCss);
 
   useEffect(() => {
-    onSubmit(css);
+    if (css !== incomingCss) onSubmit(css);
   }, [css]);
 
   useEffect(() => {
-    setCss(incomingCss);
+    if (incomingCss !== css) setCss(incomingCss);
   }, [incomingCss]);
 
   return (
     <div className="gb-px-4 gb-pb-4">
       <textarea
-        className="gb-w-full gb-h-64 gb-rounded gb-p-2"
+        className="gb-w-full gb-h-64 gb-rounded gb-p-2 gb-text-black"
         placeholder="Enter CSS here"
         value={css}
         onChange={(e) => setCss(e.currentTarget.value)}

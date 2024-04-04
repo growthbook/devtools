@@ -1,5 +1,5 @@
 import { debounce } from "lodash";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { VisualEditorVariation } from "../../../../devtools";
 
 let _globalStyleTag: HTMLStyleElement | null = null;
@@ -18,16 +18,21 @@ export default function useGlobalCSS({
   globalCss: string;
   setGlobalCss: (globalCss: string) => void;
 } {
-  const setGlobalCss = debounce((css: string) => {
-    updateVariation({ css });
-  }, 500);
+  const setGlobalCss = useCallback(
+    debounce((css: string) => {
+      updateVariation({ css });
+    }, 1500),
+    [updateVariation]
+  );
 
   useEffect(() => {
-    if (_globalStyleTag) _globalStyleTag.remove();
     if (!variation?.css) return;
     _globalStyleTag = document.createElement("style");
     document.head.appendChild(_globalStyleTag);
     _globalStyleTag.innerHTML = variation?.css ?? "";
+    return () => {
+      if (_globalStyleTag) _globalStyleTag.remove();
+    };
   }, [variation]);
 
   return {
