@@ -85,6 +85,7 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
         ...(variations?.map((v, i) => (i === index ? newVariation : v)) ?? []),
       ];
       updateVisualChangeset(newVariations);
+      setVariations(newVariations);
     },
     [variations, setVariations, updateVisualChangeset]
   );
@@ -119,7 +120,6 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
           break;
         case "GB_RESPONSE_UPDATE_VISUAL_CHANGESET":
           if (msg.data.error) setError(msg.data.error);
-          else setVisualChangeset(msg.data.visualChangeset);
           setLoading(false);
           break;
         default:
