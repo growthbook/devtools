@@ -37,7 +37,7 @@ To release a new version of the extension to the Chrome Web Store:
 
 ## Developing the Visual Editor
 
-See the Visual Editor [CONTRIBUTING](/src/visual_editor/CONTRIBUTING.md) documentation for more information on how to run the Visual Editor locally and develop it.
+See the Visual Editor [CONTRIBUTING](/src/visual_editor/CONTRIBUTING.md) doc for more information on how to run the Visual Editor locally and develop it.
 
 ## Contributing
 
