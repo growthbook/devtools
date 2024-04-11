@@ -126,6 +126,8 @@ const VisualEditor: FC<{}> = () => {
     addDomMutation,
     removeDomMutation,
     setDomMutations,
+    ignoreClassNames,
+    setIgnoreClassNames,
   } = useEditMode({
     isEnabled: mode === "edit",
     variation: selectedVariation,
@@ -209,6 +211,8 @@ const VisualEditor: FC<{}> = () => {
                 element={elementUnderEdit}
                 setHTML={setInnerHTML}
                 undoHTMLMutations={undoInnerHTMLMutations}
+                ignoreClassNames={ignoreClassNames}
+                setIgnoreClassNames={setIgnoreClassNames}
               />
             </VisualEditorSection>
 

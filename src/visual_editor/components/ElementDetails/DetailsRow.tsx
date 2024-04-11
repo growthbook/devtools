@@ -43,7 +43,7 @@ const DetailsRow = ({
 
   return (
     <div
-      className={clsx("gb-flex gb-mb-2 last:gb-mb-0", {
+      className={clsx("gb-flex", {
         "flex-col": editing,
       })}
     >
