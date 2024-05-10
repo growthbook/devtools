@@ -1,10 +1,15 @@
 import { finder } from "@medv/finder";
 
-export default function getSelector(element: Element) {
+export default function getSelector(
+  element: Element,
+  options?: { ignoreClassNames: boolean }
+) {
   let selector = "";
   try {
     selector = finder(element, {
       seedMinLength: 3,
+      ...(options?.ignoreClassNames && { className: () => false }),
+      attr: (name) => name.startsWith("data-"),
     });
   } catch (e) {
     selector =

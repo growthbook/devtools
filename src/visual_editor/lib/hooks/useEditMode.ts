@@ -47,6 +47,9 @@ type UseEditModeHook = (args: {
   addDomMutation: (mutation: DeclarativeMutation) => void;
   removeDomMutation: (mutation: DeclarativeMutation) => void;
   setDomMutations: (mutations: DeclarativeMutation[]) => void;
+
+  ignoreClassNames: boolean;
+  setIgnoreClassNames: (ignore: boolean) => void;
 };
 
 /**
@@ -62,6 +65,7 @@ const useEditMode: UseEditModeHook = ({
   const [elementUnderEdit, setElementUnderEdit] = useState<HTMLElement | null>(
     null
   );
+  const [ignoreClassNames, setIgnoreClassNames] = useState(false);
   const [highlightedElement, setHighlightedElement] =
     useState<HTMLElement | null>(null);
   const clearElementUnderEdit = useCallback(
@@ -69,12 +73,22 @@ const useEditMode: UseEditModeHook = ({
     [setElementUnderEdit]
   );
   const elementUnderEditSelector = useMemo(
-    () => (elementUnderEdit ? getSelector(elementUnderEdit) : ""),
-    [elementUnderEdit]
+    () =>
+      elementUnderEdit
+        ? getSelector(elementUnderEdit, {
+            ignoreClassNames,
+          })
+        : "",
+    [elementUnderEdit, ignoreClassNames]
   );
   const highlightedElementSelector = useMemo(
-    () => (highlightedElement ? getSelector(highlightedElement) : ""),
-    [highlightedElement]
+    () =>
+      highlightedElement
+        ? getSelector(highlightedElement, {
+            ignoreClassNames,
+          })
+        : "",
+    [highlightedElement, ignoreClassNames]
   );
   const elementUnderEditCopy = useMemo(() => {
     if (!elementUnderEdit) return "";
@@ -191,7 +205,7 @@ const useEditMode: UseEditModeHook = ({
         ]);
       });
     },
-    [elementUnderEdit, addDomMutations]
+    [elementUnderEdit, addDomMutations, elementUnderEditSelector]
   );
 
   const addClassNames = useCallback(
@@ -351,6 +365,8 @@ const useEditMode: UseEditModeHook = ({
     removeDomMutation,
     addDomMutation,
     setDomMutations,
+    ignoreClassNames,
+    setIgnoreClassNames,
   };
 };
 
