@@ -71,6 +71,7 @@ if (
   const script = document.createElement("script");
   script.id = VISUAL_EDITOR_SCRIPT_ID;
   script.async = true;
+  script.charset = "utf-8";
   script.src = chrome.runtime.getURL("js/visual_editor.js");
 
   document.body.appendChild(script);
