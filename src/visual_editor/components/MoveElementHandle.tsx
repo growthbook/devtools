@@ -12,13 +12,13 @@ const MoveElementHandle = forwardRef<
   return (
     <div
       ref={ref}
-      className="gb-fixed gb-px-2 gb-py-1 gb-text-white gb-bg-indigo-800 gb-text-xs gb-z-front gb-cursor-move gb-font-semibold"
+      className="fixed px-2 py-1 text-white bg-indigo-800 text-xs z-front cursor-move font-semibold"
       style={{
         top: domRect.bottom + 8,
         left: domRect.left + domRect.width - 40,
       }}
     >
-      <RxMove className="gb-w-6 gb-h-6" />
+      <RxMove className="w-6 h-6" />
     </div>
   );
 });

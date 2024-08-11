@@ -32,20 +32,20 @@ const DOMMutationEditor: FC<{
 
   return (
     <>
-      <div className="gb-flex gb-w-full gb-items-center gb-mb-2">
-        <div className="gb-text-slate-200 gb-w-20">Selector</div>
+      <div className="flex w-full items-center mb-2">
+        <div className="text-slate-200 w-20">Selector</div>
         <input
-          className="gb-p-2"
+          className="p-2"
           type="text"
           value={selector}
           onChange={(e) => setSelector(e.currentTarget.value)}
         />
       </div>
 
-      <div className="gb-flex gb-w-full gb-items-center gb-mb-2">
-        <div className="gb-text-slate-200 gb-w-20">Action</div>
+      <div className="flex w-full items-center mb-2">
+        <div className="text-slate-200 w-20">Action</div>
         <select
-          className="gb-p-2"
+          className="p-2"
           value={action}
           onChange={(e) =>
             setAction(e.currentTarget.value as DeclarativeMutation["action"])
@@ -57,34 +57,34 @@ const DOMMutationEditor: FC<{
         </select>
       </div>
 
-      <div className="gb-flex gb-w-full gb-items-center gb-mb-2">
-        <div className="gb-text-slate-200 gb-w-20">Attribute</div>
+      <div className="flex w-full items-center mb-2">
+        <div className="text-slate-200 w-20">Attribute</div>
         <input
           type="text"
-          className="gb-p-2"
+          className="p-2"
           value={attribute}
           onChange={(e) => setAttribute(e.currentTarget.value)}
         />
       </div>
 
-      <div className="gb-flex gb-w-full gb-items-center gb-mb-4">
-        <div className="gb-text-slate-200 gb-w-20">Value</div>
+      <div className="flex w-full items-center mb-4">
+        <div className="text-slate-200 w-20">Value</div>
         <input
           type="text"
-          className="gb-p-2"
+          className="p-2"
           value={value}
           onChange={(e) => setValue(e.currentTarget.value)}
         />
       </div>
 
-      <div className="gb-flex gb-justify-end">
+      <div className="flex justify-end">
         {onClose && (
-          <button className="gb-text-link" onClick={onClose}>
+          <button className="text-link" onClick={onClose}>
             Cancel
           </button>
         )}
         <button
-          className="gb-py-2 gb-px-4 gb-bg-indigo-800 gb-text-link gb-font-semibold gb-rounded gb-ml-2"
+          className="py-2 px-4 bg-indigo-800 text-link font-semibold rounded ml-2"
           onClick={save}
         >
           Add

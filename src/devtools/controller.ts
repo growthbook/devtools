@@ -7,10 +7,23 @@ import {
 import MessageSender = chrome.runtime.MessageSender;
 
 // Send message to content script
-function sendMessage(msg: Message) {
-  if (chrome.tabs && chrome.devtools?.inspectedWindow) {
-    const  { tabId } = chrome.devtools.inspectedWindow;
-    chrome.tabs.sendMessage(tabId || 0, msg);
+async function sendMessage(msg: Message) {
+  if (chrome.tabs) {
+    let tabId: number | undefined = chrome.devtools?.inspectedWindow?.tabId;
+    if (!tabId) {
+      await new Promise<void>((resolve) => {
+        chrome.windows.getLastFocused((window) => {
+          chrome.tabs.query({ active: true, windowId: window.id }, (tabs) => {
+            if (tabs.length > 0) {
+              const activeTab = tabs[0];
+              tabId = activeTab.id;
+              resolve();
+            }
+          });
+        });
+      });
+    }
+    await chrome.tabs.sendMessage(tabId || 0, msg);
   }
 }
 
@@ -54,5 +67,22 @@ export function setOverrides(data: Omit<SetOverridesMessage, "type">) {
   sendMessage({
     type: "GB_SET_OVERRIDES",
     ...data,
+  });
+}
+
+export function requestOpenVisualEditor(data: {apiHost: string | null; apiKey: string | null; source: string;}) {
+  sendMessage({
+    type: "GB_REQUEST_OPEN_VISUAL_EDITOR",
+    data: {
+      apiHost: data.apiHost,
+      apiKey: data.apiKey,
+      source: data.source,
+    },
+  });
+}
+
+export function requestCloseVisualEditor() {
+  sendMessage({
+    type: "GB_REQUEST_CLOSE_VISUAL_EDITOR",
   });
 }

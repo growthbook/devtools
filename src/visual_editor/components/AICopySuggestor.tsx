@@ -60,28 +60,28 @@ const AICopySuggestor: FC<{
   }, [setHTML, generatedCopy, setGeneratedCopy]);
 
   return (
-    <div className="gb-flex gb-flex-col gb-ml-4">
-      <div className="gb-bg-dark gb-text-light gb-flex gb-flex-col">
-        <div className="gb-w-24 gb-text-xs gb-text-slate-400">
+    <div className="flex flex-col ml-4">
+      <div className="bg-dark text-light flex flex-col">
+        <div className="w-24 text-xs text-slate-400">
           Original copy
         </div>
         <div
           className={clsx(
-            "gb-text-slate-400",
-            "gb-text-ellipsis",
-            "gb-overflow-hidden",
-            "gb-text-sm",
-            "gb-bg-slate-900",
-            "gb-mr-4",
-            "gb-mt-2",
-            "gb-p-2",
-            "gb-rounded",
-            "gb-border",
-            "gb-border-slate-700",
-            "gb-z-20",
-            "gb-transition-colors",
+            "text-slate-400",
+            "text-ellipsis",
+            "overflow-hidden",
+            "text-sm",
+            "bg-slate-900",
+            "mr-4",
+            "mt-2",
+            "p-2",
+            "rounded",
+            "border",
+            "border-slate-700",
+            "z-20",
+            "transition-colors",
             {
-              "gb-border-gb": tone,
+              "border-gb": tone,
             }
           )}
           style={{ flex: 2, maxHeight: "3rem" }}
@@ -89,23 +89,23 @@ const AICopySuggestor: FC<{
           {copy}
         </div>
 
-        <div className="gb-w-24 gb-text-xs gb-text-slate-400 gb-mt-2 gb-w-full gb-relative">
-          <div className="gb-bg-dark gb-relative gb-z-20 gb-inline-block">
+        <div className="w-24 text-xs text-slate-400 mt-2 w-full relative">
+          <div className="bg-dark relative z-20 inline-block">
             Make it more...
           </div>
 
           {/* top center */}
           <div
             className={clsx(
-              "-gb-top-2",
-              "gb-bottom-0",
-              "gb-inset-x-1/2",
-              "gb-absolute",
-              "gb-border-l",
-              "gb-border-slate-700",
-              "gb-transition-colors",
+              "-top-2",
+              "bottom-0",
+              "inset-x-1/2",
+              "absolute",
+              "border-l",
+              "border-slate-700",
+              "transition-colors",
               {
-                "gb-border-gb": tone,
+                "border-gb": tone,
               }
             )}
             style={{ width: "1px", height: "13px", zIndex: 30 }}
@@ -113,17 +113,17 @@ const AICopySuggestor: FC<{
           {/* left arm */}
           <div
             className={clsx(
-              "gb-z-10",
-              "gb-bottom-0",
-              "gb-absolute",
-              "gb-border-l",
-              "gb-border-t",
-              "gb-h-9",
-              "gb-border-slate-700",
-              "gb-rounded-l",
-              "gb-transition-colors",
+              "z-10",
+              "bottom-0",
+              "absolute",
+              "border-l",
+              "border-t",
+              "h-9",
+              "border-slate-700",
+              "rounded-l",
+              "transition-colors",
               {
-                "gb-border-gb": tone === "concise",
+                "border-gb": tone === "concise",
               }
             )}
             style={{ width: "33%", top: "4px", left: "17%" }}
@@ -131,15 +131,15 @@ const AICopySuggestor: FC<{
           {/* center arm */}
           <div
             className={clsx(
-              "gb-z-10",
-              "gb-bottom-0",
-              "gb-absolute",
-              "gb-border-l",
-              "gb-h-9",
-              "gb-border-slate-700",
-              "gb-transition-colors",
+              "z-10",
+              "bottom-0",
+              "absolute",
+              "border-l",
+              "h-9",
+              "border-slate-700",
+              "transition-colors",
               {
-                "gb-border-gb": tone === "energetic",
+                "border-gb": tone === "energetic",
               }
             )}
             style={{ width: "0px", top: "4px", left: "50%" }}
@@ -147,17 +147,17 @@ const AICopySuggestor: FC<{
           {/* right arm */}
           <div
             className={clsx(
-              "gb-z-10",
-              "gb-bottom-0",
-              "gb-absolute",
-              "gb-border-r",
-              "gb-border-t",
-              "gb-border-slate-700",
-              "gb-h-9",
-              "gb-rounded-r",
-              "gb-transition-colors",
+              "z-10",
+              "bottom-0",
+              "absolute",
+              "border-r",
+              "border-t",
+              "border-slate-700",
+              "h-9",
+              "rounded-r",
+              "transition-colors",
               {
-                "gb-border-gb": tone === "humorous",
+                "border-gb": tone === "humorous",
               }
             )}
             style={{ width: "33%", top: "4px", left: "50%" }}
@@ -165,31 +165,31 @@ const AICopySuggestor: FC<{
         </div>
 
         <div
-          className="gb-flex gb-mr-4 gb-mt-2 gb-text-sm gb-h-7 gb-z-20"
+          className="flex mr-4 mt-2 text-sm h-7 z-20"
           onMouseOut={() => !loading && setTone(null)}
         >
           <div
             className={clsx(
-              "gb-flex-1",
-              "gb-flex",
-              "gb-rounded-l",
-              "gb-bg-slate-700",
-              "gb-cursor-pointer",
+              "flex-1",
+              "flex",
+              "rounded-l",
+              "bg-slate-700",
+              "cursor-pointer",
 
-              "gb-transition-colors",
+              "transition-colors",
               {
-                "gb-logo-bg": tone === "concise",
+                "logo-bg": tone === "concise",
               }
             )}
           >
             <button
               className={clsx(
-                "gb-bg-slate-900",
-                "gb-flex-1",
-                "gb-flex",
-                "gb-justify-center",
-                "gb-items-center",
-                "gb-rounded-l"
+                "bg-slate-900",
+                "flex-1",
+                "flex",
+                "justify-center",
+                "items-center",
+                "rounded-l"
               )}
               style={{ margin: "1px" }}
               onClick={generateCopy("concise")}
@@ -200,22 +200,22 @@ const AICopySuggestor: FC<{
           </div>
           <div
             className={clsx(
-              "gb-flex-1",
-              "gb-flex",
-              "gb-bg-slate-700",
-              "gb-cursor-pointer",
+              "flex-1",
+              "flex",
+              "bg-slate-700",
+              "cursor-pointer",
               {
-                "gb-logo-bg": tone === "energetic",
+                "logo-bg": tone === "energetic",
               }
             )}
           >
             <button
               className={clsx(
-                "gb-bg-slate-900",
-                "gb-flex-1",
-                "gb-flex",
-                "gb-justify-center",
-                "gb-items-center"
+                "bg-slate-900",
+                "flex-1",
+                "flex",
+                "justify-center",
+                "items-center"
               )}
               style={{ margin: "1px" }}
               onMouseOver={() => !loading && setTone("energetic")}
@@ -226,18 +226,18 @@ const AICopySuggestor: FC<{
           </div>
           <div
             className={clsx(
-              "gb-flex-1",
-              "gb-flex",
-              "gb-bg-slate-700",
-              "gb-rounded-r",
-              "gb-cursor-pointer",
+              "flex-1",
+              "flex",
+              "bg-slate-700",
+              "rounded-r",
+              "cursor-pointer",
               {
-                "gb-logo-bg": tone === "humorous",
+                "logo-bg": tone === "humorous",
               }
             )}
           >
             <button
-              className="gb-bg-slate-900 gb-flex-1 gb-flex gb-justify-center gb-items-center gb-rounded-r"
+              className="bg-slate-900 flex-1 flex justify-center items-center rounded-r"
               style={{ margin: "1px" }}
               onMouseOver={() => !loading && setTone("humorous")}
               onClick={generateCopy("humorous")}
@@ -248,42 +248,42 @@ const AICopySuggestor: FC<{
         </div>
       </div>
 
-      <div className="gb-overflow-hidden">
+      <div className="overflow-hidden">
         <div
           className={clsx(
-            "gb-flex gb-justify-center gb-items-center gb-transition-all",
+            "flex justify-center items-center transition-all",
             {
-              "-gb-mt-32": !loading,
-              "gb-mt-4": loading,
+              "-mt-32": !loading,
+              "mt-4": loading,
             }
           )}
         >
-          <BiLoaderCircle className="gb-animate-spin gb-text-indigo-500" />
+          <BiLoaderCircle className="animate-spin text-indigo-500" />
         </div>
       </div>
 
-      <div className="gb-overflow-hidden gb-pr-4">
+      <div className="overflow-hidden pr-4">
         <div
-          className={clsx("gb-transition-all", {
-            "-gb-mt-32": !generatedCopy,
-            "gb-mt-0": !!generatedCopy,
+          className={clsx("transition-all", {
+            "-mt-32": !generatedCopy,
+            "mt-0": !!generatedCopy,
           })}
         >
-          <div className="gb-w-24 gb-text-xs gb-text-ai-label gb-mt-2">
+          <div className="w-24 text-xs text-ai-label mt-2">
             Transformed{" "}
           </div>
           <TextareaAutosize
             className={clsx(
-              "gb-text-slate-200",
-              "gb-text-ellipsis",
-              "gb-overflow-hidden",
-              "gb-text-sm",
-              "gb-bg-slate-900",
-              "gb-w-full",
-              "gb-mt-2",
-              "gb-p-2",
-              "gb-rounded",
-              "gb-outline-none"
+              "text-slate-200",
+              "text-ellipsis",
+              "overflow-hidden",
+              "text-sm",
+              "bg-slate-900",
+              "w-full",
+              "mt-2",
+              "p-2",
+              "rounded",
+              "outline-none"
             )}
             style={{ flex: 2 }}
             value={generatedCopy}
@@ -291,19 +291,19 @@ const AICopySuggestor: FC<{
           />
           <button
             className={clsx(
-              "gb-p-2",
-              "gb-bg-indigo-800",
-              "gb-rounded",
-              "gb-text-white",
-              "gb-font-semibold",
-              "gb-text-sm",
-              "gb-mt-2"
+              "p-2",
+              "bg-indigo-800",
+              "rounded",
+              "text-white",
+              "font-semibold",
+              "text-sm",
+              "mt-2"
             )}
             onClick={applyCopy}
           >
             Apply
           </button>
-          <button className="gb-ml-4 gb-text-indigo-600" onClick={reset}>
+          <button className="ml-4 text-indigo-600" onClick={reset}>
             Cancel
           </button>
         </div>

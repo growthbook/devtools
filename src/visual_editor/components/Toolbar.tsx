@@ -50,11 +50,11 @@ const ToolbarButton = ({
     <button
       title={title}
       className={clsx(
-        "gb-flex-1 gb-p-4 gb-h-full gb-flex gb-justify-center gb-text-white",
+        "flex-1 p-4 h-full flex justify-center text-white",
         {
-          "hover:gb-bg-slate-600/75": !disabled,
-          "gb-bg-slate-700": !disabled && isActive,
-          "gb-cursor-not-allowed": disabled,
+          "hover:bg-slate-600/75": !disabled,
+          "bg-slate-700": !disabled && isActive,
+          "cursor-not-allowed": disabled,
         }
       )}
       onClick={disabled ? () => {} : isActive ? deactivate : activate}
@@ -71,8 +71,8 @@ const Toolbar: FC<{
   clearSelectedElement: () => void;
 }> = ({ disabled, mode, setMode, clearSelectedElement }) => {
   return (
-    <div className="gb-z-max gb-shadow-xl">
-      <div className="gb-flex gb-flex-row">
+    <div className="z-max shadow-xl">
+      <div className="flex flex-row">
         <ToolbarButton
           disabled={disabled}
           isActive={mode === "interactive"}

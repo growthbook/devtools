@@ -1,4 +1,5 @@
 import React, { FC, useState } from "react";
+import clsx from "clsx";
 
 const ApiKeyForm: FC<{
   apiHost: string | null;
@@ -6,43 +7,66 @@ const ApiKeyForm: FC<{
   saveApiHost: (apiHost: string) => void;
   saveApiKey: (apiKey: string) => void;
   onSave: () => void;
-}> = ({ saveApiHost, saveApiKey, apiHost, apiKey, onSave }) => {
+  disabled?: boolean;
+}> = ({ saveApiHost, saveApiKey, apiHost, apiKey, onSave, disabled }) => {
+
   const [_apiHost, _setApiHost] = useState(apiHost || "");
   const [_apiKey, _setApiKey] = useState(apiKey || "");
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <form
-      className="gb-flex gb-flex-col"
+      className="flex flex-col"
       onSubmit={(e) => {
         e.preventDefault();
+        if (disabled) return;
         saveApiHost(_apiHost);
         saveApiKey(_apiKey);
         onSave();
       }}
     >
-      <div className="gb-text-md gb-mb-2">
+      <div className="text-md mb-2">
         Please enter your API credentials to connect to your GrowthBook account
       </div>
-      <label className="gb-flex gb-flex-col">
-        <span className="gb-text-xs gb-px-1">API Host</span>
+      <div className="flex flex-col mb-4">
+        <label className="text-xs px-1">API Host</label>
         <input
           placeholder="https://api.growthbook.io"
-          className="gb-border gb-p-2 gb-rounded gb-mb-4 gb-text-black"
+          className="border p-2 rounded text-black"
           type="text"
           value={_apiHost}
           onChange={(e) => _setApiHost(e.target.value)}
         />
-      </label>
-      <label className="gb-flex gb-flex-col">
-        <span className="gb-text-xs gb-px-1">API Secret</span>
-        <input
-          placeholder="secret_xyz..."
-          className="gb-border gb-p-2 gb-rounded gb-mb-4 gb-text-black"
-          type="password"
-          value={_apiKey}
-          onChange={(e) => _setApiKey(e.target.value)}
-        />
-      </label>
-      <input type="submit" className="gb-p-2 gb-bg-blue-300" value="Submit" />
+      </div>
+      <div className="flex flex-col w-full mb-4">
+        <label className="text-xs px-1">API Secret</label>
+        <div className="flex items-center w-[100%]">
+          <input
+            placeholder="secret_xyz..."
+            className="border p-2 rounded text-black w-full"
+            type={!showPassword ? "password" : "text"}
+            value={_apiKey}
+            onChange={(e) => _setApiKey(e.target.value)}
+          />
+          <a
+            className="flex bg-gray-300 hover:bg-gray-200 rounded items-center justify-center w-[50px] h-7 ml-2 cursor-pointer"
+            role="button"
+            onClick={() => {
+            setShowPassword(!showPassword)
+          }}>
+            {showPassword ? "hide" : "show"}
+          </a>
+        </div>
+      </div>
+      <input
+        type="submit"
+        className={clsx("inline-block text-white p-2 rounded text-center transition-colors", {
+          "bg-blue-600 hover:bg-blue-500 cursor-pointer": !disabled,
+          "bg-gray-200 cursor-wait": disabled,
+        })}
+        value="Submit"
+        disabled={disabled ?? false}
+      />
     </form>
   );
 };

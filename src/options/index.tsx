@@ -13,9 +13,9 @@ const Options = () => {
 
   return (
     <>
-      <div className="gb-w-96 gb-p-4">
+      <div className="w-96 p-4">
         {loading ? (
-          <div className="gb-text-gray-500">Loading...</div>
+          <div className="text-gray-500">Loading...</div>
         ) : (
           <ApiKeyForm
             apiHost={apiHost}

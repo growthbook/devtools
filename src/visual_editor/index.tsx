@@ -270,7 +270,7 @@ const VisualEditor: FC<{}> = () => {
           <VisualEditorSection title="Custom JS">
             <CustomJSEditor js={customJs} onSubmit={setCustomJs} />
             {customJsError && (
-              <div className="gb-px-4 gb-py-2 gb-text-rose-500">
+              <div className="px-4 py-2 text-rose-500">
                 JS error: {customJsError}
               </div>
             )}
@@ -319,7 +319,7 @@ const VisualEditor: FC<{}> = () => {
           <ErrorDisplay error={error || aiError} cspError={cspError} />
         ) : null}
 
-        <div className="gb-m-4 gb-text-center">
+        <div className="m-4 text-center">
           <BackToGBButton experimentUrl={experimentUrl} />
           <ReloadPageButton
             params={params}

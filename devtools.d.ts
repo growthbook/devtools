@@ -103,13 +103,23 @@ export type ErrorMessage = {
 type OpenVisualEditorRequestMessage = {
   type: "GB_REQUEST_OPEN_VISUAL_EDITOR";
   data: {
-    apiHost: string;
-    apiKey: string;
+    apiHost: string | null;
+    apiKey: string | null;
+    source: string;
   };
 };
 
 type OpenVisualEditorResponseMessage = {
   type: "GB_RESPONSE_OPEN_VISUAL_EDITOR";
+  data: string;
+};
+
+type CloseVisualEditorRequestMessage = {
+  type: "GB_REQUEST_CLOSE_VISUAL_EDITOR";
+};
+
+type CloseVisualEditorResponseMessage = {
+  type: "GB_RESPONSE_CLOSE_VISUAL_EDITOR";
   data: string;
 };
 
@@ -164,6 +174,8 @@ export type Message =
   | ErrorMessage
   | OpenVisualEditorRequestMessage
   | OpenVisualEditorResponseMessage
+  | CloseVisualEditorRequestMessage
+  | CloseVisualEditorResponseMessage
   | LoadVisualChangesetRequestMessage
   | LoadVisualChangesetResponseMessage
   | UpdateVisualChangesetRequestMessage

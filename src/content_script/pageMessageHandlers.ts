@@ -42,6 +42,7 @@ export const visualEditorOpenRequest = (
 
   saveApiHost(message.data.apiHost);
   saveApiKey(message.data.apiKey);
+  // todo: handle source?
 
   window.postMessage(
     { type: "GB_RESPONSE_OPEN_VISUAL_EDITOR" },
