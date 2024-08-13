@@ -217,14 +217,14 @@ const VisualEditor: FC<{}> = () => {
               <div className="flex w-full justify-between">
                 <div className="mb-2 text-sm">Experiment</div>
                 <button
-                  className="cursor-pointer"
+                  className="flex text-sm cursor-pointer"
                   onClick={() => setEditingExperiment(!editingExperiment)}
                 >
-                  <FaPencilAlt size={12} />
+                  edit <FaPencilAlt size={12} />
                 </button>
               </div>
 
-              <label>Name</label>
+              <label className="text-sm italic text-gray-500">Name</label>
               {experimentEditable && editingExperiment ? (
                 <input
                   className="w-full"
@@ -237,7 +237,7 @@ const VisualEditor: FC<{}> = () => {
                   }}
                 />
               ) : (
-                <div>{experiment.name}</div>
+                <div className="text-sm truncate text-indigo-200">{experiment.name}</div>
               )}
             </div>
 
