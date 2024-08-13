@@ -234,26 +234,26 @@ const CSSAttributeEditor: FC<{
   );
 
   return (
-    <div className="gb-text-light gb-mx-4">
-      <div className="gb-py-4 gb-text-xs">Typography</div>
+    <div className="text-light mx-4">
+      <div className="py-4 text-xs">Typography</div>
       <div>
         {typographyAttributes.map((attr, i) => (
           <CSSTextInput key={i} {...attr} updateAttribute={updateAttribute} />
         ))}
       </div>
-      <div className="gb-py-4 gb-text-xs">Background</div>
+      <div className="py-4 text-xs">Background</div>
       <div>
         {backgroundAttributes.map((attr, i) => (
           <CSSTextInput key={i} {...attr} updateAttribute={updateAttribute} />
         ))}
       </div>
-      <div className="gb-py-4 gb-text-xs">Border</div>
+      <div className="py-4 text-xs">Border</div>
       <div>
         {borderAttributes.map((attr, i) => (
           <CSSTextInput key={i} {...attr} updateAttribute={updateAttribute} />
         ))}
       </div>
-      <div className="gb-py-4 gb-text-xs">Layout</div>
+      <div className="py-4 text-xs">Layout</div>
       <div>
         {layoutAttributes.map((attr, i) => (
           <CSSTextInput key={i} {...attr} updateAttribute={updateAttribute} />

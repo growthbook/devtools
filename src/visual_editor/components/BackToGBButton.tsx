@@ -6,13 +6,13 @@ const BackToGBButton: FC<{
 }> = ({ experimentUrl }) => (
   <button
     className={clsx(
-      "gb-w-full",
-      "gb-p-2",
-      "gb-bg-indigo-800",
-      "gb-rounded",
-      "gb-text-white",
-      "gb-font-semibold",
-      "gb-text-lg"
+      "w-full",
+      "p-2",
+      "bg-indigo-800",
+      "rounded",
+      "text-white",
+      "font-semibold",
+      "text-lg"
     )}
     onClick={() => {
       if (experimentUrl) {

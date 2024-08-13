@@ -137,7 +137,9 @@ const useEditMode: UseEditModeHook = ({
 
   const setDomMutations = useCallback(
     (mutations: DeclarativeMutation[]) => {
+      console.log("setDomMutations", mutations);
       if (!variation || !updateVariation) return;
+      console.log("here 1");
       updateVariation({
         domMutations: mutations,
       });

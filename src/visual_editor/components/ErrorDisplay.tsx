@@ -2,12 +2,12 @@ import React, { useRef, FC, useEffect } from "react";
 import { CSPError, OpenOptionsPageMessage } from "../../../devtools";
 
 const CSPErrorDisplay = ({ cspError }: { cspError: CSPError | null }) => (
-  <div className="gb-p-4 gb-text-red-400">
+  <div className="p-4 text-red-400">
     The {cspError ? `${cspError.violatedDirective} directive in the` : ""}{" "}
     Content Security Policy on this page is too strict for the Visual Editor.
     Refer to the Visual Editor documentation's{" "}
     <a
-      className="gb-underline"
+      className="underline"
       href="https://docs.growthbook.io/app/visual#security-requirements"
       target="_blank"
       rel="noreferrer"
@@ -32,14 +32,14 @@ const ErrorDisplay: FC<ErrorDisplayProps> = ({ error, cspError }) => {
     case "no-api-host":
     case "no-api-key":
       return (
-        <div className="gb-p-4 gb-text-red-400 gb-text-sm">
-          <p className="gb-mb-2">
+        <div className="p-4 text-red-400 text-sm">
+          <p className="mb-2">
             GrowthBook API credentials did not reach the Chrome Extension.
           </p>
           <p>
             Please set your API host and key in the{" "}
             <a
-              className="gb-underline gb-cursor-pointer"
+              className="underline cursor-pointer"
               onClick={() => openOptionsPage()}
             >
               Chrome Extension Options
@@ -52,7 +52,7 @@ const ErrorDisplay: FC<ErrorDisplayProps> = ({ error, cspError }) => {
       return <CSPErrorDisplay cspError={cspError} />;
     default:
       return (
-        <div className="gb-p-4 gb-text-red-400">
+        <div className="p-4 text-red-400">
           An unknown error occurred. Please try again or contact support with
           the error code: '{error}'.
         </div>

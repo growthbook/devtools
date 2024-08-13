@@ -21,12 +21,12 @@ const ElementDetails: FC<{
   const isHtmlTooLarge = html.length > 100000;
 
   return (
-    <div className="gb-text-light gb-flex gb-flex-col gb-ml-4">
-      <div className="gb-mb-2">
+    <div className="text-light flex flex-col ml-4">
+      <div className="mb-2">
         <DetailsRow label="Selector" value={selector} readOnly />
-        <label className="gb-text-xs gb-flex gb-items-center gb-my-1">
+        <label className="text-xs flex items-center my-1">
           <input
-            className="gb-mr-2"
+            className="mr-2"
             type="checkbox"
             checked={ignoreClassNames}
             onChange={(e) => setIgnoreClassNames(e.target.checked)}
@@ -35,10 +35,10 @@ const ElementDetails: FC<{
         </label>
       </div>
 
-      <div className="gb-mb-2">
+      <div className="mb-2">
         <DetailsRow label="Tag name" value={name} readOnly />
       </div>
-      <div className="gb-mb-2">
+      <div className="mb-2">
         {isHtmlTooLarge ? (
           <DetailsRow
             readOnly

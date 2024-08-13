@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import {
   CSPError,
   VisualEditorVariation,
@@ -9,10 +15,11 @@ import {
   UpdateVisualChangesetRequestMessage,
 } from "../../../../devtools";
 import normalizeVariations from "../normalizeVariations";
+
 type UseVisualChangesetHook = (visualChangesetId: string) => {
   loading: boolean;
-  experimentUrl: string | null;
   variations: VisualEditorVariation[];
+  setVariations: Dispatch<SetStateAction<VisualEditorVariation[]>>;
   updateVariationAtIndex: (
     index: number,
     updates: Partial<VisualEditorVariation>
@@ -20,8 +27,15 @@ type UseVisualChangesetHook = (visualChangesetId: string) => {
   error: string | null;
   cspError: CSPError | null;
   experiment: APIExperiment | null;
+  setExperiment: Dispatch<SetStateAction<APIExperiment | null>>;
+  experimentUrl: string | null;
+  setExperimentUrl: Dispatch<SetStateAction<string | null>>;
   visualChangeset: APIVisualChangeset | null;
+  createNewExperiment: (options: CreateNewExperimentOptions) => void;
+  experimentEditable: boolean;
 };
+
+export type CreateNewExperimentOptions = {};
 
 /**
  * This hook is responsible for loading and updating a visual changeset. It utilizes the
@@ -36,6 +50,7 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
   const [experiment, setExperiment] = useState<APIExperiment | null>(null);
   const [experimentUrl, setExperimentUrl] = useState<string | null>(null);
   const [variations, setVariations] = useState<VisualEditorVariation[]>([]);
+  const [experimentEditable, setExperimentEditable] = useState(false);
 
   document.addEventListener("securitypolicyviolation", (e) => {
     if (e.violatedDirective !== "script-src") return;
@@ -71,7 +86,7 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
 
       window.postMessage(updateVisualChangesetMessage, window.location.origin);
     },
-    [visualChangesetId]
+    [visualChangesetId, variations]
   );
 
   const updateVariationAtIndex = useCallback(
@@ -88,6 +103,42 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
     },
     [variations, setVariations, updateVisualChangeset]
   );
+
+  const createNewExperiment = (options: CreateNewExperimentOptions) => {
+    const newVariations = [
+      {
+        name: "Control",
+        description: "",
+        css: "",
+        js: "",
+        domMutations: [],
+        variationId: "0",
+      },
+      {
+        name: "Variant 1",
+        description: "",
+        css: "",
+        js: "",
+        domMutations: [],
+        variationId: "0",
+      },
+    ];
+    setExperiment({
+      name: "New experiment",
+      id: "__new-experiment__",
+      hashAttribute: "id",
+      variations: newVariations.map((v) => ({
+        variationId: v.variationId,
+        key: v.variationId,
+        name: v.name,
+        description: v.description,
+        screenshots: [],
+      })),
+    });
+    setExperimentUrl(null);
+    setVariations(newVariations);
+    setExperimentEditable(true);
+  };
 
   // generate normalized variations
   useEffect(() => {
@@ -145,13 +196,18 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
 
   return {
     loading,
-    experimentUrl,
     variations,
+    setVariations,
     updateVariationAtIndex,
     error,
     cspError,
     experiment,
+    setExperiment,
+    experimentUrl,
+    setExperimentUrl,
     visualChangeset,
+    createNewExperiment,
+    experimentEditable,
   };
 };
 
