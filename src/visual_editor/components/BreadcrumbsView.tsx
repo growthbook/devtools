@@ -58,7 +58,7 @@ const BreadcrumbsView: FC<{
             <select
               value={-1}
               onChange={onChildSelect}
-              className="gb-text-black gb-my-2"
+              className="gb-my-2"
             >
               <option value={-1}>MORE</option>
               {children.map((child, index) => (
