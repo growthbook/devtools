@@ -49,15 +49,13 @@ const EditAttributeInput: FC<{
       {isAdding ? (
         <input
           type="text"
-          className="px-2 text-sm w-16 mb-2"
+          className="px-2 text-sm w-16 mb-2 text-black"
           placeholder="Key"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
       ) : (
-        <div className="w-12 text-xs text-slate-400 mb-2">
-          {name}
-        </div>
+        <div className="w-12 text-xs text-slate-400 mb-2">{name}</div>
       )}
 
       <TextareaAutosize

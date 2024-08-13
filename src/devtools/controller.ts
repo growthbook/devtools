@@ -70,7 +70,11 @@ export function setOverrides(data: Omit<SetOverridesMessage, "type">) {
   });
 }
 
-export function requestOpenVisualEditor(data: {apiHost: string | null; apiKey: string | null; source: string;}) {
+export function requestOpenVisualEditor(data: {
+  apiHost: string | null;
+  apiKey: string | null;
+  source: string;
+}) {
   sendMessage({
     type: "GB_REQUEST_OPEN_VISUAL_EDITOR",
     data: {

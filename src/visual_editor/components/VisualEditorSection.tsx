@@ -23,14 +23,11 @@ const VisualEditorSection: FC<{
   return (
     <>
       <div
-        className={clsx(
-          "text-light text-xs font-semibold uppercase p-4",
-          {
-            "flex justify-between": onClose,
-            "shadow-xl": isExpanded,
-            "mb-2": isExpanded,
-          }
-        )}
+        className={clsx("text-light text-xs font-semibold uppercase p-4", {
+          "flex justify-between": onClose,
+          "shadow-xl": isExpanded,
+          "mb-2": isExpanded,
+        })}
       >
         <div className="flex items-center relative">
           <div
@@ -48,12 +45,9 @@ const VisualEditorSection: FC<{
           )}
           {isCollapsible ? (
             <RxCaretDown
-              className={clsx(
-                "w-4 h-4 cursor-pointer text-link mx-2",
-                {
-                  "rotate-180": !isExpanded,
-                }
-              )}
+              className={clsx("w-4 h-4 cursor-pointer text-link mx-2", {
+                "rotate-180": !isExpanded,
+              })}
               onClick={toggleExpanded}
             />
           ) : null}

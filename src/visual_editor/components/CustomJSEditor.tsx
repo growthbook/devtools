@@ -13,7 +13,7 @@ const CustomJSEditor: FC<{
   return (
     <div className="px-4">
       <textarea
-        className="w-full h-64 rounded p-2"
+        className="w-full h-64 rounded p-2 text-black"
         placeholder="Enter JS here"
         value={js}
         onChange={(e) => setJs(e.currentTarget.value)}

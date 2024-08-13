@@ -35,7 +35,7 @@ const DOMMutationEditor: FC<{
       <div className="flex w-full items-center mb-2">
         <div className="text-slate-200 w-20">Selector</div>
         <input
-          className="p-2"
+          className="p-2 text-black"
           type="text"
           value={selector}
           onChange={(e) => setSelector(e.currentTarget.value)}
@@ -45,7 +45,7 @@ const DOMMutationEditor: FC<{
       <div className="flex w-full items-center mb-2">
         <div className="text-slate-200 w-20">Action</div>
         <select
-          className="p-2"
+          className="p-2 text-black"
           value={action}
           onChange={(e) =>
             setAction(e.currentTarget.value as DeclarativeMutation["action"])
@@ -61,7 +61,7 @@ const DOMMutationEditor: FC<{
         <div className="text-slate-200 w-20">Attribute</div>
         <input
           type="text"
-          className="p-2"
+          className="p-2 text-black"
           value={attribute}
           onChange={(e) => setAttribute(e.currentTarget.value)}
         />
@@ -71,7 +71,7 @@ const DOMMutationEditor: FC<{
         <div className="text-slate-200 w-20">Value</div>
         <input
           type="text"
-          className="p-2"
+          className="p-2 text-black"
           value={value}
           onChange={(e) => setValue(e.currentTarget.value)}
         />

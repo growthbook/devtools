@@ -1,9 +1,13 @@
-import {Button, IconButton} from "@chakra-ui/button";
+import { Button, IconButton } from "@chakra-ui/button";
 import { Image } from "@chakra-ui/image";
 import { Heading, HStack, Stack } from "@chakra-ui/layout";
 import React, { ReactNode } from "react";
 import { MdSync } from "react-icons/md";
-import {requestOpenVisualEditor, requestRefresh, setOverrides} from "../controller";
+import {
+  requestOpenVisualEditor,
+  requestRefresh,
+  setOverrides,
+} from "../controller";
 import logo from "./logo.svg";
 import useApiKey from "../../visual_editor/lib/hooks/useApiKey";
 
@@ -17,7 +21,6 @@ export interface Props {
 }
 
 export default function Layout({ children, overrides }: Props) {
-
   const { apiHost, apiKey: clientKey } = useApiKey();
 
   return (
@@ -52,16 +55,20 @@ export default function Layout({ children, overrides }: Props) {
             py="3"
             height="auto"
             colorScheme="blue"
-            onClick={()=>{
-              requestOpenVisualEditor({ apiHost, apiKey: clientKey, source: "layout" });
+            onClick={() => {
+              requestOpenVisualEditor({
+                apiHost,
+                apiKey: clientKey,
+                source: "layout",
+              });
             }}
           >
             <div>Open Visual Editor</div>
             <small>Design a no-code experiment</small>
           </Button>
-        ): <div>
-          No api host or client key
-        </div>}
+        ) : (
+          <div>No api host or client key</div>
+        )}
       </HStack>
 
       {children}

@@ -21,7 +21,7 @@ const AddClassNameInput: FC<{ onAdd: (className: string) => void }> = ({
         <div>
           <input
             type="text"
-            className="rounded px-2 text-sm"
+            className="rounded px-2 text-sm text-black"
             placeholder="Enter class name"
             value={newClassName}
             onChange={(e) => setNewClassName(e.target.value)}
@@ -40,10 +40,7 @@ const AddClassNameInput: FC<{ onAdd: (className: string) => void }> = ({
             </button>
           </div>
         ) : (
-          <button
-            className="text-slate-200"
-            onClick={() => setIsAdding(true)}
-          >
+          <button className="text-slate-200" onClick={() => setIsAdding(true)}>
             <RxPlus className="w-4 h-4" />
           </button>
         )}

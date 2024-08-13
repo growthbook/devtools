@@ -57,6 +57,8 @@ const fetchVisualChangeset = async ({
 
     const res = await response.json();
 
+    console.log("fetchVisualChangeset", res);
+
     if (response.status !== 200)
       throw new Error(res.message ?? response.statusText);
 

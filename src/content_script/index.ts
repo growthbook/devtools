@@ -81,7 +81,9 @@ if (
 }
 
 function injectVisualEditorScript() {
-  let script: HTMLScriptElement | null = document.getElementById(VISUAL_EDITOR_SCRIPT_ID) as HTMLScriptElement;
+  let script: HTMLScriptElement | null = document.getElementById(
+    VISUAL_EDITOR_SCRIPT_ID
+  ) as HTMLScriptElement;
   if (script) {
     console.log("Visual editor already loading, skipping embed.");
     return;

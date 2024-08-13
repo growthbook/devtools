@@ -9,7 +9,6 @@ const ApiKeyForm: FC<{
   onSave: () => void;
   disabled?: boolean;
 }> = ({ saveApiHost, saveApiKey, apiHost, apiKey, onSave, disabled }) => {
-
   const [_apiHost, _setApiHost] = useState(apiHost || "");
   const [_apiKey, _setApiKey] = useState(apiKey || "");
   const [showPassword, setShowPassword] = useState(false);
@@ -52,18 +51,22 @@ const ApiKeyForm: FC<{
             className="flex bg-gray-300 hover:bg-gray-200 rounded items-center justify-center w-[50px] h-7 ml-2 cursor-pointer"
             role="button"
             onClick={() => {
-            setShowPassword(!showPassword)
-          }}>
+              setShowPassword(!showPassword);
+            }}
+          >
             {showPassword ? "hide" : "show"}
           </a>
         </div>
       </div>
       <input
         type="submit"
-        className={clsx("inline-block text-white p-2 rounded text-center transition-colors", {
-          "bg-blue-600 hover:bg-blue-500 cursor-pointer": !disabled,
-          "bg-gray-200 cursor-wait": disabled,
-        })}
+        className={clsx(
+          "inline-block text-white p-2 rounded text-center transition-colors",
+          {
+            "bg-blue-600 hover:bg-blue-500 cursor-pointer": !disabled,
+            "bg-gray-200 cursor-wait": disabled,
+          }
+        )}
         value="Submit"
         disabled={disabled ?? false}
       />

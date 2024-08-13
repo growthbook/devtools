@@ -34,6 +34,7 @@ export interface VisualEditorVariation {
 
 export interface APIExperiment {
   id: string;
+  name: string;
   hashAttribute: string;
   variations: {
     variationId: string;
