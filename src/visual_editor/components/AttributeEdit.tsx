@@ -61,7 +61,7 @@ const EditAttributeInput: FC<{
       )}
 
       <TextareaAutosize
-        className="gb-py-0 gb-px-2 gb-text-sm gb-text-black gb-mr-2 gb-mb-1"
+        className="gb-py-0 gb-px-2 gb-text-sm gb-mr-2 gb-mb-1"
         placeholder="Value"
         value={value}
         onChange={(e) => setValue(e.target.value)}

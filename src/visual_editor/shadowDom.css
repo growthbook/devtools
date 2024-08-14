@@ -66,3 +66,7 @@
   @apply gb-text-slate-300 hover:gb-text-slate-100;
   cursor: pointer;
 }
+
+input, select, textarea {
+  @apply gb-text-black;
+}

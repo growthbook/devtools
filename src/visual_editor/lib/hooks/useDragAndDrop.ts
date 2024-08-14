@@ -139,28 +139,32 @@ const useDragAndDrop: UseDragAndDropHook = ({
     // disable drag and drop for old version of SDK
     if (hasSDK && sdkVersion && sdkVersion < "0.30.0") return;
 
-    elementToDrag.style.cursor = "move";
     document.addEventListener("pointerdown", onPointerDown, true);
     document.addEventListener("pointerup", onPointerUp, true);
     document.addEventListener("pointermove", onPointerMove, true);
 
     const moveHandlerElem = moveHandleRef.current;
-    moveHandlerElem?.addEventListener(
-      "pointerdown",
-      onMoveHandlerPointerDown,
-      true
-    );
-
-    return () => {
-      elementToDrag.style.cursor = "";
-      document.removeEventListener("pointerdown", onPointerDown, true);
-      document.removeEventListener("pointerup", onPointerUp, true);
-      document.removeEventListener("pointermove", onPointerMove, true);
-      moveHandlerElem?.removeEventListener(
+    if (moveHandlerElem) {
+      moveHandlerElem.style.cursor = "move";
+      moveHandlerElem.addEventListener(
         "pointerdown",
         onMoveHandlerPointerDown,
         true
       );
+    }
+
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("pointerup", onPointerUp, true);
+      document.removeEventListener("pointermove", onPointerMove, true);
+      if (moveHandlerElem) {
+        moveHandlerElem.style.cursor = "";
+        moveHandlerElem.removeEventListener(
+          "pointerdown",
+          onMoveHandlerPointerDown,
+          true
+        );
+      }
     };
   }, [
     isEnabled,

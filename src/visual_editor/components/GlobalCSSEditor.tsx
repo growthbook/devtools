@@ -17,7 +17,7 @@ const GlobalCSSEditor: FC<{
   return (
     <div className="gb-px-4 gb-pb-4">
       <textarea
-        className="gb-w-full gb-h-64 gb-rounded gb-p-2 gb-text-black"
+        className="gb-w-full gb-h-64 gb-rounded gb-p-2"
         placeholder="Enter CSS here"
         value={css}
         onChange={(e) => setCss(e.currentTarget.value)}

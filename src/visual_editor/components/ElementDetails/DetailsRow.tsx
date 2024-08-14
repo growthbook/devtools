@@ -52,7 +52,7 @@ const DetailsRow = ({
       {editing ? (
         <div className="gb-w-full gb-pr-2">
           <TextareaAutosize
-            className="gb-text-black gb-w-full gb-mt-2 gb-text-sm gb-p-1"
+            className="gb-w-full gb-mt-2 gb-text-sm gb-p-1"
             onChange={(e) => _setValue(e.currentTarget.value)}
             value={_value}
           />

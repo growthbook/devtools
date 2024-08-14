@@ -39,7 +39,7 @@ const CSSTextInput: FC<{
         <div className="gb-w-full gb-pr-2">
           <input
             type="text"
-            className="gb-text-black gb-w-full gb-mt-2 gb-text-sm gb-p-1"
+            className="gb-w-full gb-mt-2 gb-text-sm gb-p-1"
             onChange={(e) => setValue(e.currentTarget.value)}
             value={value}
           />

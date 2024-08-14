@@ -15,7 +15,7 @@ const VariationSelector: FC<{
     <div className="gb-w-full gb-p-4 gb-pt-2">
       <select
         disabled={variations.length === 0}
-        className="gb-w-full gb-p-2 gb-border gb-border-gray-300 gb-rounded gb-text-black"
+        className="gb-w-full gb-p-2 gb-border gb-border-gray-300 gb-rounded"
         value={selectedVariationIndex}
         onChange={onChange}
       >
