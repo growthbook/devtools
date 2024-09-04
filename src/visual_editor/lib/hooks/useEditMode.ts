@@ -1,6 +1,6 @@
-import mutate, { DeclarativeMutation } from "dom-mutator";
+import mutate, { DeclarativeMutation, isGlobalObserverPaused, pauseGlobalObserver,resumeGlobalObserver } from "dom-mutator";
 import { useRef, useMemo, useCallback, useState, useEffect } from "react";
-import { throttle } from "lodash";
+import { set, throttle } from "lodash";
 import { Attribute } from "../../components/AttributeEdit";
 import { CONTAINER_ID } from "../..";
 import getSelector from "../getSelector";
@@ -17,6 +17,15 @@ const clearHoverAttribute = () => {
     hoveredElement.removeAttribute(hoverAttributeName);
   });
 };
+
+function getOS() {
+  const userAgent = navigator.userAgent;
+  if (userAgent.indexOf("Win") !== -1) return "Windows";
+  if (userAgent.indexOf("Mac") !== -1) return "Mac";
+  if (userAgent.indexOf("Linux") !== -1) return "Linux";
+  if (userAgent.indexOf("X11") !== -1) return "Unix";
+  return "Unknown";
+}
 
 type UseEditModeHook = (args: {
   isEnabled: boolean;
@@ -50,6 +59,10 @@ type UseEditModeHook = (args: {
 
   ignoreClassNames: boolean;
   setIgnoreClassNames: (ignore: boolean) => void;
+  pauseInlineEditing: () => void;
+  resumeInlineEditing: () => void;
+  stopInlineEditing: () => void;
+  resetAndStopInlineEditing: () => void;
 };
 
 /**
@@ -66,6 +79,7 @@ const useEditMode: UseEditModeHook = ({
     null
   );
   const [ignoreClassNames, setIgnoreClassNames] = useState(false);
+  const [initialElementUnderEditCopy, setInitialElementUnderEditCopy] = useState<string | null>(null);
   const [highlightedElement, setHighlightedElement] =
     useState<HTMLElement | null>(null);
   const clearElementUnderEdit = useCallback(
@@ -107,10 +121,14 @@ const useEditMode: UseEditModeHook = ({
 
   const addDomMutations = useCallback(
     (domMutations: DeclarativeMutation[]) => {
+      console.log(variation, "variation");
       if (!variation || !updateVariation) return;
+      console.log("adding dom mutations");
+      const newDomMutations =  [...variation.domMutations, ...domMutations];
       updateVariation({
-        domMutations: [...variation.domMutations, ...domMutations],
+        domMutations: newDomMutations,
       });
+      runMutations(newDomMutations);
       setHighlightedElement(null);
     },
     [variation, updateVariation]
@@ -141,6 +159,7 @@ const useEditMode: UseEditModeHook = ({
       updateVariation({
         domMutations: mutations,
       });
+      runMutations(mutations);
     },
 
     [updateVariation, variation]
@@ -148,6 +167,7 @@ const useEditMode: UseEditModeHook = ({
 
   const setInnerHTML = useCallback(
     (html: string) => {
+      console.log(html, "setInnerHTML");
       addDomMutations([
         {
           action: "set",
@@ -273,22 +293,102 @@ const useEditMode: UseEditModeHook = ({
   // upon every DOM mutation, we revert all changes and replay them to ensure
   // that the DOM is in the correct state
   const mutateRevert = useRef<(() => void) | null>(null);
+  
+  const runMutations = (domMutations?: VisualEditorVariation["domMutations"]) => {
+     // run reverts if they exist
+      if (mutateRevert?.current) mutateRevert.current();
+      const revertCallbacks: Array<() => void> = [];
+      const stopCallbacks: Array<() => void> = [];
+      domMutations?.forEach((mutation) => {
+        const controller = mutate.declarative(mutation);
+        revertCallbacks.push(controller.revert);
+      });
+        mutateRevert.current = () => {
+          console.log("revertCallbacks", revertCallbacks)  
+          revertCallbacks.reverse().forEach((c) => {
+            console.log("reverting")
+            c()
+          });
+      }
+    }
+
   useEffect(() => {
-    // run reverts if they exist
-    if (mutateRevert?.current) mutateRevert.current();
-
-    const revertCallbacks: Array<() => void> = [];
-
-    variation?.domMutations.forEach((mutation) => {
-      const controller = mutate.declarative(mutation);
-      revertCallbacks.push(controller.revert);
-    });
-
-    mutateRevert.current = () => {
-      revertCallbacks.reverse().forEach((c) => c());
-    };
+    runMutations(variation?.domMutations);
   }, [variation]);
 
+  const hasTextInChildren = (element: Element) => {
+        for (let child of element.children) {
+            // Trim the child element's text content
+            const childText = child?.textContent?.trim();
+            if (childText || hasTextInChildren(child)) {
+                return true;
+            }
+        return false;
+    }
+  }
+
+
+  const resetAndStopInlineEditing = () => {
+     resumeGlobalObserver();
+     mutateRevert.current?.();
+    runMutations(variation?.domMutations);
+    if (!elementUnderEdit) return;
+    elementUnderEdit.removeAttribute("contenteditable");
+    elementUnderEdit.removeEventListener("keydown", ()=>{});
+    setElementUnderEdit(null);
+  }
+
+  const stopInlineEditing = () => {
+    if (!elementUnderEdit) return;
+    const html = elementUnderEdit.innerHTML;
+    console.log(html, "setInnerHTML");
+    setInnerHTML(html);
+    elementUnderEdit.removeAttribute("contenteditable");
+    elementUnderEdit.removeEventListener("keydown", ()=>{});
+    setElementUnderEdit(null);
+    resumeGlobalObserver();
+}
+
+const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
+
+    if (!elementUnderEdit) return;
+
+    if (event.key === "Enter" && event.altKey) {
+      elementUnderEdit.innerHTML = elementUnderEdit.innerHTML + "<br>";
+      return;
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      stopInlineEditing();
+      return;
+    }
+    if (event.key === "Escape") {
+      resetAndStopInlineEditing();
+      return;
+    }
+  }
+  // checking to see if element can be inline edited
+  const canInlineEditElement = (element: Element) =>{
+    const firstElementText = element?.textContent?.trim();
+    return firstElementText && !hasTextInChildren(element);
+  }
+
+  const setInlineEditOnElement = (element: HTMLElement| null) => {
+    if(!element) return;
+    const canInlineEdit =  canInlineEditElement(element);
+    if (canInlineEdit) {
+      pauseGlobalObserver();
+      element.setAttribute("contenteditable", "true");
+      element.focus();
+      // set cursor at the end
+      const range = document.createRange();
+      const sel = window.getSelection();
+      range.selectNodeContents(element);
+      range.collapse(false);
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+      elementUnderEdit?.addEventListener("keydown", (e: KeyboardEvent) =>{setInnerHTMLOnInlineEdit(e)}, false);
+    }
+  }
   // event handlers
   useEffect(() => {
     if (!isEnabled) return;
@@ -312,24 +412,33 @@ const useEditMode: UseEditModeHook = ({
       setHighlightedElement(domNode as HTMLElement);
     }, 50);
 
-    const onPointerDown = (event: MouseEvent) => {
-      const element = event.target as HTMLElement;
+  const onPointerDown = (event: MouseEvent) => {
+    const element = event.target as HTMLElement;
+      window.removeEventListener("keydown", (e: KeyboardEvent) =>{
+        setInnerHTML(elementUnderEdit?.innerHTML || "");
+      });
+      elementUnderEdit?.removeAttribute("contenteditable");
 
-      // don't intercept cilcks on the visual editor itself
-      if (element.id === CONTAINER_ID) return;
+    // don't intercept cilcks on the visual editor itself
+    if (element.id === CONTAINER_ID) return;
 
-      event.preventDefault();
-      event.stopPropagation();
+    event.preventDefault();
+    event.stopPropagation();
 
-      setElementUnderEdit(element);
-    };
+    setElementUnderEdit(element);
+  };
+
 
     const clickHandler = (event: MouseEvent) => {
       const element = event.target as HTMLElement;
-
+      window.removeEventListener("keydown", (e: KeyboardEvent) =>{
+        setInnerHTML(elementUnderEdit?.innerHTML || "");
+      });
       // don't intercept cilcks on the visual editor itself
       if (element.id === CONTAINER_ID) return;
-
+      setInitialElementUnderEditCopy(element.innerHTML);
+      setElementUnderEdit(element);
+      setInlineEditOnElement(element);
       event.preventDefault();
       event.stopPropagation();
     };
@@ -346,7 +455,18 @@ const useEditMode: UseEditModeHook = ({
       document.removeEventListener("pointerdown", onPointerDown, true);
     };
   }, [isEnabled, elementUnderEdit]);
+  
+  const pauseInlineEditing = () => {
+    elementUnderEdit?.removeAttribute("contenteditable");
+    window.removeEventListener("keydown", (e: KeyboardEvent) =>{
+      setInnerHTML(elementUnderEdit?.innerHTML || "");
+    });
+    resumeGlobalObserver();
+  }
 
+  const resumeInlineEditing = () => {
+    setInlineEditOnElement(elementUnderEdit);
+  }
   return {
     elementUnderEdit,
     setElementUnderEdit,
@@ -367,6 +487,10 @@ const useEditMode: UseEditModeHook = ({
     setDomMutations,
     ignoreClassNames,
     setIgnoreClassNames,
+    pauseInlineEditing,
+    resumeInlineEditing,
+    stopInlineEditing,
+    resetAndStopInlineEditing
   };
 };
 

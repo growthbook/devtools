@@ -47,6 +47,7 @@ import DebugPanel from "./components/DebugPanel";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
+import { isGlobalObserverPaused } from "dom-mutator";
 
 const VisualEditor: FC<{}> = () => {
   const { x, y, setX, setY, parentStyles } = useFixedPositioning({
@@ -128,11 +129,14 @@ const VisualEditor: FC<{}> = () => {
     setDomMutations,
     ignoreClassNames,
     setIgnoreClassNames,
+    pauseInlineEditing,
+    resumeInlineEditing,
+    stopInlineEditing,
+    resetAndStopInlineEditing
   } = useEditMode({
     isEnabled: mode === "edit",
     variation: selectedVariation,
-    updateVariation: updateSelectedVariation,
-  });
+    updateVariation: updateSelectedVariation  });
 
   const moveHandleRef = useRef<HTMLDivElement | null>(null);
 
@@ -146,6 +150,11 @@ const VisualEditor: FC<{}> = () => {
     hasSDK,
     sdkVersion: version,
   });
+
+  // stop inline editing when dragging
+  useEffect(() => {
+      isDragging? pauseInlineEditing(): resumeInlineEditing();
+  }, [isDragging]);
 
   const selectedVariationTotalChangesLength = useMemo(
     () =>
@@ -164,19 +173,30 @@ const VisualEditor: FC<{}> = () => {
   // Upon any DOM change on the page, we trigger a refresh of visual editor to
   // keep it in sync. We use debounce to limit forceUpdate calls to 1 per 100ms.
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
-  const forceUpdate = debounce(_forceUpdate, 100);
+  const forceUpdate = debounce(()=>{
+      _forceUpdate();
+  }, 100);
 
   useEffect(() => {
-    const observer = new MutationObserver(() =>
-      setTimeout(() => forceUpdate(), 0)
-    );
-    observer.observe(document.body, {
-      attributes: true,
-      childList: true,
-      subtree: true,
-    });
-    return () => observer.disconnect();
+    // we need to disable mutation observer when contentEditable is active to prevent overriding user changes){
+      console.log("Mutation observer enabled");
+      const observer = new MutationObserver(() =>
+        setTimeout(() => forceUpdate(), 0)
+      );
+      observer.observe(document.body, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+      });
+      return () => {
+        console.log("Mutation observer disconnected");
+        observer.disconnect();
+      }
   }, []);
+  //reset inline editing when mode changes
+  useEffect(() => {
+    resetAndStopInlineEditing();
+  }, [mode] );
 
   return (
     <>
@@ -336,15 +356,25 @@ const VisualEditor: FC<{}> = () => {
           <FloatingFrame
             hideOverlay={isDragging}
             parentElement={elementUnderEdit}
-            clearSelectedElement={() => setElementUnderEdit(null)}
+            clearSelectedElement={() => {
+              stopInlineEditing();
+            }
+            }
           />
           <SelectorDisplay parentElement={elementUnderEdit} />
           {elementUnderEditMutations.length > 0 ? (
             <FloatingUndoButton
               parentElement={elementUnderEdit}
-              undo={() =>
-                removeDomMutation(elementUnderEditMutations.slice(-1)[0])
-              }
+              undo={() =>{
+                const lastMutation = elementUnderEditMutations[elementUnderEditMutations.length - 1];
+                if (lastMutation.value === elementUnderEdit.innerHTML) {
+                    removeDomMutation(lastMutation);
+
+                }
+                if (isGlobalObserverPaused()) {
+                  resetAndStopInlineEditing();
+                }
+              }}
             />
           ) : null}
         </>
