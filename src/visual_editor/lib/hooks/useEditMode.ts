@@ -1,6 +1,6 @@
 import mutate, { DeclarativeMutation, isGlobalObserverPaused, pauseGlobalObserver,resumeGlobalObserver } from "dom-mutator";
 import { useRef, useMemo, useCallback, useState, useEffect } from "react";
-import { set, throttle } from "lodash";
+import { first, set, throttle } from "lodash";
 import { Attribute } from "../../components/AttributeEdit";
 import { CONTAINER_ID } from "../..";
 import getSelector from "../getSelector";
@@ -78,8 +78,10 @@ const useEditMode: UseEditModeHook = ({
   const [elementUnderEdit, setElementUnderEdit] = useState<HTMLElement | null>(
     null
   );
+  const [currentElement, setCurrentElement] = useState<HTMLElement | null>(
+    null
+  );
   const [ignoreClassNames, setIgnoreClassNames] = useState(false);
-  const [initialElementUnderEditCopy, setInitialElementUnderEditCopy] = useState<string | null>(null);
   const [highlightedElement, setHighlightedElement] =
     useState<HTMLElement | null>(null);
   const clearElementUnderEdit = useCallback(
@@ -104,8 +106,11 @@ const useEditMode: UseEditModeHook = ({
         : "",
     [highlightedElement, ignoreClassNames]
   );
+
   const elementUnderEditCopy = useMemo(() => {
-    if (!elementUnderEdit) return "";
+    if (!elementUnderEdit){ 
+      return ""
+    };
     // ignore when selected is simply wrapper of another element
     if (elementUnderEdit.innerHTML.startsWith("<")) return "";
     // hard-limit on text length
@@ -117,18 +122,27 @@ const useEditMode: UseEditModeHook = ({
     );
     const text = parsed.body.textContent || "";
     return text.trim();
-  }, [elementUnderEdit]);
+  }, [currentElement]);
+
+  const currentElementUnderEditCopy = useMemo(() => {
+    if (!elementUnderEdit){ 
+      return ""
+    }
+    console.log(elementUnderEdit.textContent, "elementUnderEdit in memo");
+    // ignore when selected is simply wrapper of another element
+    if (elementUnderEdit.innerHTML.startsWith("<")) return "";
+
+    return elementUnderEdit.textContent || "";
+  }, [elementUnderEdit, currentElement, variation]);
+  
 
   const addDomMutations = useCallback(
     (domMutations: DeclarativeMutation[]) => {
-      console.log(variation, "variation");
       if (!variation || !updateVariation) return;
-      console.log("adding dom mutations");
       const newDomMutations =  [...variation.domMutations, ...domMutations];
       updateVariation({
         domMutations: newDomMutations,
       });
-      runMutations(newDomMutations);
       setHighlightedElement(null);
     },
     [variation, updateVariation]
@@ -144,10 +158,11 @@ const useEditMode: UseEditModeHook = ({
   const removeDomMutations = useCallback(
     (mutations: DeclarativeMutation[]) => {
       if (!variation || !updateVariation) return;
+      const newDomMutations = variation.domMutations.filter(
+        (m) => !mutations.includes(m)
+      );
       updateVariation({
-        domMutations: variation.domMutations.filter(
-          (m) => !mutations.includes(m)
-        ),
+        domMutations:newDomMutations
       });
     },
     [updateVariation, variation]
@@ -159,7 +174,6 @@ const useEditMode: UseEditModeHook = ({
       updateVariation({
         domMutations: mutations,
       });
-      runMutations(mutations);
     },
 
     [updateVariation, variation]
@@ -167,7 +181,11 @@ const useEditMode: UseEditModeHook = ({
 
   const setInnerHTML = useCallback(
     (html: string) => {
-      console.log(html, "setInnerHTML");
+      if(elementUnderEdit)
+        if(variation?.domMutations.length === 0){
+          console.log("setting innerHTML", currentElementUnderEditCopy);
+         elementUnderEdit.innerHTML = currentElementUnderEditCopy;
+        }
       addDomMutations([
         {
           action: "set",
@@ -296,23 +314,24 @@ const useEditMode: UseEditModeHook = ({
   
   const runMutations = (domMutations?: VisualEditorVariation["domMutations"]) => {
      // run reverts if they exist
-      if (mutateRevert?.current) mutateRevert.current();
+      if(!isGlobalObserverPaused()){
+        if (mutateRevert?.current) mutateRevert.current();
+      }
       const revertCallbacks: Array<() => void> = [];
       const stopCallbacks: Array<() => void> = [];
       domMutations?.forEach((mutation) => {
         const controller = mutate.declarative(mutation);
         revertCallbacks.push(controller.revert);
       });
+      if(!isGlobalObserverPaused()){
         mutateRevert.current = () => {
-          console.log("revertCallbacks", revertCallbacks)  
-          revertCallbacks.reverse().forEach((c) => {
-            console.log("reverting")
-            c()
-          });
+          revertCallbacks.reverse().forEach((c) => c());
+        }
       }
     }
 
   useEffect(() => {
+
     runMutations(variation?.domMutations);
   }, [variation]);
 
@@ -329,9 +348,13 @@ const useEditMode: UseEditModeHook = ({
 
 
   const resetAndStopInlineEditing = () => {
-     resumeGlobalObserver();
-     mutateRevert.current?.();
+    resumeGlobalObserver();
+    if(variation?.domMutations.length === 0 && elementUnderEdit){
+      elementUnderEdit.innerHTML = currentElementUnderEditCopy;
+    }
+
     runMutations(variation?.domMutations);
+    
     if (!elementUnderEdit) return;
     elementUnderEdit.removeAttribute("contenteditable");
     elementUnderEdit.removeEventListener("keydown", ()=>{});
@@ -341,18 +364,16 @@ const useEditMode: UseEditModeHook = ({
   const stopInlineEditing = () => {
     if (!elementUnderEdit) return;
     const html = elementUnderEdit.innerHTML;
-    console.log(html, "setInnerHTML");
     setInnerHTML(html);
+    resumeGlobalObserver();
     elementUnderEdit.removeAttribute("contenteditable");
     elementUnderEdit.removeEventListener("keydown", ()=>{});
     setElementUnderEdit(null);
-    resumeGlobalObserver();
 }
 
 const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
 
     if (!elementUnderEdit) return;
-
     if (event.key === "Enter" && event.altKey) {
       elementUnderEdit.innerHTML = elementUnderEdit.innerHTML + "<br>";
       return;
@@ -368,8 +389,10 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
   }
   // checking to see if element can be inline edited
   const canInlineEditElement = (element: Element) =>{
-    const firstElementText = element?.textContent?.trim();
-    return firstElementText && !hasTextInChildren(element);
+    let firstElementHasText = !!element?.textContent?.trim();
+    // if the element is empty and has no children, we can't inline edit it
+    if(element?.textContent?.trim() === "") firstElementHasText = true;
+    return firstElementHasText && !hasTextInChildren(element);
   }
 
   const setInlineEditOnElement = (element: HTMLElement| null) => {
@@ -436,8 +459,9 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
       });
       // don't intercept cilcks on the visual editor itself
       if (element.id === CONTAINER_ID) return;
-      setInitialElementUnderEditCopy(element.innerHTML);
+    
       setElementUnderEdit(element);
+      setCurrentElement(element);
       setInlineEditOnElement(element);
       event.preventDefault();
       event.stopPropagation();

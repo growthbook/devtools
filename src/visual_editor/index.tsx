@@ -1,4 +1,4 @@
-import { debounce } from "lodash";
+import { debounce, remove } from "lodash";
 import React, {
   FC,
   useCallback,
@@ -47,7 +47,7 @@ import DebugPanel from "./components/DebugPanel";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
-import { isGlobalObserverPaused } from "dom-mutator";
+import { isGlobalObserverPaused, resumeGlobalObserver } from "dom-mutator";
 
 const VisualEditor: FC<{}> = () => {
   const { x, y, setX, setY, parentStyles } = useFixedPositioning({
@@ -367,11 +367,11 @@ const VisualEditor: FC<{}> = () => {
               parentElement={elementUnderEdit}
               undo={() =>{
                 const lastMutation = elementUnderEditMutations[elementUnderEditMutations.length - 1];
+                console.log()
                 if (lastMutation.value === elementUnderEdit.innerHTML) {
+                    resetAndStopInlineEditing();
                     removeDomMutation(lastMutation);
-
-                }
-                if (isGlobalObserverPaused()) {
+                } else if (isGlobalObserverPaused()) {
                   resetAndStopInlineEditing();
                 }
               }}
