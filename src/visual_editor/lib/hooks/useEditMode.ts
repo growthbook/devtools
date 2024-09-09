@@ -78,7 +78,7 @@ const useEditMode: UseEditModeHook = ({
   const [elementUnderEdit, setElementUnderEdit] = useState<HTMLElement | null>(
     null
   );
-  const [currentElement, setCurrentElement] = useState<HTMLElement | null>(
+  const [currentElement,] = useState<HTMLElement | null>(
     null
   );
   const [ignoreClassNames, setIgnoreClassNames] = useState(false);
@@ -122,18 +122,7 @@ const useEditMode: UseEditModeHook = ({
     );
     const text = parsed.body.textContent || "";
     return text.trim();
-  }, [currentElement]);
-
-  const currentElementUnderEditCopy = useMemo(() => {
-    if (!elementUnderEdit){ 
-      return ""
-    }
-    console.log(elementUnderEdit.textContent, "elementUnderEdit in memo");
-    // ignore when selected is simply wrapper of another element
-    if (elementUnderEdit.innerHTML.startsWith("<")) return "";
-
-    return elementUnderEdit.textContent || "";
-  }, [elementUnderEdit, currentElement, variation]);
+  }, [currentElement, variation]);
   
 
   const addDomMutations = useCallback(
@@ -183,8 +172,8 @@ const useEditMode: UseEditModeHook = ({
     (html: string) => {
       if(elementUnderEdit)
         if(variation?.domMutations.length === 0){
-          console.log("setting innerHTML", currentElementUnderEditCopy);
-         elementUnderEdit.innerHTML = currentElementUnderEditCopy;
+          console.log("setting innerHTML", elementUnderEditCopy);
+         elementUnderEdit.innerHTML = elementUnderEditCopy;
         }
       addDomMutations([
         {
@@ -350,7 +339,7 @@ const useEditMode: UseEditModeHook = ({
   const resetAndStopInlineEditing = () => {
     resumeGlobalObserver();
     if(variation?.domMutations.length === 0 && elementUnderEdit){
-      elementUnderEdit.innerHTML = currentElementUnderEditCopy;
+      elementUnderEdit.innerHTML = elementUnderEditCopy;
     }
 
     runMutations(variation?.domMutations);
@@ -461,7 +450,6 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
       if (element.id === CONTAINER_ID) return;
     
       setElementUnderEdit(element);
-      setCurrentElement(element);
       setInlineEditOnElement(element);
       event.preventDefault();
       event.stopPropagation();

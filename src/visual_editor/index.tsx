@@ -179,7 +179,6 @@ const VisualEditor: FC<{}> = () => {
 
   useEffect(() => {
     // we need to disable mutation observer when contentEditable is active to prevent overriding user changes){
-      console.log("Mutation observer enabled");
       const observer = new MutationObserver(() =>
         setTimeout(() => forceUpdate(), 0)
       );
@@ -189,7 +188,6 @@ const VisualEditor: FC<{}> = () => {
         subtree: true,
       });
       return () => {
-        console.log("Mutation observer disconnected");
         observer.disconnect();
       }
   }, []);
@@ -367,11 +365,10 @@ const VisualEditor: FC<{}> = () => {
               parentElement={elementUnderEdit}
               undo={() =>{
                 const lastMutation = elementUnderEditMutations[elementUnderEditMutations.length - 1];
-                console.log()
                 if (lastMutation.value === elementUnderEdit.innerHTML) {
-                    resetAndStopInlineEditing();
                     removeDomMutation(lastMutation);
-                } else if (isGlobalObserverPaused()) {
+                }
+                if (isGlobalObserverPaused()) {
                   resetAndStopInlineEditing();
                 }
               }}
