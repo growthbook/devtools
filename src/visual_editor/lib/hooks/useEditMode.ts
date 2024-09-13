@@ -122,7 +122,7 @@ const useEditMode: UseEditModeHook = ({
     );
     const text = parsed.body.textContent || "";
     return text.trim();
-  }, [currentElement, variation]);
+  }, [elementUnderEdit, variation]);
   
 
   const addDomMutations = useCallback(
@@ -172,7 +172,6 @@ const useEditMode: UseEditModeHook = ({
     (html: string) => {
       if(elementUnderEdit)
         if(variation?.domMutations.length === 0){
-          console.log("setting innerHTML", elementUnderEditCopy);
          elementUnderEdit.innerHTML = elementUnderEditCopy;
         }
       addDomMutations([
