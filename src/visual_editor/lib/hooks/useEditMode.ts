@@ -78,9 +78,7 @@ const useEditMode: UseEditModeHook = ({
   const [elementUnderEdit, setElementUnderEdit] = useState<HTMLElement | null>(
     null
   );
-  const [currentElement,] = useState<HTMLElement | null>(
-    null
-  );
+  const [isInlineEditing, setIsInlineEditing] = useState(false);
   const [ignoreClassNames, setIgnoreClassNames] = useState(false);
   const [highlightedElement, setHighlightedElement] =
     useState<HTMLElement | null>(null);
@@ -390,7 +388,6 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
       pauseGlobalObserver();
       element.setAttribute("contenteditable", "true");
       element.focus();
-      // set cursor at the end
       const range = document.createRange();
       const sel = window.getSelection();
       range.selectNodeContents(element);
@@ -398,6 +395,8 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
       sel?.removeAllRanges();
       sel?.addRange(range);
       elementUnderEdit?.addEventListener("keydown", (e: KeyboardEvent) =>{setInnerHTMLOnInlineEdit(e)}, false);
+    } else {
+      setIsInlineEditing(false);
     }
   }
   // event handlers
@@ -405,6 +404,7 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
     if (!isEnabled) return;
 
     const onPointerMove = throttle((event: MouseEvent) => {
+      console.log("pointer move");
       const { clientX: x, clientY: y } = event;
       const domNode = document.elementFromPoint(x, y);
 
@@ -425,6 +425,7 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
 
   const onPointerDown = (event: MouseEvent) => {
     const element = event.target as HTMLElement;
+    if(elementUnderEdit === element) return;
       window.removeEventListener("keydown", (e: KeyboardEvent) =>{
         setInnerHTML(elementUnderEdit?.innerHTML || "");
       });
@@ -435,30 +436,36 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
 
     event.preventDefault();
     event.stopPropagation();
-
+    setIsInlineEditing(true);
     setElementUnderEdit(element);
   };
 
 
     const clickHandler = (event: MouseEvent) => {
+      if (event.detail === 1) {
       const element = event.target as HTMLElement;
       window.removeEventListener("keydown", (e: KeyboardEvent) =>{
         setInnerHTML(elementUnderEdit?.innerHTML || "");
       });
       // don't intercept cilcks on the visual editor itself
       if (element.id === CONTAINER_ID) return;
-    
+      //need to set inline editing true before setting element under edit if it is not inline editing we revert the changes
+      setIsInlineEditing(true);
       setElementUnderEdit(element);
       setInlineEditOnElement(element);
       event.preventDefault();
       event.stopPropagation();
-    };
-
-    document.addEventListener("click", clickHandler, true);
-    document.addEventListener("pointermove", onPointerMove, true);
-    document.addEventListener("pointerdown", onPointerDown, true);
-
+    }
+  }; 
+      console.log("tesing");
+      // if(!isInlineEditing){
+        console.log("adding event listeners");
+        document.addEventListener("click", clickHandler, true);
+        document.addEventListener("pointermove", onPointerMove, true);
+        document.addEventListener("pointerdown", onPointerDown, true);
+      // }
     return () => {
+      console.log("removing event listeners");
       clearHoverAttribute();
       setHighlightedElement(null);
       document.removeEventListener("click", clickHandler, true);
