@@ -19,3 +19,6 @@
   position: fixed;
   @apply gb-z-max;
 }
+[contenteditable]:focus {
+  outline: 0px solid transparent;
+}

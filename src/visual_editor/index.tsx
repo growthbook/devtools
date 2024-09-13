@@ -129,32 +129,27 @@ const VisualEditor: FC<{}> = () => {
     setDomMutations,
     ignoreClassNames,
     setIgnoreClassNames,
-    pauseInlineEditing,
-    resumeInlineEditing,
     stopInlineEditing,
-    resetAndStopInlineEditing
+    resetAndStopInlineEditing,
+    isInlineEditing,
   } = useEditMode({
     isEnabled: mode === "edit",
     variation: selectedVariation,
     updateVariation: updateSelectedVariation  });
 
   const moveHandleRef = useRef<HTMLDivElement | null>(null);
-
-  const { isDragging } = useDragAndDrop({
-    isEnabled: mode === "edit",
-    elementToDrag: elementUnderEdit,
+  console.log( mode === "edit", isInlineEditing, elementUnderEdit);
+  const {isDragging} = useDragAndDrop({
+    isEnabled: mode === "edit" && !isInlineEditing,
+    elementToDrag: isInlineEditing? null : elementUnderEdit,
     addDomMutation,
     elementUnderEditMutations,
     setDomMutations,
     moveHandleRef,
     hasSDK,
     sdkVersion: version,
-  });
+  });  
 
-  // stop inline editing when dragging
-  useEffect(() => {
-      isDragging? pauseInlineEditing(): resumeInlineEditing();
-  }, [isDragging]);
 
   const selectedVariationTotalChangesLength = useMemo(
     () =>
@@ -349,7 +344,7 @@ const VisualEditor: FC<{}> = () => {
       </VisualEditorPane>
 
       {/** Overlays for highlighting selected elements **/}
-      {mode === "edit" && elementUnderEdit && !isDragging ? (
+      {mode === "edit" && elementUnderEdit && !isDragging  ? (
         <>
           <FloatingFrame
             hideOverlay={isDragging}
@@ -359,7 +354,7 @@ const VisualEditor: FC<{}> = () => {
             }
             }
           />
-          <SelectorDisplay parentElement={elementUnderEdit} />
+         {!elementUnderEdit && <SelectorDisplay parentElement={elementUnderEdit} />}
           {elementUnderEditMutations.length > 0 ? (
             <FloatingUndoButton
               parentElement={elementUnderEdit}
@@ -376,14 +371,15 @@ const VisualEditor: FC<{}> = () => {
           ) : null}
         </>
       ) : null}
-      {mode === "edit" && elementUnderEdit ? (
+      {mode === "edit" && elementUnderEdit && !isInlineEditing ? (
         <MoveElementHandle
           ref={moveHandleRef}
           parentElement={elementUnderEdit}
+          onPointerDown={() => stopInlineEditing()}
         />
       ) : null}
       {/** Overlays for highlighting hovered elements **/}
-      {mode === "edit" && !isDragging ? (
+      {mode === "edit" && !isDragging && !isInlineEditing ? (
         <>
           <FloatingFrame parentElement={highlightedElement} />
           <SelectorDisplay parentElement={highlightedElement} />

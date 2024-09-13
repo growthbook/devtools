@@ -59,10 +59,9 @@ type UseEditModeHook = (args: {
 
   ignoreClassNames: boolean;
   setIgnoreClassNames: (ignore: boolean) => void;
-  pauseInlineEditing: () => void;
-  resumeInlineEditing: () => void;
   stopInlineEditing: () => void;
   resetAndStopInlineEditing: () => void;
+  isInlineEditing: boolean;
 };
 
 /**
@@ -335,6 +334,7 @@ const useEditMode: UseEditModeHook = ({
 
   const resetAndStopInlineEditing = () => {
     resumeGlobalObserver();
+
     if(variation?.domMutations.length === 0 && elementUnderEdit){
       elementUnderEdit.innerHTML = elementUnderEditCopy;
     }
@@ -344,7 +344,8 @@ const useEditMode: UseEditModeHook = ({
     if (!elementUnderEdit) return;
     elementUnderEdit.removeAttribute("contenteditable");
     elementUnderEdit.removeEventListener("keydown", ()=>{});
-    setElementUnderEdit(null);
+    if(!isInlineEditing) setElementUnderEdit(null);
+    setIsInlineEditing(false);
   }
 
   const stopInlineEditing = () => {
@@ -354,7 +355,9 @@ const useEditMode: UseEditModeHook = ({
     resumeGlobalObserver();
     elementUnderEdit.removeAttribute("contenteditable");
     elementUnderEdit.removeEventListener("keydown", ()=>{});
-    setElementUnderEdit(null);
+    // we need to reset if it is not inline editing
+    if(!isInlineEditing) setElementUnderEdit(null);
+    setIsInlineEditing(false);
 }
 
 const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
@@ -381,10 +384,18 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
     return firstElementHasText && !hasTextInChildren(element);
   }
 
+
+  // event handlers
+  useEffect(() => {
+    if (!isEnabled) return;
   const setInlineEditOnElement = (element: HTMLElement| null) => {
     if(!element) return;
     const canInlineEdit =  canInlineEditElement(element);
     if (canInlineEdit) {
+      setIsInlineEditing(true);
+      document.removeEventListener("click", clickHandler, true);
+      document.removeEventListener("pointermove", onPointerMove, true);
+      document.removeEventListener("pointerdown", onPointerDown, true);
       pauseGlobalObserver();
       element.setAttribute("contenteditable", "true");
       element.focus();
@@ -399,10 +410,6 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
       setIsInlineEditing(false);
     }
   }
-  // event handlers
-  useEffect(() => {
-    if (!isEnabled) return;
-
     const onPointerMove = throttle((event: MouseEvent) => {
       console.log("pointer move");
       const { clientX: x, clientY: y } = event;
@@ -472,19 +479,9 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
       document.removeEventListener("pointermove", onPointerMove, true);
       document.removeEventListener("pointerdown", onPointerDown, true);
     };
-  }, [isEnabled, elementUnderEdit]);
-  
-  const pauseInlineEditing = () => {
-    elementUnderEdit?.removeAttribute("contenteditable");
-    window.removeEventListener("keydown", (e: KeyboardEvent) =>{
-      setInnerHTML(elementUnderEdit?.innerHTML || "");
-    });
-    resumeGlobalObserver();
-  }
+  }, [isEnabled, elementUnderEdit, isInlineEditing]);
 
-  const resumeInlineEditing = () => {
-    setInlineEditOnElement(elementUnderEdit);
-  }
+
   return {
     elementUnderEdit,
     setElementUnderEdit,
@@ -505,10 +502,9 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
     setDomMutations,
     ignoreClassNames,
     setIgnoreClassNames,
-    pauseInlineEditing,
-    resumeInlineEditing,
     stopInlineEditing,
-    resetAndStopInlineEditing
+    resetAndStopInlineEditing,
+    isInlineEditing,
   };
 };
 

@@ -16,6 +16,7 @@ type UseDragAndDropHook = (args: {
   sdkVersion: string | undefined;
 }) => {
   isDragging: boolean;
+  removeDragListeners: () => void;
 };
 
 const useDragAndDrop: UseDragAndDropHook = ({
@@ -132,6 +133,12 @@ const useDragAndDrop: UseDragAndDropHook = ({
     },
     [isDragging, elementToDrag, setDragDestination]
   );
+  const removeDragListeners = () => {
+    document.removeEventListener("pointerdown", onPointerDown, true);
+    document.removeEventListener("pointerup", onPointerUp, true);
+    document.removeEventListener("pointermove", onPointerMove, true);
+    setIsDragging(false);
+  };
 
   useEffect(() => {
     if (!isEnabled || !elementToDrag) return;
@@ -175,7 +182,7 @@ const useDragAndDrop: UseDragAndDropHook = ({
     moveHandleRef.current,
   ]);
 
-  return { isDragging };
+  return { isDragging, removeDragListeners };
 };
 
 export default useDragAndDrop;
