@@ -186,7 +186,6 @@ const VisualEditor: FC<{}> = () => {
   useEffect(() => {
     resetAndStopInlineEditing();
   }, [mode] );
-
   return (
     <>
       <VisualEditorPane style={parentStyles}>

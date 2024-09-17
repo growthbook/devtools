@@ -115,6 +115,7 @@ const useEditMode: UseEditModeHook = ({
 
   const addDomMutations = useCallback(
     (domMutations: DeclarativeMutation[]) => {
+      console.log("addDomMutations", domMutations);
       if (!variation || !updateVariation) return;
       const newDomMutations =  [...variation.domMutations, ...domMutations];
       updateVariation({
@@ -355,10 +356,7 @@ const useEditMode: UseEditModeHook = ({
 const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
 
     if (!elementUnderEdit) return;
-    if (event.key === "Enter" && event.altKey) {
-      elementUnderEdit.innerHTML = elementUnderEdit.innerHTML + "<br>";
-      return;
-    } else if (event.key === "Enter") {
+   if (event.key === "Enter") {
       event.preventDefault();
       stopInlineEditing();
       return;
