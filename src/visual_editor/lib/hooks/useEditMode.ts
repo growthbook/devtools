@@ -1,6 +1,6 @@
 import mutate, { DeclarativeMutation, isGlobalObserverPaused, pauseGlobalObserver,resumeGlobalObserver } from "dom-mutator";
 import { useRef, useMemo, useCallback, useState, useEffect } from "react";
-import { first, set, throttle } from "lodash";
+import { throttle } from "lodash";
 import { Attribute } from "../../components/AttributeEdit";
 import { CONTAINER_ID } from "../..";
 import getSelector from "../getSelector";
