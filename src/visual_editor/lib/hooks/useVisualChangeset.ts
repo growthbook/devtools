@@ -107,9 +107,11 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
 
     const messageHandler = (event: MessageEvent<Message>) => {
       const msg = event.data;
+
       switch (msg.type) {
         case "GB_RESPONSE_LOAD_VISUAL_CHANGESET":
-          if (msg.data.error) setError(msg.data.error);
+          if(msg?.data.error && typeof msg.data.error === "string")
+          if (msg.data.error && typeof msg.data.error === "string") setError(msg.data.error);
           else {
             setVisualChangeset(msg.data.visualChangeset);
             setExperiment(msg.data.experiment);
@@ -118,7 +120,8 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
           setLoading(false);
           break;
         case "GB_RESPONSE_UPDATE_VISUAL_CHANGESET":
-          if (msg.data.error) setError(msg.data.error);
+          if(msg?.data.error && typeof msg.data.error === "string")
+          if (msg.data.error && typeof msg.data.error === "string") setError(msg.data.error);
           setLoading(false);
           break;
         default:
