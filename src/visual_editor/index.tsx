@@ -1,4 +1,4 @@
-import { debounce, remove } from "lodash";
+import { debounce } from "lodash";
 import React, {
   FC,
   useCallback,
@@ -138,7 +138,6 @@ const VisualEditor: FC<{}> = () => {
     updateVariation: updateSelectedVariation  });
 
   const moveHandleRef = useRef<HTMLDivElement | null>(null);
-  console.log( mode === "edit", isInlineEditing, elementUnderEdit);
   const {isDragging} = useDragAndDrop({
     isEnabled: mode === "edit" && !isInlineEditing,
     elementToDrag: isInlineEditing? null : elementUnderEdit,
@@ -168,12 +167,9 @@ const VisualEditor: FC<{}> = () => {
   // Upon any DOM change on the page, we trigger a refresh of visual editor to
   // keep it in sync. We use debounce to limit forceUpdate calls to 1 per 100ms.
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
-  const forceUpdate = debounce(()=>{
-      _forceUpdate();
-  }, 100);
+  const forceUpdate = debounce(() => _forceUpdate(), 100);
 
   useEffect(() => {
-    // we need to disable mutation observer when contentEditable is active to prevent overriding user changes){
       const observer = new MutationObserver(() =>
         setTimeout(() => forceUpdate(), 0)
       );
@@ -355,7 +351,7 @@ const VisualEditor: FC<{}> = () => {
             }
           />
          {!elementUnderEdit && <SelectorDisplay parentElement={elementUnderEdit} />}
-          {elementUnderEditMutations.length > 0 ? (
+          {elementUnderEditMutations.length > 0 && !!elementUnderEdit ? (
             <FloatingUndoButton
               parentElement={elementUnderEdit}
               undo={() =>{

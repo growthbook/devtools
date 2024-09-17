@@ -18,15 +18,6 @@ const clearHoverAttribute = () => {
   });
 };
 
-function getOS() {
-  const userAgent = navigator.userAgent;
-  if (userAgent.indexOf("Win") !== -1) return "Windows";
-  if (userAgent.indexOf("Mac") !== -1) return "Mac";
-  if (userAgent.indexOf("Linux") !== -1) return "Linux";
-  if (userAgent.indexOf("X11") !== -1) return "Unix";
-  return "Unknown";
-}
-
 type UseEditModeHook = (args: {
   isEnabled: boolean;
   updateVariation: (updates: Partial<VisualEditorVariation>) => void;
@@ -169,7 +160,8 @@ const useEditMode: UseEditModeHook = ({
     (html: string) => {
       if(elementUnderEdit)
         if(variation?.domMutations.length === 0){
-         elementUnderEdit.innerHTML = elementUnderEditCopy;
+
+         elementUnderEdit.innerText = elementUnderEditCopy;
         }
       addDomMutations([
         {
