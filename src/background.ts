@@ -96,7 +96,7 @@ const fetchVisualChangeset = async ({
       visualChangeset: null,
       experiment: null,
       experimentUrl: null,
-      error: "this is a test error",
+      error,
     };
   }
 };
@@ -138,7 +138,6 @@ const updateVisualChangeset = async ({
 
     const res = await resp.json();
     const bkg = chrome.extension.getBackgroundPage() as any;
-    bkg.console.log("res", res);
     if (resp.status !== 200) throw new Error(res.message ?? resp.statusText);
 
     return {
