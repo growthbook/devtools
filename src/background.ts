@@ -47,6 +47,7 @@ const fetchVisualChangeset = async ({
 
     if (!apiKey || !apiHost)
       throw new Error(!apiKey ? "no-api-key" : "no-api-host");
+
     const response = await fetch(
       `${apiHost}/api/v1/visual-changesets/${visualChangesetId}?includeExperiment=1`,
       {
@@ -84,7 +85,6 @@ const fetchVisualChangeset = async ({
       error: null,
     };
   } catch (e: any) {
-
     let error: string = e.message;
 
     if (e.message === "no-api-key" || e.message === "no-api-host") {
@@ -145,9 +145,11 @@ const updateVisualChangeset = async ({
     };
   } catch (e: any) {
     let error = e.string;
+
     if (e.message === "no-api-key" || e.message === "no-api-host") {
       error = e.message;
     }
+
     return {
       nModified: 0,
       visualChangeset: null,
@@ -305,7 +307,6 @@ chrome.runtime.onMessage.addListener(
           })
           .then((res) => {
             if (res.error) throw new Error(res.error);
-
             sendResponse(res);
           })
           .catch((e) => {
