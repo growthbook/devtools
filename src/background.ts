@@ -73,7 +73,6 @@ const fetchVisualChangeset = async ({
       if (appOrigin) await saveAppOrigin(appOrigin);
     } catch (e) {
       // fail silently
-      throw new Error("failed-fetching-app-origin");
     }
 
     return {
@@ -135,9 +134,8 @@ const updateVisualChangeset = async ({
       }
     );
 
-
     const res = await resp.json();
-    const bkg = chrome.extension.getBackgroundPage() as any;
+
     if (resp.status !== 200) throw new Error(res.message ?? resp.statusText);
 
     return {
