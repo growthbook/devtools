@@ -83,7 +83,7 @@ export const visualEditorLoadChangesetRequest = (
           ...resp,
         },
       };
-      console.log("message", message);
+
       window.postMessage(message, window.location.origin);
     }
   );

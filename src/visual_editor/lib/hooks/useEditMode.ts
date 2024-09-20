@@ -115,9 +115,9 @@ const useEditMode: UseEditModeHook = ({
 
   const addDomMutations = useCallback(
     (domMutations: DeclarativeMutation[]) => {
-      console.log("addDomMutations", domMutations);
       if (!variation || !updateVariation) return;
       const newDomMutations =  [...variation.domMutations, ...domMutations];
+      console.log("how many mutations");
       updateVariation({
         domMutations: newDomMutations,
       });
@@ -164,6 +164,7 @@ const useEditMode: UseEditModeHook = ({
 
          elementUnderEdit.innerText = elementUnderEditCopy;
         }
+        console.log("setting inner html");
       addDomMutations([
         {
           action: "set",

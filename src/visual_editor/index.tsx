@@ -93,6 +93,7 @@ const VisualEditor: FC<{}> = () => {
 
   const updateSelectedVariation = useCallback(
     (updates: Partial<VisualEditorVariation>) => {
+      console.log(selectedVariationIndex, "hello what is going on1");
       updateVariationAtIndex(selectedVariationIndex, updates);
     },
     [selectedVariationIndex, updateVariationAtIndex]
@@ -166,22 +167,22 @@ const VisualEditor: FC<{}> = () => {
 
   // Upon any DOM change on the page, we trigger a refresh of visual editor to
   // keep it in sync. We use debounce to limit forceUpdate calls to 1 per 100ms.
-  const [, _forceUpdate] = useReducer((x) => x + 1, 0);
-  const forceUpdate = debounce(() => _forceUpdate(), 100);
+  // const [, _forceUpdate] = useReducer((x) => x + 1, 0);
+  // const forceUpdate = debounce(() => _forceUpdate(), 100);
 
-  useEffect(() => {
-      const observer = new MutationObserver(() =>
-        setTimeout(() => forceUpdate(), 0)
-      );
-      observer.observe(document.body, {
-        attributes: true,
-        childList: true,
-        subtree: true,
-      });
-      return () => {
-        observer.disconnect();
-      }
-  }, []);
+  // useEffect(() => {
+  //     const observer = new MutationObserver(() =>
+  //       setTimeout(() => forceUpdate(), 0)
+  //     );
+  //     observer.observe(document.body, {
+  //       attributes: true,
+  //       childList: true,
+  //       subtree: true,
+  //     });
+  //     return () => {
+  //       observer.disconnect();
+  //     }
+  // }, []);
   //reset inline editing when mode changes
   useEffect(() => {
     resetAndStopInlineEditing();

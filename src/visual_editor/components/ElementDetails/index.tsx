@@ -20,7 +20,6 @@ const ElementDetails: FC<{
   const html = element.innerHTML;
   const isHtmlTooLarge = html.length > 100000;
 
-  console.log("html", html);
   return (
     <div className="gb-text-light gb-flex gb-flex-col gb-ml-4">
       <div className="gb-mb-2">

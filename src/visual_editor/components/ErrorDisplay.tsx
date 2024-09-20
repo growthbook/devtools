@@ -62,7 +62,6 @@ const ErrorDisplay: FC<ErrorDisplayProps> = ({ error, cspError }) => {
 
 export default (props: ErrorDisplayProps) => {
   const { error, cspError } = props;
-  console.log("error", error);
   const errorContainerRef = useRef<HTMLDivElement | null>(null);
 
   // scroll to error

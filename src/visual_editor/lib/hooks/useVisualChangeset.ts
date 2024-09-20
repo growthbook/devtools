@@ -9,6 +9,7 @@ import {
   UpdateVisualChangesetRequestMessage,
 } from "../../../../devtools";
 import normalizeVariations from "../normalizeVariations";
+import { update } from "lodash";
 type UseVisualChangesetHook = (visualChangesetId: string) => {
   loading: boolean;
   experimentUrl: string | null;
@@ -59,7 +60,6 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
           description: v.description,
         })),
       };
-
       const updateVisualChangesetMessage: UpdateVisualChangesetRequestMessage =
         {
           type: "GB_REQUEST_UPDATE_VISUAL_CHANGESET",
@@ -110,7 +110,6 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
 
       switch (msg.type) {
         case "GB_RESPONSE_LOAD_VISUAL_CHANGESET":
-          if(msg?.data.error && typeof msg.data.error === "string")
           if (msg.data.error && typeof msg.data.error === "string") setError(msg.data.error);
           else {
             setVisualChangeset(msg.data.visualChangeset);
@@ -120,7 +119,6 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
           setLoading(false);
           break;
         case "GB_RESPONSE_UPDATE_VISUAL_CHANGESET":
-          if(msg?.data.error && typeof msg.data.error === "string")
           if (msg.data.error && typeof msg.data.error === "string") setError(msg.data.error);
           setLoading(false);
           break;
