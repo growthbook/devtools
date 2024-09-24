@@ -158,8 +158,8 @@ const useEditMode: UseEditModeHook = ({
 
   const setInnerHTML = useCallback(
     (html: string) => {
-      if(elementUnderEdit)
-        if(variation?.domMutations.length === 0){
+      if(!elementUnderEdit) return;
+      if(variation?.domMutations.length === 0){
 
          elementUnderEdit.innerText = elementUnderEditCopy;
         }
@@ -335,7 +335,7 @@ const useEditMode: UseEditModeHook = ({
     
     if (!elementUnderEdit) return;
     elementUnderEdit.removeAttribute("contenteditable");
-    elementUnderEdit.removeEventListener("keydown", ()=>{});
+    elementUnderEdit.removeEventListener("keydown", setInnerHTMLOnInlineEdit);
     if(!isInlineEditing) setElementUnderEdit(null);
     setIsInlineEditing(false);
   }
@@ -343,6 +343,7 @@ const useEditMode: UseEditModeHook = ({
   const stopInlineEditing = () => {
     if (!elementUnderEdit) return;
     const html = elementUnderEdit.innerHTML;
+    if(html === elementUnderEditCopy) return;
     setInnerHTML(html);
     resumeGlobalObserver();
     elementUnderEdit.removeAttribute("contenteditable");
@@ -395,7 +396,7 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
       range.collapse(false);
       sel?.removeAllRanges();
       sel?.addRange(range);
-      elementUnderEdit?.addEventListener("keydown", (e: KeyboardEvent) =>{setInnerHTMLOnInlineEdit(e)}, false);
+      elementUnderEdit?.addEventListener("keydown", setInnerHTMLOnInlineEdit, false);
     } else {
       setIsInlineEditing(false);
     }
