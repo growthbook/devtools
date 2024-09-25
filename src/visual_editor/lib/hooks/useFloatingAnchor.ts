@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { throttle } from "lodash";
+import getSelector from "../getSelector";
 
 export default function useFloatingAnchor(parentElement: Element | null) {
   const [domRect, setDomRect] = useState<DOMRect | null>(null);
 
   const onChange = useCallback(
     throttle(() => {
-      const rect = parentElement?.getBoundingClientRect();
+      let selector = "";
+      if(parentElement)
+       selector =  getSelector(parentElement);
+      // get element by query selector
+      const rect = document.querySelector(selector)?.getBoundingClientRect();
       setDomRect(rect ?? null);
     }, 1000 / 60),
     [parentElement, setDomRect]

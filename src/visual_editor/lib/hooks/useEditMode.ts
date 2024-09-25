@@ -111,6 +111,18 @@ const useEditMode: UseEditModeHook = ({
     const text = parsed.body.textContent || "";
     return text.trim();
   }, [elementUnderEdit, variation]);
+
+  const elementUnderEditHTML = useMemo(() => {
+    if (!elementUnderEdit){ 
+      return ""
+    };
+    // ignore when selected is simply wrapper of another element
+    if (elementUnderEdit.innerHTML.startsWith("<")) return "";
+    // hard-limit on text length
+    if (elementUnderEdit.innerHTML.length > 800) return "";
+
+    return elementUnderEdit.innerHTML;
+  }, [elementUnderEdit, variation]);
   
 
   const addDomMutations = useCallback(
@@ -161,7 +173,7 @@ const useEditMode: UseEditModeHook = ({
       if(!elementUnderEdit) return;
       if(variation?.domMutations.length === 0){
 
-         elementUnderEdit.innerText = elementUnderEditCopy;
+         elementUnderEdit.innerHTML = elementUnderEditHTML;
         }
       addDomMutations([
         {
@@ -315,20 +327,29 @@ const useEditMode: UseEditModeHook = ({
   const hasTextInChildren = (element: Element) => {
         for (let child of element.children) {
             // Trim the child element's text content
-            const childText = child?.textContent?.trim();
-            if (childText || hasTextInChildren(child)) {
+            let isValid = !!child?.textContent?.trim();
+            // make carve out for the case where the child is a span or a or b or i or u
+           if(["span", "b", "i", "u", "a"].includes(element.tagName.toLowerCase())) isValid = true;
+
+            if (!isValid || hasTextInChildren(child)) {
                 return true;
             }
         return false;
     }
   }
-
+  const clearInlineEditAttributes = () => {
+    const inlineEditElements = document.querySelectorAll(`[canInlineEdit], [contenteditable]`);
+    inlineEditElements.forEach((element) => {
+      element.removeAttribute("canInlineEdit");
+      element.removeAttribute("contenteditable");
+    });
+    
+  }
 
   const resetAndStopInlineEditing = () => {
     resumeGlobalObserver();
-
     if(variation?.domMutations.length === 0 && elementUnderEdit){
-      elementUnderEdit.innerHTML = elementUnderEditCopy;
+      elementUnderEdit.innerHTML = elementUnderEditHTML;
     }
 
     runMutations(variation?.domMutations);
@@ -336,20 +357,28 @@ const useEditMode: UseEditModeHook = ({
     if (!elementUnderEdit) return;
     elementUnderEdit.removeAttribute("contenteditable");
     elementUnderEdit.removeEventListener("keydown", setInnerHTMLOnInlineEdit);
-    if(!isInlineEditing) setElementUnderEdit(null);
+    if(!isInlineEditing){ 
+      clearInlineEditAttributes();
+      setElementUnderEdit(null);
+    }
     setIsInlineEditing(false);
   }
 
   const stopInlineEditing = () => {
     if (!elementUnderEdit) return;
+    clearInlineEditAttributes();
     const html = elementUnderEdit.innerHTML;
-    if(html === elementUnderEditCopy) return;
-    setInnerHTML(html);
+    if(html !== elementUnderEditHTML && isInlineEditing){
+      clearInlineEditAttributes();
+      setInnerHTML(html);
+    }
+    elementUnderEdit.setAttribute("canInlineEdit", "true");
     resumeGlobalObserver();
-    elementUnderEdit.removeAttribute("contenteditable");
     elementUnderEdit.removeEventListener("keydown", ()=>{});
     // we need to reset if it is not inline editing
-    if(!isInlineEditing) setElementUnderEdit(null);
+    if(!isInlineEditing){
+      setElementUnderEdit(null);
+    } 
     setIsInlineEditing(false);
 }
 
@@ -367,11 +396,13 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
     }
   }
   // checking to see if element can be inline edited
+  // make a allow list of elements that can be inline edited
+  // allow anything that is span or b or i or u or a
   const canInlineEditElement = (element: Element) =>{
-    let firstElementHasText = !!element?.textContent?.trim();
+    let isValid = !!element?.textContent?.trim();
     // if the element is empty and has no children, we can't inline edit it
-    if(element?.textContent?.trim() === "") firstElementHasText = true;
-    return firstElementHasText && !hasTextInChildren(element);
+    if(element?.textContent?.trim() === "") isValid = true;    
+    return isValid && !hasTextInChildren(element);
   }
 
 
@@ -402,9 +433,9 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
     }
   }
     const onPointerMove = throttle((event: MouseEvent) => {
+      if(elementUnderEdit) return;
       const { clientX: x, clientY: y } = event;
       const domNode = document.elementFromPoint(x, y);
-
       // return early if we are over the visual editor itself (e.g. frame)
       if (domNode?.id === CONTAINER_ID) {
         clearHoverAttribute();
@@ -422,11 +453,8 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
 
   const onPointerDown = (event: MouseEvent) => {
     const element = event.target as HTMLElement;
+    if(elementUnderEdit) return;
     if(elementUnderEdit === element) return;
-      window.removeEventListener("keydown", (e: KeyboardEvent) =>{
-        setInnerHTML(elementUnderEdit?.innerHTML || "");
-      });
-      elementUnderEdit?.removeAttribute("contenteditable");
 
     // don't intercept cilcks on the visual editor itself
     if (element.id === CONTAINER_ID) return;
@@ -434,23 +462,32 @@ const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
     event.preventDefault();
     event.stopPropagation();
   };
+  const setCursorForInlineEditing = (element: HTMLElement) => {
+    if(!element) return;
+    const canInlineEdit =  canInlineEditElement(element);
+    if (canInlineEdit) {
+      element.setAttribute("canInlineEdit", "true");
+    }
+  }
+
 
 
     const clickHandler = (event: MouseEvent) => {
       if (event.detail === 1) {
       const element = event.target as HTMLElement;
-      window.removeEventListener("keydown", (e: KeyboardEvent) =>{
-        setInnerHTML(elementUnderEdit?.innerHTML || "");
-      });
+      if(isInlineEditing) return;
       // don't intercept cilcks on the visual editor itself
       if (element.id === CONTAINER_ID) return;
 
       //need to set inline editing true before setting element under edit if it is not inline editing we revert the changes
-      const isCurrentElementUnderEdit = elementUnderEdit === element;
-      setElementUnderEdit(element);
+      if(!elementUnderEdit){
+       setElementUnderEdit(element);
+      }
       // we want to set the element inline edit on the second click
-      if(isCurrentElementUnderEdit){
-       setInlineEditOnElement(element);
+      setCursorForInlineEditing(element);
+      // we know that if you click anywhere else you want to stop inline editing
+      if(elementUnderEdit){
+       setInlineEditOnElement(elementUnderEdit);
       }
       event.preventDefault();
       event.stopPropagation();

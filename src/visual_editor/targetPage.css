@@ -2,7 +2,7 @@
   display: block !important;
 }
 
-[gb-edit-mode-hover][contenteditable="true"] {
+[canInlineEdit] {
   cursor: text !important;
 }
 

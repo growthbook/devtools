@@ -138,7 +138,10 @@ const VisualEditor: FC<{}> = () => {
     updateVariation: updateSelectedVariation  });
 
   const moveHandleRef = useRef<HTMLDivElement | null>(null);
-  const {isDragging} = useDragAndDrop({
+  const [isDragging, setDragging] = useState(false);
+
+
+  const {isDragging: draggingStarted } = useDragAndDrop({
     isEnabled: mode === "edit" && !isInlineEditing,
     elementToDrag: isInlineEditing? null : elementUnderEdit,
     addDomMutation,
@@ -148,7 +151,17 @@ const VisualEditor: FC<{}> = () => {
     hasSDK,
     sdkVersion: version,
   });  
-
+  // wait for 1 second before setting dragging to true
+  useEffect(() => {
+    if (draggingStarted) {
+      const timeout = setTimeout(() => {
+        setDragging(true);
+      }, 500);
+      return () => clearTimeout(timeout);
+    } else {
+      setDragging(false);
+    }
+  }, [draggingStarted]);
 
   const selectedVariationTotalChangesLength = useMemo(
     () =>
@@ -374,7 +387,7 @@ const VisualEditor: FC<{}> = () => {
         />
       ) : null}
       {/** Overlays for highlighting hovered elements **/}
-      {mode === "edit" && !isDragging && !isInlineEditing ? (
+      {mode === "edit" && !isDragging ? (
         <>
           <FloatingFrame parentElement={highlightedElement} />
           <SelectorDisplay parentElement={highlightedElement} />
