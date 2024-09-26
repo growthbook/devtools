@@ -39,12 +39,14 @@ const Popup = () => {
         <div className="gb-mb-3 gb-px-3 gb-py-2 gb-border gb-border-gray-200 gb-rounded-lg gb-bg-white">
           <label className="gb-label gb-text-sm">Visual Editor</label>
           <div className="gb-mt-1">
-            To use the visual editor, you must create an experiment in <strong>GrowthBook</strong> and add <strong>Visual Editor</strong> changes.
+            To use the visual editor, you must create an experiment in{" "}
+            <strong>GrowthBook</strong> and add <strong>Visual Editor</strong>{" "}
+            changes.
           </div>
         </div>
 
         <div className="gb-px-3 gb-py-2 gb-border gb-border-gray-200 gb-rounded-lg gb-bg-white">
-        <a
+          <a
             className="gb-flex gb-justify-between gb-items-center hover:gb-underline"
             role="button"
             onClick={() => {
@@ -88,7 +90,7 @@ const root = ReactDOM.createRoot(container!);
 root.render(
   <React.StrictMode>
     <Popup />
-  </React.StrictMode>
+  </React.StrictMode>,
 );
 
 function getOS() {

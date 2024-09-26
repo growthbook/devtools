@@ -35,5 +35,5 @@ const root = ReactDOM.createRoot(container!);
 root.render(
   <React.StrictMode>
     <Options />
-  </React.StrictMode>
+  </React.StrictMode>,
 );

@@ -110,7 +110,7 @@ function App(props: Props) {
 
   const filteredFeatures = features.filter((f) => !q || f.key.includes(q));
   const filteredExperiments = experiments.filter(
-    (e) => !q || e.experiment.key.includes(q)
+    (e) => !q || e.experiment.key.includes(q),
   );
 
   return (

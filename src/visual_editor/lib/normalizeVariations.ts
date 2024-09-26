@@ -20,7 +20,7 @@ const normalizeVariations = ({
       acc[variation] = visualChange;
       return acc;
     },
-    {}
+    {},
   );
 
   return variations.map((variation: APIExperimentVariation) => {

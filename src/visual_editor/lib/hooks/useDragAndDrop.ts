@@ -59,7 +59,7 @@ const useDragAndDrop: UseDragAndDropHook = ({
       // if the user is clicking on an already selected element, we begin dragging
       if (elementToDrag?.contains(element)) setIsDragging(true);
     },
-    [elementToDrag, setIsDragging]
+    [elementToDrag, setIsDragging],
   );
 
   const onMoveHandlerPointerDown = useCallback(
@@ -68,7 +68,7 @@ const useDragAndDrop: UseDragAndDropHook = ({
       event.stopPropagation();
       setIsDragging(true);
     },
-    [setIsDragging]
+    [setIsDragging],
   );
 
   const onPointerUp = useCallback(
@@ -108,7 +108,7 @@ const useDragAndDrop: UseDragAndDropHook = ({
       setDragDestination(null);
       draggingTeardown();
     },
-    [isDragging, elementToDrag, dragDestination, addDomMutation]
+    [isDragging, elementToDrag, dragDestination, addDomMutation],
   );
 
   const onPointerMove = useCallback(
@@ -130,7 +130,7 @@ const useDragAndDrop: UseDragAndDropHook = ({
           siblingElement: draggedToSibling,
         });
     },
-    [isDragging, elementToDrag, setDragDestination]
+    [isDragging, elementToDrag, setDragDestination],
   );
 
   useEffect(() => {
@@ -149,7 +149,7 @@ const useDragAndDrop: UseDragAndDropHook = ({
       moveHandlerElem.addEventListener(
         "pointerdown",
         onMoveHandlerPointerDown,
-        true
+        true,
       );
     }
 
@@ -162,7 +162,7 @@ const useDragAndDrop: UseDragAndDropHook = ({
         moveHandlerElem.removeEventListener(
           "pointerdown",
           onMoveHandlerPointerDown,
-          true
+          true,
         );
       }
     };

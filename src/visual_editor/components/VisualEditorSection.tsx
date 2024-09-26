@@ -29,7 +29,7 @@ const VisualEditorSection: FC<{
             "gb-flex gb-justify-between": onClose,
             "gb-shadow-xl": isExpanded,
             "gb-mb-2": isExpanded,
-          }
+          },
         )}
       >
         <div className="gb-flex gb-items-center gb-relative">
@@ -52,7 +52,7 @@ const VisualEditorSection: FC<{
                 "gb-w-4 gb-h-4 gb-cursor-pointer gb-text-link gb-mx-2",
                 {
                   "gb-rotate-180": !isExpanded,
-                }
+                },
               )}
               onClick={toggleExpanded}
             />

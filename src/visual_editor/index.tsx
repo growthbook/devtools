@@ -47,6 +47,7 @@ import DebugPanel from "./components/DebugPanel";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
+import { isGlobalObserverPaused, resumeGlobalObserver } from "dom-mutator";
 
 const VisualEditor: FC<{}> = () => {
   const { x, y, setX, setY, parentStyles } = useFixedPositioning({
@@ -94,7 +95,7 @@ const VisualEditor: FC<{}> = () => {
     (updates: Partial<VisualEditorVariation>) => {
       updateVariationAtIndex(selectedVariationIndex, updates);
     },
-    [selectedVariationIndex, updateVariationAtIndex]
+    [selectedVariationIndex, updateVariationAtIndex],
   );
 
   const { globalCss, setGlobalCss } = useGlobalCSS({
@@ -128,6 +129,9 @@ const VisualEditor: FC<{}> = () => {
     setDomMutations,
     ignoreClassNames,
     setIgnoreClassNames,
+    stopInlineEditing,
+    resetAndStopInlineEditing,
+    isInlineEditing,
   } = useEditMode({
     isEnabled: mode === "edit",
     variation: selectedVariation,
@@ -135,10 +139,11 @@ const VisualEditor: FC<{}> = () => {
   });
 
   const moveHandleRef = useRef<HTMLDivElement | null>(null);
+  const [isDragging, setDragging] = useState(false);
 
-  const { isDragging } = useDragAndDrop({
-    isEnabled: mode === "edit",
-    elementToDrag: elementUnderEdit,
+  const { isDragging: draggingStarted } = useDragAndDrop({
+    isEnabled: mode === "edit" && !isInlineEditing,
+    elementToDrag: isInlineEditing ? null : elementUnderEdit,
     addDomMutation,
     elementUnderEditMutations,
     setDomMutations,
@@ -146,13 +151,24 @@ const VisualEditor: FC<{}> = () => {
     hasSDK,
     sdkVersion: version,
   });
+  // wait for 1 second before setting dragging to true
+  useEffect(() => {
+    if (draggingStarted) {
+      const timeout = setTimeout(() => {
+        setDragging(true);
+      }, 500);
+      return () => clearTimeout(timeout);
+    } else {
+      setDragging(false);
+    }
+  }, [draggingStarted]);
 
   const selectedVariationTotalChangesLength = useMemo(
     () =>
       (selectedVariation?.domMutations ?? []).length +
       (selectedVariation?.js ? 1 : 0) +
       (selectedVariation?.css ? 1 : 0),
-    [selectedVariation]
+    [selectedVariation],
   );
 
   useEffect(() => {
@@ -164,20 +180,25 @@ const VisualEditor: FC<{}> = () => {
   // Upon any DOM change on the page, we trigger a refresh of visual editor to
   // keep it in sync. We use debounce to limit forceUpdate calls to 1 per 100ms.
   const [, _forceUpdate] = useReducer((x) => x + 1, 0);
-  const forceUpdate = debounce(_forceUpdate, 100);
+  const forceUpdate = debounce(() => _forceUpdate(), 100);
 
   useEffect(() => {
     const observer = new MutationObserver(() =>
-      setTimeout(() => forceUpdate(), 0)
+      setTimeout(() => forceUpdate(), 0),
     );
     observer.observe(document.body, {
       attributes: true,
       childList: true,
       subtree: true,
     });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, []);
-
+  //reset inline editing when mode changes
+  useEffect(() => {
+    resetAndStopInlineEditing();
+  }, [mode]);
   return (
     <>
       <VisualEditorPane style={parentStyles}>
@@ -336,23 +357,37 @@ const VisualEditor: FC<{}> = () => {
           <FloatingFrame
             hideOverlay={isDragging}
             parentElement={elementUnderEdit}
-            clearSelectedElement={() => setElementUnderEdit(null)}
+            clearSelectedElement={() => {
+              stopInlineEditing();
+            }}
           />
-          <SelectorDisplay parentElement={elementUnderEdit} />
-          {elementUnderEditMutations.length > 0 ? (
+          {!elementUnderEdit && (
+            <SelectorDisplay parentElement={elementUnderEdit} />
+          )}
+          {elementUnderEditMutations.length > 0 && !!elementUnderEdit ? (
             <FloatingUndoButton
               parentElement={elementUnderEdit}
-              undo={() =>
-                removeDomMutation(elementUnderEditMutations.slice(-1)[0])
-              }
+              undo={() => {
+                const lastMutation =
+                  elementUnderEditMutations[
+                    elementUnderEditMutations.length - 1
+                  ];
+                if (lastMutation.value === elementUnderEdit.innerHTML) {
+                  removeDomMutation(lastMutation);
+                }
+                if (isGlobalObserverPaused()) {
+                  resetAndStopInlineEditing();
+                }
+              }}
             />
           ) : null}
         </>
       ) : null}
-      {mode === "edit" && elementUnderEdit ? (
+      {mode === "edit" && elementUnderEdit && !isInlineEditing ? (
         <MoveElementHandle
           ref={moveHandleRef}
           parentElement={elementUnderEdit}
+          onPointerDown={() => stopInlineEditing()}
         />
       ) : null}
       {/** Overlays for highlighting hovered elements **/}
@@ -386,7 +421,7 @@ if (shadowRoot) {
 document.body.appendChild(container);
 
 const root = ReactDOM.createRoot(
-  shadowRoot.querySelector("#visual-editor-root")!
+  shadowRoot.querySelector("#visual-editor-root")!,
 );
 
 root.render(<VisualEditor />);

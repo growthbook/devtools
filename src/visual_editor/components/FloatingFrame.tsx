@@ -78,15 +78,17 @@ const FloatingFrameEdge = ({
 }: {
   domRect: DOMRect;
   position: "top" | "right" | "bottom" | "left";
-}) => (
-  <div
-    className={clsx("gb-fixed", "gb-z-front", "gb-border-indigo-600", {
-      "gb-border-t": position === "top" || position === "bottom",
-      "gb-border-l": position === "right" || position === "left",
-    })}
-    style={edgeStyles(domRect)[position]}
-  ></div>
-);
+}) => {
+  return (
+    <div
+      className={clsx("gb-fixed", "gb-z-front", "gb-border-indigo-600", {
+        "gb-border-t": position === "top" || position === "bottom",
+        "gb-border-l": position === "right" || position === "left",
+      })}
+      style={edgeStyles(domRect)[position]}
+    ></div>
+  );
+};
 
 const FloatingFrame: FC<{
   hideOverlay?: boolean;
@@ -96,7 +98,6 @@ const FloatingFrame: FC<{
   const domRect = useFloatingAnchor(parentElement);
 
   if (!domRect) return null;
-
   return (
     <>
       <FloatingFrameEdge domRect={domRect} position="top" />

@@ -22,7 +22,7 @@ export default function useGlobalCSS({
     debounce((css: string) => {
       updateVariation({ css });
     }, 1500),
-    [updateVariation]
+    [updateVariation],
   );
 
   useEffect(() => {

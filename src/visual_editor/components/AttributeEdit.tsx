@@ -55,7 +55,7 @@ const EditAttributeInput: FC<{
           onChange={(e) => setName(e.target.value)}
         />
       ) : (
-        <div className="gb-w-12 gb-text-xs gb-text-slate-400 gb-mb-2">
+        <div className="gb-text-xs gb-text-slate-400 gb-mb-2 gb-mr-2">
           {name}
         </div>
       )}
@@ -93,7 +93,7 @@ const AddAttributeInput: FC<{
       }
       onCancel();
     },
-    [_onAdd, onCancel]
+    [_onAdd, onCancel],
   );
   return (
     <>
@@ -123,7 +123,7 @@ const AttributeToken: FC<
       onEdit(attr);
       onCancel();
     },
-    [onEdit, onCancel]
+    [onEdit, onCancel],
   );
   if (isEditing) {
     return (
@@ -137,11 +137,11 @@ const AttributeToken: FC<
   }
   return (
     <div className="gb-flex gb-mb-2 last:gb-mb-0">
-      <div className="gb-w-12 gb-text-xs gb-text-slate-400">{name}</div>
+      <div className="gb-text-xs gb-text-slate-400 gb-mr-2">{name}</div>
 
       <div
         className={clsx(
-          "gb-text-link gb-text-ellipsis gb-overflow-hidden gb-text-sm hover:gb-bg-slate-600"
+          "gb-text-link gb-text-ellipsis gb-overflow-hidden gb-text-sm hover:gb-bg-slate-600",
         )}
         style={{ flex: 2, maxHeight: "3rem" }}
         onClick={() => setIsEditing(true)}
@@ -155,18 +155,17 @@ const AttributeToken: FC<
     </div>
   );
 };
-
 const AttributeEdit: FC<{
   element: HTMLElement;
   onSave: (attributes: Attribute[]) => void;
 }> = ({ element, onSave }) => {
   const attributes = normalizeAttrs(element.attributes);
-
+  
   const removeAttr = useCallback(
     (name: string) => {
       onSave(attributes.filter((attr) => attr.name !== name));
     },
-    [attributes, onSave]
+    [attributes, onSave],
   );
 
   const addAttr = useCallback(
@@ -174,7 +173,7 @@ const AttributeEdit: FC<{
       const deduped = attributes.filter((a) => a.name !== name);
       onSave([...deduped, { name, value }]);
     },
-    [onSave, attributes]
+    [onSave, attributes],
   );
 
   const editAttr = useCallback(
@@ -183,7 +182,7 @@ const AttributeEdit: FC<{
         ...attributes.map((a) => (a.name === name ? { name, value } : a)),
       ]);
     },
-    [onSave, attributes]
+    [onSave, attributes],
   );
 
   return (

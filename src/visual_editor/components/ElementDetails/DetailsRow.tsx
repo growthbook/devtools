@@ -73,7 +73,7 @@ const DetailsRow = ({
               "hover:gb-text-slate-100": !readOnly,
               "hover:gb-bg-slate-600": !readOnly,
               "gb-cursor-pointer": !readOnly,
-            }
+            },
           )}
           style={{ flex: 2, maxHeight: "3rem" }}
           onClick={!readOnly ? () => setIsEditing(true) : () => {}}

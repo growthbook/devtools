@@ -21,7 +21,7 @@ import { VISUAL_CHANGESET_ID_PARAMS_KEY } from "../visual_editor/lib/constants";
 import { saveApiHost, saveApiKey } from "../visual_editor/lib/storage";
 
 export const genericDevtoolsMessagePassThrough = (
-  message: RefreshMessage | ErrorMessage
+  message: RefreshMessage | ErrorMessage,
 ) => {
   chrome.runtime.sendMessage(message);
 };
@@ -29,13 +29,13 @@ export const genericDevtoolsMessagePassThrough = (
 // 1. save key to local storage
 // 2. send response message to content script
 export const visualEditorOpenRequest = (
-  message: OpenVisualEditorRequestMessage
+  message: OpenVisualEditorRequestMessage,
 ) => {
   if (!message.data?.apiKey || !message.data?.apiHost) {
     // TODO send error message back
     console.error(
       "For some reason, the message data is missing either the API key or API host.",
-      message.data
+      message.data,
     );
     return;
   }
@@ -45,7 +45,7 @@ export const visualEditorOpenRequest = (
 
   window.postMessage(
     { type: "GB_RESPONSE_OPEN_VISUAL_EDITOR" },
-    window.location.origin
+    window.location.origin,
   );
 };
 
@@ -64,7 +64,7 @@ export const loadVisualEditorQueryParams = () => {
 };
 
 export const visualEditorLoadChangesetRequest = (
-  msg: LoadVisualChangesetRequestMessage
+  msg: LoadVisualChangesetRequestMessage,
 ) => {
   chrome.runtime.sendMessage<
     BGLoadVisualChangsetMessage,
@@ -85,12 +85,12 @@ export const visualEditorLoadChangesetRequest = (
       };
 
       window.postMessage(message, window.location.origin);
-    }
+    },
   );
 };
 
 export const visualEditorUpdateChangesetRequest = (
-  msg: UpdateVisualChangesetRequestMessage
+  msg: UpdateVisualChangesetRequestMessage,
 ) => {
   chrome.runtime.sendMessage<
     BGUpdateVisualChangsetMessage,
@@ -112,12 +112,12 @@ export const visualEditorUpdateChangesetRequest = (
       };
 
       window.postMessage(message, window.location.origin);
-    }
+    },
   );
 };
 
 export const visualEditorTransformCopyRequest = (
-  msg: TransformCopyRequestMessage
+  msg: TransformCopyRequestMessage,
 ) => {
   chrome.runtime.sendMessage<BGTransformCopyMessage, TransformCopyPayload>(
     {
@@ -136,6 +136,6 @@ export const visualEditorTransformCopyRequest = (
         },
       };
       window.postMessage(message, window.location.origin);
-    }
+    },
   );
 };

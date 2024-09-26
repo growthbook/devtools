@@ -38,7 +38,7 @@ const useSDKDiagnostics: UseSDKDiagnosticsHook = ({ experiment }) => {
     setHasHashAttr(
       hasSDK
         ? !!sdkAttributes?.hasOwnProperty(experiment?.hashAttribute || "")
-        : false
+        : false,
     );
   }, [hasSDK, hashAttribute]);
 

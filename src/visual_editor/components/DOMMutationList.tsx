@@ -126,7 +126,7 @@ const DOMMutationList: FC<{
       }
       removeDomMutation?.(mutation);
     },
-    [removeDomMutation, clearGlobalCss]
+    [removeDomMutation, clearGlobalCss],
   );
 
   return (

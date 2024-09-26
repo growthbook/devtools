@@ -79,7 +79,7 @@ const ClassNamesEdit: FC<{
       const newClassNames = new Set([...classNames.split(" ")]);
       _onAdd(Array.from(newClassNames).join(" "));
     },
-    [classNames, _onAdd]
+    [classNames, _onAdd],
   );
 
   return (

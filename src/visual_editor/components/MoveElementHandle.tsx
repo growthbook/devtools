@@ -4,8 +4,8 @@ import useFloatingAnchor from "../lib/hooks/useFloatingAnchor";
 
 const MoveElementHandle = forwardRef<
   HTMLDivElement,
-  { parentElement: HTMLElement }
->(function ({ parentElement }, ref) {
+  { parentElement: HTMLElement; onPointerDown: () => void }
+>(function ({ parentElement, onPointerDown }, ref) {
   const domRect = useFloatingAnchor(parentElement);
   if (!domRect) return null;
   if (!parentElement) return null;
@@ -17,6 +17,7 @@ const MoveElementHandle = forwardRef<
         top: domRect.bottom + 8,
         left: domRect.left + domRect.width - 40,
       }}
+      onPointerDown={onPointerDown}
     >
       <RxMove className="gb-w-6 gb-h-6" />
     </div>

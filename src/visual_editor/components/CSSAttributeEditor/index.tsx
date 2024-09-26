@@ -230,7 +230,7 @@ const CSSAttributeEditor: FC<{
         });
       }
     },
-    [elementStyle]
+    [elementStyle],
   );
 
   return (

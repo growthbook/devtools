@@ -19,7 +19,7 @@ type UseQueryParamsHook = () => {
 // normalize param values into number type
 // default to 1 (first variation)
 const getVariationIndexFromParams = (
-  param: string | (string | null)[] | null
+  param: string | (string | null)[] | null,
 ): number => {
   if (Array.isArray(param)) {
     if (!param[0]) return 1;
@@ -44,21 +44,21 @@ const cleanUpParams = (params: qs.ParsedQuery) => () => {
         // deprecated but still in use by old versions of GB app
         [EXPERIMENT_URL_PARAMS_KEY]: undefined,
       },
-    })
+    }),
   );
 };
 
 const useQueryParams: UseQueryParamsHook = () => {
   const params = qs.parse(window.location.search);
   const [visualChangesetId] = useState(
-    (params[VISUAL_CHANGESET_ID_PARAMS_KEY] || "") as string
+    (params[VISUAL_CHANGESET_ID_PARAMS_KEY] || "") as string,
   );
   const [variationIndex] = useState(
-    getVariationIndexFromParams(params[VARIATION_INDEX_PARAMS_KEY])
+    getVariationIndexFromParams(params[VARIATION_INDEX_PARAMS_KEY]),
   );
   const [hasAiEnabled] = useState(
     decodeURIComponent((params[AI_ENABLED_PARAMS_KEY] || "") as string) ===
-      "true"
+      "true",
   );
   return {
     params,
