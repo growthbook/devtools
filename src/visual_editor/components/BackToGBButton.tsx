@@ -12,7 +12,7 @@ const BackToGBButton: FC<{
       "gb-rounded",
       "gb-text-white",
       "gb-font-semibold",
-      "gb-text-lg"
+      "gb-text-lg",
     )}
     onClick={() => {
       if (experimentUrl) {

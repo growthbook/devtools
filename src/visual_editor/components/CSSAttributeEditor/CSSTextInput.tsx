@@ -64,7 +64,7 @@ const CSSTextInput: FC<{
             {
               "gb-text-slate-200": isInline,
               "gb-text-slate-400": !isInline,
-            }
+            },
           )}
           style={{ flex: 2, maxHeight: "3rem" }}
           onClick={() => setIsEditing(true)}

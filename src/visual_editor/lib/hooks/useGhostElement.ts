@@ -16,7 +16,7 @@ const cloneElement = (element: HTMLElement) => {
     const styleProperty = computedStyles[i];
     clone.style.setProperty(
       styleProperty,
-      computedStyles.getPropertyValue(styleProperty)
+      computedStyles.getPropertyValue(styleProperty),
     );
   }
 
@@ -31,7 +31,7 @@ const useGhostElement: UseGhostElementHook = ({
 }) => {
   const [ghostElement, setGhostElement] = useState<HTMLElement | null>(null);
   const [offsetPos, setOffsetPos] = useState<{ x: number; y: number } | null>(
-    null
+    null,
   );
 
   const setElementPosition = useCallback(
@@ -48,7 +48,7 @@ const useGhostElement: UseGhostElementHook = ({
       element.style.top = `${y - offsetPos.y}px`;
       element.style.left = `${x - offsetPos.x}px`;
     },
-    [targetElement, offsetPos]
+    [targetElement, offsetPos],
   );
 
   // reset offsetPos when targetElement changes

@@ -65,7 +65,7 @@ const ApiKeyForm: FC<{
           {
             "gb-bg-blue-600 hover:gb-bg-blue-500 gb-cursor-pointer": !disabled,
             "gb-bg-gray-200 gb-cursor-wait": disabled,
-          }
+          },
         )}
         value="Submit"
         disabled={disabled ?? false}

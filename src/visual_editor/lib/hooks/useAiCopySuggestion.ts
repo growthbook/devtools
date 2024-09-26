@@ -63,7 +63,7 @@ const useAiCopySuggestion: UseAiCopySuggestionHook = (visualChangesetId) => {
 
       window.postMessage(transformCopyMessage, window.location.origin);
     },
-    [visualChangesetId]
+    [visualChangesetId],
   );
 
   return {

@@ -40,7 +40,7 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
       clearTimeout(timer);
       getValidGrowthBookInstance(cb);
     },
-    false
+    false,
   );
 }
 

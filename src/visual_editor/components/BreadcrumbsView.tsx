@@ -19,7 +19,7 @@ const BreadcrumbsView: FC<{
   const breadcrumbs = useMemo(() => getBreadcrumbs(element), [element]);
   const children = useMemo(
     () => Array.from(element.children),
-    [element, elementInnerHtml]
+    [element, elementInnerHtml],
   );
 
   const onChildSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -55,11 +55,7 @@ const BreadcrumbsView: FC<{
         <span>
           {" > "}
           <span>
-            <select
-              value={-1}
-              onChange={onChildSelect}
-              className="gb-my-2"
-            >
+            <select value={-1} onChange={onChildSelect} className="gb-my-2">
               <option value={-1}>MORE</option>
               {children.map((child, index) => (
                 <option key={index} value={index}>

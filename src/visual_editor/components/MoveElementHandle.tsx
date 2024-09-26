@@ -4,9 +4,8 @@ import useFloatingAnchor from "../lib/hooks/useFloatingAnchor";
 
 const MoveElementHandle = forwardRef<
   HTMLDivElement,
-  { parentElement: HTMLElement, onPointerDown: () => void }
->(function ({ parentElement, onPointerDown}, ref) {
-  
+  { parentElement: HTMLElement; onPointerDown: () => void }
+>(function ({ parentElement, onPointerDown }, ref) {
   const domRect = useFloatingAnchor(parentElement);
   if (!domRect) return null;
   if (!parentElement) return null;

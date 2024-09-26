@@ -9,14 +9,13 @@ import {
   UpdateVisualChangesetRequestMessage,
 } from "../../../../devtools";
 import normalizeVariations from "../normalizeVariations";
-import { update } from "lodash";
 type UseVisualChangesetHook = (visualChangesetId: string) => {
   loading: boolean;
   experimentUrl: string | null;
   variations: VisualEditorVariation[];
   updateVariationAtIndex: (
     index: number,
-    updates: Partial<VisualEditorVariation>
+    updates: Partial<VisualEditorVariation>,
   ) => void;
   error: string | null;
   cspError: CSPError | null;
@@ -71,7 +70,7 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
 
       window.postMessage(updateVisualChangesetMessage, window.location.origin);
     },
-    [visualChangesetId]
+    [visualChangesetId],
   );
 
   const updateVariationAtIndex = useCallback(
@@ -86,7 +85,7 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
       updateVisualChangeset(newVariations);
       setVariations(newVariations);
     },
-    [variations, setVariations, updateVisualChangeset]
+    [variations, setVariations, updateVisualChangeset],
   );
 
   // generate normalized variations
@@ -110,7 +109,8 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
 
       switch (msg.type) {
         case "GB_RESPONSE_LOAD_VISUAL_CHANGESET":
-          if (msg.data.error && typeof msg.data.error === "string") setError(msg.data.error);
+          if (msg.data.error && typeof msg.data.error === "string")
+            setError(msg.data.error);
           else {
             setVisualChangeset(msg.data.visualChangeset);
             setExperiment(msg.data.experiment);
@@ -119,7 +119,8 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
           setLoading(false);
           break;
         case "GB_RESPONSE_UPDATE_VISUAL_CHANGESET":
-          if (msg.data.error && typeof msg.data.error === "string") setError(msg.data.error);
+          if (msg.data.error && typeof msg.data.error === "string")
+            setError(msg.data.error);
           setLoading(false);
           break;
         default:

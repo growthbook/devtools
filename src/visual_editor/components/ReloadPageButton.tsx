@@ -26,7 +26,7 @@ const refreshWithParams = ({
         [VARIATION_INDEX_PARAMS_KEY]: variationIndex,
         [AI_ENABLED_PARAMS_KEY]: hasAiEnabled,
       },
-    })
+    }),
   );
 };
 

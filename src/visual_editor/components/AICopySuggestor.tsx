@@ -21,7 +21,7 @@ const AICopySuggestor: FC<{
   transformedCopy,
 }) => {
   const [tone, setTone] = useState<"concise" | "energetic" | "humorous" | null>(
-    null
+    null,
   );
   const [generatedCopy, setGeneratedCopy] = useState<string>("");
   const [copy, setCopy] = useState(_copy);
@@ -46,7 +46,7 @@ const AICopySuggestor: FC<{
 
       transformCopy(parentElement.innerHTML, mode);
     },
-    [parentElement, loading, transformCopy, setGeneratedCopy]
+    [parentElement, loading, transformCopy, setGeneratedCopy],
   );
 
   const reset = useCallback(() => {
@@ -82,7 +82,7 @@ const AICopySuggestor: FC<{
             "gb-transition-colors",
             {
               "gb-border-gb": tone,
-            }
+            },
           )}
           style={{ flex: 2, maxHeight: "3rem" }}
         >
@@ -106,7 +106,7 @@ const AICopySuggestor: FC<{
               "gb-transition-colors",
               {
                 "gb-border-gb": tone,
-              }
+              },
             )}
             style={{ width: "1px", height: "13px", zIndex: 30 }}
           ></div>
@@ -124,7 +124,7 @@ const AICopySuggestor: FC<{
               "gb-transition-colors",
               {
                 "gb-border-gb": tone === "concise",
-              }
+              },
             )}
             style={{ width: "33%", top: "4px", left: "17%" }}
           ></div>
@@ -140,7 +140,7 @@ const AICopySuggestor: FC<{
               "gb-transition-colors",
               {
                 "gb-border-gb": tone === "energetic",
-              }
+              },
             )}
             style={{ width: "0px", top: "4px", left: "50%" }}
           ></div>
@@ -158,7 +158,7 @@ const AICopySuggestor: FC<{
               "gb-transition-colors",
               {
                 "gb-border-gb": tone === "humorous",
-              }
+              },
             )}
             style={{ width: "33%", top: "4px", left: "50%" }}
           ></div>
@@ -179,7 +179,7 @@ const AICopySuggestor: FC<{
               "gb-transition-colors",
               {
                 "gb-logo-bg": tone === "concise",
-              }
+              },
             )}
           >
             <button
@@ -189,7 +189,7 @@ const AICopySuggestor: FC<{
                 "gb-flex",
                 "gb-justify-center",
                 "gb-items-center",
-                "gb-rounded-l"
+                "gb-rounded-l",
               )}
               style={{ margin: "1px" }}
               onClick={generateCopy("concise")}
@@ -206,7 +206,7 @@ const AICopySuggestor: FC<{
               "gb-cursor-pointer",
               {
                 "gb-logo-bg": tone === "energetic",
-              }
+              },
             )}
           >
             <button
@@ -215,7 +215,7 @@ const AICopySuggestor: FC<{
                 "gb-flex-1",
                 "gb-flex",
                 "gb-justify-center",
-                "gb-items-center"
+                "gb-items-center",
               )}
               style={{ margin: "1px" }}
               onMouseOver={() => !loading && setTone("energetic")}
@@ -233,7 +233,7 @@ const AICopySuggestor: FC<{
               "gb-cursor-pointer",
               {
                 "gb-logo-bg": tone === "humorous",
-              }
+              },
             )}
           >
             <button
@@ -255,7 +255,7 @@ const AICopySuggestor: FC<{
             {
               "-gb-mt-32": !loading,
               "gb-mt-4": loading,
-            }
+            },
           )}
         >
           <BiLoaderCircle className="gb-animate-spin gb-text-indigo-500" />
@@ -283,7 +283,7 @@ const AICopySuggestor: FC<{
               "gb-mt-2",
               "gb-p-2",
               "gb-rounded",
-              "gb-outline-none"
+              "gb-outline-none",
             )}
             style={{ flex: 2 }}
             value={generatedCopy}
@@ -297,7 +297,7 @@ const AICopySuggestor: FC<{
               "gb-text-white",
               "gb-font-semibold",
               "gb-text-sm",
-              "gb-mt-2"
+              "gb-mt-2",
             )}
             onClick={applyCopy}
           >

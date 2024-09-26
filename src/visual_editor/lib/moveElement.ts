@@ -3,7 +3,7 @@ const dragTargetEdgeAttributeName = "gb-edit-mode-drag-target-edge";
 
 const clearDragTargetEdges = () => {
   const targetEdges = document.querySelectorAll(
-    `[${dragTargetEdgeAttributeName}]`
+    `[${dragTargetEdgeAttributeName}]`,
   );
   targetEdges.forEach((targetEdge) => {
     targetEdge.remove();
@@ -12,7 +12,7 @@ const clearDragTargetEdges = () => {
 
 const clearDragTargetAttribute = () => {
   const targetElements = document.querySelectorAll(
-    `[${dragTargetAttributeName}]`
+    `[${dragTargetAttributeName}]`,
   );
   targetElements.forEach((targetElement) => {
     targetElement.removeAttribute(dragTargetAttributeName);

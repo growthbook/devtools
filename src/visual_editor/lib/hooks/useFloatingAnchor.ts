@@ -8,13 +8,12 @@ export default function useFloatingAnchor(parentElement: Element | null) {
   const onChange = useCallback(
     throttle(() => {
       let selector = "";
-      if(parentElement)
-       selector =  getSelector(parentElement);
+      if (parentElement) selector = getSelector(parentElement);
       // get element by query selector
       const rect = document.querySelector(selector)?.getBoundingClientRect();
       setDomRect(rect ?? null);
     }, 1000 / 60),
-    [parentElement, setDomRect]
+    [parentElement, setDomRect],
   );
 
   useEffect(() => {

@@ -2,7 +2,7 @@ import { finder } from "@medv/finder";
 
 export default function getSelector(
   element: Element,
-  options?: { ignoreClassNames: boolean }
+  options?: { ignoreClassNames: boolean },
 ) {
   let selector = "";
   try {

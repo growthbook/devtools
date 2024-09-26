@@ -26,7 +26,7 @@ const IDrop: FC<{ tooltip: string }> = ({ tooltip }) => {
           {
             "gb-hidden gb-opacity-0": !showTooltip,
             "gb-opacity-100": showTooltip,
-          }
+          },
         )}
       >
         {tooltip}

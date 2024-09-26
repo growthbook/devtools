@@ -77,5 +77,5 @@ root.render(
     <ChakraProvider>
       <WaitForGrowthBook />
     </ChakraProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

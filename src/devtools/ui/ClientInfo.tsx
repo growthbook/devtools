@@ -12,7 +12,7 @@ export default function ClientInfo(props: ClientInfoProps) {
   const { onCopy: onCopyClientKey, hasCopied: hasCopiedClientKey } =
     useClipboard(props.clientKey);
   const { onCopy: onCopyApiHost, hasCopied: hasCopiedApiHost } = useClipboard(
-    props.apiHost
+    props.apiHost,
   );
   const { onCopy: onCopyRequestUrl, hasCopied: hasCopiedRequestUrl } =
     useClipboard(requestUrl);

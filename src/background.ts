@@ -52,7 +52,7 @@ const fetchVisualChangeset = async ({
       `${apiHost}/api/v1/visual-changesets/${visualChangesetId}?includeExperiment=1`,
       {
         headers: genHeaders(apiKey),
-      }
+      },
     );
 
     const res = await response.json();
@@ -131,7 +131,7 @@ const updateVisualChangeset = async ({
         headers: genHeaders(apiKey),
         method: "PUT",
         body: JSON.stringify(updatePayload),
-      }
+      },
     );
 
     const res = await resp.json();
@@ -256,7 +256,7 @@ const isSameOrigin = (url: string, origin: string) => {
         origin,
       });
       throw new Error(
-        'Unrecognizable domain type for either "url" or "origin"'
+        'Unrecognizable domain type for either "url" or "origin"',
       );
     }
   } catch (e) {
@@ -301,7 +301,7 @@ chrome.runtime.onMessage.addListener(
               !isSameOrigin(editorUrl, senderOrigin)
             )
               throw new Error(
-                `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`
+                `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`,
               );
             return updateVisualChangeset(data);
           })
@@ -330,5 +330,5 @@ chrome.runtime.onMessage.addListener(
 
     // return true to indicate async response
     return true;
-  }
+  },
 );

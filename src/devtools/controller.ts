@@ -9,7 +9,7 @@ import MessageSender = chrome.runtime.MessageSender;
 // Send message to content script
 function sendMessage(msg: Message) {
   if (chrome.tabs && chrome.devtools?.inspectedWindow) {
-    const  { tabId } = chrome.devtools.inspectedWindow;
+    const { tabId } = chrome.devtools.inspectedWindow;
     chrome.tabs.sendMessage(tabId || 0, msg);
   }
 }
@@ -18,7 +18,7 @@ function sendMessage(msg: Message) {
 let refreshListeners: Set<(err: string, data: RefreshMessage | null) => void> =
   new Set();
 export function onGrowthBookData(
-  cb: (err: string, data: RefreshMessage | null) => void
+  cb: (err: string, data: RefreshMessage | null) => void,
 ) {
   refreshListeners.add(cb);
   return () => {
@@ -41,7 +41,7 @@ chrome.runtime.onMessage.addListener(
         cb(msg.error, null);
       });
     }
-  }
+  },
 );
 
 export function requestRefresh() {

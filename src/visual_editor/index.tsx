@@ -95,7 +95,7 @@ const VisualEditor: FC<{}> = () => {
     (updates: Partial<VisualEditorVariation>) => {
       updateVariationAtIndex(selectedVariationIndex, updates);
     },
-    [selectedVariationIndex, updateVariationAtIndex]
+    [selectedVariationIndex, updateVariationAtIndex],
   );
 
   const { globalCss, setGlobalCss } = useGlobalCSS({
@@ -135,22 +135,22 @@ const VisualEditor: FC<{}> = () => {
   } = useEditMode({
     isEnabled: mode === "edit",
     variation: selectedVariation,
-    updateVariation: updateSelectedVariation  });
+    updateVariation: updateSelectedVariation,
+  });
 
   const moveHandleRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setDragging] = useState(false);
 
-
-  const {isDragging: draggingStarted } = useDragAndDrop({
+  const { isDragging: draggingStarted } = useDragAndDrop({
     isEnabled: mode === "edit" && !isInlineEditing,
-    elementToDrag: isInlineEditing? null : elementUnderEdit,
+    elementToDrag: isInlineEditing ? null : elementUnderEdit,
     addDomMutation,
     elementUnderEditMutations,
     setDomMutations,
     moveHandleRef,
     hasSDK,
     sdkVersion: version,
-  });  
+  });
   // wait for 1 second before setting dragging to true
   useEffect(() => {
     if (draggingStarted) {
@@ -168,7 +168,7 @@ const VisualEditor: FC<{}> = () => {
       (selectedVariation?.domMutations ?? []).length +
       (selectedVariation?.js ? 1 : 0) +
       (selectedVariation?.css ? 1 : 0),
-    [selectedVariation]
+    [selectedVariation],
   );
 
   useEffect(() => {
@@ -183,22 +183,22 @@ const VisualEditor: FC<{}> = () => {
   const forceUpdate = debounce(() => _forceUpdate(), 100);
 
   useEffect(() => {
-      const observer = new MutationObserver(() =>
-        setTimeout(() => forceUpdate(), 0)
-      );
-      observer.observe(document.body, {
-        attributes: true,
-        childList: true,
-        subtree: true,
-      });
-      return () => {
-        observer.disconnect();
-      }
+    const observer = new MutationObserver(() =>
+      setTimeout(() => forceUpdate(), 0),
+    );
+    observer.observe(document.body, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
+    return () => {
+      observer.disconnect();
+    };
   }, []);
   //reset inline editing when mode changes
   useEffect(() => {
     resetAndStopInlineEditing();
-  }, [mode] );
+  }, [mode]);
   return (
     <>
       <VisualEditorPane style={parentStyles}>
@@ -352,24 +352,28 @@ const VisualEditor: FC<{}> = () => {
       </VisualEditorPane>
 
       {/** Overlays for highlighting selected elements **/}
-      {mode === "edit" && elementUnderEdit && !isDragging  ? (
+      {mode === "edit" && elementUnderEdit && !isDragging ? (
         <>
           <FloatingFrame
             hideOverlay={isDragging}
             parentElement={elementUnderEdit}
             clearSelectedElement={() => {
               stopInlineEditing();
-            }
-            }
+            }}
           />
-         {!elementUnderEdit && <SelectorDisplay parentElement={elementUnderEdit} />}
+          {!elementUnderEdit && (
+            <SelectorDisplay parentElement={elementUnderEdit} />
+          )}
           {elementUnderEditMutations.length > 0 && !!elementUnderEdit ? (
             <FloatingUndoButton
               parentElement={elementUnderEdit}
-              undo={() =>{
-                const lastMutation = elementUnderEditMutations[elementUnderEditMutations.length - 1];
+              undo={() => {
+                const lastMutation =
+                  elementUnderEditMutations[
+                    elementUnderEditMutations.length - 1
+                  ];
                 if (lastMutation.value === elementUnderEdit.innerHTML) {
-                    removeDomMutation(lastMutation);
+                  removeDomMutation(lastMutation);
                 }
                 if (isGlobalObserverPaused()) {
                   resetAndStopInlineEditing();
@@ -417,7 +421,7 @@ if (shadowRoot) {
 document.body.appendChild(container);
 
 const root = ReactDOM.createRoot(
-  shadowRoot.querySelector("#visual-editor-root")!
+  shadowRoot.querySelector("#visual-editor-root")!,
 );
 
 root.render(<VisualEditor />);

@@ -55,7 +55,7 @@ const ToolbarButton = ({
           "hover:gb-bg-slate-600/75": !disabled,
           "gb-bg-slate-700": !disabled && isActive,
           "gb-cursor-not-allowed": disabled,
-        }
+        },
       )}
       onClick={disabled ? () => {} : isActive ? deactivate : activate}
     >
