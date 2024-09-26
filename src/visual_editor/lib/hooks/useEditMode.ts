@@ -440,13 +440,14 @@ const useEditMode: UseEditModeHook = ({
         setIsInlineEditing(false);
       }
     };
+
     const onPointerMove = throttle((event: MouseEvent) => {
       if (elementUnderEdit) return;
- 
+
       const { clientX: x, clientY: y } = event;
-      let domNode = document.elementFromPoint(x, y);
+      let domNode: Element | null = document.elementFromPoint(x, y);
       const tagType = domNode?.tagName.toLowerCase();
-      if (tagType && ["b","i", "u"].includes(tagType)) {
+      if (tagType && ["b", "i", "u"].includes(tagType)) {
         domNode = domNode?.parentElement || null;
       }
       // return early if we are over the visual editor itself (e.g. frame)
@@ -469,12 +470,13 @@ const useEditMode: UseEditModeHook = ({
       if (elementUnderEdit) return;
       if (elementUnderEdit === element) return;
 
-      // don't intercept cilcks on the visual editor itself
+      // don't intercept clicks on the visual editor itself
       if (element.id === CONTAINER_ID) return;
 
       event.preventDefault();
       event.stopPropagation();
     };
+
     const setCursorForInlineEditing = (element: HTMLElement) => {
       if (!element) return;
       const canInlineEdit = canInlineEditElement(element);
@@ -487,15 +489,15 @@ const useEditMode: UseEditModeHook = ({
       if (event.detail === 1) {
         let element = event.target as HTMLElement;
         const tagType = element?.tagName.toLowerCase();
-          if (tagType && ["b","i", "u"].includes(tagType)) {
+          if (tagType && ["b", "i", "u"].includes(tagType)) {
             element = element?.parentElement as HTMLElement;
           }
         if(!element) return;
         if (isInlineEditing) return;
-        // don't intercept cilcks on the visual editor itself
+        // don't intercept clicks on the visual editor itself
         if (element.id === CONTAINER_ID) return;
 
-        //need to set inline editing true before setting element under edit if it is not inline editing we revert the changes
+        // need to set inline editing true before setting element under edit. if it is not inline editing we revert the changes
         if (!elementUnderEdit) {
           setElementUnderEdit(element);
         }
