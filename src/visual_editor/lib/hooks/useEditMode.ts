@@ -14,7 +14,7 @@ import { VisualEditorVariation } from "../../../../devtools";
 export const hoverAttributeName = "gb-edit-mode-hover";
 
 // HTML attriibute names to ignore when editing
-export const IGNORED_ATTRS = ["class", hoverAttributeName];
+export const IGNORED_ATTRS = ["class", hoverAttributeName, "contenteditable", "caninlineedit"];
 
 const clearHoverAttribute = () => {
   const hoveredElements = document.querySelectorAll(`[${hoverAttributeName}]`);
@@ -344,10 +344,10 @@ const useEditMode: UseEditModeHook = ({
   };
   const clearInlineEditAttributes = () => {
     const inlineEditElements = document.querySelectorAll(
-      `[canInlineEdit], [contenteditable]`,
+      `[caninlineedit], [contenteditable]`,
     );
     inlineEditElements.forEach((element) => {
-      element.removeAttribute("canInlineEdit");
+      element.removeAttribute("caninlineedit");
       element.removeAttribute("contenteditable");
     });
   };
@@ -378,7 +378,7 @@ const useEditMode: UseEditModeHook = ({
       clearInlineEditAttributes();
       setInnerHTML(html);
     }
-    elementUnderEdit.setAttribute("canInlineEdit", "true");
+    elementUnderEdit.setAttribute("caninlineedit", "true");
     resumeGlobalObserver();
     elementUnderEdit.removeEventListener("keydown", () => {});
     // we need to reset if it is not inline editing
@@ -479,7 +479,7 @@ const useEditMode: UseEditModeHook = ({
       if (!element) return;
       const canInlineEdit = canInlineEditElement(element);
       if (canInlineEdit) {
-        element.setAttribute("canInlineEdit", "true");
+        element.setAttribute("caninlineedit", "true");
       }
     };
 

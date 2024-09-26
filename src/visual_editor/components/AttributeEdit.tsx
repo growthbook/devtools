@@ -155,13 +155,12 @@ const AttributeToken: FC<
     </div>
   );
 };
-
 const AttributeEdit: FC<{
   element: HTMLElement;
   onSave: (attributes: Attribute[]) => void;
 }> = ({ element, onSave }) => {
   const attributes = normalizeAttrs(element.attributes);
-
+  
   const removeAttr = useCallback(
     (name: string) => {
       onSave(attributes.filter((attr) => attr.name !== name));
