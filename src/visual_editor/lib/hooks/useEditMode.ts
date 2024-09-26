@@ -442,8 +442,13 @@ const useEditMode: UseEditModeHook = ({
     };
     const onPointerMove = throttle((event: MouseEvent) => {
       if (elementUnderEdit) return;
+ 
       const { clientX: x, clientY: y } = event;
-      const domNode = document.elementFromPoint(x, y);
+      let domNode = document.elementFromPoint(x, y);
+      const tagType = domNode?.tagName.toLowerCase();
+      if (tagType && ["b","i", "u"].includes(tagType)) {
+        domNode = domNode?.parentElement || null;
+      }
       // return early if we are over the visual editor itself (e.g. frame)
       if (domNode?.id === CONTAINER_ID) {
         clearHoverAttribute();
@@ -480,7 +485,12 @@ const useEditMode: UseEditModeHook = ({
 
     const clickHandler = (event: MouseEvent) => {
       if (event.detail === 1) {
-        const element = event.target as HTMLElement;
+        let element = event.target as HTMLElement;
+        const tagType = element?.tagName.toLowerCase();
+          if (tagType && ["b","i", "u"].includes(tagType)) {
+            element = element?.parentElement as HTMLElement;
+          }
+        if(!element) return;
         if (isInlineEditing) return;
         // don't intercept cilcks on the visual editor itself
         if (element.id === CONTAINER_ID) return;
