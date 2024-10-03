@@ -5,7 +5,7 @@ import mutate, {
   resumeGlobalObserver,
 } from "dom-mutator";
 import { useRef, useMemo, useCallback, useState, useEffect } from "react";
-import { throttle } from "lodash";
+import { set, throttle } from "lodash";
 import { Attribute } from "../../components/AttributeEdit";
 import { CONTAINER_ID } from "../..";
 import getSelector from "../getSelector";
@@ -55,7 +55,7 @@ type UseEditModeHook = (args: {
 
   ignoreClassNames: boolean;
   setIgnoreClassNames: (ignore: boolean) => void;
-  stopInlineEditing: () => void;
+  stopInlineEditing: (forceSave?: boolean) => void;
   resetAndStopInlineEditing: () => void;
   isInlineEditing: boolean;
 };
@@ -370,11 +370,11 @@ const useEditMode: UseEditModeHook = ({
     setIsInlineEditing(false);
   };
 
-  const stopInlineEditing = () => {
+  const stopInlineEditing = (forceSave = false) => {
     if (!elementUnderEdit) return;
     clearInlineEditAttributes();
     const html = elementUnderEdit.innerHTML;
-    if (html !== elementUnderEditHTML && isInlineEditing) {
+    if (html !== elementUnderEditHTML && (forceSave || isInlineEditing)) {
       clearInlineEditAttributes();
       setInnerHTML(html);
     }
@@ -391,8 +391,10 @@ const useEditMode: UseEditModeHook = ({
   const setInnerHTMLOnInlineEdit = (event: KeyboardEvent) => {
     if (!elementUnderEdit) return;
     if (event.key === "Enter") {
+      // prevent default behavior
       event.preventDefault();
-      stopInlineEditing();
+      //we need to force save the innerHTML because we are out of scope of the inline editing
+      stopInlineEditing(true);
       return;
     }
     if (event.key === "Escape") {
@@ -409,7 +411,7 @@ const useEditMode: UseEditModeHook = ({
     if (element?.textContent?.trim() === "") isValid = true;
     return isValid && !hasTextInChildren(element);
   };
-
+  
   // event handlers
   useEffect(() => {
     if (!isEnabled) return;
@@ -433,11 +435,9 @@ const useEditMode: UseEditModeHook = ({
         sel?.addRange(range);
         elementUnderEdit?.addEventListener(
           "keydown",
-          setInnerHTMLOnInlineEdit,
+          (event: KeyboardEvent) => setInnerHTMLOnInlineEdit(event),
           false,
         );
-      } else {
-        setIsInlineEditing(false);
       }
     };
 
