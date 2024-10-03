@@ -9,7 +9,7 @@ export default function getSelector(
     selector = finder(element, {
       seedMinLength: 3,
       ...(options?.ignoreClassNames && { className: () => false }),
-      attr: (name) => name.startsWith("data-"),
+      attr: (name) => false, // ignore all attributes
     });
   } catch (e) {
     selector =
