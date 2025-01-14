@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 .label {
-    @apply gb-font-semibold gb-text-gray-800;
+    @apply font-semibold text-gray-800;
 }
 
 .triangle {

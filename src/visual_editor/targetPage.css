@@ -6,18 +6,18 @@
   cursor: text !important;
 }
 
-[gb-edit-mode-hover] {
+[edit-mode-hover] {
   cursor: crosshair;
 }
 
 /* drag element highlight edges */
-[gb-edit-mode-drag-target] {
+[edit-mode-drag-target] {
   position: relative;
 }
 
-[gb-edit-mode-drag-target-edge] {
+[edit-mode-drag-target-edge] {
   position: fixed;
-  @apply gb-z-max;
+  @apply z-max;
 }
 [contenteditable]:focus {
   outline: 0px solid transparent;

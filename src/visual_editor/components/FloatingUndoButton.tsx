@@ -13,7 +13,7 @@ export default function FloatingUndoButton({
   if (!parentElement) return null;
   return (
     <div
-      className="gb-fixed gb-px-2 gb-py-1 gb-text-white gb-bg-indigo-800 gb-text-xs gb-z-front gb-cursor-pointer gb-font-semibold"
+      className="fixed px-2 py-1 text-white bg-indigo-800 text-xs z-front cursor-pointer font-semibold"
       style={{
         top: domRect.top - (26 + 8),
         left: domRect.left + domRect.width - 44.47,

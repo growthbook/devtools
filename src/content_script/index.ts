@@ -1,4 +1,4 @@
-import type { Message, BGOpenOptionsPageMessage } from "../../devtools";
+import type { Message } from "../../devtools";
 import {
   genericDevtoolsMessagePassThrough,
   loadVisualEditorQueryParams,
@@ -27,12 +27,6 @@ window.addEventListener("message", function (event: MessageEvent<Message>) {
       break;
     case "GB_REQUEST_TRANSFORM_COPY":
       visualEditorTransformCopyRequest(data);
-      break;
-    case "GB_OPEN_OPTIONS_PAGE":
-      chrome.runtime.sendMessage<BGOpenOptionsPageMessage>({
-        type: "BG_OPEN_OPTIONS_PAGE",
-        data: null,
-      });
       break;
     default:
       break;

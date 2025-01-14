@@ -24,34 +24,34 @@ const VisualEditorSection: FC<{
     <>
       <div
         className={clsx(
-          "gb-text-light gb-text-xs gb-font-semibold gb-uppercase gb-p-4",
+          "text-light text-xs font-semibold uppercase p-4",
           {
-            "gb-flex gb-justify-between": onClose,
-            "gb-shadow-xl": isExpanded,
-            "gb-mb-2": isExpanded,
+            "flex justify-between": onClose,
+            "shadow-xl": isExpanded,
+            "mb-2": isExpanded,
           },
         )}
       >
-        <div className="gb-flex gb-items-center gb-relative">
+        <div className="flex items-center relative">
           <div
             className={clsx({
-              "gb-cursor-pointer": isCollapsible,
+              "cursor-pointer": isCollapsible,
             })}
             onClick={toggleExpanded}
           >
             {title}
           </div>
           {tooltip && (
-            <div className="gb-ml-2 gb-cursor-pointer" onClick={toggleExpanded}>
+            <div className="ml-2 cursor-pointer" onClick={toggleExpanded}>
               <IDrop tooltip={tooltip} />
             </div>
           )}
           {isCollapsible ? (
             <RxCaretDown
               className={clsx(
-                "gb-w-4 gb-h-4 gb-cursor-pointer gb-text-link gb-mx-2",
+                "w-4 h-4 cursor-pointer text-link mx-2",
                 {
-                  "gb-rotate-180": !isExpanded,
+                  "rotate-180": !isExpanded,
                 },
               )}
               onClick={toggleExpanded}
@@ -60,8 +60,8 @@ const VisualEditorSection: FC<{
         </div>
 
         {onClose && (
-          <button className="gb-text-link" onClick={onClose}>
-            <RxCross1 className="gb-w-3 gb-h-3" />
+          <button className="text-link" onClick={onClose}>
+            <RxCross1 className="w-3 h-3" />
           </button>
         )}
       </div>

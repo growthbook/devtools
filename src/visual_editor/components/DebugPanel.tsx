@@ -5,17 +5,17 @@ import { IoMdCloseCircle, IoMdCheckmarkCircle } from "react-icons/io";
 import Tooltip from "./Tooltip";
 
 const Row = ({ children }: { children: ReactNode }) => (
-  <div className="gb-py-2 gb-px-4 gb-bg-slate-700 odd:gb-bg-slate-600 first:gb-rounded-t last:gb-rounded-b">
+  <div className="py-2 px-4 bg-slate-700 odd:bg-slate-600 first:rounded-t last:rounded-b">
     {children}
   </div>
 );
 
 const GreenCheck = () => (
-  <IoMdCheckmarkCircle className="gb-text-green-400 gb-w-4 gb-h-4 gb-inline" />
+  <IoMdCheckmarkCircle className="text-green-400 w-4 h-4 inline" />
 );
 
 const RedX = () => (
-  <IoMdCloseCircle className="gb-text-red-400 gb-w-4 gb-h-4 gb-inline" />
+  <IoMdCloseCircle className="text-red-400 w-4 h-4 inline" />
 );
 
 export default function DebugPanel({
@@ -36,25 +36,25 @@ export default function DebugPanel({
   hasHashAttribute: boolean;
 }) {
   return (
-    <div className="gb-text-light gb-px-4 gb-text-sm">
+    <div className="text-light px-4 text-sm">
       <Row>
         Experiment ID:{" "}
-        <div className="gb-text-white">
+        <div className="text-white">
           {experiment ? experiment.id : "N/A"}
         </div>
       </Row>
 
       <Row>
         Visual Changeset ID:{" "}
-        <div className="gb-text-white">
+        <div className="text-white">
           {visualChangeset ? visualChangeset.id : "N/A"}
         </div>
       </Row>
 
       <Row>
         GrowthBook SDK:
-        <ul className="gb-list-disc gb-ml-4">
-          <li className="gb-text-white">
+        <ul className="list-disc ml-4">
+          <li className="text-white">
             {hasSDK ? (
               <>
                 <GreenCheck /> Detected
@@ -65,10 +65,10 @@ export default function DebugPanel({
               </>
             )}
           </li>
-          <li className="gb-text-white">
+          <li className="text-white">
             Version: {sdkVersion ? sdkVersion : "Not detected"}
           </li>
-          <li className="gb-text-white">
+          <li className="text-white">
             {hasLatest ? (
               <>
                 <GreenCheck /> Up to date
@@ -84,10 +84,10 @@ export default function DebugPanel({
 
       <Row>
         Hash Attribute:{" "}
-        <div className="gb-text-white">
-          <ul className="gb-ml-4 gb-list-disc">
+        <div className="text-white">
+          <ul className="ml-4 list-disc">
             <li>
-              <code className="gb-text-xs gb-inline-block gb-max-w-full gb-whitespace-nowrap gb-text-ellipsis gb-overflow-hidden gb-bg-white gb-text-red-600 gb-rounded gb-px-1">
+              <code className="text-xs inline-block max-w-full whitespace-nowrap text-ellipsis overflow-hidden bg-white text-red-600 rounded px-1">
                 {hashAttribute ? hashAttribute : ""}
               </code>
             </li>
@@ -109,17 +109,17 @@ export default function DebugPanel({
       <Row>
         URL Targets:{" "}
         {visualChangeset?.urlPatterns.map((pattern, i) => (
-          <div key={i} className="gb-my-2 gb-text-white">
+          <div key={i} className="my-2 text-white">
             <Tooltip label={pattern.pattern}>
-              <code className="gb-text-xs gb-inline-block gb-max-w-full gb-whitespace-nowrap gb-text-ellipsis gb-overflow-hidden gb-bg-white gb-text-red-600 gb-rounded gb-px-1">
+              <code className="text-xs inline-block max-w-full whitespace-nowrap text-ellipsis overflow-hidden bg-white text-red-600 rounded px-1">
                 {pattern.pattern}
               </code>
             </Tooltip>
-            <ul className="gb-ml-4 gb-list-disc">
+            <ul className="ml-4 list-disc">
               <li>{pattern.include ? "include" : "exclude"}</li>
               <li>{pattern.type}</li>
               <li>
-                <div className="gb-mr-1">
+                <div className="mr-1">
                   {isURLTargeted(window.location.href, [pattern]) ? (
                     <>
                       <GreenCheck /> Targets this page

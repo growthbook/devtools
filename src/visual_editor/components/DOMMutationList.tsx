@@ -11,20 +11,20 @@ const DOMMutationAccordian: FC<{
 }> = ({ mutations, onRemoveMutation }) => {
   return (
     <Accordion.Root
-      className="gb-text-xs gb-rounded gb-overflow-hidden"
+      className="text-xs rounded overflow-hidden"
       type="multiple"
     >
       {mutations.map((m, i) => (
         <Accordion.Item
           key={i}
           value={`item-${i}`}
-          className="gb-bg-slate-700 odd:gb-bg-slate-600"
+          className="bg-slate-700 odd:bg-slate-600"
         >
           <Accordion.Header>
-            <Accordion.Trigger className="gb-p-2 gb-text-sm gb-text-light gb-flex gb-w-full gb-justify-between">
-              <div className="gb-flex gb-w-full">
-                <div className="gb-w-6">#{i + 1}.</div>
-                <div className="gb-w-12 gb-text-left gb-mx-2">
+            <Accordion.Trigger className="p-2 text-sm text-light flex w-full justify-between">
+              <div className="flex w-full">
+                <div className="w-6">#{i + 1}.</div>
+                <div className="w-12 text-left mx-2">
                   <code>{m.action}</code>
                 </div>
                 <code>{m.attribute}</code>
@@ -32,8 +32,8 @@ const DOMMutationAccordian: FC<{
               <RxChevronDown aria-hidden />
             </Accordion.Trigger>
           </Accordion.Header>
-          <Accordion.Content className="gb-flex gb-flex-col gb-rounded gb-overflow-hidden">
-            <div className="gb-p-2 gb-pb-0">
+          <Accordion.Content className="flex flex-col rounded overflow-hidden">
+            <div className="p-2 pb-0">
               {[
                 "action",
                 "attribute",
@@ -46,20 +46,20 @@ const DOMMutationAccordian: FC<{
                 .map((key) => (
                   <div
                     key={key}
-                    className="gb-flex gb-flex-col gb-mb-2  last:gb-mb-0"
+                    className="flex flex-col mb-2  last:mb-0"
                   >
-                    <div className="gb-text-xs gb-text-slate-400 gb-mb-1">
+                    <div className="text-xs text-slate-400 mb-1">
                       {key}
                     </div>
-                    <div className="gb-text-light">
+                    <div className="text-light">
                       <code>{m[key as keyof DeclarativeMutation]}</code>
                     </div>
                   </div>
                 ))}
             </div>
-            <div className="gb-w-full gb-flex gb-justify-end gb-p-2">
+            <div className="w-full flex justify-end p-2">
               <span
-                className="gb-text-red-500 hover:gb-underline gb-cursor-pointer"
+                className="text-red-500 hover:underline cursor-pointer"
                 onClick={() => onRemoveMutation(m)}
               >
                 delete
@@ -130,8 +130,8 @@ const DOMMutationList: FC<{
   );
 
   return (
-    <div className="gb-px-4">
-      <div className="gb-mb-4">
+    <div className="px-4">
+      <div className="mb-4">
         <DOMMutationAccordian
           mutations={mutations}
           onRemoveMutation={onRemoveMutation}
@@ -140,7 +140,7 @@ const DOMMutationList: FC<{
 
       {addMutation && !showEditor && (
         <div
-          className="gb-text-link gb-text-sm"
+          className="text-link text-sm"
           onClick={() => setShowEditor(true)}
         >
           + Add custom DOM mutation

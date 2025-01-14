@@ -152,10 +152,6 @@ type TransformCopyResponseMessage = {
   data: TransformCopyPayload;
 };
 
-type OpenOptionsPageMessage = {
-  type: "GB_OPEN_OPTIONS_PAGE";
-};
-
 // Messages sent to content script
 export type Message =
   | RequestRefreshMessage
@@ -169,8 +165,7 @@ export type Message =
   | UpdateVisualChangesetRequestMessage
   | UpdateVisualChangesetResponseMessage
   | TransformCopyRequestMessage
-  | TransformCopyResponseMessage
-  | OpenOptionsPageMessage;
+  | TransformCopyResponseMessage;
 
 export type BGLoadVisualChangsetMessage = {
   type: "BG_LOAD_VISUAL_CHANGESET";
@@ -196,14 +191,8 @@ export type BGTransformCopyMessage = {
   };
 };
 
-export type BGOpenOptionsPageMessage = {
-  type: "BG_OPEN_OPTIONS_PAGE";
-  data: null;
-};
-
 // Messages sent to background script
 export type BGMessage =
   | BGLoadVisualChangsetMessage
   | BGUpdateVisualChangsetMessage
-  | BGTransformCopyMessage
-  | BGOpenOptionsPageMessage;
+  | BGTransformCopyMessage;

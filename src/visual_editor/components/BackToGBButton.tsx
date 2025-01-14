@@ -5,7 +5,7 @@ const BackToGBButton: FC<{
   experimentUrl: string | null;
 }> = ({ experimentUrl }) => (
   <button
-    className="gb-w-full gb-p-2 gb-bg-indigo-800 hover:gb-bg-indigo-700 gb-rounded gb-text-white gb-font-semibold gb-text-lg gb-transition-colors"
+    className="w-full p-2 bg-indigo-800 hover:bg-indigo-700 rounded text-white font-semibold text-lg transition-colors"
     onClick={() => {
       if (experimentUrl) {
         window.location.href = experimentUrl;

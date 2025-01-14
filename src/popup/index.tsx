@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import * as ReactDOM from "react-dom/client";
 import useApiKey from "../visual_editor/lib/hooks/useApiKey";
 import "./index.css";
-import ApiKeyForm from "../options/ApiKeyForm";
+import ApiKeyForm from "./ApiKeyForm";
 import logo from "../devtools/ui/logo.svg";
 
 const Popup = () => {
@@ -13,47 +13,47 @@ const Popup = () => {
 
   return (
     <>
-      <div className="gb-w-[360px] gb-p-3 gb-bg-zinc-100">
-        <h1 className="gb-text-lg gb-mb-2">
+      <div className="w-[360px] p-3 bg-zinc-100">
+        <h1 className="text-lg mb-2">
           <img
             src={logo}
             alt="GrowthBook"
-            className="gb-w-[140px] gb-inline-block gb-mb-1 gb-mr-2"
+            className="w-[140px] inline-block mb-1 mr-2"
           />
-          <span className="gb-text-gray-500 gb-font-bold">DevTools</span>
+          <span className="text-gray-500 font-bold">DevTools</span>
         </h1>
 
-        <div className="gb-mb-3 gb-px-3 gb-py-2 gb-border gb-border-gray-200 gb-rounded-lg gb-bg-white">
-          <label className="gb-inline-block gb-label gb-text-sm gb-mb-1">
+        <div className="mb-3 px-3 py-2 border border-gray-200 rounded-lg bg-white">
+          <label className="inline-block label text-sm mb-1">
             GrowthBook Inspector
           </label>
-          <div className="gb-mt-1">
+          <div className="mt-1">
             To inspect the current page, open the <strong>Dev Tools</strong> (
-            <code className="gb-text-red-800 gb-whitespace-nowrap">
+            <code className="text-red-800 whitespace-nowrap">
               {getDevToolsShortcut()}
             </code>
             ) and find the <strong>GrowthBook</strong> tab.
           </div>
         </div>
 
-        <div className="gb-mb-3 gb-px-3 gb-py-2 gb-border gb-border-gray-200 gb-rounded-lg gb-bg-white">
-          <label className="gb-label gb-text-sm">Visual Editor</label>
-          <div className="gb-mt-1">
+        <div className="mb-3 px-3 py-2 border border-gray-200 rounded-lg bg-white">
+          <label className="label text-sm">Visual Editor</label>
+          <div className="mt-1">
             To use the visual editor, you must create an experiment in{" "}
             <strong>GrowthBook</strong> and add <strong>Visual Editor</strong>{" "}
             changes.
           </div>
         </div>
 
-        <div className="gb-px-3 gb-py-2 gb-border gb-border-gray-200 gb-rounded-lg gb-bg-white">
+        <div className="px-3 py-2 border border-gray-200 rounded-lg bg-white">
           <a
-            className="gb-flex gb-justify-between gb-items-center hover:gb-underline"
+            className="flex justify-between items-center hover:underline"
             role="button"
             onClick={() => {
               setCredentialsOpen(!credentialsOpen);
             }}
           >
-            <label className="gb-label gb-text-sm gb-cursor-pointer">
+            <label className="label text-sm cursor-pointer">
               My Credentials
             </label>
             <span
@@ -62,7 +62,7 @@ const Popup = () => {
             />
           </a>
           {credentialsOpen && (
-            <div className="gb-mt-2">
+            <div className="mt-2">
               <ApiKeyForm
                 apiHost={apiHost}
                 apiKey={apiKey}

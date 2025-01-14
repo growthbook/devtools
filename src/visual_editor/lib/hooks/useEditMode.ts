@@ -11,7 +11,7 @@ import { CONTAINER_ID } from "../..";
 import getSelector from "../getSelector";
 import { VisualEditorVariation } from "../../../../devtools";
 
-export const hoverAttributeName = "gb-edit-mode-hover";
+export const hoverAttributeName = "edit-mode-hover";
 
 // HTML attriibute names to ignore when editing
 export const IGNORED_ATTRS = ["class", hoverAttributeName, "contenteditable", "caninlineedit"];
