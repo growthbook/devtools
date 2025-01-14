@@ -6,26 +6,26 @@ const IDrop: FC<{ tooltip: string }> = ({ tooltip }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   return (
     <div
-      className="gb-text-light gb-normal-case"
+      className="text-light normal-case"
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
-      <IoMdInformationCircle className="gb-w-3 gb-h-3" />
+      <IoMdInformationCircle className="w-3 h-3" />
       <div
         className={clsx(
-          "gb-absolute",
-          "gb-top-4",
-          "gb-left-0",
-          "gb-w-64",
-          "gb-z-max",
-          "gb-bg-slate-600",
-          "gb-p-2",
-          "gb-rounded",
-          "gb-font-normal",
-          "gb-transition-opacity",
+          "absolute",
+          "top-4",
+          "left-0",
+          "w-64",
+          "z-max",
+          "bg-slate-600",
+          "p-2",
+          "rounded",
+          "font-normal",
+          "transition-opacity",
           {
-            "gb-hidden gb-opacity-0": !showTooltip,
-            "gb-opacity-100": showTooltip,
+            "hidden opacity-0": !showTooltip,
+            "opacity-100": showTooltip,
           },
         )}
       >

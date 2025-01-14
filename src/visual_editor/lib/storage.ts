@@ -1,4 +1,4 @@
-const NAMESPACE = "gb-devtools";
+const NAMESPACE = "devtools";
 const VERSION = "v1";
 const API_HOST = `${NAMESPACE}-${VERSION}-api-host`;
 const API_KEY = `${NAMESPACE}-${VERSION}-api-key`;

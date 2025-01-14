@@ -17,7 +17,7 @@ const SelectorDisplay: FC<{
 
   return (
     <div
-      className="gb-fixed gb-p-2 gb-bg-indigo-800 gb-text-white gb-text-xs gb-z-front"
+      className="fixed p-2 bg-indigo-800 text-white text-xs z-front"
       style={{ top: domRect.bottom + 8, left: domRect.left }}
     >
       {selector}

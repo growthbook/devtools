@@ -38,7 +38,7 @@ const ReloadPageButton: FC<{
 }> = ({ params, variationIndex, visualChangesetId, hasAiEnabled }) => {
   return (
     <button
-      className="gb-text-light gb-text-xs gb-mt-2"
+      className="text-light text-xs mt-2"
       onClick={() =>
         refreshWithParams({
           params,

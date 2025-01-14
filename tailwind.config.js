@@ -61,6 +61,5 @@ module.exports = {
       },
     },
   },
-  prefix: "gb-",
   plugins: [],
 };

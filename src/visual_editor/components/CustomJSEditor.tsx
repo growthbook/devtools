@@ -11,22 +11,22 @@ const CustomJSEditor: FC<{
   }, [incomingJs]);
 
   return (
-    <div className="gb-px-4">
+    <div className="px-4">
       <textarea
-        className="gb-w-full gb-h-64 gb-rounded gb-p-2"
+        className="w-full h-64 rounded p-2"
         placeholder="Enter JS here"
         value={js}
         onChange={(e) => setJs(e.currentTarget.value)}
       />
-      <div className="gb-flex gb-flex-col">
+      <div className="flex flex-col">
         <button
           disabled={incomingJs === js}
-          className="gb-mt-2 gb-p-2 gb-px-4 gb-border-indigo-500 disabled:opacity-30 disabled:gb-border-gray-500 gb-border-2 gb-rounded disabled:gb-text-gray-500 gb-text-indigo-500 gb-font-semibold"
+          className="mt-2 p-2 px-4 border-indigo-500 disabled:opacity-30 disabled:border-gray-500 border-2 rounded disabled:text-gray-500 text-indigo-500 font-semibold"
           onClick={() => onSubmit(js)}
         >
           Save
         </button>
-        <div className="gb-text-xs gb-pt-2 gb-text-light">
+        <div className="text-xs pt-2 text-light">
           Note: Side-effects made by this JS cannot be undone. If you want to
           revert the changes, you will have to reload the page.
         </div>

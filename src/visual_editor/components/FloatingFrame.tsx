@@ -39,7 +39,7 @@ const FloatingFrameOverlay = ({
   clear: () => void;
 }) => (
   <div
-    className={clsx("gb-fixed", "gb-z-front", "gb-bg-black/25")}
+    className={clsx("fixed", "z-front", "bg-black/25")}
     style={overlayStyles(domRect)[position]}
     onClick={clear}
   ></div>
@@ -81,9 +81,9 @@ const FloatingFrameEdge = ({
 }) => {
   return (
     <div
-      className={clsx("gb-fixed", "gb-z-front", "gb-border-indigo-600", {
-        "gb-border-t": position === "top" || position === "bottom",
-        "gb-border-l": position === "right" || position === "left",
+      className={clsx("fixed", "z-front", "border-indigo-600", {
+        "border-t": position === "top" || position === "bottom",
+        "border-l": position === "right" || position === "left",
       })}
       style={edgeStyles(domRect)[position]}
     ></div>

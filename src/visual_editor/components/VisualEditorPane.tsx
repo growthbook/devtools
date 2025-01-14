@@ -5,11 +5,11 @@ const VisualEditorPane: FC<{
   style: CSSProperties;
 }> = ({ children, style }) => (
   <div
-    className="gb-rounded-xl gb-shadow-xl gb-z-max gb-w-80 gb-cursor-default gb-exp-creator gb-bg-dark"
+    className="rounded-xl shadow-xl z-max w-80 cursor-default exp-creator bg-dark"
     style={style}
   >
     <div
-      className="gb-overflow-y-auto"
+      className="overflow-y-auto"
       style={{
         maxHeight: "90vh",
       }}

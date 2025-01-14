@@ -3,31 +3,31 @@
 @tailwind utilities;
 
 * {
-  @apply gb-font-sans;
+  @apply font-sans;
 }
 
-.gb-bg-dark {
-  @apply gb-bg-slate-800;
+.bg-dark {
+  @apply bg-slate-800;
 }
 
-.gb-logo-bg {
+.logo-bg {
   background: linear-gradient(135deg, #c111dd, #81d, #350e47);
   animation: gradient 5s ease infinite;
   background-size: 200% 200%;
 }
 
-.gb-border-gb {
+.border-gb {
   border-color: #df5ef3;
 }
 
-.gb-ai-section-title {
+.ai-section-title {
   background: linear-gradient(135deg, #f4c6fb, #df5ef3);
   animation: gradient 5s ease infinite;
   background-size: 200% 200%;
   background-clip: text;
 }
 
-.gb-text-ai-label {
+.text-ai-label {
   color: #df5ef3;
 }
 
@@ -43,7 +43,7 @@
   }
 }
 
-.gb-exp-creator {
+.exp-creator {
   animation: appear 500ms ease-in-out;
 }
 
@@ -58,15 +58,15 @@
   }
 }
 
-.gb-text-light {
-  @apply gb-text-slate-300;
+.text-light {
+  @apply text-slate-300;
 }
 
-.gb-text-link {
-  @apply gb-text-slate-300 hover:gb-text-slate-100;
+.text-link {
+  @apply text-slate-300 hover:text-slate-100;
   cursor: pointer;
 }
 
 input, select, textarea {
-  @apply gb-text-black;
+  @apply text-black;
 }
