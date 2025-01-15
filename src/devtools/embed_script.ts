@@ -73,6 +73,7 @@ function handleSdkChange(gb?: GrowthBook) {
   const msg = {
     type: "BG_SET_SDK_USAGE_DATA",
     data: {
+      // todo: sdk health check data
       sdkFound: !!gb,
     }
   };

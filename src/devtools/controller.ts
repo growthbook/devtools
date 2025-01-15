@@ -65,7 +65,7 @@ export function setOverrides(data: Omit<SetOverridesMessage, "type">) {
 
 export function setSDKUsageData(data: Record<string, any>) {
   sendBGMessage({
-    type: "BG_SET_SDK_USAGE_DATA",
+    type: "SET_SDK_USAGE_DATA",
     data,
   });
 }

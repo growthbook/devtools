@@ -8,16 +8,10 @@ import {
   visualEditorUpdateChangesetRequest,
 } from "./pageMessageHandlers";
 
-// VISUAL EDITOR:
 // Listen for messages from the page
 window.addEventListener("message", function (event: MessageEvent<Message | BGMessage>) {
   const data = event.data;
   switch (data?.type) {
-    case "GB_REFRESH":
-    case "GB_ERROR":
-    case "BG_SET_SDK_USAGE_DATA":
-      genericDevtoolsMessagePassThrough(data);
-      break;
     case "GB_REQUEST_OPEN_VISUAL_EDITOR":
       visualEditorOpenRequest(data);
       break;
@@ -30,7 +24,13 @@ window.addEventListener("message", function (event: MessageEvent<Message | BGMes
     case "GB_REQUEST_TRANSFORM_COPY":
       visualEditorTransformCopyRequest(data);
       break;
+    case "GB_REFRESH":
+    case "GB_ERROR":
+    case "BG_SET_SDK_USAGE_DATA":
+      genericDevtoolsMessagePassThrough(data);
+      break;
     default:
+      console.error("Unknown message type", data?.type || data);
       break;
   }
 });

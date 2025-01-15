@@ -202,3 +202,8 @@ export type BGMessage =
   | BGUpdateVisualChangsetMessage
   | BGTransformCopyMessage
   | BGSetSDKUsageData;
+
+export type GenericMessage = {
+  type: string;
+  data?: Record<string, any>;
+}

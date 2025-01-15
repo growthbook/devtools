@@ -275,6 +275,22 @@ chrome.runtime.onMessage.addListener(
     const senderOrigin = sender.origin;
 
     switch (type) {
+      case "BG_SET_SDK_USAGE_DATA":
+        let setText = true;
+        if (data?.sdkFound !== undefined) {
+          if (data.sdkFound) {
+            chrome.action.setIcon({ path: chrome.runtime.getURL("/logo128-connected.png") });
+          } else {
+            chrome.action.setIcon({ path: chrome.runtime.getURL("/logo128.png") });
+            setText = false;
+          }
+        }
+        if (setText) {
+          chrome.action.setBadgeText({ text: data?.totalItems ? data.totalItems + "" : "" });
+        } else {
+          chrome.action.setBadgeText({ text: "" });
+        }
+        break;
       case "BG_LOAD_VISUAL_CHANGESET":
         fetchVisualChangeset(data).then((res) => {
           if (res.error) return sendResponse({ error: res.error });
@@ -318,22 +334,6 @@ chrome.runtime.onMessage.addListener(
           if (res.error) return sendResponse({ error: res.error });
           sendResponse(res);
         });
-        break;
-      case "BG_SET_SDK_USAGE_DATA":
-        let setText = true;
-        if (data?.sdkFound !== undefined) {
-          if (data.sdkFound) {
-            chrome.action.setIcon({ path: chrome.runtime.getURL("/logo128-connected.png") });
-          } else {
-            chrome.action.setIcon({ path: chrome.runtime.getURL("/logo128.png") });
-            setText = false;
-          }
-        }
-        if (setText) {
-          chrome.action.setBadgeText({ text: data?.totalItems ? data.totalItems + "" : "" });
-        } else {
-          chrome.action.setBadgeText({ text: "" });
-        }
         break;
       default:
         sendResponse();
