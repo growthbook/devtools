@@ -15,7 +15,7 @@ import Experiment from "./Experiment";
 import { IconButton } from "@chakra-ui/button";
 import { MdHistory } from "react-icons/md";
 import { DebugLogs } from "../../../devtools";
-import { setOverrides } from "../controller";
+import {setOverrides, setSDKUsageData} from "../controller";
 import Layout from "./Layout";
 import ClientInfo from "./ClientInfo";
 
@@ -112,6 +112,12 @@ function App(props: Props) {
   const filteredExperiments = experiments.filter(
     (e) => !q || e.experiment.key.includes(q),
   );
+
+  const totalItems = features.length + experiments.length;
+
+  useEffect(() => {
+    setSDKUsageData({ totalItems });
+  }, [totalItems])
 
   return (
     <Layout

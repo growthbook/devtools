@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useEffect, useState } from "react";
 import { clsx } from "clsx";
-import GBLogo from "../../../public/logo192.png";
+import GBLogo from "../../../public/logo128.png";
 
 // used to determine x y delta of mouse movement
 let originX: number | undefined;

@@ -1,4 +1,4 @@
-import type { Message } from "../../devtools";
+import type {BGMessage, Message} from "../../devtools";
 import {
   genericDevtoolsMessagePassThrough,
   loadVisualEditorQueryParams,
@@ -8,12 +8,14 @@ import {
   visualEditorUpdateChangesetRequest,
 } from "./pageMessageHandlers";
 
+// VISUAL EDITOR:
 // Listen for messages from the page
-window.addEventListener("message", function (event: MessageEvent<Message>) {
+window.addEventListener("message", function (event: MessageEvent<Message | BGMessage>) {
   const data = event.data;
   switch (data?.type) {
     case "GB_REFRESH":
     case "GB_ERROR":
+    case "BG_SET_SDK_USAGE_DATA":
       genericDevtoolsMessagePassThrough(data);
       break;
     case "GB_REQUEST_OPEN_VISUAL_EDITOR":
@@ -45,6 +47,7 @@ chrome.runtime.onMessage.addListener(async (msg: Message) => {
       break;
   }
 });
+
 
 // Inject devtools content script
 const DEVTOOLS_SCRIPT_ID = "gbdevtools-page-script";

@@ -266,8 +266,8 @@ const isSameOrigin = (url: string, origin: string) => {
 };
 
 /**
- * Listen for messages from the devtools. We have to keep the handler synchronous
- * so we can return true to indicate an async response to chrome.
+ * Listen for messages from the devtools and content script.
+ * We have to keep the handler synchronous so we can return true to indicate an async response to chrome.
  */
 chrome.runtime.onMessage.addListener(
   (message: BGMessage, sender, sendResponse) => {
@@ -318,6 +318,22 @@ chrome.runtime.onMessage.addListener(
           if (res.error) return sendResponse({ error: res.error });
           sendResponse(res);
         });
+        break;
+      case "BG_SET_SDK_USAGE_DATA":
+        let setText = true;
+        if (data?.sdkFound !== undefined) {
+          if (data.sdkFound) {
+            chrome.action.setIcon({ path: chrome.runtime.getURL("/logo128-connected.png") });
+          } else {
+            chrome.action.setIcon({ path: chrome.runtime.getURL("/logo128.png") });
+            setText = false;
+          }
+        }
+        if (setText) {
+          chrome.action.setBadgeText({ text: data?.totalItems ? data.totalItems + "" : "" });
+        } else {
+          chrome.action.setBadgeText({ text: "" });
+        }
         break;
       default:
         sendResponse();

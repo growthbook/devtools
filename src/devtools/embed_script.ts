@@ -67,6 +67,18 @@ function getRefreshMessage(gb: GrowthBook): RefreshMessage {
   return msg;
 }
 
+function handleSdkChange(gb?: GrowthBook) {
+  if (document.hidden) return;
+  // todo: better handling, tab switching, no tab selected
+  const msg = {
+    type: "BG_SET_SDK_USAGE_DATA",
+    data: {
+      sdkFound: !!gb,
+    }
+  };
+  window.postMessage(msg, window.location.origin);
+}
+
 // Sync changes to devtools if there are any
 let lastMsg: string = "";
 function syncToDevtools(gb: GrowthBook, force?: boolean) {
@@ -105,8 +117,15 @@ window.addEventListener("message", function (event: MessageEvent<Message>) {
 onGrowthBookLoad((gb) => {
   window.setInterval(() => {
     syncToDevtools(gb);
+    handleSdkChange(gb);
   }, 1000);
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    handleSdkChange();
+  }
 });
 
 // Request a refresh on load
 requestRefresh();
+handleSdkChange();

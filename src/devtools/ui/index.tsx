@@ -56,15 +56,7 @@ function WaitForGrowthBook() {
   }
 
   return (
-    <App
-      url={data.url}
-      clientKey={data.clientKey}
-      apiHost={data.apiHost}
-      features={data.features}
-      experiments={data.experiments}
-      attributes={data.attributes}
-      overrides={data.overrides || {}}
-    />
+    <App {...data} />
   );
 }
 

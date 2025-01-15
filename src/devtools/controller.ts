@@ -1,4 +1,5 @@
 import {
+  BGMessage,
   ErrorMessage,
   Message,
   RefreshMessage,
@@ -12,6 +13,11 @@ function sendMessage(msg: Message) {
     const { tabId } = chrome.devtools.inspectedWindow;
     chrome.tabs.sendMessage(tabId || 0, msg);
   }
+}
+
+// Send message to background worker
+function sendBGMessage(msg: BGMessage) {
+  chrome.runtime.sendMessage(msg);
 }
 
 // Listen for updates from content script and forward to any listeners
@@ -54,5 +60,12 @@ export function setOverrides(data: Omit<SetOverridesMessage, "type">) {
   sendMessage({
     type: "GB_SET_OVERRIDES",
     ...data,
+  });
+}
+
+export function setSDKUsageData(data: Record<string, any>) {
+  sendBGMessage({
+    type: "BG_SET_SDK_USAGE_DATA",
+    data,
   });
 }

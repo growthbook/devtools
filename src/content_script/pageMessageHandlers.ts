@@ -10,7 +10,7 @@ import {
   BGLoadVisualChangsetMessage,
   UpdateVisualChangesetResponseMessage,
   LoadVisualChangesetResponseMessage,
-  TransformCopyResponseMessage,
+  TransformCopyResponseMessage, BGMessage,
 } from "../../devtools";
 import {
   FetchVisualChangesetPayload,
@@ -21,7 +21,7 @@ import { VISUAL_CHANGESET_ID_PARAMS_KEY } from "../visual_editor/lib/constants";
 import { saveApiHost, saveApiKey } from "../visual_editor/lib/storage";
 
 export const genericDevtoolsMessagePassThrough = (
-  message: RefreshMessage | ErrorMessage,
+  message: RefreshMessage | ErrorMessage | BGMessage,
 ) => {
   chrome.runtime.sendMessage(message);
 };

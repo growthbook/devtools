@@ -19,7 +19,8 @@
       "resources": [
         "js/devtools_embed_script.js",
         "js/visual_editor.js",
-        "js/logo192.png",
+        "js/logo128.png",
+        "js/logo128-connected.png",
         "js/create-api-key.png",
         "options.html"
       ]
@@ -35,9 +36,9 @@
   "host_permissions": ["<all_urls>"],
 
   "icons": {
-    "16": "logo192.png",
-    "48": "logo192.png",
-    "128": "logo192.png"
+    "16": "logo128.png",
+    "48": "logo128.png",
+    "128": "logo128.png"
   },
 
   "devtools_page": "devtools.html",

@@ -191,8 +191,14 @@ export type BGTransformCopyMessage = {
   };
 };
 
+type BGSetSDKUsageData = {
+  type: "BG_SET_SDK_USAGE_DATA";
+  data: Record<string, any>;
+}
+
 // Messages sent to background script
 export type BGMessage =
   | BGLoadVisualChangsetMessage
   | BGUpdateVisualChangsetMessage
-  | BGTransformCopyMessage;
+  | BGTransformCopyMessage
+  | BGSetSDKUsageData;
