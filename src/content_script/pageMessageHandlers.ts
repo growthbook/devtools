@@ -20,12 +20,6 @@ import {
 import { VISUAL_CHANGESET_ID_PARAMS_KEY } from "../visual_editor/lib/constants";
 import { saveApiHost, saveApiKey } from "../visual_editor/lib/storage";
 
-export const genericDevtoolsMessagePassThrough = (
-  message: RefreshMessage | ErrorMessage | GenericMessage,
-) => {
-  chrome.runtime.sendMessage(message);
-};
-
 // 1. save key to local storage
 // 2. send response message to content script
 export const visualEditorOpenRequest = (

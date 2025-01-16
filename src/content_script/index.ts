@@ -1,6 +1,5 @@
 import type {BGMessage, Message} from "../../devtools";
 import {
-  genericDevtoolsMessagePassThrough,
   loadVisualEditorQueryParams,
   visualEditorLoadChangesetRequest,
   visualEditorOpenRequest,
@@ -27,7 +26,8 @@ window.addEventListener("message", function (event: MessageEvent<Message | BGMes
     case "GB_REFRESH":
     case "GB_ERROR":
     case "BG_SET_SDK_USAGE_DATA":
-      genericDevtoolsMessagePassThrough(data);
+      // passthrough to background worker:
+      chrome.runtime.sendMessage(data);
       break;
     default:
       console.error("Unknown message type", data?.type || data);

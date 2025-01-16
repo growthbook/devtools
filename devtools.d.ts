@@ -193,7 +193,12 @@ export type BGTransformCopyMessage = {
 
 type BGSetSDKUsageData = {
   type: "BG_SET_SDK_USAGE_DATA";
-  data: Record<string, any>;
+  data: {
+    sdkFound?: boolean;
+    sdkVersion?: string;
+    totalItems?: number;
+    tabId?: number;
+  };
 }
 
 // Messages sent to background script

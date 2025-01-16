@@ -75,6 +75,7 @@ function handleSdkChange(gb?: GrowthBook) {
     data: {
       // todo: sdk health check data
       sdkFound: !!gb,
+      sdkVersion: gb?.version,
     }
   };
   window.postMessage(msg, window.location.origin);
@@ -129,4 +130,10 @@ document.addEventListener('visibilitychange', () => {
 
 // Request a refresh on load
 requestRefresh();
+
+// Clear devtools state for this tab
 handleSdkChange();
+window.setInterval(() => {
+  if (window._growthbook) return;
+  handleSdkChange();
+}, 1000);

@@ -64,8 +64,9 @@ export function setOverrides(data: Omit<SetOverridesMessage, "type">) {
 }
 
 export function setSDKUsageData(data: Record<string, any>) {
+  const tabId = chrome.devtools.inspectedWindow.tabId;
   sendBGMessage({
-    type: "SET_SDK_USAGE_DATA",
-    data,
+    type: "BG_SET_SDK_USAGE_DATA",
+    data: { tabId, ...data },
   });
 }

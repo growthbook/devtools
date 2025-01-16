@@ -273,23 +273,27 @@ chrome.runtime.onMessage.addListener(
   (message: BGMessage, sender, sendResponse) => {
     const { type, data } = message;
     const senderOrigin = sender.origin;
+    let tabId = sender.tab?.id;
 
     switch (type) {
       case "BG_SET_SDK_USAGE_DATA":
-        let setText = true;
-        if (data?.sdkFound !== undefined) {
-          if (data.sdkFound) {
-            chrome.action.setIcon({ path: chrome.runtime.getURL("/logo128-connected.png") });
-          } else {
-            chrome.action.setIcon({ path: chrome.runtime.getURL("/logo128.png") });
-            setText = false;
-          }
-        }
-        if (setText) {
-          chrome.action.setBadgeText({ text: data?.totalItems ? data.totalItems + "" : "" });
+        if (!tabId) tabId = data?.tabId;
+
+        let title = "GrowthBook DevTools";
+        let text = data?.totalItems ? data.totalItems + "" : "";
+
+        if (data.sdkFound) {
+          chrome.action.setIcon({ tabId, path: chrome.runtime.getURL("/logo128-connected.png") });
+          title = "GrowthBook DevTools\n🟢 SDK connected";
+          if (data?.sdkVersion) title += ` (${data.sdkVersion})`;
         } else {
-          chrome.action.setBadgeText({ text: "" });
+          chrome.action.setIcon({ tabId, path: chrome.runtime.getURL("/logo128.png") });
+          title = "GrowthBook DevTools\n⚪ no SDK present";
+          text = "";
         }
+
+        chrome.action.setBadgeText({ tabId, text });
+        chrome.action.setTitle({ title, tabId });
         break;
       case "BG_LOAD_VISUAL_CHANGESET":
         fetchVisualChangeset(data).then((res) => {
