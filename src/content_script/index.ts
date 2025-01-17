@@ -7,6 +7,8 @@ import {
   visualEditorUpdateChangesetRequest,
 } from "./pageMessageHandlers";
 
+const forceLoadVisualEditor = false;
+
 // Listen for messages from the page
 window.addEventListener("message", function (event: MessageEvent<Message | BGMessage>) {
   const data = event.data;
@@ -30,7 +32,6 @@ window.addEventListener("message", function (event: MessageEvent<Message | BGMes
       chrome.runtime.sendMessage(data);
       break;
     default:
-      console.error("Unknown message type", data?.type || data);
       break;
   }
 });
@@ -63,7 +64,7 @@ if (!document.getElementById(DEVTOOLS_SCRIPT_ID)) {
 const VISUAL_EDITOR_SCRIPT_ID = "visual-editor-script";
 if (
   !document.getElementById(VISUAL_EDITOR_SCRIPT_ID) &&
-  !!loadVisualEditorQueryParams()
+  (!!loadVisualEditorQueryParams() || forceLoadVisualEditor)
 ) {
   const script = document.createElement("script");
   script.id = VISUAL_EDITOR_SCRIPT_ID;

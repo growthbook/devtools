@@ -131,8 +131,7 @@ document.addEventListener('visibilitychange', () => {
 // Request a refresh on load
 requestRefresh();
 
-// Clear devtools state for this tab
-handleSdkChange();
+// Keep a connection to
 window.setInterval(() => {
   if (window._growthbook) return;
   handleSdkChange();

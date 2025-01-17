@@ -1,6 +1,5 @@
-const webpack = require("webpack");
-const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
+const path = require("path");
 const srcDir = path.join(__dirname, "..", "src");
 
 module.exports = {
@@ -8,7 +7,7 @@ module.exports = {
     popup: path.join(srcDir, "popup", "index.tsx"),
     content_script: path.join(srcDir, "content_script/index.ts"),
     visual_editor: path.join(srcDir, "visual_editor", "index.tsx"),
-    background: path.join(srcDir, "background.ts"),
+    background: path.join(srcDir, "background/index.ts"),
   },
   output: {
     path: path.join(__dirname, "../dist/js"),

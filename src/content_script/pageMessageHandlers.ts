@@ -1,22 +1,20 @@
 import {
   BGUpdateVisualChangsetMessage,
-  ErrorMessage,
   LoadVisualChangesetRequestMessage,
   OpenVisualEditorRequestMessage,
-  RefreshMessage,
   UpdateVisualChangesetRequestMessage,
   TransformCopyRequestMessage,
   BGTransformCopyMessage,
   BGLoadVisualChangsetMessage,
   UpdateVisualChangesetResponseMessage,
   LoadVisualChangesetResponseMessage,
-  TransformCopyResponseMessage, BGMessage, GenericMessage,
+  TransformCopyResponseMessage,
 } from "../../devtools";
 import {
   FetchVisualChangesetPayload,
   TransformCopyPayload,
   UpdateVisualChangesetPayload,
-} from "../background";
+} from "../background/visualEditorHandlers";
 import { VISUAL_CHANGESET_ID_PARAMS_KEY } from "../visual_editor/lib/constants";
 import { saveApiHost, saveApiKey } from "../visual_editor/lib/storage";
 

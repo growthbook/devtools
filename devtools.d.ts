@@ -7,7 +7,7 @@ import {
   FetchVisualChangesetPayload,
   TransformCopyPayload,
   UpdateVisualChangesetPayload,
-} from "./src/background";
+} from "src/background";
 
 declare global {
   interface Window {
