@@ -1,8 +1,6 @@
-const { merge } = require("webpack-merge");
 const devtoolsConfig = require("./webpack.devtools.js");
 
-module.exports = [devtoolsConfig].map((c) =>
-  merge(c, {
-    mode: "production",
-  })
-);
+module.exports = {
+  ...devtoolsConfig,
+  mode: "production",
+};
