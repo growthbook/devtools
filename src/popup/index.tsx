@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as ReactDOM from "react-dom/client";
 import logo from "@/devtools/ui/logo.svg";
+import "./index.css";
 import { BGMessage } from "devtools";
 import useApiKey from "@/visual_editor/lib/hooks/useApiKey";
 import ApiKeyForm from "@/popup/ApiKeyForm";
