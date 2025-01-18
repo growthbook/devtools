@@ -5,16 +5,21 @@ import mutate, {
   resumeGlobalObserver,
 } from "dom-mutator";
 import { useRef, useMemo, useCallback, useState, useEffect } from "react";
-import { set, throttle } from "lodash";
-import { Attribute } from "../../components/AttributeEdit";
-import { CONTAINER_ID } from "../..";
-import getSelector from "../getSelector";
-import { VisualEditorVariation } from "../../../../devtools";
+import { throttle } from "lodash";
+import { VisualEditorVariation } from "devtools";
+import { Attribute } from "@/visual_editor/components/AttributeEdit";
+import getSelector from "@/visual_editor/lib/getSelector";
+import { CONTAINER_ID } from "@/visual_editor";
 
 export const hoverAttributeName = "edit-mode-hover";
 
 // HTML attriibute names to ignore when editing
-export const IGNORED_ATTRS = ["class", hoverAttributeName, "contenteditable", "caninlineedit"];
+export const IGNORED_ATTRS = [
+  "class",
+  hoverAttributeName,
+  "contenteditable",
+  "caninlineedit",
+];
 
 const clearHoverAttribute = () => {
   const hoveredElements = document.querySelectorAll(`[${hoverAttributeName}]`);
@@ -411,7 +416,7 @@ const useEditMode: UseEditModeHook = ({
     if (element?.textContent?.trim() === "") isValid = true;
     return isValid && !hasTextInChildren(element);
   };
-  
+
   // event handlers
   useEffect(() => {
     if (!isEnabled) return;
@@ -489,10 +494,10 @@ const useEditMode: UseEditModeHook = ({
       if (event.detail === 1) {
         let element = event.target as HTMLElement;
         const tagType = element?.tagName.toLowerCase();
-          if (tagType && ["b", "i", "u"].includes(tagType)) {
-            element = element?.parentElement as HTMLElement;
-          }
-        if(!element) return;
+        if (tagType && ["b", "i", "u"].includes(tagType)) {
+          element = element?.parentElement as HTMLElement;
+        }
+        if (!element) return;
         if (isInlineEditing) return;
         // don't intercept clicks on the visual editor itself
         if (element.id === CONTAINER_ID) return;

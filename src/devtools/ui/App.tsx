@@ -14,8 +14,8 @@ import AttributesSection from "./AttributesSection";
 import Experiment from "./Experiment";
 import { IconButton } from "@chakra-ui/button";
 import { MdHistory } from "react-icons/md";
-import { DebugLogs } from "../../../devtools";
-import {setOverrides, setSDKUsageData} from "../controller";
+import { DebugLogs } from "devtools";
+import { setOverrides, setSDKUsageData } from "../controller";
 import Layout from "./Layout";
 import ClientInfo from "./ClientInfo";
 
@@ -117,7 +117,7 @@ function App(props: Props) {
 
   useEffect(() => {
     setSDKUsageData({ totalItems });
-  }, [totalItems])
+  }, [totalItems]);
 
   return (
     <Layout

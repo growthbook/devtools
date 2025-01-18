@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { APIExperiment, APIVisualChangeset } from "../../../devtools";
+import { APIExperiment, APIVisualChangeset } from "devtools";
 import { isURLTargeted } from "@growthbook/growthbook";
 import { IoMdCloseCircle, IoMdCheckmarkCircle } from "react-icons/io";
 import Tooltip from "./Tooltip";
@@ -14,9 +14,7 @@ const GreenCheck = () => (
   <IoMdCheckmarkCircle className="text-green-400 w-4 h-4 inline" />
 );
 
-const RedX = () => (
-  <IoMdCloseCircle className="text-red-400 w-4 h-4 inline" />
-);
+const RedX = () => <IoMdCloseCircle className="text-red-400 w-4 h-4 inline" />;
 
 export default function DebugPanel({
   experiment,
@@ -39,9 +37,7 @@ export default function DebugPanel({
     <div className="text-light px-4 text-sm">
       <Row>
         Experiment ID:{" "}
-        <div className="text-white">
-          {experiment ? experiment.id : "N/A"}
-        </div>
+        <div className="text-white">{experiment ? experiment.id : "N/A"}</div>
       </Row>
 
       <Row>

@@ -1,17 +1,24 @@
 import {
   APIExperiment,
   APIVisualChangeset,
-  BGLoadVisualChangsetMessage, BGTransformCopyMessage,
-  BGUpdateVisualChangsetMessage, CopyMode
-} from "../../devtools";
-import {loadApiHost, loadApiKey, loadAppOrigin, saveAppOrigin} from "../visual_editor/lib/storage";
-import {genHeaders, isSameOrigin} from "./index";
+  BGLoadVisualChangsetMessage,
+  BGTransformCopyMessage,
+  BGUpdateVisualChangsetMessage,
+  CopyMode,
+} from "devtools";
+import {
+  loadApiHost,
+  loadApiKey,
+  loadAppOrigin,
+  saveAppOrigin,
+} from "@/visual_editor/lib/storage";
+import { genHeaders, isSameOrigin } from "@/background/index";
 import MessageSender = chrome.runtime.MessageSender;
 
 export async function handleLoadVisualChangeset(
   message: BGLoadVisualChangsetMessage,
   sender: MessageSender,
-  sendResponse: (res: FetchVisualChangesetPayload | { error: string; }) => void,
+  sendResponse: (res: FetchVisualChangesetPayload | { error: string }) => void,
 ) {
   const { data } = message;
   const senderOrigin = sender.origin;
@@ -20,11 +27,7 @@ export async function handleLoadVisualChangeset(
   if (res.error) return sendResponse({ error: res.error });
 
   const editorUrl = res.visualChangeset?.editorUrl;
-  if (
-    !editorUrl ||
-    !senderOrigin ||
-    !isSameOrigin(editorUrl, senderOrigin)
-  ) {
+  if (!editorUrl || !senderOrigin || !isSameOrigin(editorUrl, senderOrigin)) {
     return sendResponse({
       error: `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`,
     });
@@ -36,7 +39,7 @@ export async function handleLoadVisualChangeset(
 export async function handleUpdateVisualChangeset(
   message: BGUpdateVisualChangsetMessage,
   sender: MessageSender,
-  sendResponse: (res: UpdateVisualChangesetPayload | { error: string; }) => void,
+  sendResponse: (res: UpdateVisualChangesetPayload | { error: string }) => void,
 ) {
   const { data } = message;
   const senderOrigin = sender.origin;
@@ -46,11 +49,7 @@ export async function handleUpdateVisualChangeset(
     if (res.error) throw new Error(res.error);
 
     const editorUrl = res.visualChangeset?.editorUrl;
-    if (
-      !editorUrl ||
-      !senderOrigin ||
-      !isSameOrigin(editorUrl, senderOrigin)
-    )
+    if (!editorUrl || !senderOrigin || !isSameOrigin(editorUrl, senderOrigin))
       throw new Error(
         `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`,
       );
@@ -65,7 +64,7 @@ export async function handleUpdateVisualChangeset(
 export async function handleTransformCopy(
   message: BGTransformCopyMessage,
   sender: MessageSender,
-  sendResponse: (res: TransformCopyPayload | { error: string; }) => void,
+  sendResponse: (res: TransformCopyPayload | { error: string }) => void,
 ) {
   const { data } = message;
   const senderOrigin = sender.origin;
@@ -75,23 +74,22 @@ export async function handleTransformCopy(
   sendResponse(res);
 }
 
-
 // CRUD methods
 // ============
 
 export type FetchVisualChangesetPayload =
   | {
-  visualChangeset: APIVisualChangeset;
-  experiment: APIExperiment;
-  experimentUrl: string | null;
-  error: null;
-}
+      visualChangeset: APIVisualChangeset;
+      experiment: APIExperiment;
+      experimentUrl: string | null;
+      error: null;
+    }
   | {
-  visualChangeset: null;
-  experiment: null;
-  experimentUrl: null;
-  error: string;
-};
+      visualChangeset: null;
+      experiment: null;
+      experimentUrl: null;
+      error: string;
+    };
 
 const fetchVisualChangeset = async ({
   visualChangesetId,
@@ -156,18 +154,17 @@ const fetchVisualChangeset = async ({
   }
 };
 
-
 export type UpdateVisualChangesetPayload =
   | {
-  nModified: number;
-  visualChangeset: APIVisualChangeset;
-  error: null;
-}
+      nModified: number;
+      visualChangeset: APIVisualChangeset;
+      error: null;
+    }
   | {
-  nModified: number;
-  visualChangeset: null;
-  error: string;
-};
+      nModified: number;
+      visualChangeset: null;
+      error: string;
+    };
 
 const updateVisualChangeset = async ({
   visualChangesetId,
@@ -215,20 +212,19 @@ const updateVisualChangeset = async ({
   }
 };
 
-
 export type TransformCopyPayload =
   | {
-  visualChangeset: APIVisualChangeset;
-  transformed: string;
-  dailyLimitReached: boolean;
-  error: null;
-}
+      visualChangeset: APIVisualChangeset;
+      transformed: string;
+      dailyLimitReached: boolean;
+      error: null;
+    }
   | {
-  visualChangeset: null;
-  transformed: null;
-  dailyLimitReached: null;
-  error: string;
-};
+      visualChangeset: null;
+      transformed: null;
+      dailyLimitReached: null;
+      error: string;
+    };
 
 const transformCopy = async ({
   visualChangesetId,

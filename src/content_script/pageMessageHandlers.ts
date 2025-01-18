@@ -9,14 +9,14 @@ import {
   UpdateVisualChangesetResponseMessage,
   LoadVisualChangesetResponseMessage,
   TransformCopyResponseMessage,
-} from "../../devtools";
+} from "devtools";
 import {
   FetchVisualChangesetPayload,
   TransformCopyPayload,
   UpdateVisualChangesetPayload,
-} from "../background/visualEditorHandlers";
-import { VISUAL_CHANGESET_ID_PARAMS_KEY } from "../visual_editor/lib/constants";
-import { saveApiHost, saveApiKey } from "../visual_editor/lib/storage";
+} from "@/background/visualEditorHandlers";
+import { VISUAL_CHANGESET_ID_PARAMS_KEY } from "@/visual_editor/lib/constants";
+import { saveApiHost, saveApiKey } from "@/visual_editor/lib/storage";
 
 // 1. save key to local storage
 // 2. send response message to content script

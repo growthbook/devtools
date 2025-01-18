@@ -1,5 +1,5 @@
 import type { Experiment, GrowthBook } from "@growthbook/growthbook";
-import type { ErrorMessage, Message, RefreshMessage } from "../../devtools";
+import type { ErrorMessage, Message, RefreshMessage } from "devtools";
 
 declare global {
   interface Window {
@@ -76,7 +76,7 @@ function handleSdkChange(gb?: GrowthBook) {
       // todo: sdk health check data
       sdkFound: !!gb,
       sdkVersion: gb?.version,
-    }
+    },
   };
   window.postMessage(msg, window.location.origin);
 }
@@ -122,8 +122,8 @@ onGrowthBookLoad((gb) => {
     handleSdkChange(gb);
   }, 1000);
 });
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
     handleSdkChange();
   }
 });

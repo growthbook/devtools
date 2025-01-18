@@ -54,6 +54,9 @@ module.exports = {
     ],
   },
   resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "../src"), // Should match tsconfig.json
+    },
     extensions: [".ts", ".tsx", ".js"],
   },
   plugins: [

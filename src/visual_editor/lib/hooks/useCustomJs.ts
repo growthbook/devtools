@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { VisualEditorVariation } from "../../../../devtools";
+import { VisualEditorVariation } from "devtools";
 
 const validate = (js: string) => {
   let error;

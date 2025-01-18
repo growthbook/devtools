@@ -5,7 +5,7 @@ import {
   Message,
   RefreshMessage,
   SetOverridesMessage,
-} from "../../../../devtools";
+} from "devtools";
 import MessageSender = chrome.runtime.MessageSender;
 
 // technically doesn't have to be the latest version but the most recent version

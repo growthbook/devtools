@@ -55,9 +55,7 @@ const EditAttributeInput: FC<{
           onChange={(e) => setName(e.target.value)}
         />
       ) : (
-        <div className="text-xs text-slate-400 mb-2 mr-2">
-          {name}
-        </div>
+        <div className="text-xs text-slate-400 mb-2 mr-2">{name}</div>
       )}
 
       <TextareaAutosize
@@ -160,7 +158,7 @@ const AttributeEdit: FC<{
   onSave: (attributes: Attribute[]) => void;
 }> = ({ element, onSave }) => {
   const attributes = normalizeAttrs(element.attributes);
-  
+
   const removeAttr = useCallback(
     (name: string) => {
       onSave(attributes.filter((attr) => attr.name !== name));

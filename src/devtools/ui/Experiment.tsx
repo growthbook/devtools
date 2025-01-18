@@ -15,7 +15,7 @@ import type {
   Experiment as ExperimentInterface,
   ExperimentOverride,
 } from "@growthbook/growthbook";
-import { DebugLogs } from "../../../devtools";
+import { DebugLogs } from "devtools";
 import stringify from "json-stringify-pretty-compact";
 
 export interface Props {

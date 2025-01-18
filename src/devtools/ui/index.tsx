@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertIcon } from "@chakra-ui/alert";
 import { Box, Text } from "@chakra-ui/layout";
 import { Spinner } from "@chakra-ui/spinner";
 import { onGrowthBookData, requestRefresh } from "../controller";
-import { RefreshMessage } from "../../../devtools";
+import { RefreshMessage } from "devtools";
 import { Button } from "@chakra-ui/button";
 import Layout from "./Layout";
 
@@ -55,9 +55,7 @@ function WaitForGrowthBook() {
     );
   }
 
-  return (
-    <App {...data} />
-  );
+  return <App {...data} />;
 }
 
 const container = document.getElementById("root");

@@ -7,7 +7,7 @@ import {
   APIExperiment,
   LoadVisualChangesetRequestMessage,
   UpdateVisualChangesetRequestMessage,
-} from "../../../../devtools";
+} from "devtools";
 import normalizeVariations from "../normalizeVariations";
 type UseVisualChangesetHook = (visualChangesetId: string) => {
   loading: boolean;

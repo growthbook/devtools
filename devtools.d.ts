@@ -7,7 +7,7 @@ import {
   FetchVisualChangesetPayload,
   TransformCopyPayload,
   UpdateVisualChangesetPayload,
-} from "src/background";
+} from "@/background/visualEditorHandlers";
 
 declare global {
   interface Window {

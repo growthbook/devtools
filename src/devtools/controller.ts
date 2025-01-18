@@ -4,7 +4,7 @@ import {
   Message,
   RefreshMessage,
   SetOverridesMessage,
-} from "../../devtools";
+} from "devtools";
 import MessageSender = chrome.runtime.MessageSender;
 
 // Send message to content script

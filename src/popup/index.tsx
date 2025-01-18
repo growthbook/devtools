@@ -1,10 +1,9 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as ReactDOM from "react-dom/client";
-import useApiKey from "../visual_editor/lib/hooks/useApiKey";
-import "./index.css";
-import ApiKeyForm from "./ApiKeyForm";
-import logo from "../devtools/ui/logo.svg";
-import type { BGMessage } from "../../devtools";
+import logo from "@/devtools/ui/logo.svg";
+import { BGMessage } from "devtools";
+import useApiKey from "@/visual_editor/lib/hooks/useApiKey";
+import ApiKeyForm from "@/popup/ApiKeyForm";
 
 const Popup = () => {
   const { apiHost, apiKey, saveApiHost, saveApiKey, loading } = useApiKey();
@@ -15,27 +14,37 @@ const Popup = () => {
   const [sdkFound, setSdkFound] = useState<boolean | undefined>(undefined);
   const [sdkVersion, setSdkVersion] = useState<string>("");
 
+  const sdkFoundRef = useRef<boolean | undefined>(sdkFound);
+  sdkFoundRef.current = sdkFound;
   useEffect(() => {
-    chrome.runtime.onMessage.addListener((message: BGMessage, sender, sendResponse) => {
-      const {type, data} = message;
-      switch (type) {
-        case "BG_SET_SDK_USAGE_DATA":
-          const senderOrigin = sender.origin;
-          let tabId = sender.tab?.id;
-          const sdkFound = !!data?.sdkFound;
-          const sdkVersion = data?.sdkVersion;
-          setSdkFound(sdkFound);
-          if (sdkVersion !== undefined) {
-            setSdkVersion(sdkVersion);
-          }
-          break;
-      }
-    });
+    window.setTimeout(() => {
+      if (sdkFoundRef.current === undefined) setSdkFound(false);
+    }, 2000);
+  }, []);
+
+  useEffect(() => {
+    chrome.runtime.onMessage.addListener(
+      (message: BGMessage, sender, sendResponse) => {
+        const { type, data } = message;
+        switch (type) {
+          case "BG_SET_SDK_USAGE_DATA":
+            const senderOrigin = sender.origin;
+            let tabId = sender.tab?.id;
+            const sdkFound = !!data?.sdkFound;
+            const sdkVersion = data?.sdkVersion;
+            setSdkFound(sdkFound);
+            if (sdkVersion !== undefined) {
+              setSdkVersion(sdkVersion);
+            }
+            break;
+        }
+      },
+    );
   }, []);
 
   return (
     <>
-      <div id="main" className="w-[360px] p-3 bg-zinc-100">
+      <div id="main" className="w-[500px] p-3 bg-zinc-100">
         <h1 className="text-lg mb-2">
           <img
             src={logo}
@@ -45,29 +54,26 @@ const Popup = () => {
           <span className="text-gray-500 font-bold">DevTools</span>
         </h1>
 
-        {sdkFound ? (
-          <div>
-            <h4>SDK found</h4>
-            <strong>{sdkVersion}</strong>
-          </div>
-        ) : sdkFound === false ? (
-          <h4>No SDK present</h4>
-        ) : (
-          <div><em>Loading...</em></div>
-        )}
+        <div className="mb-3 px-3 py-2 border border-gray-200x rounded-lg bg-white">
+          <label className="label text-sm">GrowthBook SDK</label>
+          {sdkFound ? (
+            <div>
+              <h4>🟢 SDK connected</h4>
+              <strong>{sdkVersion}</strong>
+            </div>
+          ) : sdkFound === false ? (
+            <h4>⚪ no SDK present</h4>
+          ) : (
+            <div>
+              <em>Loading...</em>
+            </div>
+          )}
+        </div>
 
-        <div className="mb-3 px-3 py-2 border border-gray-200 rounded-lg bg-white">
+        <div className="mb-3 px-3 py-2 border border-gray-200x rounded-lg bg-white">
           <label className="inline-block label text-sm mb-1">
             GrowthBook Inspector
           </label>
-          {sdkFound && (
-            <button
-              className="float-right text-white mt-2 mr-2 py-0 px-2 rounded text-center transition-colors bg-blue-600 hover:bg-blue-500 cursor-pointer text-lg"
-              onClick={()=>{}}
-            >
-              Open Devtools
-            </button>
-          )}
           <div className="mt-1">
             To inspect the current page, open the <strong>Dev Tools</strong> (
             <code className="text-red-800 whitespace-nowrap">

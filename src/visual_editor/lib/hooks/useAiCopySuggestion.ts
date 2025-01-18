@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  Message,
-  CopyMode,
-  TransformCopyRequestMessage,
-} from "../../../../devtools";
+import { Message, CopyMode, TransformCopyRequestMessage } from "devtools";
 
 export type TransformCopyFn = (copy: string, mode: CopyMode) => void;
 

@@ -10,12 +10,12 @@ import {
   BGLoadVisualChangsetMessage,
   BGUpdateVisualChangsetMessage,
   BGTransformCopyMessage,
-} from "../../devtools";
+} from "devtools";
 import {
   handleLoadVisualChangeset,
-  handleUpdateVisualChangeset,
   handleTransformCopy,
-} from "./visualEditorHandlers";
+  handleUpdateVisualChangeset,
+} from "@/background/visualEditorHandlers";
 
 /**
  * Listen for messages from the devtools and content script.
@@ -35,11 +35,17 @@ chrome.runtime.onMessage.addListener(
         let text = data?.totalItems ? data.totalItems + "" : "";
 
         if (data.sdkFound) {
-          chrome.action.setIcon({ tabId, path: chrome.runtime.getURL("/logo128-connected.png") });
+          chrome.action.setIcon({
+            tabId,
+            path: chrome.runtime.getURL("/logo128-connected.png"),
+          });
           title = "GrowthBook DevTools\n🟢 SDK connected";
           if (data?.sdkVersion) title += ` (${data.sdkVersion})`;
         } else {
-          chrome.action.setIcon({ tabId, path: chrome.runtime.getURL("/logo128.png") });
+          chrome.action.setIcon({
+            tabId,
+            path: chrome.runtime.getURL("/logo128.png"),
+          });
           title = "GrowthBook DevTools\n⚪ no SDK present";
           text = "";
         }
@@ -49,13 +55,25 @@ chrome.runtime.onMessage.addListener(
         break;
 
       case "BG_LOAD_VISUAL_CHANGESET":
-        handleLoadVisualChangeset(message as BGLoadVisualChangsetMessage, sender, sendResponse);
+        handleLoadVisualChangeset(
+          message as BGLoadVisualChangsetMessage,
+          sender,
+          sendResponse,
+        );
         break;
       case "BG_UPDATE_VISUAL_CHANGESET":
-        handleUpdateVisualChangeset(message as BGUpdateVisualChangsetMessage, sender, sendResponse);
+        handleUpdateVisualChangeset(
+          message as BGUpdateVisualChangsetMessage,
+          sender,
+          sendResponse,
+        );
         break;
       case "BG_TRANSFORM_COPY":
-        handleTransformCopy(message as BGTransformCopyMessage, sender, sendResponse);
+        handleTransformCopy(
+          message as BGTransformCopyMessage,
+          sender,
+          sendResponse,
+        );
         break;
       default:
         sendResponse();
@@ -66,7 +84,6 @@ chrome.runtime.onMessage.addListener(
     return true;
   },
 );
-
 
 export const genHeaders = (apiKey: string) => ({
   Authorization: `Basic ${btoa(apiKey + ":")}`,
@@ -113,4 +130,3 @@ export const isSameOrigin = (url: string, origin: string) => {
     return false;
   }
 };
-

@@ -27,7 +27,7 @@ import {
   FeatureDefinition,
   FeatureRule,
 } from "@growthbook/growthbook";
-import { DebugLogs } from "../../../devtools";
+import { DebugLogs } from "devtools";
 import { Switch } from "@chakra-ui/react";
 
 export interface Props {

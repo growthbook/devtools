@@ -1,7 +1,7 @@
 import React from "react";
 import { Box } from "@chakra-ui/layout";
 import stringify from "json-stringify-pretty-compact";
-import { DebugLogs } from "../../../devtools";
+import { DebugLogs } from "devtools";
 
 export default function DebugLog({ debug }: { debug: DebugLogs }) {
   return (

@@ -1,40 +1,43 @@
-import type {BGMessage, Message} from "../../devtools";
+import type { BGMessage, Message } from "devtools";
 import {
   loadVisualEditorQueryParams,
   visualEditorLoadChangesetRequest,
   visualEditorOpenRequest,
   visualEditorTransformCopyRequest,
   visualEditorUpdateChangesetRequest,
-} from "./pageMessageHandlers";
+} from "@/content_script/pageMessageHandlers";
 
 const forceLoadVisualEditor = false;
 
 // Listen for messages from the page
-window.addEventListener("message", function (event: MessageEvent<Message | BGMessage>) {
-  const data = event.data;
-  switch (data?.type) {
-    case "GB_REQUEST_OPEN_VISUAL_EDITOR":
-      visualEditorOpenRequest(data);
-      break;
-    case "GB_REQUEST_LOAD_VISUAL_CHANGESET":
-      visualEditorLoadChangesetRequest(data);
-      break;
-    case "GB_REQUEST_UPDATE_VISUAL_CHANGESET":
-      visualEditorUpdateChangesetRequest(data);
-      break;
-    case "GB_REQUEST_TRANSFORM_COPY":
-      visualEditorTransformCopyRequest(data);
-      break;
-    case "GB_REFRESH":
-    case "GB_ERROR":
-    case "BG_SET_SDK_USAGE_DATA":
-      // passthrough to background worker:
-      chrome.runtime.sendMessage(data);
-      break;
-    default:
-      break;
-  }
-});
+window.addEventListener(
+  "message",
+  function (event: MessageEvent<Message | BGMessage>) {
+    const data = event.data;
+    switch (data?.type) {
+      case "GB_REQUEST_OPEN_VISUAL_EDITOR":
+        visualEditorOpenRequest(data);
+        break;
+      case "GB_REQUEST_LOAD_VISUAL_CHANGESET":
+        visualEditorLoadChangesetRequest(data);
+        break;
+      case "GB_REQUEST_UPDATE_VISUAL_CHANGESET":
+        visualEditorUpdateChangesetRequest(data);
+        break;
+      case "GB_REQUEST_TRANSFORM_COPY":
+        visualEditorTransformCopyRequest(data);
+        break;
+      case "GB_REFRESH":
+      case "GB_ERROR":
+      case "BG_SET_SDK_USAGE_DATA":
+        // passthrough to background worker:
+        chrome.runtime.sendMessage(data);
+        break;
+      default:
+        break;
+    }
+  },
+);
 
 // Listen for messages from devtools, background, etc.
 chrome.runtime.onMessage.addListener(async (msg: Message) => {
@@ -48,7 +51,6 @@ chrome.runtime.onMessage.addListener(async (msg: Message) => {
       break;
   }
 });
-
 
 // Inject devtools content script
 const DEVTOOLS_SCRIPT_ID = "gbdevtools-page-script";

@@ -1,6 +1,6 @@
 import { debounce } from "lodash";
 import { useCallback, useEffect } from "react";
-import { VisualEditorVariation } from "../../../../devtools";
+import { VisualEditorVariation } from "devtools";
 
 let _globalStyleTag: HTMLStyleElement | null = null;
 
