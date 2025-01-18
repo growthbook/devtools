@@ -5,7 +5,7 @@ import {
   loadApiKey,
   saveApiKey,
   clearApiKey,
-} from "@/visual_editor/lib/storage";
+} from "@/app/storage";
 
 export default () => {
   const [loading, setLoading] = useState(true);

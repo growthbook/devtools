@@ -11,7 +11,7 @@ import {
   loadApiKey,
   loadAppOrigin,
   saveAppOrigin,
-} from "@/visual_editor/lib/storage";
+} from "@/app/storage";
 import { genHeaders, isSameOrigin } from "@/background/index";
 import MessageSender = chrome.runtime.MessageSender;
 
