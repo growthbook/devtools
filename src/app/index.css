@@ -1,0 +1,32 @@
+@import "@radix-ui/themes/styles.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-weight-light: 200;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+
+  --color-background: var(--accent-2);
+  --color-panel-solid: #ffffff;
+  --color-panel-translucent: rgba(255, 255, 255, 0.7);
+  --color-surface: rgba(255, 255, 255, 0.85);
+  --color-overlay: var(--black-a6);
+  --color-landmark: var(--indigo-12);
+  --color-text-high: var(--indigo-12);
+  --color-text-mid: rgba(31, 45, 92, 0.85);
+  --color-text-low: rgba(31, 45, 92, 0.65);
+  --color-text-disabled: rgba(31, 45, 92, 0.45);
+}
+
+.radix-themes {
+  --cursor-button: pointer;
+}
+
+.label {
+  font-size: var(--font-size-4);
+  @apply font-semibold text-gray-800;
+}
