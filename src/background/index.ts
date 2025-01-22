@@ -22,12 +22,19 @@ import {
 let state: Record<string, any> = {};
 
 // Helper functions to manage global state
-function getState(property: string) {
+async function getState(property: string, persist: boolean = false) {
+  if (persist) {
+    const result = await chrome.storage.sync.get([property]);
+    return result?.[property];
+  }
   return state?.[property];
 }
-
-function setState(property: string, value: any) {
-  state[property] = value;
+async function setState(property: string, value: any, persist: boolean = false) {
+  if (persist) {
+    await chrome.storage.sync.set({ [property]: value });
+  } else {
+    state[property] = value;
+  }
 
   // Notify all listeners about the state change
   chrome.runtime.sendMessage({
@@ -39,14 +46,25 @@ function setState(property: string, value: any) {
 
 // Listen for messages from the App
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
-  if (message.type === "getState") {
-    const stateValue = getState(message.property);
-    sendResponse({ state: stateValue });
-  }
-  if (message.type === "setState") {
-    setState(message.property, message.value);
-    sendResponse({ success: true });
-  }
+  (async () => {
+    try {
+      if (message.type === "getState") {
+        const stateValue = await getState(message.property, message.persist);
+        chrome.runtime.sendMessage({
+          type: "globalStateChanged",
+          property: message.property,
+          value: stateValue,
+        });
+      }
+      if (message.type === "setState") {
+        await setState(message.property, message.value, message.persist);
+        sendResponse({success: true});
+      }
+    } catch (error) {
+      console.error("Error resolving global state", error);
+      sendResponse({success: false, error: (error as Error).message});
+    }
+  })();
   return true;
 });
 

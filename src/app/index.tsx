@@ -28,7 +28,7 @@ export const App = () => {
   const [sdkExperiments, setSdkExperiments] = useState<Record<string, Experiment<any>>>({});
 
   const [foo, setFoo] = useTabState("foo", "tabState");
-  const [bar, setBar] = UseGlobalState("bar", "globalState");
+  const [bar, setBar] = UseGlobalState("bar", "globalState", true);
 
 
   const sdkFoundRef = useRef<boolean | undefined>(sdkFound);

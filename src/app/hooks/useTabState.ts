@@ -11,7 +11,7 @@ export default function useTabState(property: string, defaultValue: any = null) 
       if (activeTab?.id) {
         try {
           const response = await chrome.tabs.sendMessage(activeTab.id, { type: "getState", property });
-          if (response && "state" in response) {
+          if (response && ("state" in response)) {
             setState(response.state);
           }
         } catch (error) {
