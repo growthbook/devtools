@@ -45,13 +45,12 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
 }
 
 function getRefreshMessage(gb: GrowthBook): RefreshMessage {
-  let experiments: Record<string, Experiment<any>> = {};
+  const [apiHost, clientKey] = gb.getApiInfo();
 
+  let experiments: Record<string, Experiment<any>> = {};
   gb.getAllResults().forEach((v, k) => {
     experiments[k] = v.experiment;
   });
-
-  const [apiHost, clientKey] = gb.getApiInfo();
 
   const msg: RefreshMessage = {
     type: "GB_REFRESH",
@@ -69,7 +68,6 @@ function getRefreshMessage(gb: GrowthBook): RefreshMessage {
 
 function handleSdkChange(gb?: GrowthBook) {
   if (document.hidden) return;
-  // todo: better handling, tab switching, no tab selected
   const msg = {
     type: "BG_SET_SDK_USAGE_DATA",
     data: {
@@ -83,19 +81,15 @@ function handleSdkChange(gb?: GrowthBook) {
 
 // Sync changes to devtools if there are any
 let lastMsg: string = "";
-function syncToDevtools(gb: GrowthBook, force?: boolean) {
+function syncToDevtools(gb: GrowthBook) {
   const msg = getRefreshMessage(gb);
-  const hash = JSON.stringify(msg);
-  if (force || hash !== lastMsg) {
-    lastMsg = hash;
     window.postMessage(msg, window.location.origin);
-  }
 }
 
 // Send a refresh message back to content script
 function requestRefresh() {
   onGrowthBookLoad((gb) => {
-    syncToDevtools(gb, true);
+    syncToDevtools(gb);
   });
 }
 
