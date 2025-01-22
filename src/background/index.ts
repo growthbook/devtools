@@ -17,6 +17,41 @@ import {
   handleUpdateVisualChangeset,
 } from "@/background/visualEditorHandlers";
 
+
+// Global state store
+let state: Record<string, any> = {};
+
+// Helper functions to manage global state
+function getState(property: string) {
+  return state?.[property];
+}
+
+function setState(property: string, value: any) {
+  state[property] = value;
+
+  // Notify all listeners about the state change
+  chrome.runtime.sendMessage({
+    type: "globalStateChanged",
+    property,
+    value,
+  });
+}
+
+// Listen for messages from the App
+chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
+  if (message.type === "getState") {
+    const stateValue = getState(message.property);
+    sendResponse({ state: stateValue });
+  }
+  if (message.type === "setState") {
+    setState(message.property, message.value);
+    sendResponse({ success: true });
+  }
+  return true;
+});
+
+
+
 /**
  * Listen for messages from the devtools and content script.
  * We have to keep the handler synchronous so we can return true to indicate an async response to chrome.
