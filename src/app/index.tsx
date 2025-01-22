@@ -43,6 +43,9 @@ export const App = () => {
   >({});
   const [currentTab, setCurrentTab] = useTabState("currentTab", "sdk");
 
+  const [foo, setFoo] = useTabState("foo", "tabState");
+  const [bar, setBar] = UseGlobalState("bar", "globalState");
+
   useEffect(() => {
     window.setTimeout(() => {
       if (sdkFound === undefined) setSdkFound(false);
@@ -102,6 +105,20 @@ export const App = () => {
 
   return (
     <Theme accentColor="violet" hasBackground={false}>
+      <Button
+        onClick={() => {
+          setFoo(foo + " F");
+        }}
+      >
+        {foo}
+      </Button>
+      <Button
+        onClick={() => {
+          setBar(bar + " B");
+        }}
+      >
+        {bar}
+      </Button>
       <div id="main" className="p-3">
         <Flex justify="between">
           <h1 className="text-lg mb-2">
