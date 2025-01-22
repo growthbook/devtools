@@ -9,14 +9,16 @@ import {
 
 const forceLoadVisualEditor = false;
 
-
-// Tab-specific state
-let state: Record<string, any> = {};
+// Tab-specific state has a write-through cache in memory and is persisted to sessionStorage
+let state: Record<string, any> = JSON.parse(
+  window.sessionStorage.getItem("tabState") || "{}"
+);
 function getState(property: string) {
   return state?.[property];
 }
 function setState(property: string, value: any) {
   state[property] = value;
+  window.sessionStorage.setItem("tabState", JSON.stringify(state));
 }
 
 // Listen for messages from the App
@@ -31,7 +33,6 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   }
   return true;
 });
-
 
 // Listen for messages from the page
 window.addEventListener(
@@ -60,7 +61,7 @@ window.addEventListener(
       default:
         break;
     }
-  },
+  }
 );
 
 // Listen for messages from devtools, background, etc.
