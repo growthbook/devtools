@@ -80,7 +80,6 @@ function handleSdkChange(gb?: GrowthBook) {
 }
 
 // Sync changes to devtools if there are any
-let lastMsg: string = "";
 function syncToDevtools(gb: GrowthBook) {
   const msg = getRefreshMessage(gb);
     window.postMessage(msg, window.location.origin);

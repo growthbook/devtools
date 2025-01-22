@@ -3,14 +3,19 @@ import { Theme, Flex, Button, Dialog } from "@radix-ui/themes";
 
 import React, {useEffect, useRef, useState} from "react";
 import logo from "@/devtools/ui/logo.svg";
+import UseTabState from "@/app/hooks/useTabState";
 import ApiKeyForm from "@/app/components/ApiKeyForm";
 import useApiKey from "@/app/hooks/useApiKey";
 import {Message, BGMessage} from "devtools";
 import {FaGear} from "react-icons/fa6";
 import {Attributes, Experiment, FeatureDefinition} from "@growthbook/growthbook";
+import useTabState from "@/app/hooks/useTabState";
+
 
 export const App = () => {
   const { apiHost, apiKey, saveApiHost, saveApiKey, loading } = useApiKey();
+
+
 
   const [credentialsOpen, setCredentialsOpen] = useState(false);
   const [disableButtons, setDisableButtons] = useState(false);
@@ -21,6 +26,8 @@ export const App = () => {
   const [sdkAttributes, setSdkAttributes] = useState<Attributes>({});
   const [sdkFeatures, setSdkFeatures] = useState<Record<string, FeatureDefinition>>({});
   const [sdkExperiments, setSdkExperiments] = useState<Record<string, Experiment<any>>>({});
+
+  const [foo, setFoo] = useTabState("foo", "initial foo");
 
 
   const sdkFoundRef = useRef<boolean | undefined>(sdkFound);
@@ -59,7 +66,6 @@ export const App = () => {
             break;
           case "GB_REFRESH":
             const { attributes, features, experiments, overrides, url, clientKey, apiHost } = message;
-            console.log("GB_REFRESH", {attributes, features, experiments})
             setSdkAttributes(attributes);
             setSdkFeatures(features);
             setSdkExperiments(experiments);
@@ -77,6 +83,7 @@ export const App = () => {
 
   return (
     <Theme accentColor="violet" hasBackground={false}>
+      <button onClick={()=> {setFoo(foo + " F")}}>{foo}</button>
       <div id="main" className="p-3">
         <Flex justify="between">
           <h1 className="text-lg mb-2">

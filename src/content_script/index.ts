@@ -9,6 +9,30 @@ import {
 
 const forceLoadVisualEditor = false;
 
+
+// Tab-specific state
+let state: Record<string, any> = {};
+function getState(property: string) {
+  return state?.[property];
+}
+function setState(property: string, value: any) {
+  state[property] = value;
+}
+
+// Listen for messages from the App
+chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
+  if (message.type === "getState") {
+    const stateValue = getState(message.property); // Get state based on property
+    sendResponse({ state: stateValue });
+  }
+  if (message.type === "setState") {
+    setState(message.property, message.value); // Update the state property
+    sendResponse({ success: true });
+  }
+  return true;
+});
+
+
 // Listen for messages from the page
 window.addEventListener(
   "message",
@@ -50,6 +74,7 @@ chrome.runtime.onMessage.addListener(async (msg: Message) => {
     default:
       break;
   }
+  return true;
 });
 
 // Inject devtools content script
