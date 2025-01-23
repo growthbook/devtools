@@ -37,7 +37,7 @@ function setState(property: string, value: any) {
 }
 
 // Listen for messages from the App
-chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "getState") {
     const result = getState(message.property); // Get state based on property
     const { state: stateValue, success } = result;
@@ -50,6 +50,20 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   if (message.type === "setState") {
     setState(message.property, message.value); // Update the state property
     sendResponse({ success: true });
+    if (sender.tab?.id) {
+      chrome.tabs.sendMessage(sender.tab?.id, {
+        type: "tabStateChanged",
+        property: message.property,
+        value: message.value,
+      });
+    } else {
+      // TODO: do we need or want this else case?
+      chrome.runtime.sendMessage({
+        type: "tabStateChanged",
+        property: message.property,
+        value: message.value,
+      });
+    }
   }
   return true;
 });

@@ -36,6 +36,21 @@ export default function useTabState<T>(
       }
     };
     fetchState();
+
+    // Listener for content script state changes
+    const listener = (message: any) => {
+      if (message.type === "tabStateChanged" && message.property === property) {
+        // Missing value indicates no state found in global store, keep default value
+        if ("value" in message) {
+          setState(message.value);
+        }
+        setReady(true);
+      }
+    };
+    chrome.runtime.onMessage.addListener(listener);
+    return () => {
+      chrome.runtime.onMessage.removeListener(listener);
+    };
   }, [property]);
 
   // Setter for state: updates state in the content script
