@@ -35,35 +35,40 @@ function setState(property: string, value: any) {
     SESSION_STORAGE_TAB_STATE_KEY,
     JSON.stringify(state)
   );
+  chrome.runtime.sendMessage({
+    type: "tabStateChanged",
+    property,
+    value,
+  });
 }
 
 // Listen for messages from the App
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
-  if (message.type === "getState") {
-    const result = getState(message.property); // Get state based on property
-    const { state: stateValue, success } = result;
-    if (success) {
-      chrome.runtime.sendMessage({
-        type: "tabStateChanged",
-        property: message.property,
-        value: stateValue,
-      });
-    } else {
-      chrome.runtime.sendMessage({
-        type: "tabStateChanged",
-        property: message.property,
-        // not found, send empty message to signal unset
-      });
+  try {
+    if (message.type === "getState") {
+      const result = getState(message.property); // Get state based on property
+      const { state: stateValue, success } = result;
+      if (success) {
+        chrome.runtime.sendMessage({
+          type: "tabStateChanged",
+          property: message.property,
+          value: stateValue,
+        });
+      } else {
+        chrome.runtime.sendMessage({
+          type: "tabStateChanged",
+          property: message.property,
+          // not found, send empty message to signal unset
+        });
+      }
     }
-  }
-  if (message.type === "setState") {
-    setState(message.property, message.value); // Update the state property
-    sendResponse({ success: true });
-    chrome.runtime.sendMessage({
-      type: "tabStateChanged",
-      property: message.property,
-      value: message.value,
-    });
+    if (message.type === "setState") {
+      setState(message.property, message.value); // Update the state property
+      sendResponse({ success: true });
+    }
+  } catch (error) {
+    console.error("Error resolving tab state", error);
+    sendResponse({ success: false, error: (error as Error).message });
   }
   return true;
 });
