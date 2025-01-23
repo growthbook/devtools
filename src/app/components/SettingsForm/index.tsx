@@ -19,14 +19,13 @@ const SettingsForm = ({
 }) => {
   const [apiHost, setApiHost, apiHostReady] = useGlobalState(API_HOST, CLOUD_API_HOST, true);
   const [apiKey, setApiKey, apiKeyReady] = useGlobalState(API_KEY, "", true);
-  const [isCloud, setIsCloud] = useState(true);
   const ready = apiHostReady && apiKeyReady;
 
   const form = useForm({
     defaultValues: {
       apiHost,
       apiKey,
-      isCloud, // local form-control state
+      isCloud: true, // local form-control state
     }
   });
   const submitForm = (e: React.SyntheticEvent) => {

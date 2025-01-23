@@ -38,8 +38,10 @@
 
 
 
-
-
+/* Prevent modal jumping when inner content changes shape and weird scroll bar */
+.rt-BaseDialogScroll {
+  position: relative;
+}
 
 /* Fix Radix modal flicker bug (https://github.com/radix-ui/primitives/issues/3286) */
 .rt-BaseDialogOverlay {
