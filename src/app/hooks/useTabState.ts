@@ -2,6 +2,12 @@ import { useState, useEffect } from "react";
 
 type UseStateReturn<T> = [T, (value: T) => void, boolean];
 
+async function getActiveTabId() {
+  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  const activeTab = tabs[0];
+  return activeTab?.id;
+}
+
 export default function useTabState<T>(
   property: string,
   defaultValue: T
@@ -10,29 +16,18 @@ export default function useTabState<T>(
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Fetch state when the component mounts (or when the property changes)
+    // Fetch (query) state from content script when the component mounts (or when the property changes)
+    // note: Content script state is pushed via "tabStateChanged" message
     const fetchState = async () => {
-      const tabs = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      const activeTab = tabs[0];
-      if (activeTab?.id) {
-        try {
-          const response = await chrome.tabs.sendMessage(activeTab.id, {
-            type: "getState",
-            property,
-          });
-          if (response) {
-            // Missing state indicates no state found in global store, keep default value
-            if ("state" in response) {
-              setState(response.state);
-            }
-            if (!ready) setReady(true);
-          }
-        } catch (error) {
-          console.error("Error fetching state from content script", error);
-        }
+      const activeTabId = await getActiveTabId();
+      if (!activeTabId) return;
+      try {
+        await chrome.tabs.sendMessage(activeTabId, {
+          type: "getState",
+          property,
+        });
+      } catch (error) {
+        console.error("Error fetching state from content script", error);
       }
     };
     fetchState();
@@ -40,7 +35,7 @@ export default function useTabState<T>(
     // Listener for content script state changes
     const listener = (message: any) => {
       if (message.type === "tabStateChanged" && message.property === property) {
-        // Missing value indicates no state found in global store, keep default value
+        // Missing value indicates no state found in tab store, keep default value
         if ("value" in message) {
           setState(message.value);
         }
@@ -55,19 +50,17 @@ export default function useTabState<T>(
 
   // Setter for state: updates state in the content script
   const setTabState = async (value: T) => {
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-    const activeTab = tabs[0];
-    if (activeTab?.id) {
-      try {
-        await chrome.tabs.sendMessage(activeTab.id, {
-          type: "setState",
-          property,
-          value,
-        });
-        setState(value);
-      } catch (error) {
-        console.error("Error setting state in content script", error);
-      }
+    const activeTabId = await getActiveTabId();
+    if (!activeTabId) return;
+    try {
+      await chrome.tabs.sendMessage(activeTabId, {
+        type: "setState",
+        property,
+        value,
+      });
+      setState(value); // Optimistic update
+    } catch (error) {
+      console.error("Error setting tab state in content script", error);
     }
   };
 
