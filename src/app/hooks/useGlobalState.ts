@@ -11,7 +11,8 @@ export default function useGlobalState<T>(
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Fetch state when the component mounts (or when the property changes)
+    // Fetch (query) state from background worker when the component mounts (or when the property changes)
+    // note: Background worker state is pushed via "globalStateChanged" message
     const fetchState = async () => {
       try {
         await chrome.runtime.sendMessage({ type: "getState", property, persist });
@@ -21,10 +22,13 @@ export default function useGlobalState<T>(
     };
     fetchState();
 
-    // Listener for background state changes
+    // Listener for background worker state changes
     const listener = (message: any) => {
       if (message.type === "globalStateChanged" && message.property === property) {
-        setState(message.value);
+        // Missing value indicates no state found in global store, keep default value
+        if ("value" in message) {
+          setState(message.value);
+        }
         setReady(true);
       }
     };

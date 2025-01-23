@@ -9,12 +9,24 @@ import {
 
 const forceLoadVisualEditor = false;
 
-// Tab-specific state has a write-through cache in memory and is persisted to sessionStorage
-let state: Record<string, any> = JSON.parse(
-  window.sessionStorage.getItem("tabState") || "{}"
-);
-function getState(property: string) {
-  return state?.[property];
+
+// Tab-specific state store
+// has a write-through cache in memory and is persisted to sessionStorage
+let state: Record<string, any> = {};
+try {
+  state = JSON.parse(
+    window.sessionStorage.getItem("growthbook-devtools-tab-state") || "{}"
+  );
+} catch (e) {
+  console.error("Failed to parse saved tab state");
+}
+
+function getState(property: string): { state?: any, success: boolean } {
+  if (property in state) {
+    return { state: state?.[property], success: true };
+  } else {
+    return { success: false };
+  }
 }
 function setState(property: string, value: any) {
   state[property] = value;
@@ -24,8 +36,13 @@ function setState(property: string, value: any) {
 // Listen for messages from the App
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   if (message.type === "getState") {
-    const stateValue = getState(message.property); // Get state based on property
-    sendResponse({ state: stateValue });
+    const result = getState(message.property); // Get state based on property
+    const { state: stateValue, success } = result;
+    if (success) {
+      sendResponse({ state: stateValue });
+    } else {
+      sendResponse({});
+    }
   }
   if (message.type === "setState") {
     setState(message.property, message.value); // Update the state property

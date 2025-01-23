@@ -19,15 +19,24 @@ import {
 
 
 // Global state store
+// Has an optional sync with chrome.storage via "persist" flag
 let state: Record<string, any> = {};
 
 // Helper functions to manage global state
-async function getState(property: string, persist: boolean = false) {
+async function getState(property: string, persist: boolean = false): Promise<{ state?: any, success: boolean }> {
   if (persist) {
     const result = await chrome.storage.sync.get([property]);
-    return result?.[property];
+    if (property in result) {
+      return { state: result?.[property], success: true };
+    } else {
+      return { success: false };
+    }
   }
-  return state?.[property];
+  if (property in state) {
+    return { state: state?.[property], success: true };
+  } else {
+    return { success: false };
+  }
 }
 async function setState(property: string, value: any, persist: boolean = false) {
   if (persist) {
@@ -35,8 +44,6 @@ async function setState(property: string, value: any, persist: boolean = false) 
   } else {
     state[property] = value;
   }
-
-  // Notify all listeners about the state change
   chrome.runtime.sendMessage({
     type: "globalStateChanged",
     property,
@@ -49,12 +56,21 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   (async () => {
     try {
       if (message.type === "getState") {
-        const stateValue = await getState(message.property, message.persist);
-        chrome.runtime.sendMessage({
-          type: "globalStateChanged",
-          property: message.property,
-          value: stateValue,
-        });
+        const result = await getState(message.property, message.persist);
+        const { state: stateValue, success } = result;
+        if (success) {
+          chrome.runtime.sendMessage({
+            type: "globalStateChanged",
+            property: message.property,
+            value: stateValue,
+          });
+        } else {
+          chrome.runtime.sendMessage({
+            type: "globalStateChanged",
+            property: message.property,
+            // not found, send empty message to signal unset
+          });
+        }
       }
       if (message.type === "setState") {
         await setState(message.property, message.value, message.persist);

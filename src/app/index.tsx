@@ -1,14 +1,10 @@
 import "./index.css";
-import { Theme, Flex, Button, Dialog, Tabs } from "@radix-ui/themes";
+import { Theme, Flex, Button, IconButton, Dialog, Tabs } from "@radix-ui/themes";
 
 import React, { useEffect, useState } from "react";
 import logo from "@/devtools/ui/logo.svg";
 import useTabState from "@/app/hooks/useTabState";
-import UseGlobalState from "@/app/hooks/useGlobalState";
-import ApiKeyForm from "@/app/components/ApiKeyForm";
-import useApiKey from "@/app/hooks/useApiKey";
 import { Message, BGMessage } from "devtools";
-import { FaGear } from "react-icons/fa6";
 import {
   Attributes,
   Experiment,
@@ -19,14 +15,11 @@ import AttributesTab from "./components/AttributesTab";
 import ExperimentsTab from "./components/ExperimentsTab";
 import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
-import useGlobalState from "@/app/hooks/useGlobalState";
-import SettingsForm, {API_HOST, API_KEY} from "@/app/components/SettingsForm";
+import SettingsForm from "@/app/components/SettingsForm";
+import {PiX, PiGearSix} from "react-icons/pi";
 
 export const App = () => {
-  const { apiHost, apiKey, saveApiHost, saveApiKey, loading } = useApiKey();
-
-  const [credentialsOpen, setCredentialsOpen] = useState(false);
-  const [disableButtons, setDisableButtons] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
     "sdkFound",
@@ -44,9 +37,6 @@ export const App = () => {
     Record<string, Experiment<any>>
   >({});
   const [currentTab, setCurrentTab] = useTabState("currentTab", "sdk");
-
-  const [foo, setFoo] = useTabState<string>("foo", "tabState");
-  const [bar, setBar] = UseGlobalState<string>("bar", "globalState", true);
 
   useEffect(() => {
     window.setTimeout(() => {
@@ -107,20 +97,6 @@ export const App = () => {
 
   return (
     <Theme accentColor="violet" hasBackground={false}>
-      <Button
-        onClick={() => {
-          setFoo(foo + " F");
-        }}
-      >
-        {foo}
-      </Button>
-      <Button
-        onClick={() => {
-          setBar(bar + " B");
-        }}
-      >
-        {bar}
-      </Button>
       <div id="main" className="p-3">
         <Flex justify="between">
           <h1 className="text-lg mb-2">
@@ -133,35 +109,30 @@ export const App = () => {
           </h1>
 
           <Dialog.Root
-            open={credentialsOpen}
-            onOpenChange={(o) => setCredentialsOpen(o)}
+            open={settingsOpen}
+            onOpenChange={(o) => setSettingsOpen(o)}
           >
             <Dialog.Trigger>
               <Button>
                 <div className="px-4">
-                  <FaGear />
+                  <PiGearSix size={20} />
                 </div>
               </Button>
             </Dialog.Trigger>
-            <Dialog.Content>
-              <Dialog.Title>My Credentials</Dialog.Title>
-              {credentialsOpen && (
-                <SettingsForm close={() => setCredentialsOpen(false)} />
-              )}
-              {/*<ApiKeyForm*/}
-              {/*  apiHost={apiHost}*/}
-              {/*  apiKey={apiKey}*/}
-              {/*  saveApiHost={saveApiHost}*/}
-              {/*  saveApiKey={saveApiKey}*/}
-              {/*  onSave={() => {*/}
-              {/*    setDisableButtons(true);*/}
-              {/*    setTimeout(() => {*/}
-              {/*      setCredentialsOpen(false);*/}
-              {/*      setDisableButtons(false);*/}
-              {/*    }, 200);*/}
-              {/*  }}*/}
-              {/*  disabled={disableButtons || loading}*/}
-              {/*/>*/}
+            <Dialog.Content className="ModalBody">
+              <Dialog.Title>Settings</Dialog.Title>
+              <SettingsForm close={() => setSettingsOpen(false)} />
+              <Dialog.Close style={{ position: "absolute", top: 5, right: 5 }}>
+                <IconButton
+                  color="gray"
+                  highContrast
+                  size="1"
+                  variant="outline"
+                  radius="full"
+                >
+                  <PiX size={20} />
+                </IconButton>
+              </Dialog.Close>
             </Dialog.Content>
           </Dialog.Root>
         </Flex>

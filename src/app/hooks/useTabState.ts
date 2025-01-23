@@ -23,8 +23,11 @@ export default function useTabState<T>(
             type: "getState",
             property,
           });
-          if (response && "state" in response) {
-            setState(response.state);
+          if (response) {
+            // Missing state indicates no state found in global store, keep default value
+            if ("state" in response) {
+              setState(response.state);
+            }
             if (!ready) setReady(true);
           }
         } catch (error) {

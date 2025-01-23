@@ -30,3 +30,7 @@
   font-size: var(--font-size-4);
   @apply font-semibold text-gray-800;
 }
+
+.ModalBody {
+  width: 400px;
+}

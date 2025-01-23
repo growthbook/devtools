@@ -17,6 +17,10 @@ textarea {
   display: grid;
   margin-bottom: 10px;
 }
+.FormFieldInline {
+  display: flex;
+  align-items: center;
+}
 
 .FormLabel {
   font-size: 15px;
