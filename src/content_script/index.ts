@@ -8,20 +8,20 @@ import {
 } from "@/content_script/pageMessageHandlers";
 
 const forceLoadVisualEditor = false;
-
+export const SESSION_STORAGE_TAB_STATE_KEY = "growthbook-devtools-tab-state";
 
 // Tab-specific state store
 // has a write-through cache in memory and is persisted to sessionStorage
 let state: Record<string, any> = {};
 try {
   state = JSON.parse(
-    window.sessionStorage.getItem("growthbook-devtools-tab-state") || "{}"
+    window.sessionStorage.getItem(SESSION_STORAGE_TAB_STATE_KEY) || "{}"
   );
 } catch (e) {
   console.error("Failed to parse saved tab state");
 }
 
-function getState(property: string): { state?: any, success: boolean } {
+function getState(property: string): { state?: any; success: boolean } {
   if (property in state) {
     return { state: state?.[property], success: true };
   } else {
@@ -30,7 +30,10 @@ function getState(property: string): { state?: any, success: boolean } {
 }
 function setState(property: string, value: any) {
   state[property] = value;
-  window.sessionStorage.setItem("tabState", JSON.stringify(state));
+  window.sessionStorage.setItem(
+    SESSION_STORAGE_TAB_STATE_KEY,
+    JSON.stringify(state)
+  );
 }
 
 // Listen for messages from the App
