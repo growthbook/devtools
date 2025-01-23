@@ -4,7 +4,7 @@ import * as ReactDOM from "react-dom/client";
 
 const Popup = () => {
   return (
-    <div className="w-[600px] bg-zinc-100">
+    <div className="w-[600px] min-h-[400px] max-h-[800px] bg-zinc-100">
       <App />
     </div>
   );

@@ -1,0 +1,64 @@
+@import "@radix-ui/colors/black-alpha.css";
+@import "@radix-ui/colors/gray-alpha.css";
+@import "@radix-ui/colors/mauve.css";
+
+/* reset */
+input,
+textarea {
+  all: unset;
+  box-sizing: border-box;
+}
+
+.FormRoot {
+  margin: auto;
+}
+
+.FormField {
+  display: grid;
+  margin-bottom: 10px;
+}
+
+.FormLabel {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 35px;
+}
+
+.FormMessage {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.Input,
+.Textarea {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 15px;
+  background-color: var(--gray-a2);
+  border: 1px solid var(--black-a6);
+  transition: 150ms box-shadow;
+}
+
+.Input:focus,
+.Textarea:focus {
+  box-shadow: 0px 0px 0px 1px var(--violet-a8);
+}
+
+.Input::selection,
+.Textarea::selection {
+  background-color: var(--black-a6);
+}
+
+.Input {
+  padding: 0 10px;
+  height: 35px;
+  line-height: 1;
+}
+
+.Textarea {
+  resize: none;
+  padding: 10px;
+}

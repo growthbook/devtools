@@ -19,6 +19,8 @@ import AttributesTab from "./components/AttributesTab";
 import ExperimentsTab from "./components/ExperimentsTab";
 import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
+import useGlobalState from "@/app/hooks/useGlobalState";
+import SettingsForm, {API_HOST, API_KEY} from "@/app/components/SettingsForm";
 
 export const App = () => {
   const { apiHost, apiKey, saveApiHost, saveApiKey, loading } = useApiKey();
@@ -43,8 +45,8 @@ export const App = () => {
   >({});
   const [currentTab, setCurrentTab] = useTabState("currentTab", "sdk");
 
-  const [foo, setFoo] = useTabState("foo", "tabState");
-  const [bar, setBar] = UseGlobalState("bar", "globalState");
+  const [foo, setFoo] = useTabState<string>("foo", "tabState");
+  const [bar, setBar] = UseGlobalState<string>("bar", "globalState", true);
 
   useEffect(() => {
     window.setTimeout(() => {
@@ -143,20 +145,23 @@ export const App = () => {
             </Dialog.Trigger>
             <Dialog.Content>
               <Dialog.Title>My Credentials</Dialog.Title>
-              <ApiKeyForm
-                apiHost={apiHost}
-                apiKey={apiKey}
-                saveApiHost={saveApiHost}
-                saveApiKey={saveApiKey}
-                onSave={() => {
-                  setDisableButtons(true);
-                  setTimeout(() => {
-                    setCredentialsOpen(false);
-                    setDisableButtons(false);
-                  }, 200);
-                }}
-                disabled={disableButtons || loading}
-              />
+              {credentialsOpen && (
+                <SettingsForm close={() => setCredentialsOpen(false)} />
+              )}
+              {/*<ApiKeyForm*/}
+              {/*  apiHost={apiHost}*/}
+              {/*  apiKey={apiKey}*/}
+              {/*  saveApiHost={saveApiHost}*/}
+              {/*  saveApiKey={saveApiKey}*/}
+              {/*  onSave={() => {*/}
+              {/*    setDisableButtons(true);*/}
+              {/*    setTimeout(() => {*/}
+              {/*      setCredentialsOpen(false);*/}
+              {/*      setDisableButtons(false);*/}
+              {/*    }, 200);*/}
+              {/*  }}*/}
+              {/*  disabled={disableButtons || loading}*/}
+              {/*/>*/}
             </Dialog.Content>
           </Dialog.Root>
         </Flex>

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 
-type UseStateReturn<T> = [T, (value: T) => void];
+type UseStateReturn<T> = [T, (value: T) => void, boolean];
 
 export default function useTabState<T>(
   property: string,
   defaultValue: T
 ): UseStateReturn<T> {
   const [state, setState] = useState(defaultValue);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     // Fetch state when the component mounts (or when the property changes)
@@ -24,6 +25,7 @@ export default function useTabState<T>(
           });
           if (response && "state" in response) {
             setState(response.state);
+            if (!ready) setReady(true);
           }
         } catch (error) {
           console.error("Error fetching state from content script", error);
@@ -51,5 +53,5 @@ export default function useTabState<T>(
     }
   };
 
-  return [state, setTabState];
+  return [state, setTabState, ready];
 }

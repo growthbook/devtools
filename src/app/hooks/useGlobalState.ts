@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 
-export default function useGlobalState(property: string, defaultValue: any = null, persist: boolean = false) {
+type UseStateReturn<T> = [T, (value: T) => void, boolean];
+
+export default function useGlobalState<T>(
+  property: string,
+  defaultValue: any = null,
+  persist: boolean = false
+): UseStateReturn<T> {
   const [state, setState] = useState(defaultValue);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     // Fetch state when the component mounts (or when the property changes)
@@ -18,6 +25,7 @@ export default function useGlobalState(property: string, defaultValue: any = nul
     const listener = (message: any) => {
       if (message.type === "globalStateChanged" && message.property === property) {
         setState(message.value);
+        setReady(true);
       }
     };
     chrome.runtime.onMessage.addListener(listener);
@@ -36,5 +44,5 @@ export default function useGlobalState(property: string, defaultValue: any = nul
     }
   };
 
-  return [state, setGlobalState];
+  return [state, setGlobalState, ready];
 }
