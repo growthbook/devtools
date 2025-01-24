@@ -4,7 +4,7 @@ type UseStateReturn<T> = [T, (value: T) => void, boolean];
 
 export default function useGlobalState<T>(
   property: string,
-  defaultValue: any = null,
+  defaultValue: T,
   persist: boolean = false
 ): UseStateReturn<T> {
   const [state, setState] = useState(defaultValue);
@@ -15,16 +15,26 @@ export default function useGlobalState<T>(
     // note: Background worker state is pushed via "globalStateChanged" message
     const fetchState = async () => {
       try {
-        await chrome.runtime.sendMessage({ type: "getState", property, persist });
+        await chrome.runtime.sendMessage({
+          type: "getState",
+          property,
+          persist,
+        });
       } catch (error) {
-        console.error("Error fetching global state from background worker", error);
+        console.error(
+          "Error fetching global state from background worker",
+          error
+        );
       }
     };
     fetchState();
 
     // Listener for background worker state changes
     const listener = (message: any) => {
-      if (message.type === "globalStateChanged" && message.property === property) {
+      if (
+        message.type === "globalStateChanged" &&
+        message.property === property
+      ) {
         // Missing value indicates no state found in global store, keep default value
         if ("value" in message) {
           setState(message.value);
@@ -41,7 +51,12 @@ export default function useGlobalState<T>(
   // Setter for state: updates state in the background worker
   const setGlobalState = async (value: any) => {
     try {
-      await chrome.runtime.sendMessage({ type: "setState", property, value, persist });
+      await chrome.runtime.sendMessage({
+        type: "setState",
+        property,
+        value,
+        persist,
+      });
       setState(value); // Optimistic update
     } catch (error) {
       console.error("Error setting global state in background worker", error);

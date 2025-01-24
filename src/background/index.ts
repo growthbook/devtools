@@ -17,13 +17,15 @@ import {
   handleUpdateVisualChangeset,
 } from "@/background/visualEditorHandlers";
 
-
 // Global state store
 // Has an optional sync with chrome.storage via "persist" flag
 let state: Record<string, any> = {};
 
 // Helper functions to manage global state
-async function getState(property: string, persist: boolean = false): Promise<{ state?: any, success: boolean }> {
+async function getState(
+  property: string,
+  persist: boolean = false
+): Promise<{ state?: any; success: boolean }> {
   if (persist) {
     const result = await chrome.storage.sync.get([property]);
     if (property in result) {
@@ -38,7 +40,11 @@ async function getState(property: string, persist: boolean = false): Promise<{ s
     return { success: false };
   }
 }
-async function setState(property: string, value: any, persist: boolean = false) {
+async function setState(
+  property: string,
+  value: any,
+  persist: boolean = false
+) {
   if (persist) {
     await chrome.storage.sync.set({ [property]: value });
   } else {
@@ -74,17 +80,15 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
       }
       if (message.type === "setState") {
         await setState(message.property, message.value, message.persist);
-        sendResponse({success: true});
+        sendResponse({ success: true });
       }
     } catch (error) {
       console.error("Error resolving global state", error);
-      sendResponse({success: false, error: (error as Error).message});
+      sendResponse({ success: false, error: (error as Error).message });
     }
   })();
   return true;
 });
-
-
 
 /**
  * Listen for messages from the devtools and content script.
@@ -127,21 +131,21 @@ chrome.runtime.onMessage.addListener(
         handleLoadVisualChangeset(
           message as BGLoadVisualChangsetMessage,
           sender,
-          sendResponse,
+          sendResponse
         );
         break;
       case "BG_UPDATE_VISUAL_CHANGESET":
         handleUpdateVisualChangeset(
           message as BGUpdateVisualChangsetMessage,
           sender,
-          sendResponse,
+          sendResponse
         );
         break;
       case "BG_TRANSFORM_COPY":
         handleTransformCopy(
           message as BGTransformCopyMessage,
           sender,
-          sendResponse,
+          sendResponse
         );
         break;
       default:
@@ -151,7 +155,7 @@ chrome.runtime.onMessage.addListener(
 
     // return true to indicate async response
     return true;
-  },
+  }
 );
 
 export const genHeaders = (apiKey: string) => ({
@@ -191,7 +195,7 @@ export const isSameOrigin = (url: string, origin: string) => {
         origin,
       });
       throw new Error(
-        'Unrecognizable domain type for either "url" or "origin"',
+        'Unrecognizable domain type for either "url" or "origin"'
       );
     }
   } catch (e) {
