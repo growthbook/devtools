@@ -50,6 +50,7 @@ export default function useTabState<T>(
 
   // Setter for state: updates state in the content script
   const setTabState = async (value: T) => {
+    setState(value); // Optimistic update
     const activeTabId = await getActiveTabId();
     if (!activeTabId) return;
     try {
@@ -58,7 +59,6 @@ export default function useTabState<T>(
         property,
         value,
       });
-      setState(value); // Optimistic update
     } catch (error) {
       console.error("Error setting tab state in content script", error);
     }
