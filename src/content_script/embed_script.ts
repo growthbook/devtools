@@ -67,7 +67,7 @@ function getRefreshMessage(gb: GrowthBook): RefreshMessage {
 }
 
 function handleSdkChange(gb?: GrowthBook) {
-  if (document.hidden) return;
+  if (document.visibilityState !== "visible") return;
   const msg = {
     type: "BG_SET_SDK_USAGE_DATA",
     data: {
@@ -81,6 +81,7 @@ function handleSdkChange(gb?: GrowthBook) {
 
 // Sync changes to devtools if there are any
 function syncToDevtools(gb: GrowthBook) {
+  if (document.visibilityState !== "visible") return;
   const msg = getRefreshMessage(gb);
     window.postMessage(msg, window.location.origin);
 }
@@ -94,6 +95,7 @@ function requestRefresh() {
 
 // Listen for events from content script
 window.addEventListener("message", function (event: MessageEvent<Message>) {
+  if (document.visibilityState !== "visible") return;
   const data = event.data;
   if (data.type === "GB_REQUEST_REFRESH") {
     requestRefresh();
