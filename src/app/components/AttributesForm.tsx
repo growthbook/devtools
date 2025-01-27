@@ -1,42 +1,52 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import * as Form from "@radix-ui/react-form";
-import {Button, Switch} from "@radix-ui/themes";
+import {Button, Switch, Link} from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import {UseFormReturn} from "react-hook-form";
 import {PiXCircle} from "react-icons/pi";
 
 export default function AttributesForm({
   form,
+  dirty = false,
+  setDirty,
   jsonMode = false,
   schema,
   canAddRemoveFields = true,
 }: {
   form: UseFormReturn<Attributes>;
+  dirty?: boolean;
+  setDirty?: (d: boolean) => void;
   jsonMode?: boolean;
   schema?: Record<string, string>;
   canAddRemoveFields?: boolean;
 }) {
   const attributes = form.getValues();
-  const [fields, setFields] = useState(new Set(Object.keys(attributes)));
 
   const addField = (key: string) => {
-    setFields(prev => new Set([...prev, key]));
+    setDirty?.(true);
+    const newAttributes = form.getValues();
+    newAttributes[key] = undefined;
+    form.reset(newAttributes);
   }
   const removeField = (key: string) => {
-    form.setValue(key, undefined);
-    setFields(prev => new Set([...prev].filter(x => x !== key)));
+    setDirty?.(true);
+    const newAttributes = form.getValues();
+    delete newAttributes?.[key];
+    form.reset(newAttributes);
   };
 
   useEffect(() => {
-    setFields(new Set(Object.keys(attributes)));
-  }, [JSON.stringify(form.getValues())]);
+    if (form.formState.isDirty && !dirty) {
+      setDirty?.(true);
+    }
+  }, [form.formState, dirty]);
 
   return (
     <>
       <div>
         <Form.Root className="FormRoot small">
           {!jsonMode ?
-            [...fields].map((attributeKey, i) => {
+            Object.keys(attributes).map((attributeKey, i) => {
               return (
                 <div key={attributeKey}>
                   <Form.Field className="FormFieldInline my-1" name={attributeKey}>
@@ -70,6 +80,16 @@ export default function AttributesForm({
                 value={JSON.stringify(attributes, null, 2)}
                 rows={12}
               />
+          )}
+          {dirty && (
+            <div className="mt-2 flex justify-between items-center">
+              <Link href="#" role="button" color="gray">
+                Reset
+              </Link>
+              <Button type="button" size="2">
+                Apply
+              </Button>
+            </div>
           )}
         </Form.Root>
       </div>

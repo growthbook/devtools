@@ -1,10 +1,11 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import {Checkbox, RadioGroup, Select} from "@radix-ui/themes";
 import { Archetype } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import {useForm} from "react-hook-form";
+import {PiAsterisk} from "react-icons/pi";
 
 type ArchetypeSource = "growthbook" | "local";
 type Archetypes = Record<ArchetypeSource, Archetype[]>;
@@ -13,6 +14,7 @@ export default function AttributesTab() {
   const [sdkAttributes] = useTabState<Attributes>("sdkAttributes", {});
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
   const attributesForm = useForm<Attributes>({ defaultValues: sdkAttributes });
+  const [dirty, setDirty] = useState(false);
   const [jsonMode, setJsonMode] = useTabState("attributesForm_useJsonMode", false);
 
   const [archetypeSource, setArchetypeSource] = useTabState<ArchetypeSource>(
@@ -32,7 +34,9 @@ export default function AttributesTab() {
 
   // listen to SDK changes to set attributes form
   useEffect(() => {
-    attributesForm.reset(sdkAttributes)
+    if (!dirty) {
+      attributesForm.reset(sdkAttributes);
+    }
   }, [JSON.stringify(sdkAttributes)]);
 
   return (
@@ -65,7 +69,10 @@ export default function AttributesTab() {
       </div>
       <div className="flex-none basis-[49%] box px-3 py-2 border border-gray-200x rounded-lg bg-white">
         <div className="flex items-end justify-between mb-2">
-          <div className="label">User Attributes</div>
+          <div className="label">
+            User Attributes
+            {dirty && <PiAsterisk size={12} color="red" className="inline-block relative" style={{ top: -6 }} />}
+          </div>
           <div className="mb-1">
             <label className="flex items-center text-xs cursor-pointer select-none">
               <Checkbox
@@ -81,6 +88,8 @@ export default function AttributesTab() {
         </div>
         <AttributesForm
           form={attributesForm}
+          dirty={dirty}
+          setDirty={setDirty}
           jsonMode={jsonMode}
         />
       </div>
