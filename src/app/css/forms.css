@@ -21,16 +21,8 @@ textarea {
   display: flex;
   align-items: center;
 }
-
 .FormLabel {
-  font-size: 15px;
   font-weight: 500;
-  line-height: 35px;
-}
-
-.FormMessage {
-  font-size: 13px;
-  opacity: 0.8;
 }
 
 .Input,
@@ -40,7 +32,6 @@ textarea {
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  font-size: 15px;
   background-color: var(--gray-a2);
   border: 1px solid var(--black-a6);
   transition: 150ms box-shadow;
@@ -57,12 +48,43 @@ textarea {
 }
 
 .Input {
-  padding: 0 10px;
-  height: 35px;
   line-height: 1;
 }
-
 .Textarea {
   resize: none;
-  padding: 10px;
+}
+
+.FormRoot {
+  .FormLabel {
+    font-size: 15px;
+    line-height: 35px;
+  }
+  .Input, .Textarea {
+    font-size: 15px;
+  }
+  .Input {
+    padding: 0 10px;
+    height: 35px;
+  }
+  .Textarea {
+    line-height: 35px;
+    padding: 10px;
+  }
+}
+.FormRoot.small {
+  .FormLabel {
+    font-size: 12px;
+    line-height: 24px;
+  }
+  .Input, .Textarea {
+    font-size: 12px;
+  }
+  .Input {
+    padding: 0 6px;
+    height: 24px;
+  }
+  .Textarea {
+    line-height: 24px;
+    padding: 6px;
+  }
 }

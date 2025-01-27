@@ -1,4 +1,4 @@
-import "./index.css";
+import "@/app/css/index.css";
 import {
   Theme,
   Flex,
@@ -22,7 +22,7 @@ import AttributesTab from "./components/AttributesTab";
 import ExperimentsTab from "./components/ExperimentsTab";
 import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
-import SettingsForm from "@/app/components/SettingsForm";
+import SettingsForm from "@/app/components/Settings";
 import { PiX, PiGearSix } from "react-icons/pi";
 import useGlobalState from "./hooks/useGlobalState";
 
@@ -46,7 +46,6 @@ export const App = () => {
     Record<string, Experiment<any>>
   >({});
   const [currentTab, setCurrentTab] = useTabState("currentTab", "attributes");
-  const [globalBar, setGlobalBar] = useGlobalState("bar", "", true);
 
   useEffect(() => {
     window.setTimeout(() => {
@@ -107,9 +106,6 @@ export const App = () => {
 
   return (
     <Theme accentColor="violet" hasBackground={false}>
-      <Button onClick={() => setGlobalBar(globalBar + " B")}>
-        Global State: {globalBar}
-      </Button>
       <div id="main" className="p-3">
         <Flex justify="between">
           <h1 className="text-lg mb-2">
