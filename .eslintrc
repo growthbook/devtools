@@ -24,7 +24,6 @@
     "react",
     "@typescript-eslint",
     "prettier",
-    "@next/eslint-plugin-next",
     "no-async-foreach"
   ],
   "extends": [

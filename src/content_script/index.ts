@@ -62,7 +62,7 @@ function setState(property: string, value: any) {
   // send custom messages to Embed script for specific properties so that the Embed script can update the GB SDK
   if (property in propertiesWithCustomMessage) {    
     const customMessage = propertiesWithCustomMessage[property as keyof typeof propertiesWithCustomMessage];
-    chrome.runtime.sendMessage({ type: customMessage, data: value });
+    window.postMessage({ type: customMessage, data: value }, window.location.origin);
   }
   window.sessionStorage.setItem("tabState", JSON.stringify(state));
 }

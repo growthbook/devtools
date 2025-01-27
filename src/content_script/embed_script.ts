@@ -26,6 +26,9 @@ function getValidGrowthBookInstance(cb: (gb: GrowthBook) => void) {
   }
   return true;
 }
+function test () {
+  console.log("test");
+}
 
 // Wait for window._growthbook to be available
 function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
@@ -162,7 +165,6 @@ function updateTabState(property: string, value: unknown) {
   } catch (error) {
     console.log("shoot this is not working");
   }
-
 }
 
 // start running
