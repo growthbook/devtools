@@ -36,7 +36,6 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
       error:
         "Unable to locate GrowthBook SDK instance. Please ensure you are using either the Javascript or React SDK, and Dev Mode is enabled.",
     };
-    window.postMessage(msg, window.location.origin);
   }, 5000);
 
   document.addEventListener(
@@ -57,7 +56,8 @@ function getRefreshMessage(gb: GrowthBook): RefreshMessage {
     experiments[k] = v.experiment;
   });
   const [attributes, _setAttributes] = useTabState("attributes", gb.getAttributes());
-  const [features, _setFeatures] = useTabState("attributes", gb.getFeatures());
+  const [features, _setFeatures] = useTabState("features", gb.getFeatures());
+
 
   const msg: RefreshMessage = {
     type: "GB_REFRESH",
@@ -91,6 +91,8 @@ function init() {
 
 function pushSDKUpdate(){
   onGrowthBookLoad((gb) => {
+    const [sdkFound, _setSdkFound] = useTabState("sdkFound", !!gb);
+    const [sdkVersion, _setSdkVersion] = useTabState("sdkVersion", gb?.version);
     const msg = getRefreshMessage(gb);
     chrome.runtime.sendMessage({type: "GB_SDK_UPDATED", data: msg});
   });
