@@ -10,6 +10,8 @@ type Archetypes = Record<ArchetypeSource, Archetype[]>;
 
 export default function AttributesTab() {
   const [sdkAttributes] = useTabState<Attributes>("sdkAttributes", {});
+  const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
+  console.log("attr",attributes);
   const [archetypeSource, setArchetypeSource] = useTabState<ArchetypeSource>(
     "archetypeSource",
     "growthbook"
@@ -23,7 +25,7 @@ export default function AttributesTab() {
   >("selectedArchetype", undefined);
 
   const currArchetypeList = archetypes[archetypeSource];
-
+  console.log(attributes, "guy testing attributes");
   return (
     <div className="mb-3 px-3 py-2 border border-gray-200x rounded-lg bg-white">
       <div className="label">Attributes</div>
@@ -52,7 +54,7 @@ export default function AttributesTab() {
               <AttributesForm attributeValues={selectedArchetype?.attributes} />
             </td>
             <td width="50%">
-              <AttributesForm attributeValues={sdkAttributes} />
+              <AttributesForm attributeValues={attributes} />
             </td>
           </tr>
         </tbody>

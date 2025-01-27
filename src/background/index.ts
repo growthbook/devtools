@@ -103,9 +103,8 @@ chrome.runtime.onMessage.addListener(
     switch (type) {
       case "GB_SDK_UPDATED":
         if (!tabId) tabId = data?.tabId;
-
         let title = "GrowthBook DevTools";
-        let text = data?.totalItems ? data.totalItems + "" : "";
+        let text =  "";
 
         if (data.sdkFound) {
           chrome.action.setIcon({
@@ -120,7 +119,6 @@ chrome.runtime.onMessage.addListener(
             path: chrome.runtime.getURL("/logo128.png"),
           });
           title = "GrowthBook DevTools\n⚪ no SDK present";
-          text = "";
         }
 
         chrome.action.setBadgeText({ tabId, text });

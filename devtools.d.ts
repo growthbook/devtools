@@ -152,6 +152,15 @@ type TransformCopyResponseMessage = {
   data: TransformCopyPayload;
 };
 
+type UpdateTabState = {
+  type: "UPDATE_TAB_STATE";
+  data: {
+    property: string;
+    value: unknown;
+    tabId: number;
+  }
+};
+
 // Messages sent to content script
 export type Message =
   | RequestRefreshMessage
@@ -165,7 +174,8 @@ export type Message =
   | UpdateVisualChangesetRequestMessage
   | UpdateVisualChangesetResponseMessage
   | TransformCopyRequestMessage
-  | TransformCopyResponseMessage;
+  | TransformCopyResponseMessage
+  | UpdateTabState;
 
 export type BGLoadVisualChangsetMessage = {
   type: "BG_LOAD_VISUAL_CHANGESET";

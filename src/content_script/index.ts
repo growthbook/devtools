@@ -27,6 +27,18 @@ try {
 } catch (e) {
   console.error("Failed to parse saved tab state");
 }
+// Listen for messages from the Embed script
+  window.addEventListener(
+    "message",
+    function (event: MessageEvent<Message | BGMessage>) {
+      const data = event.data;
+      console.log("Received message from page", data);
+      if(data?.type === "UPDATE_TAB_STATE"){
+        const {property, value} = data.data;
+        setState(property, value);
+      }
+    }
+  );
 
 // Helper functions to manage tab state
 function getState(property: string): { state?: any; success: boolean } {
@@ -106,8 +118,9 @@ window.addEventListener(
         break;
       case "GB_REFRESH":
       case "GB_ERROR":
-      case "BG_SET_SDK_USAGE_DATA":
-        // passthrough to background worker:
+      case "GB_SDK_UPDATED":
+        console.log("Received message from page", data);
+        // passthrough to background worker:nvm 
         chrome.runtime.sendMessage(data);
         break;
       default:

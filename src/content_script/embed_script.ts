@@ -2,7 +2,7 @@ import type { Experiment, GrowthBook } from "@growthbook/growthbook";
 import type { ErrorMessage, Message, RefreshMessage } from "devtools";
 import useTabState from "@/app/hooks/useTabState";
 import { Attributes } from "@growthbook/growthbook";
-import { update } from "lodash";
+import { at, update } from "lodash";
 import { m } from "framer-motion";
 
 declare global {
@@ -48,68 +48,58 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
   );
 }
 
-function getRefreshMessage(gb: GrowthBook): RefreshMessage {
-  const [apiHost, clientKey] = gb.getApiInfo();
-
-  let experiments: Record<string, Experiment<any>> = {};
-  gb.getAllResults().forEach((v, k) => {
-    experiments[k] = v.experiment;
-  });
-  const [attributes, _setAttributes] = useTabState("attributes", gb.getAttributes());
-  const [features, _setFeatures] = useTabState("features", gb.getFeatures());
-
-
-  const msg: RefreshMessage = {
-    type: "GB_REFRESH",
-    attributes,
-    features,
-    overrides: (gb as any).context?.overrides || {},
-    experiments,
-    url: window.location.href,
-    clientKey,
-    apiHost,
-  };
-
-  return msg;
-}
-
-
 // Send a refresh message back to content script
 function init() {
-  onGrowthBookLoad((gb) => {
-    setupListeners();
-    pushSDKUpdate();
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        pushSDKUpdate();
+  setupListeners();
+  pushAppUpdates();
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        pushAppUpdates();
       }
-    });
   });
 }
 
-
-
-function pushSDKUpdate(){
+function pushAppUpdates() {
   onGrowthBookLoad((gb) => {
-    const [sdkFound, _setSdkFound] = useTabState("sdkFound", !!gb);
-    const [sdkVersion, _setSdkVersion] = useTabState("sdkVersion", gb?.version);
-    const msg = getRefreshMessage(gb);
-    chrome.runtime.sendMessage({type: "GB_SDK_UPDATED", data: msg});
+    pushSDKUpdate();
+    console.log("push updates");
+    if (gb) {
+      console.log("attr updates", gb.getAttributes());
+      updateTabState("attributes", gb.getAttributes());
+      updateTabState("features", gb.getForcedFeatures());
+      updateTabState("experiments", gb.getForcedVariations());
+    }
   });
+}
+
+function pushSDKUpdate(gb?: GrowthBook) {
+    updateTabState("sdkFound", !!gb);
+    updateTabState("sdkVersion", gb?.version);
+    window.postMessage({type: "GB_SDK_UPDATED", data: {
+      sdkFound: !!gb,
+      sdkVersion: gb?.version,
+
+    }}, window.location.origin);
 }
 function setupListeners() {
   // listen for state change events that will effect the SDK
-  chrome.runtime.onMessage.addListener((message: {type: string, data: unknown}) => {
+  window.addEventListener("message", (event) => {
+    const message = event.data;
+    if (typeof message !== "object" || message === null) return;
+
     switch (message.type) {
       case "GB_UPDATE_ATTRIBUTES":
         updateAttributes(message.data);
+        break;
       case "GB_UPDATE_FEATURES":
         updateFeatures(message.data);
+        break;
       case "GB_UPDATE_EXPERIMENTS":
         updateExperiments(message.data);
-      default: 
+        break;
+      default:
         return;
-  }
+    }
   });
 }
 
@@ -159,6 +149,20 @@ function updateExperiments(data: unknown) {
       };
     }
   });
+}
+
+// send a message that the tabstate has been updated
+function updateTabState(property: string, value: unknown) {
+  try {
+    console.log("posting message")
+    window.postMessage({type: "UPDATE_TAB_STATE", data: { 
+      property,
+      value
+  }}, window.location.origin);
+  } catch (error) {
+    console.log("shoot this is not working");
+  }
+
 }
 
 // start running

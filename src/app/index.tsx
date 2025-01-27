@@ -34,7 +34,7 @@ export const App = () => {
     "sdkFound",
     undefined
   );
-  const [_sdkVersion, setSdkVersion] = useTabState<string>("sdkVersion", "");
+  const [sdkVersion, setSdkVersion] = useTabState<string>("sdkVersion", "");
   const [_sdkAttributes, setSdkAttributes] = useTabState<Attributes>(
     "sdkAttributes",
     {}
@@ -47,10 +47,10 @@ export const App = () => {
   >({});
   const [currentTab, setCurrentTab] = useTabState("currentTab", "attributes");
   const [globalBar, setGlobalBar] = useGlobalState("bar", "", true);
-
   useEffect(() => {
     window.setTimeout(() => {
       if (sdkFound === undefined) setSdkFound(false);
+      console.log("SDK Found", sdkFound);
     }, 2000);
   }, []);
 
@@ -62,48 +62,6 @@ export const App = () => {
       }
     });
   }, []);
-
-  useEffect(() => {
-    chrome.runtime.onMessage.addListener(
-      (message: Message | BGMessage, sender, sendResponse) => {
-        const { type } = message;
-        switch (type) {
-          case "BG_SET_SDK_USAGE_DATA":
-            const { data } = message;
-            const messageSdkFound = !!data?.sdkFound;
-            const messageSdkVersion = data?.sdkVersion;
-            setSdkFound(messageSdkFound);
-            if (messageSdkVersion !== undefined) {
-              setSdkVersion(messageSdkVersion);
-            }
-            if (!messageSdkFound) {
-              clearSdkState();
-            }
-            break;
-          case "GB_REFRESH":
-            const {
-              attributes,
-              features,
-              experiments,
-              overrides,
-              url,
-              clientKey,
-              apiHost,
-            } = message;
-            setSdkAttributes(attributes);
-            setSdkFeatures(features);
-            setSdkExperiments(experiments);
-            break;
-        }
-      }
-    );
-  }, []);
-
-  const clearSdkState = () => {
-    setSdkAttributes({});
-    setSdkFeatures({});
-    setSdkExperiments({});
-  };
 
   return (
     <Theme accentColor="violet" hasBackground={false}>
