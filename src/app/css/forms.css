@@ -33,18 +33,13 @@ textarea {
   justify-content: center;
   border-radius: 4px;
   background-color: var(--gray-a2);
-  border: 1px solid var(--black-a6);
+  border: 1px solid var(--black-a5);
   transition: 150ms box-shadow;
 }
 
 .Input:focus,
 .Textarea:focus {
   box-shadow: 0px 0px 0px 1px var(--violet-a8);
-}
-
-.Input::selection,
-.Textarea::selection {
-  background-color: var(--black-a6);
 }
 
 .Input {
@@ -67,7 +62,7 @@ textarea {
     height: 35px;
   }
   .Textarea {
-    line-height: 35px;
+    line-height: 20px;
     padding: 10px;
   }
 }
@@ -84,7 +79,7 @@ textarea {
     height: 24px;
   }
   .Textarea {
-    line-height: 24px;
-    padding: 6px;
+    line-height: 18px;
+    padding: 2px 6px;
   }
 }
