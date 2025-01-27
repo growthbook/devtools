@@ -50,6 +50,7 @@ export default function useGlobalState<T>(
 
   // Setter for state: updates state in the background worker
   const setGlobalState = async (value: any) => {
+    setState(value); // Optimistic update
     try {
       await chrome.runtime.sendMessage({
         type: "setState",
@@ -57,7 +58,6 @@ export default function useGlobalState<T>(
         value,
         persist,
       });
-      setState(value); // Optimistic update
     } catch (error) {
       console.error("Error setting global state in background worker", error);
     }
