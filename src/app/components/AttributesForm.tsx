@@ -38,23 +38,17 @@ export default function AttributesForm({
 
 function renderInputField(a: string, v: any, schema?: Record<string, string>) {
   let attributeType = getAttributeType(a, v, schema);
-  if (attributeType === "number") {
-    return (
-      <Form.Control asChild>
-        <input className="Input" type="number" name={a} value={v} />
-      </Form.Control>
-    );
-  }
-  if (attributeType === "boolean") {
-    return (
-      <Form.Control asChild>
-        <Switch size="2" className="Switch" name={a} checked={v} />
-      </Form.Control>
-    );
-  }
+  // todo: enum, number[], string[]
+  // todo (maybe. or just use string): secureString, secureString[]
   return (
     <Form.Control asChild>
-      <input className="Input" name={a} value={v} />
+      {attributeType === "number" ? (
+        <input className="Input" type="number" name={a} value={v}/>
+      ): attributeType === "boolean" ? (
+        <Switch size="2" className="Switch" name={a} checked={v} />
+      ) : (
+        <input className="Input" name={a} value={v}/>
+      )}
     </Form.Control>
   );
 }
