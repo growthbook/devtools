@@ -4,6 +4,7 @@ import {Button, Switch, Link} from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import {UseFormReturn} from "react-hook-form";
 import {PiXCircle} from "react-icons/pi";
+import useTabState from "@/app/hooks/useTabState";
 
 export default function AttributesForm({
   form,
@@ -20,7 +21,8 @@ export default function AttributesForm({
   schema?: Record<string, string>;
   canAddRemoveFields?: boolean;
 }) {
-  const attributes = form.getValues();
+  const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
+  const formAttributes = form.getValues();
 
   const addField = (key: string) => {
     setDirty?.(true);
@@ -34,6 +36,15 @@ export default function AttributesForm({
     delete newAttributes?.[key];
     form.reset(newAttributes);
   };
+  const applyAttributes = () => {
+    setAttributes(formAttributes);
+    form.reset(formAttributes);
+    setDirty?.(false);
+  }
+  const resetAttributes = () => {
+    form.reset(attributes);
+    setDirty?.(false);
+  }
 
   useEffect(() => {
     if (form.formState.isDirty && !dirty) {
@@ -46,7 +57,7 @@ export default function AttributesForm({
       <div>
         <Form.Root className="FormRoot small">
           {!jsonMode ?
-            Object.keys(attributes).map((attributeKey, i) => {
+            Object.keys(formAttributes).map((attributeKey, i) => {
               return (
                 <div key={attributeKey}>
                   <Form.Field className="FormFieldInline my-1" name={attributeKey}>
@@ -77,16 +88,16 @@ export default function AttributesForm({
                 className="Textarea mono"
                 name={"__JSON_attributes__"}
                 // todo: make uncontrolled, sync with form if valid JSON
-                value={JSON.stringify(attributes, null, 2)}
+                value={JSON.stringify(formAttributes, null, 2)}
                 rows={12}
               />
           )}
           {dirty && (
             <div className="mt-2 flex justify-between items-center">
-              <Link href="#" role="button" color="gray">
+              <Link href="#" role="button" color="gray" onClick={resetAttributes}>
                 Reset
               </Link>
-              <Button type="button" size="2">
+              <Button type="button" size="2" onClick={applyAttributes}>
                 Apply
               </Button>
             </div>

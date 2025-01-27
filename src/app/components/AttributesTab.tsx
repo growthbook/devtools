@@ -11,9 +11,8 @@ type ArchetypeSource = "growthbook" | "local";
 type Archetypes = Record<ArchetypeSource, Archetype[]>;
 
 export default function AttributesTab() {
-  const [sdkAttributes] = useTabState<Attributes>("sdkAttributes", {});
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
-  const attributesForm = useForm<Attributes>({ defaultValues: sdkAttributes });
+  const attributesForm = useForm<Attributes>({ defaultValues: attributes });
   const [dirty, setDirty] = useState(false);
   const [jsonMode, setJsonMode] = useTabState("attributesForm_useJsonMode", false);
 
@@ -35,9 +34,9 @@ export default function AttributesTab() {
   // listen to SDK changes to set attributes form
   useEffect(() => {
     if (!dirty) {
-      attributesForm.reset(sdkAttributes);
+      attributesForm.reset(attributes);
     }
-  }, [JSON.stringify(sdkAttributes)]);
+  }, [JSON.stringify(attributes)]);
 
   return (
     <div className="flex justify-between items-top">
