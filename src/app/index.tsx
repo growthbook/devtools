@@ -1,4 +1,4 @@
-import "./index.css";
+import "@/app/css/index.css";
 import {
   Theme,
   Flex,
@@ -22,7 +22,7 @@ import AttributesTab from "./components/AttributesTab";
 import ExperimentsTab from "./components/ExperimentsTab";
 import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
-import SettingsForm from "@/app/components/SettingsForm";
+import SettingsForm from "@/app/components/Settings";
 import { PiX, PiGearSix } from "react-icons/pi";
 import useGlobalState from "./hooks/useGlobalState";
 
@@ -46,7 +46,7 @@ export const App = () => {
     Record<string, Experiment<any>>
   >({});
   const [currentTab, setCurrentTab] = useTabState("currentTab", "attributes");
-  const [globalBar, setGlobalBar] = useGlobalState("bar", "", true);
+  
   useEffect(() => {
     window.setTimeout(() => {
       if (sdkFound === undefined) setSdkFound(false);
@@ -65,12 +65,9 @@ export const App = () => {
 
   return (
     <Theme accentColor="violet" hasBackground={false}>
-      <Button onClick={() => setGlobalBar(globalBar + " B")}>
-        Global State: {globalBar}
-      </Button>
-      <div id="main" className="p-3">
+      <div id="main" className="px-3 pt-2 pb-3">
         <Flex justify="between">
-          <h1 className="text-lg mb-2">
+          <h1 className="text-lg">
             <img
               src={logo}
               alt="GrowthBook"
@@ -131,18 +128,20 @@ export const App = () => {
               <Tabs.Trigger value="experiments">Experiments</Tabs.Trigger>
               <Tabs.Trigger value="logs">Event Logs</Tabs.Trigger>
             </Tabs.List>
-            <Tabs.Content value="attributes">
-              <AttributesTab />
-            </Tabs.Content>
-            <Tabs.Content value="features">
-              <FeaturesTab />
-            </Tabs.Content>
-            <Tabs.Content value="experiments">
-              <ExperimentsTab />
-            </Tabs.Content>
-            <Tabs.Content value="logs">
-              <LogsTab />
-            </Tabs.Content>
+            <div className="mt-2">
+              <Tabs.Content value="attributes">
+                <AttributesTab />
+              </Tabs.Content>
+              <Tabs.Content value="features">
+                <FeaturesTab />
+              </Tabs.Content>
+              <Tabs.Content value="experiments">
+                <ExperimentsTab />
+              </Tabs.Content>
+              <Tabs.Content value="logs">
+                <LogsTab />
+              </Tabs.Content>
+            </div>
           </Tabs.Root>
         )}
       </div>

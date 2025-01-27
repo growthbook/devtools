@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import * as Form from "@radix-ui/react-form";
-import "./style.css";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { useForm } from "react-hook-form";
 import { Button, Checkbox } from "@radix-ui/themes";
