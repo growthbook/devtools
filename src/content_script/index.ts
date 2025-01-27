@@ -6,10 +6,17 @@ import {
   visualEditorTransformCopyRequest,
   visualEditorUpdateChangesetRequest,
 } from "@/content_script/pageMessageHandlers";
+import { at } from "lodash";
 
 const forceLoadVisualEditor = false;
 export const SESSION_STORAGE_TAB_STATE_KEY = "growthbook-devtools-tab-state";
 
+// 
+const propertiesWithCustomMessage = {
+  attributes: "GB_UPDATE_ATTRIBUTES",
+  features: "GB_UPDATE_FEATURES",
+  experiments: "GB_UPDATE_EXPERIMENTS",
+}
 // Tab-specific state store
 // has a write-through cache in memory and is persisted to sessionStorage
 let state: Record<string, any> = {};
@@ -40,6 +47,12 @@ function setState(property: string, value: any) {
     property,
     value,
   });
+  // send custom messages to Embed script for specific properties so that the Embed script can update the GB SDK
+  if (property in propertiesWithCustomMessage) {    
+    const customMessage = propertiesWithCustomMessage[property as keyof typeof propertiesWithCustomMessage];
+    chrome.runtime.sendMessage({ type: customMessage, data: value });
+  }
+  window.sessionStorage.setItem("tabState", JSON.stringify(state));
 }
 
 // Listen for messages from the App

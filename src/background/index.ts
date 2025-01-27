@@ -101,7 +101,7 @@ chrome.runtime.onMessage.addListener(
     let tabId = sender.tab?.id;
 
     switch (type) {
-      case "BG_SET_SDK_USAGE_DATA":
+      case "GB_SDK_UPDATED":
         if (!tabId) tabId = data?.tabId;
 
         let title = "GrowthBook DevTools";

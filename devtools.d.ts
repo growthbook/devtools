@@ -192,7 +192,7 @@ export type BGTransformCopyMessage = {
 };
 
 type BGSetSDKUsageData = {
-  type: "BG_SET_SDK_USAGE_DATA";
+  type: "GB_SDK_UPDATED";
   data: {
     sdkFound?: boolean;
     sdkVersion?: string;
