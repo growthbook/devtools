@@ -5,7 +5,7 @@ export default function SdkTab() {
   const [sdkFound] = useTabState<boolean | undefined>("sdkFound", undefined);
   const [sdkVersion] = useTabState<string>("sdkVersion", "");
   return (
-    <div className="mb-3 px-3 py-2 border border-gray-200x rounded-lg bg-white">
+    <div className="box mb-3">
       <div className="label">GrowthBook SDK</div>
       {sdkFound ? (
         <div>

@@ -5,7 +5,7 @@ type UseStateReturn<T> = [T, (value: T) => void, boolean];
 export default function useGlobalState<T>(
   property: string,
   defaultValue: T,
-  persist: boolean = false
+  persist: boolean = false,
 ): UseStateReturn<T> {
   const [state, setState] = useState(defaultValue);
   const [ready, setReady] = useState(false);
@@ -23,7 +23,7 @@ export default function useGlobalState<T>(
       } catch (error) {
         console.error(
           "Error fetching global state from background worker",
-          error
+          error,
         );
       }
     };

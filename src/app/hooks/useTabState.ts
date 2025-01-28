@@ -10,7 +10,7 @@ async function getActiveTabId() {
 
 export default function useTabState<T>(
   property: string,
-  defaultValue: T
+  defaultValue: T,
 ): UseStateReturn<T> {
   const [state, setState] = useState(defaultValue);
   const [ready, setReady] = useState(false);

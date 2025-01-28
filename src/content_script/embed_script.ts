@@ -12,7 +12,6 @@ declare global {
 }
 
 function getValidGrowthBookInstance(cb: (gb: GrowthBook) => void) {
-
   if (!window._growthbook) return false;
 
   if (!window._growthbook.setAttributeOverrides) {
@@ -57,8 +56,8 @@ function init() {
   pushAppUpdates();
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
-        pushAppUpdates();
-      }
+      pushAppUpdates();
+    }
   });
 }
 
@@ -76,13 +75,18 @@ function pushAppUpdates() {
 }
 
 function pushSDKUpdate(gb?: GrowthBook) {
-    updateTabState("sdkFound", !!gb);
-    updateTabState("sdkVersion", gb?.version);
-    window.postMessage({type: "GB_SDK_UPDATED", data: {
-      sdkFound: !!gb,
-      sdkVersion: gb?.version,
-
-    }}, window.location.origin);
+  updateTabState("sdkFound", !!gb);
+  updateTabState("sdkVersion", gb?.version);
+  window.postMessage(
+    {
+      type: "GB_SDK_UPDATED",
+      data: {
+        sdkFound: !!gb,
+        sdkVersion: gb?.version,
+      },
+    },
+    window.location.origin,
+  );
 }
 function setupListeners() {
   // listen for state change events that will effect the SDK
@@ -122,7 +126,9 @@ function updateAttributes(data: unknown) {
 function updateFeatures(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (typeof data === "object" && data !== null) {
-      gb.setForcedFeatures(new Map(Object.entries(data as Record<string, any>)));
+      gb.setForcedFeatures(
+        new Map(Object.entries(data as Record<string, any>)),
+      );
     } else {
       const msg: ErrorMessage = {
         type: "GB_ERROR",
@@ -137,7 +143,9 @@ function updateExperiments(data: unknown) {
     if (Array.isArray(data)) {
       data.forEach((experiment) => {
         if (experiment.id && experiment.forcedVariation) {
-          gb.setForcedVariations({ [experiment.id]: experiment.forcedVariation });
+          gb.setForcedVariations({
+            [experiment.id]: experiment.forcedVariation,
+          });
         } else {
           const msg: ErrorMessage = {
             type: "GB_ERROR",
@@ -157,11 +165,17 @@ function updateExperiments(data: unknown) {
 // send a message that the tabstate has been updated
 function updateTabState(property: string, value: unknown) {
   try {
-    console.log("posting message")
-    window.postMessage({type: "UPDATE_TAB_STATE", data: { 
-      property,
-      value
-  }}, window.location.origin);
+    console.log("posting message");
+    window.postMessage(
+      {
+        type: "UPDATE_TAB_STATE",
+        data: {
+          property,
+          value,
+        },
+      },
+      window.location.origin,
+    );
   } catch (error) {
     console.log("shoot this is not working");
   }

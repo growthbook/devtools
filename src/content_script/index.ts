@@ -11,34 +11,34 @@ import { at } from "lodash";
 const forceLoadVisualEditor = false;
 export const SESSION_STORAGE_TAB_STATE_KEY = "growthbook-devtools-tab-state";
 
-// 
+//
 const propertiesWithCustomMessage = {
   attributes: "GB_UPDATE_ATTRIBUTES",
   features: "GB_UPDATE_FEATURES",
   experiments: "GB_UPDATE_EXPERIMENTS",
-}
+};
 // Tab-specific state store
 // has a write-through cache in memory and is persisted to sessionStorage
 let state: Record<string, any> = {};
 try {
   state = JSON.parse(
-    window.sessionStorage.getItem(SESSION_STORAGE_TAB_STATE_KEY) || "{}"
+    window.sessionStorage.getItem(SESSION_STORAGE_TAB_STATE_KEY) || "{}",
   );
 } catch (e) {
   console.error("Failed to parse saved tab state");
 }
 // Listen for messages from the Embed script
-  window.addEventListener(
-    "message",
-    function (event: MessageEvent<Message | BGMessage>) {
-      const data = event.data;
-      console.log("Received message from page", data);
-      if(data?.type === "UPDATE_TAB_STATE"){
-        const {property, value} = data.data;
-        setState(property, value);
-      }
+window.addEventListener(
+  "message",
+  function (event: MessageEvent<Message | BGMessage>) {
+    const data = event.data;
+    console.log("Received message from page", data);
+    if (data?.type === "UPDATE_TAB_STATE") {
+      const { property, value } = data.data;
+      setState(property, value);
     }
-  );
+  },
+);
 
 // Helper functions to manage tab state
 function getState(property: string): { state?: any; success: boolean } {
@@ -52,7 +52,7 @@ function setState(property: string, value: any) {
   state[property] = value;
   window.sessionStorage.setItem(
     SESSION_STORAGE_TAB_STATE_KEY,
-    JSON.stringify(state)
+    JSON.stringify(state),
   );
   chrome.runtime.sendMessage({
     type: "tabStateChanged",
@@ -60,8 +60,11 @@ function setState(property: string, value: any) {
     value,
   });
   // send custom messages to Embed script for specific properties so that the Embed script can update the GB SDK
-  if (property in propertiesWithCustomMessage) {    
-    const customMessage = propertiesWithCustomMessage[property as keyof typeof propertiesWithCustomMessage];
+  if (property in propertiesWithCustomMessage) {
+    const customMessage =
+      propertiesWithCustomMessage[
+        property as keyof typeof propertiesWithCustomMessage
+      ];
     window.postMessage({ type: customMessage, data: value }, window.location.origin);
   }
   window.sessionStorage.setItem("tabState", JSON.stringify(state));
@@ -120,13 +123,13 @@ window.addEventListener(
       case "GB_ERROR":
       case "GB_SDK_UPDATED":
         console.log("Received message from page", data);
-        // passthrough to background worker:nvm 
+        // passthrough to background worker:nvm
         chrome.runtime.sendMessage(data);
         break;
       default:
         break;
     }
-  }
+  },
 );
 
 // Listen for messages from devtools, background, etc.

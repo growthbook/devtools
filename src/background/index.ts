@@ -24,7 +24,7 @@ let state: Record<string, any> = {};
 // Helper functions to manage global state
 async function getState(
   property: string,
-  persist: boolean = false
+  persist: boolean = false,
 ): Promise<{ state?: any; success: boolean }> {
   if (persist) {
     const result = await chrome.storage.sync.get([property]);
@@ -43,7 +43,7 @@ async function getState(
 async function setState(
   property: string,
   value: any,
-  persist: boolean = false
+  persist: boolean = false,
 ) {
   if (persist) {
     await chrome.storage.sync.set({ [property]: value });
@@ -104,7 +104,7 @@ chrome.runtime.onMessage.addListener(
       case "GB_SDK_UPDATED":
         if (!tabId) tabId = data?.tabId;
         let title = "GrowthBook DevTools";
-        let text =  "";
+        let text = "";
 
         if (data.sdkFound) {
           chrome.action.setIcon({
@@ -129,21 +129,21 @@ chrome.runtime.onMessage.addListener(
         handleLoadVisualChangeset(
           message as BGLoadVisualChangsetMessage,
           sender,
-          sendResponse
+          sendResponse,
         );
         break;
       case "BG_UPDATE_VISUAL_CHANGESET":
         handleUpdateVisualChangeset(
           message as BGUpdateVisualChangsetMessage,
           sender,
-          sendResponse
+          sendResponse,
         );
         break;
       case "BG_TRANSFORM_COPY":
         handleTransformCopy(
           message as BGTransformCopyMessage,
           sender,
-          sendResponse
+          sendResponse,
         );
         break;
       default:
@@ -153,7 +153,7 @@ chrome.runtime.onMessage.addListener(
 
     // return true to indicate async response
     return true;
-  }
+  },
 );
 
 export const genHeaders = (apiKey: string) => ({
@@ -193,7 +193,7 @@ export const isSameOrigin = (url: string, origin: string) => {
         origin,
       });
       throw new Error(
-        'Unrecognizable domain type for either "url" or "origin"'
+        'Unrecognizable domain type for either "url" or "origin"',
       );
     }
   } catch (e) {
