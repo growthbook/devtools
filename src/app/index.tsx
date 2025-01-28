@@ -32,12 +32,12 @@ export const App = () => {
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
     "sdkFound",
-    undefined
+    undefined,
   );
   const [sdkVersion, setSdkVersion] = useTabState<string>("sdkVersion", "");
   const [_sdkAttributes, setSdkAttributes] = useTabState<Attributes>(
     "sdkAttributes",
-    {}
+    {},
   );
   const [_sdkFeatures, setSdkFeatures] = useTabState<
     Record<string, FeatureDefinition>
@@ -46,7 +46,7 @@ export const App = () => {
     Record<string, Experiment<any>>
   >({});
   const [currentTab, setCurrentTab] = useTabState("currentTab", "attributes");
-  
+
   useEffect(() => {
     window.setTimeout(() => {
       if (sdkFound === undefined) setSdkFound(false);
@@ -64,86 +64,99 @@ export const App = () => {
   }, []);
 
   return (
-    <Theme accentColor="violet" hasBackground={false}>
-      <div id="main" className="px-3 pt-2 pb-3">
-        <Flex justify="between">
-          <h1 className="text-lg">
-            <img
-              src={logo}
-              alt="GrowthBook"
-              className="w-[140px] inline-block mb-1 mr-2"
-            />
-            <span className="text-gray-500 font-bold">DevTools</span>
-          </h1>
-          <Flex>
-            <Button
-              mr="2"
-              variant={showSdkDebug ? "solid" : "outline"}
-              // TODO: extend coloring/styling to other error and warning states
-              color={sdkFound ? undefined : "orange"}
-              // TODO: where else do we want a way to return to the main tabs
-              onClick={() => setShowSdkDebug(!showSdkDebug)}
-            >
-              SDK
-            </Button>
-            <Dialog.Root
-              open={settingsOpen}
-              onOpenChange={(o) => setSettingsOpen(o)}
-            >
-              <Dialog.Trigger>
-                <Button>
-                  <div className="px-4">
-                    <PiGearSix size={20} />
-                  </div>
-                </Button>
-              </Dialog.Trigger>
-              <Dialog.Content className="ModalBody">
-                <Dialog.Title>Settings</Dialog.Title>
-                <SettingsForm close={() => setSettingsOpen(false)} />
-                <Dialog.Close
-                  style={{ position: "absolute", top: 5, right: 5 }}
-                >
-                  <IconButton
-                    color="gray"
-                    highContrast
-                    size="1"
-                    variant="outline"
-                    radius="full"
+    <Theme
+      accentColor="violet"
+      hasBackground={false}
+      style={{ minHeight: "unset" }}
+    >
+      <div id="main">
+        <div
+          className="shadow-sm fixed top-0 px-3 pt-2 w-full bg-zinc-50"
+          style={{ zIndex: 100000 }}
+        >
+          <Flex justify="between">
+            <h1 className="text-lg">
+              <img
+                src={logo}
+                alt="GrowthBook"
+                className="w-[140px] inline-block mb-1 mr-2"
+              />
+              <span className="text-gray-500 font-bold">DevTools</span>
+            </h1>
+            <Flex>
+              <Button
+                mr="2"
+                variant={showSdkDebug ? "solid" : "outline"}
+                // TODO: extend coloring/styling to other error and warning states
+                color={sdkFound ? undefined : "orange"}
+                // TODO: where else do we want a way to return to the main tabs
+                onClick={() => setShowSdkDebug(!showSdkDebug)}
+              >
+                SDK
+              </Button>
+              <Dialog.Root
+                open={settingsOpen}
+                onOpenChange={(o) => setSettingsOpen(o)}
+              >
+                <Dialog.Trigger>
+                  <Button>
+                    <div className="px-4">
+                      <PiGearSix size={20} />
+                    </div>
+                  </Button>
+                </Dialog.Trigger>
+                <Dialog.Content className="ModalBody">
+                  <Dialog.Title>Settings</Dialog.Title>
+                  <SettingsForm close={() => setSettingsOpen(false)} />
+                  <Dialog.Close
+                    style={{ position: "absolute", top: 5, right: 5 }}
                   >
-                    <PiX size={20} />
-                  </IconButton>
-                </Dialog.Close>
-              </Dialog.Content>
-            </Dialog.Root>
+                    <IconButton
+                      color="gray"
+                      highContrast
+                      size="1"
+                      variant="outline"
+                      radius="full"
+                    >
+                      <PiX size={20} />
+                    </IconButton>
+                  </Dialog.Close>
+                </Dialog.Content>
+              </Dialog.Root>
+            </Flex>
           </Flex>
-        </Flex>
 
-        {showSdkDebug ? (
-          <SdkTab />
-        ) : (
-          <Tabs.Root value={currentTab} onValueChange={setCurrentTab}>
-            <Tabs.List>
-              <Tabs.Trigger value="attributes">User Attributes</Tabs.Trigger>
-              <Tabs.Trigger value="features">Features</Tabs.Trigger>
-              <Tabs.Trigger value="experiments">Experiments</Tabs.Trigger>
-              <Tabs.Trigger value="logs">Event Logs</Tabs.Trigger>
-            </Tabs.List>
-            <div className="mt-2">
-              <Tabs.Content value="attributes">
-                <AttributesTab />
-              </Tabs.Content>
-              <Tabs.Content value="features">
-                <FeaturesTab />
-              </Tabs.Content>
-              <Tabs.Content value="experiments">
-                <ExperimentsTab />
-              </Tabs.Content>
-              <Tabs.Content value="logs">
-                <LogsTab />
-              </Tabs.Content>
-            </div>
-          </Tabs.Root>
-        )}
+          {!showSdkDebug && (
+            <Tabs.Root
+              value={currentTab}
+              onValueChange={setCurrentTab}
+              className="-mx-4"
+            >
+              <Tabs.List>
+                <div className="mx-2" />
+                <Tabs.Trigger value="attributes">User Attributes</Tabs.Trigger>
+                <Tabs.Trigger value="features">Features</Tabs.Trigger>
+                <Tabs.Trigger value="experiments">Experiments</Tabs.Trigger>
+                <Tabs.Trigger value="logs">Event Logs</Tabs.Trigger>
+                <div className="mx-2" />
+              </Tabs.List>
+            </Tabs.Root>
+          )}
+        </div>
+
+        <div className="mt-[95px] mx-3">
+          {currentTab === "attributes" ? (
+            <AttributesTab />
+          ) : currentTab === "features" ? (
+            <FeaturesTab />
+          ) : currentTab === "experiments" ? (
+            <ExperimentsTab />
+          ) : currentTab === "logs" ? (
+            <LogsTab />
+          ) : showSdkDebug ? (
+            <SdkTab />
+          ) : null}
+        </div>
       </div>
     </Theme>
   );

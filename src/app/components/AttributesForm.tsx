@@ -1,10 +1,11 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as Form from "@radix-ui/react-form";
-import {Button, Switch, Link, Select} from "@radix-ui/themes";
+import { Button, Switch, Link, Select } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
-import {UseFormReturn} from "react-hook-form";
-import {PiPlusCircle, PiXCircle} from "react-icons/pi";
+import { UseFormReturn } from "react-hook-form";
+import { PiCheckBold, PiPlusCircle, PiX, PiXCircle } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
+import clsx from "clsx";
 
 export default function AttributesForm({
   form,
@@ -32,7 +33,7 @@ export default function AttributesForm({
     const newAttributes = form.getValues();
     newAttributes[key] = undefined;
     form.reset(newAttributes);
-  }
+  };
   const removeField = (key: string) => {
     setDirty?.(true);
     const newAttributes = form.getValues();
@@ -42,27 +43,28 @@ export default function AttributesForm({
   const addCustomField = () => {
     setDirty?.(true);
     const newAttributes = form.getValues();
-    newAttributes[addCustomId] = addCustomType === "number" ? 0 : addCustomType === "boolean" ? false : "string";
+    newAttributes[addCustomId] =
+      addCustomType === "number" ? 0 : addCustomType === "boolean" ? false : "";
     // todo: number[], string[]
     form.reset(newAttributes);
     setAddingCustom(false);
     setAddCustomId("");
     setAddCustomType("string");
-  }
+  };
   const cancelAddCustomField = () => {
     setAddingCustom(false);
     setAddCustomId("");
     setAddCustomType("string");
-  }
+  };
   const applyAttributes = () => {
     setAttributes(formAttributes);
     form.reset(formAttributes);
     setDirty?.(false);
-  }
+  };
   const resetAttributes = () => {
     form.reset(attributes);
     setDirty?.(false);
-  }
+  };
 
   useEffect(() => {
     if (form.formState.isDirty && !dirty) {
@@ -71,14 +73,17 @@ export default function AttributesForm({
   }, [form.formState, dirty]);
 
   return (
-    <>
-      <div>
-        <Form.Root className="FormRoot small">
-          {!jsonMode ?
+    <div className={clsx({ "mb-[60px]": dirty })}>
+      <Form.Root className="FormRoot small">
+        <div className="box">
+          {!jsonMode ? (
             Object.keys(formAttributes).map((attributeKey, i) => {
               return (
                 <div key={attributeKey}>
-                  <Form.Field className="FormFieldInline my-1" name={attributeKey}>
+                  <Form.Field
+                    className="FormFieldInline my-1"
+                    name={attributeKey}
+                  >
                     <Form.Label className="FormLabel mr-1 text-nowrap">
                       {canAddRemoveFields && (
                         <Button
@@ -89,94 +94,137 @@ export default function AttributesForm({
                           className="px-1 mt-0.5 mr-0.5"
                           onClick={() => removeField(attributeKey)}
                         >
-                          <PiXCircle/>
+                          <PiXCircle />
                         </Button>
                       )}
-                      <div className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
-                           style={{minWidth: 80, maxWidth: 120}}>
+                      <div
+                        className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
+                        style={{ minWidth: 80, maxWidth: 120 }}
+                      >
                         {attributeKey}
                       </div>
                     </Form.Label>
-                    {renderInputField({attributeKey, form, schema})}
+                    {renderInputField({ attributeKey, form, schema })}
                   </Form.Field>
                 </div>
               );
             })
-            : (
-              <textarea
-                className="Textarea mono"
-                name={"__JSON_attributes__"}
-                // todo: make uncontrolled, sync with form if valid JSON
-                value={JSON.stringify(formAttributes, null, 2)}
-                rows={12}
-              />
-            )}
-          {canAddRemoveFields && (
-            <div className="mt-2">
-              {/*todo: map through unused attributes from schema*/}
-              {!addingCustom ? (
-                <div key="add_custom">
-                  <Button
-                    type="button"
-                    size="2"
-                    variant="ghost"
-                    className="px-1 mt-0.5 mr-0.5"
-                    onClick={() => {
-                      setAddingCustom(true);
-                    }}
-                  >
-                    <PiPlusCircle /> Add {schema ? "custom" : ""}attribute...
-                  </Button>
-                </div>
-              ) : (
-                <div key="add_custom" className="mt-1 flex justify-between items-center" style={{ fontSize: 12 }}>
-                  <div className="flex items-center gap-1 mr-3">
-                    <span>Add</span>
-                    <input placeholder="field name" className="Input" value={addCustomId} onChange={(e) => {
+          ) : (
+            <textarea
+              className="Textarea mono mt-1"
+              name={"__JSON_attributes__"}
+              // todo: make uncontrolled, sync with form if valid JSON
+              value={JSON.stringify(formAttributes, null, 2)}
+              rows={12}
+            />
+          )}
+        </div>
+
+        {canAddRemoveFields && (
+          <div className="m-2">
+            {/*todo: map through unused attributes from schema*/}
+            {!addingCustom ? (
+              <div key="add_custom">
+                <Button
+                  type="button"
+                  size="1"
+                  variant="ghost"
+                  className="mt-0.5"
+                  onClick={() => {
+                    setAddingCustom(true);
+                  }}
+                >
+                  <PiPlusCircle /> Add {schema ? "custom" : ""}attribute...
+                </Button>
+              </div>
+            ) : (
+              <div
+                key="add_custom"
+                className="mt-1 flex gap-3 justify-between items-center"
+                style={{ fontSize: 12 }}
+              >
+                <div className="flex items-center gap-1">
+                  <span>Add</span>
+                  <input
+                    autoFocus
+                    placeholder="field name"
+                    className="Input bg-white"
+                    value={addCustomId}
+                    onChange={(e) => {
                       const v = e.target.value;
                       setAddCustomId(v);
-                    }}/>
-                    <Select.Root defaultValue="string" size="1" value={addCustomType}
-                                 onValueChange={(v) => setAddCustomType(v)}>
-                      <Select.Trigger className="uppercase">
-                        <div className="text-green-700">
-                          &lt;{addCustomType?.[0] || "S"}&gt;
-                        </div>
-                      </Select.Trigger>
-                      <Select.Content>
-                        <Select.Item value="string">String</Select.Item>
-                        <Select.Item value="number">Number</Select.Item>
-                        <Select.Item value="boolean">Boolean</Select.Item>
-                        {/*todo: number[], string[]*/}
-                      </Select.Content>
-                    </Select.Root>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Button disabled={!addCustomId.trim()} type="button" size="1" onClick={() => addCustomField()}>
-                      Add
-                    </Button>
-                    <Button type="button" size="1" color="gray" variant="outline" onClick={() => cancelAddCustomField()}>
-                      X
-                    </Button>
-                  </div>
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.code === "Enter" && addCustomId.trim()) {
+                        addCustomField();
+                      }
+                    }}
+                  />
+                  <Select.Root
+                    defaultValue="string"
+                    size="1"
+                    value={addCustomType}
+                    onValueChange={(v) => setAddCustomType(v)}
+                  >
+                    <Select.Trigger className="uppercase">
+                      <div className="text-green-700">
+                        &lt;{addCustomType?.[0] || "S"}&gt;
+                      </div>
+                    </Select.Trigger>
+                    <Select.Content>
+                      <Select.Item value="string">String</Select.Item>
+                      <Select.Item value="number">Number</Select.Item>
+                      <Select.Item value="boolean">Boolean</Select.Item>
+                      {/*todo: number[], string[]*/}
+                    </Select.Content>
+                  </Select.Root>
                 </div>
-              )}
-            </div>
-          )}
-          {dirty && (
-            <div className="mt-2 flex justify-between items-center">
-              <Link href="#" role="button" color="gray" onClick={resetAttributes}>
-                Reset
-              </Link>
-              <Button type="button" size="2" onClick={applyAttributes}>
-                Apply
-              </Button>
-            </div>
-          )}
-        </Form.Root>
-      </div>
-    </>
-);
+                <div className="flex items-center gap-1 -mr-1">
+                  <Button
+                    type="button"
+                    disabled={!addCustomId.trim()}
+                    radius="full"
+                    size="1"
+                    onClick={() => addCustomField()}
+                    style={{ width: 24 }}
+                    className="px-0"
+                  >
+                    <PiCheckBold />
+                  </Button>
+                  <Button
+                    type="button"
+                    radius="full"
+                    size="1"
+                    color="gray"
+                    variant="outline"
+                    onClick={() => cancelAddCustomField()}
+                    style={{ width: 24 }}
+                    className="px-0"
+                  >
+                    <PiX />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        {dirty && (
+          <div
+            className="flex items-center gap-3 shadow-sm-up fixed bottom-0 left-0 px-3 py-2 w-full bg-zinc-50"
+            style={{ zIndex: 100000 }}
+          >
+            <div className="flex-1" />
+            <Link href="#" role="button" color="gray" onClick={resetAttributes}>
+              Reset
+            </Link>
+            <Button type="button" size="2" onClick={applyAttributes}>
+              Apply
+            </Button>
+          </div>
+        )}
+      </Form.Root>
+    </div>
+  );
 }
 
 function renderInputField({
@@ -188,15 +236,28 @@ function renderInputField({
   form: UseFormReturn<Attributes>;
   schema?: Record<string, string>;
 }) {
-  let attributeType = getAttributeType(attributeKey, form.watch(attributeKey), schema);
+  let attributeType = getAttributeType(
+    attributeKey,
+    form.watch(attributeKey),
+    schema,
+  );
   // todo: enum, number[], string[]
   // todo (maybe. or just use string): secureString, secureString[]
   return (
     <Form.Control asChild>
       {attributeType === "number" ? (
-        <input className="Input" type="number" {...form.register(attributeKey)} />
-      ): attributeType === "boolean" ? (
-        <Switch size="2" className="Switch" checked={form.watch(attributeKey)} onCheckedChange={(v: boolean) => form.setValue(attributeKey, v)} />
+        <input
+          className="Input"
+          type="number"
+          {...form.register(attributeKey)}
+        />
+      ) : attributeType === "boolean" ? (
+        <Switch
+          size="2"
+          className="Switch"
+          checked={form.watch(attributeKey)}
+          onCheckedChange={(v: boolean) => form.setValue(attributeKey, v)}
+        />
       ) : (
         <input className="Input" {...form.register(attributeKey)} />
       )}
