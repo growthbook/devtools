@@ -119,11 +119,11 @@ window.addEventListener(
       case "GB_REQUEST_TRANSFORM_COPY":
         visualEditorTransformCopyRequest(data);
         break;
-      case "GB_REFRESH":
       case "GB_ERROR":
       case "GB_SDK_UPDATED":
-        console.log("Received message from page", data);
         // passthrough to background worker:nvm
+        console.log("sending message to background", data);
+        // get tabid
         chrome.runtime.sendMessage(data);
         break;
       default:

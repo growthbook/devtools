@@ -2,7 +2,7 @@ import type { Experiment, GrowthBook } from "@growthbook/growthbook";
 import type { ErrorMessage, Message, RefreshMessage } from "devtools";
 import useTabState from "@/app/hooks/useTabState";
 import { Attributes } from "@growthbook/growthbook";
-import { at, update } from "lodash";
+import { at, has, update } from "lodash";
 import { m } from "framer-motion";
 
 declare global {
@@ -25,9 +25,7 @@ function getValidGrowthBookInstance(cb: (gb: GrowthBook) => void) {
   }
   return true;
 }
-function test () {
-  console.log("test");
-}
+
 
 // Wait for window._growthbook to be available
 function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
@@ -62,8 +60,9 @@ function init() {
 }
 
 function pushAppUpdates() {
+
   onGrowthBookLoad((gb) => {
-    pushSDKUpdate();
+    pushSDKUpdate(gb);
     console.log("push updates");
     if (gb) {
       console.log("attr updates", gb.getAttributes());
@@ -77,17 +76,9 @@ function pushAppUpdates() {
 function pushSDKUpdate(gb?: GrowthBook) {
   updateTabState("sdkFound", !!gb);
   updateTabState("sdkVersion", gb?.version);
-  window.postMessage(
-    {
-      type: "GB_SDK_UPDATED",
-      data: {
-        sdkFound: !!gb,
-        sdkVersion: gb?.version,
-      },
-    },
-    window.location.origin,
-  );
+  updateBackgroundSDK(gb);
 }
+
 function setupListeners() {
   // listen for state change events that will effect the SDK
   window.addEventListener("message", (event) => {
@@ -160,6 +151,20 @@ function updateExperiments(data: unknown) {
       };
     }
   });
+}
+
+function updateBackgroundSDK(gb?: GrowthBook) {
+  console.log("this is gb", gb);
+  window.postMessage(
+    {
+      type: "GB_SDK_UPDATED",
+      data: {
+        sdkFound: !!gb,
+        sdkVersion: gb?.version || null,
+      },
+    },
+    window.location.origin,
+  );
 }
 
 // send a message that the tabstate has been updated

@@ -50,7 +50,6 @@ export const App = () => {
   useEffect(() => {
     window.setTimeout(() => {
       if (sdkFound === undefined) setSdkFound(false);
-      console.log("SDK Found", sdkFound);
     }, 2000);
   }, []);
 
