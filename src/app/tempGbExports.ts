@@ -26,8 +26,11 @@ export type SDKAttribute = {
   projects?: string[];
 };
 export type SDKAttributeSchema = SDKAttribute[];
+
+export type ArchetypeSource = "growthbook" | "local";
 export interface Archetype {
   id: string;
   name: string;
   attributes: Attributes;
+  source: ArchetypeSource;
 }
