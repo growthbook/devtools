@@ -57,8 +57,8 @@ export default function AttributesTab() {
   useEffect(() => {
     if (archetypesLoading || archetypesError || !archetypesData) return;
     setArchetypes({
-      local: archetypes.local,
-      growthbook: archetypesData.archetypes,
+      local: archetypes.local || [],
+      growthbook: archetypesData.archetypes || [],
     });
   }, [archetypesLoading, archetypesError, archetypesData]);
 
