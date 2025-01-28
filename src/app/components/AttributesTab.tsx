@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
+import uniqid from "uniqid";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
-import {Button, Checkbox, Dialog, IconButton, Link, RadioGroup, Select} from "@radix-ui/themes";
+import useGlobalState from "../hooks/useGlobalState";
+import {Button, Checkbox, Dialog, IconButton, Link, Popover, RadioGroup, Select} from "@radix-ui/themes";
 import { Archetype } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
 import {PiAsterisk, PiBookmark, PiGearSix, PiX} from "react-icons/pi";
-import SettingsForm, {API_HOST} from "@/app/components/Settings";
 import * as Form from "@radix-ui/react-form";
 
 type ArchetypeSource = "growthbook" | "local";
@@ -26,23 +27,11 @@ export default function AttributesTab() {
     false,
   );
 
-  const [saveUserModalOpen, setSaveUserModalOpen] = useState(false);
-  const saveUserForm = useForm({ defaultValues: {
-    userType: "__new__",
-    userName: "",
-  }});
-  const submitUserForm = (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    const values = saveUserForm.getValues();
-    console.log({values})
-    close?.();
-  };
-
   const [archetypeSource, setArchetypeSource] = useTabState<ArchetypeSource>(
     "archetypeSource",
     "growthbook",
   );
-  const [archetypes, setArchetypes] = useTabState<Archetypes>("archetypes", {
+  const [archetypes, setArchetypes] = useGlobalState<Archetypes>("archetypes", {
     growthbook: [],
     local: [],
   });
@@ -54,6 +43,36 @@ export default function AttributesTab() {
   const archetypeAttributesForm = useForm<Attributes>({
     defaultValues: selectedArchetype?.attributes || {},
   });
+
+  const [saveArchetypeOpen, setSaveArchetypeOpen] = useState(false);
+  const saveArchetypeForm = useForm({ defaultValues: {
+      type: "new", // "new" | "existing"
+      name: "",
+      id: "",
+    }});
+  const newArchetypeIsValid = saveArchetypeForm.watch("name").trim().length > 0 &&
+    !archetypes.local.find((archetype) => archetype.name !== saveArchetypeForm.watch("name"));
+  const submitArchetypeForm = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    const values = saveArchetypeForm.getValues();
+    if (values.type === "new") {
+      const archetype: Archetype = {
+        id: uniqid("sam_"),
+        name: values.name,
+        attributes: formAttributes,
+      };
+      setArchetypes({
+        ...archetypes,
+        local: [ ...archetypes.local, archetype ],
+      });
+      saveArchetypeForm.reset({
+        type: "existing",
+        name: archetype.name,
+        id: archetype.id,
+      });
+    }
+    setSaveArchetypeOpen(false);
+  };
 
   const applyAttributes = () => {
     if (!jsonMode) {
@@ -161,14 +180,56 @@ export default function AttributesTab() {
         >
           <div className="flex-1" />
           <div className="flex items-center gap-3 w-[50%]">
-            <Button variant="soft" onClick={() => setSaveUserModalOpen(true)}>
-              <PiBookmark />
-              Save as...
-            </Button>
+            <Popover.Root
+              open={saveArchetypeOpen}
+              onOpenChange={(o) => setSaveArchetypeOpen(o)}
+            >
+              <Popover.Trigger>
+                <Button variant="soft">
+                  <PiBookmark />
+                  Save...
+                </Button>
+              </Popover.Trigger>
+              <Popover.Content style={{ width: 200 }}>
+                <Form.Root className="FormRoot small" onSubmit={submitArchetypeForm}>
+                  <Form.Field className="FormField" name="type">
+                    <Form.Label className="FormLabel">Save User Attributes as...</Form.Label>
+                    <Select.Root
+                      size="1"
+                      value={saveArchetypeForm.watch("type")}
+                      onValueChange={(v) => saveArchetypeForm.setValue("type", v)}
+                    >
+                      <Select.Trigger variant="surface" className="w-full"/>
+                      <Select.Content>
+                        {archetypes.local.length > 0 && (
+                          <Select.Item value="existing">{saveArchetypeForm.watch("name")}</Select.Item>
+                        )}
+                        <Select.Item value="new">New Archetype</Select.Item>
+                      </Select.Content>
+                    </Select.Root>
+                  </Form.Field>
+                  {saveArchetypeForm.watch("type") === "new" && (
+                    <Form.Field className="FormField" name="name">
+                      <Form.Label className="FormLabel">Archetype Name</Form.Label>
+                      <Form.Control asChild>
+                        <input className="Input" {...saveArchetypeForm.register("name")} />
+                      </Form.Control>
+                    </Form.Field>
+                  )}
+                  <div className="mt-4">
+                    <Form.Submit asChild disabled={!newArchetypeIsValid}>
+                      <Button size="1" className="w-full">
+                        Save
+                      </Button>
+                    </Form.Submit>
+                  </div>
+                </Form.Root>
+              </Popover.Content>
+            </Popover.Root>
             <div className="flex-1" />
             {dirty && (
               <>
-                <Link href="#" role="button" color="gray" onClick={resetAttributes}>
+                <Link href="#" size="2" role="button" color="gray" onClick={resetAttributes}>
                   Reset
                 </Link>
                 <Button type="button" size="2" onClick={applyAttributes}>
@@ -179,59 +240,6 @@ export default function AttributesTab() {
           </div>
         </div>
       )}
-
-      <Dialog.Root
-        open={saveUserModalOpen}
-        onOpenChange={(o) => setSaveUserModalOpen(o)}
-      >
-        <Dialog.Trigger>
-          <Button>
-            <div className="px-4">
-              <PiGearSix size={20} />
-            </div>
-          </Button>
-        </Dialog.Trigger>
-        <Dialog.Content className="ModalBody">
-          <Dialog.Title>Save User as</Dialog.Title>
-          <Form.Root className="FormRoot" onSubmit={submitUserForm}>
-            <Select.Root {...saveUserForm.register("userType")}>
-              <Select.Trigger variant="surface" className="w-full" />
-              <Select.Content>
-                <Select.Item value="__new__">New Saved User</Select.Item>
-                {/* todo: map local archetypes */}
-              </Select.Content>
-            </Select.Root>
-            {saveUserForm.watch("userType") === "__new__" && (
-              <Form.Field className="FormField" name="userName">
-                <Form.Label className="FormLabel">Name</Form.Label>
-                <Form.Control asChild>
-                  <input className="Input" {...saveUserForm.register("userName")} />
-                </Form.Control>
-              </Form.Field>
-            )}
-            <div className="mt-8">
-              <Form.Submit asChild>
-                <Button size="3" className="w-full">
-                  Save
-                </Button>
-              </Form.Submit>
-            </div>
-          </Form.Root>
-          <Dialog.Close
-            style={{position: "absolute", top: 5, right: 5}}
-          >
-            <IconButton
-              color="gray"
-              highContrast
-              size="1"
-              variant="outline"
-              radius="full"
-            >
-              <PiX size={20}/>
-            </IconButton>
-          </Dialog.Close>
-        </Dialog.Content>
-      </Dialog.Root>
     </>
   );
 }
