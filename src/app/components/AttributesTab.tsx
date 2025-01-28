@@ -3,23 +3,13 @@ import uniqid from "uniqid";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
-import {
-  Button,
-  Checkbox,
-  Link,
-  Popover,
-  RadioGroup,
-  Select,
-} from "@radix-ui/themes";
+import { Button, Checkbox, Link, Popover, Select } from "@radix-ui/themes";
 import { Archetype } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
 import { PiAsterisk, PiBookmark } from "react-icons/pi";
 import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
-
-type ArchetypeSource = "growthbook" | "local";
-type Archetypes = Record<ArchetypeSource, Archetype[]>;
 
 export default function AttributesTab() {
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
@@ -36,16 +26,9 @@ export default function AttributesTab() {
     false
   );
 
-  const [archetypeSource, setArchetypeSource] = useTabState<ArchetypeSource>(
-    "archetypeSource",
-    "growthbook"
-  );
-  const [archetypes, setArchetypes] = useGlobalState<Archetypes>(
-    "archetypes",
-    {
-      growthbook: [],
-      local: [],
-    },
+  const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
+    "allArchetypes",
+    [],
     true
   );
   const {
@@ -56,18 +39,17 @@ export default function AttributesTab() {
 
   useEffect(() => {
     if (archetypesLoading || archetypesError || !archetypesData) return;
-    setArchetypes({
-      local: archetypes.local || [],
-      growthbook: archetypesData.archetypes || [],
-    });
+    setArchetypes(
+      archetypes
+        .filter((arch) => arch.source === "local")
+        .concat(archetypesData.archetypes || [])
+    );
   }, [archetypesLoading, archetypesError, archetypesData]);
-
-  const currArchetypeList = archetypes[archetypeSource];
 
   const [selectedArchetypeId, setSelectedArchetypeId] = useTabState<
     string | undefined
   >("selectedArchetypeId", undefined);
-  const selectedArchetype = archetypes[archetypeSource].find(
+  const selectedArchetype = archetypes.find(
     (arch) => arch.id === selectedArchetypeId
   );
 
@@ -89,7 +71,7 @@ export default function AttributesTab() {
   });
   const newArchetypeIsValid =
     saveArchetypeForm.watch("name").trim().length > 0 &&
-    !archetypes.local.find(
+    !archetypes.find(
       (archetype) => archetype.name !== saveArchetypeForm.watch("name")
     );
   const submitArchetypeForm = (e: React.SyntheticEvent) => {
@@ -100,11 +82,9 @@ export default function AttributesTab() {
         id: uniqid("sam_"),
         name: values.name,
         attributes: formAttributes,
+        source: "local",
       };
-      setArchetypes({
-        growthbook: archetypes.growthbook || [],
-        local: [...archetypes.local, archetype],
-      });
+      setArchetypes([...archetypes, archetype]);
       saveArchetypeForm.reset({
         type: "existing",
         name: archetype.name,
@@ -150,22 +130,15 @@ export default function AttributesTab() {
       <div className="flex justify-between items-top">
         <div className="flex-none basis-[50%]">
           <div className="">
-            <div className="label mb-2">Saved Users</div>
-            <RadioGroup.Root
-              value={archetypeSource}
-              onValueChange={setArchetypeSource}
-            >
-              <RadioGroup.Item value="growthbook">Archetypes</RadioGroup.Item>
-              <RadioGroup.Item value="local">Saved Users</RadioGroup.Item>
-            </RadioGroup.Root>
+            <div className="label mb-2">Archetypes</div>
             <Select.Root
-              defaultValue={currArchetypeList[0]?.id}
+              defaultValue={archetypes[0]?.id}
               value={selectedArchetype?.id}
               onValueChange={setSelectedArchetypeId}
             >
               <Select.Trigger placeholder="Archetype..." variant="surface" />
               <Select.Content>
-                {archetypes[archetypeSource].map((arch) => (
+                {archetypes.map((arch) => (
                   <Select.Item value={arch.id}>{arch.name}</Select.Item>
                 ))}
               </Select.Content>
@@ -249,7 +222,8 @@ export default function AttributesTab() {
                     >
                       <Select.Trigger variant="surface" className="w-full" />
                       <Select.Content>
-                        {archetypes.local.length > 0 && (
+                        {/* TODO: does this need to filter only local archetypes? */}
+                        {archetypes.length > 0 && (
                           <Select.Item value="existing">
                             {saveArchetypeForm.watch("name")}
                           </Select.Item>
