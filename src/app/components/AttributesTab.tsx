@@ -3,12 +3,20 @@ import uniqid from "uniqid";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
-import {Button, Checkbox, Dialog, IconButton, Link, Popover, RadioGroup, Select} from "@radix-ui/themes";
+import {
+  Button,
+  Checkbox,
+  Link,
+  Popover,
+  RadioGroup,
+  Select,
+} from "@radix-ui/themes";
 import { Archetype } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
-import {PiAsterisk, PiBookmark, PiGearSix, PiX} from "react-icons/pi";
+import { PiAsterisk, PiBookmark } from "react-icons/pi";
 import * as Form from "@radix-ui/react-form";
+import useApi from "../hooks/useApi";
 
 type ArchetypeSource = "growthbook" | "local";
 type Archetypes = Record<ArchetypeSource, Archetype[]>;
@@ -19,39 +27,66 @@ export default function AttributesTab() {
   const formAttributes = attributesForm.getValues();
   const hasAttributes = Object.keys(formAttributes).length > 0;
   const formAttributesString = JSON.stringify(formAttributes, null, 2);
-  const [textareaAttributes, setTextareaAttributes] = useState(formAttributesString);
+  const [textareaAttributes, setTextareaAttributes] =
+    useState(formAttributesString);
   const [textareaError, setTextareaError] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
-    false,
+    false
   );
 
   const [archetypeSource, setArchetypeSource] = useTabState<ArchetypeSource>(
     "archetypeSource",
-    "growthbook",
+    "growthbook"
   );
-  const [archetypes, setArchetypes] = useGlobalState<Archetypes>("archetypes", {
-    growthbook: [],
-    local: [],
-  });
+  const [archetypes, setArchetypes] = useGlobalState<Archetypes>(
+    "archetypes",
+    {
+      growthbook: [],
+      local: [],
+    },
+    true
+  );
+  const {
+    isLoading: archetypesLoading,
+    error: archetypesError,
+    data: archetypesData,
+  } = useApi<{ archetypes: Archetype[] }>("/api/v1/archetypes");
+  useEffect(() => {
+    if (archetypesLoading || archetypesError || !archetypesData) return;
+    setArchetypes({
+      local: archetypes.local,
+      growthbook: archetypesData.archetypes,
+    });
+  }, [archetypesLoading, archetypesError, archetypesData]);
+
   const currArchetypeList = archetypes[archetypeSource];
 
-  const [selectedArchetype, setSelectedArchetype] = useTabState<
-    Archetype | undefined
-  >("selectedArchetype", undefined);
+  const [selectedArchetypeId, setSelectedArchetypeId] = useTabState<
+    string | undefined
+  >("selectedArchetypeId", undefined);
+  const selectedArchetype = archetypes[archetypeSource].find(
+    (arch) => arch.id === selectedArchetypeId
+  );
+
   const archetypeAttributesForm = useForm<Attributes>({
     defaultValues: selectedArchetype?.attributes || {},
   });
 
   const [saveArchetypeOpen, setSaveArchetypeOpen] = useState(false);
-  const saveArchetypeForm = useForm({ defaultValues: {
+  const saveArchetypeForm = useForm({
+    defaultValues: {
       type: "new", // "new" | "existing"
       name: "",
       id: "",
-    }});
-  const newArchetypeIsValid = saveArchetypeForm.watch("name").trim().length > 0 &&
-    !archetypes.local.find((archetype) => archetype.name !== saveArchetypeForm.watch("name"));
+    },
+  });
+  const newArchetypeIsValid =
+    saveArchetypeForm.watch("name").trim().length > 0 &&
+    !archetypes.local.find(
+      (archetype) => archetype.name !== saveArchetypeForm.watch("name")
+    );
   const submitArchetypeForm = (e: React.SyntheticEvent) => {
     e.preventDefault();
     const values = saveArchetypeForm.getValues();
@@ -63,7 +98,7 @@ export default function AttributesTab() {
       };
       setArchetypes({
         ...archetypes,
-        local: [ ...archetypes.local, archetype ],
+        local: [...archetypes.local, archetype],
       });
       saveArchetypeForm.reset({
         type: "existing",
@@ -121,13 +156,14 @@ export default function AttributesTab() {
             <Select.Root
               defaultValue={currArchetypeList[0]?.id}
               value={selectedArchetype?.id}
-              onValueChange={(archId) =>
-                setSelectedArchetype(
-                  currArchetypeList.find((arch) => arch.id === archId),
-                )
-              }
+              onValueChange={setSelectedArchetypeId}
             >
               <Select.Trigger placeholder="Archetype..." variant="surface" />
+              <Select.Content>
+                {archetypes[archetypeSource].map((arch) => (
+                  <Select.Item value={arch.id}>{arch.name}</Select.Item>
+                ))}
+              </Select.Content>
             </Select.Root>
           </div>
           {selectedArchetype ? (
@@ -191,18 +227,27 @@ export default function AttributesTab() {
                 </Button>
               </Popover.Trigger>
               <Popover.Content style={{ width: 200 }}>
-                <Form.Root className="FormRoot small" onSubmit={submitArchetypeForm}>
+                <Form.Root
+                  className="FormRoot small"
+                  onSubmit={submitArchetypeForm}
+                >
                   <Form.Field className="FormField" name="type">
-                    <Form.Label className="FormLabel">Save User Attributes as...</Form.Label>
+                    <Form.Label className="FormLabel">
+                      Save User Attributes as...
+                    </Form.Label>
                     <Select.Root
                       size="1"
                       value={saveArchetypeForm.watch("type")}
-                      onValueChange={(v) => saveArchetypeForm.setValue("type", v)}
+                      onValueChange={(v) =>
+                        saveArchetypeForm.setValue("type", v)
+                      }
                     >
-                      <Select.Trigger variant="surface" className="w-full"/>
+                      <Select.Trigger variant="surface" className="w-full" />
                       <Select.Content>
                         {archetypes.local.length > 0 && (
-                          <Select.Item value="existing">{saveArchetypeForm.watch("name")}</Select.Item>
+                          <Select.Item value="existing">
+                            {saveArchetypeForm.watch("name")}
+                          </Select.Item>
                         )}
                         <Select.Item value="new">New Archetype</Select.Item>
                       </Select.Content>
@@ -210,9 +255,14 @@ export default function AttributesTab() {
                   </Form.Field>
                   {saveArchetypeForm.watch("type") === "new" && (
                     <Form.Field className="FormField" name="name">
-                      <Form.Label className="FormLabel">Archetype Name</Form.Label>
+                      <Form.Label className="FormLabel">
+                        Archetype Name
+                      </Form.Label>
                       <Form.Control asChild>
-                        <input className="Input" {...saveArchetypeForm.register("name")} />
+                        <input
+                          className="Input"
+                          {...saveArchetypeForm.register("name")}
+                        />
                       </Form.Control>
                     </Form.Field>
                   )}
@@ -229,7 +279,13 @@ export default function AttributesTab() {
             <div className="flex-1" />
             {dirty && (
               <>
-                <Link href="#" size="2" role="button" color="gray" onClick={resetAttributes}>
+                <Link
+                  href="#"
+                  size="2"
+                  role="button"
+                  color="gray"
+                  onClick={resetAttributes}
+                >
                   Reset
                 </Link>
                 <Button type="button" size="2" onClick={applyAttributes}>

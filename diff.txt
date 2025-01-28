@@ -1,0 +1,232 @@
+diff --git a/package.json b/package.json
+index 0eb5b19..66005d1 100644
+--- a/package.json
++++ b/package.json
+@@ -22,10 +22,10 @@
+     "@growthbook/growthbook": "^1.3.1",
+     "@medv/finder": "^3.2.0",
+     "@phosphor-icons/react": "^2.1.7",
+-    "@radix-ui/themes": "^3.1.3",
+     "@radix-ui/react-accordion": "^1.2.0",
+     "@radix-ui/react-form": "^0.1.1",
+     "@radix-ui/react-tooltip": "^1.1.2",
++    "@radix-ui/themes": "^3.1.3",
+     "clsx": "^2.1.1",
+     "dom-mutator": "^0.7.0",
+     "framer-motion": "^11.3.24",
+@@ -39,7 +39,8 @@
+     "react-icons": "^5.3.0",
+     "react-syntax-highlighter": "^15.5.0",
+     "react-textarea-autosize": "^8.5.3",
+-    "style-to-object": "^1.0.6"
++    "style-to-object": "^1.0.6",
++    "swr": "^2.3.0"
+   },
+   "devDependencies": {
+     "@types/chrome": "^0.0.270",
+diff --git a/src/app/components/AttributesTab.tsx b/src/app/components/AttributesTab.tsx
+index 24ba732..f81ca31 100644
+--- a/src/app/components/AttributesTab.tsx
++++ b/src/app/components/AttributesTab.tsx
+@@ -1,10 +1,12 @@
+-import React, {useEffect} from "react";
++import React, { useEffect } from "react";
+ import { Attributes } from "@growthbook/growthbook";
+ import useTabState from "../hooks/useTabState";
+-import {Checkbox, RadioGroup, Select} from "@radix-ui/themes";
++import { Checkbox, RadioGroup, Select } from "@radix-ui/themes";
+ import { Archetype } from "../tempGbExports";
+ import AttributesForm from "./AttributesForm";
+-import {useForm} from "react-hook-form";
++import { useForm } from "react-hook-form";
++import useApi from "../hooks/useApi";
++import useGlobalState from "../hooks/useGlobalState";
+ 
+ type ArchetypeSource = "growthbook" | "local";
+ type Archetypes = Record<ArchetypeSource, Archetype[]>;
+@@ -12,26 +14,51 @@ type Archetypes = Record<ArchetypeSource, Archetype[]>;
+ export default function AttributesTab() {
+   const [sdkAttributes] = useTabState<Attributes>("sdkAttributes", {});
+   const attributesForm = useForm<Attributes>({ defaultValues: sdkAttributes });
+-  const [jsonMode, setJsonMode] = useTabState("attributesForm_useJsonMode", false);
++  const [jsonMode, setJsonMode] = useTabState(
++    "attributesForm_useJsonMode",
++    false
++  );
+ 
+   const [archetypeSource, setArchetypeSource] = useTabState<ArchetypeSource>(
+     "archetypeSource",
+     "growthbook"
+   );
+-  const [archetypes, setArchetypes] = useTabState<Archetypes>("archetypes", {
+-    growthbook: [],
+-    local: [],
+-  });
++  const [archetypes, setArchetypes] = useGlobalState<Archetypes>(
++    "archetypes",
++    {
++      growthbook: [],
++      local: [],
++    },
++    true
++  );
++  const {
++    isLoading: archetypesLoading,
++    error: archetypesError,
++    data: archetypesData,
++  } = useApi<{ archetypes: Archetype[] }>("/api/v1/archetypes");
++  useEffect(() => {
++    if (archetypesLoading || archetypesError || !archetypesData) return;
++    setArchetypes({
++      local: archetypes.local,
++      growthbook: archetypesData.archetypes,
++    });
++  }, [archetypesLoading, archetypesError, archetypesData]);
++
+   const currArchetypeList = archetypes[archetypeSource];
+ 
+-  const [selectedArchetype, setSelectedArchetype] = useTabState<
+-    Archetype | undefined
+-  >("selectedArchetype", undefined);
+-  const archetypeAttributesForm = useForm<Attributes>({ defaultValues: selectedArchetype?.attributes || {} });
++  const [selectedArchetypeId, setSelectedArchetypeId] = useTabState<
++    string | undefined
++  >("selectedArchetypeId", undefined);
++  const selectedArchetype = archetypes[archetypeSource].find(
++    (arch) => arch.id === selectedArchetypeId
++  );
++  const archetypeAttributesForm = useForm<Attributes>({
++    defaultValues: selectedArchetype?.attributes || {},
++  });
+ 
+   // listen to SDK changes to set attributes form
+   useEffect(() => {
+-    attributesForm.reset(sdkAttributes)
++    attributesForm.reset(sdkAttributes);
+   }, [JSON.stringify(sdkAttributes)]);
+ 
+   return (
+@@ -48,19 +75,18 @@ export default function AttributesTab() {
+         <Select.Root
+           defaultValue={currArchetypeList[0]?.id}
+           value={selectedArchetype?.id}
+-          onValueChange={(archId) =>
+-            setSelectedArchetype(
+-              currArchetypeList.find((arch) => arch.id === archId)
+-            )
+-          }
++          onValueChange={setSelectedArchetypeId}
+         >
+-          <Select.Trigger placeholder="Archetype..." variant="surface"/>
++          <Select.Trigger placeholder="Archetype..." variant="surface" />
++          <Select.Content>
++            {archetypes[archetypeSource].map((arch) => (
++              <Select.Item value={arch.id}>{arch.name}</Select.Item>
++            ))}
++          </Select.Content>
+         </Select.Root>
+         {selectedArchetype ? (
+-          <AttributesForm
+-            form={archetypeAttributesForm}
+-          />
+-        ): null}
++          <AttributesForm form={archetypeAttributesForm} />
++        ) : null}
+       </div>
+       <div className="flex-none basis-[49%] box px-3 py-2 border border-gray-200x rounded-lg bg-white">
+         <div className="flex items-end justify-between mb-2">
+@@ -78,10 +104,7 @@ export default function AttributesTab() {
+             </label>
+           </div>
+         </div>
+-        <AttributesForm
+-          form={attributesForm}
+-          jsonMode={jsonMode}
+-        />
++        <AttributesForm form={attributesForm} jsonMode={jsonMode} />
+       </div>
+     </div>
+   );
+diff --git a/src/app/hooks/useApi.ts b/src/app/hooks/useApi.ts
+new file mode 100644
+index 0000000..bc0ea75
+--- /dev/null
++++ b/src/app/hooks/useApi.ts
+@@ -0,0 +1,34 @@
++import { useCallback, useEffect, useState } from "react";
++import useSWR, { SWRConfiguration } from "swr";
++import useApiKey from "./useApiKey";
++
++type ApiCallType<T> = (url: string, options?: RequestInit) => Promise<T>;
++
++export default function useApi<Response = unknown>(path: string) {
++  const { apiHost, apiKey } = useApiKey();
++  const apiCall: ApiCallType<Response> = useCallback(
++    async (url: string | null, options: Omit<RequestInit, "headers"> = {}) => {
++      if (!apiHost || !apiKey || typeof url !== "string") return;
++      const init: RequestInit = { ...options };
++      init.headers = {};
++      init.headers["Authorization"] = `Bearer ${apiKey}`;
++      init.credentials = "include";
++      if (init.body && !init.headers["Content-Type"]) {
++        init.headers["Content-Type"] = "application/json";
++      }
++      const response = await fetch(apiHost + url, init);
++      const responseData = await response.json();
++
++      if (responseData.status && responseData.status >= 400) {
++        throw new Error(responseData.message || "There was an error");
++      }
++
++      return responseData;
++    },
++    [apiHost, apiKey]
++  );
++
++  return useSWR<Response, Error>(path, async () =>
++    apiCall(path, { method: "GET" })
++  );
++}
+diff --git a/yarn.lock b/yarn.lock
+index 2d4da58..d9e1fc4 100644
+--- a/yarn.lock
++++ b/yarn.lock
+@@ -3301,6 +3301,11 @@ deepmerge@^4.2.2:
+   resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-4.3.1.tgz#44b5f2147cd3b00d4b56137685966f26fd25dd4a"
+   integrity sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==
+ 
++dequal@^2.0.3:
++  version "2.0.3"
++  resolved "https://registry.yarnpkg.com/dequal/-/dequal-2.0.3.tgz#2644214f1997d39ed0ee0ece72335490a7ac67be"
++  integrity sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==
++
+ detect-newline@^3.0.0:
+   version "3.1.0"
+   resolved "https://registry.yarnpkg.com/detect-newline/-/detect-newline-3.1.0.tgz#576f5dfc63ae1a192ff192d8ad3af6308991b651"
+@@ -5614,6 +5619,14 @@ supports-preserve-symlinks-flag@^1.0.0:
+   resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
+   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
+ 
++swr@^2.3.0:
++  version "2.3.0"
++  resolved "https://registry.yarnpkg.com/swr/-/swr-2.3.0.tgz#66fa45023efd4199f4e7ce608c255709a135943d"
++  integrity sha512-NyZ76wA4yElZWBHzSgEJc28a0u6QZvhb6w0azeL2k7+Q1gAzVK+IqQYXhVOC/mzi+HZIozrZvBVeSeOZNR2bqA==
++  dependencies:
++    dequal "^2.0.3"
++    use-sync-external-store "^1.4.0"
++
+ tailwindcss@^3.4.10:
+   version "3.4.10"
+   resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-3.4.10.tgz#70442d9aeb78758d1f911af29af8255ecdb8ffef"
+@@ -5862,6 +5875,11 @@ use-sidecar@^1.1.2:
+     detect-node-es "^1.1.0"
+     tslib "^2.0.0"
+ 
++use-sync-external-store@^1.4.0:
++  version "1.4.0"
++  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.4.0.tgz#adbc795d8eeb47029963016cefdf89dc799fcebc"
++  integrity sha512-9WXSPC5fMv61vaupRkCKCxsPxBocVnwakBEkMIHHpkTTg6icbJtg6jzgtLDm4bl3cSHAca52rYWih0k4K3PfHw==
++
+ util-deprecate@^1.0.2:
+   version "1.0.2"
+   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
