@@ -53,6 +53,7 @@ export default function AttributesTab() {
     error: archetypesError,
     data: archetypesData,
   } = useApi<{ archetypes: Archetype[] }>("/api/v1/archetypes");
+
   useEffect(() => {
     if (archetypesLoading || archetypesError || !archetypesData) return;
     setArchetypes({
@@ -73,6 +74,10 @@ export default function AttributesTab() {
   const archetypeAttributesForm = useForm<Attributes>({
     defaultValues: selectedArchetype?.attributes || {},
   });
+
+  useEffect(() => {
+    archetypeAttributesForm.reset(selectedArchetype?.attributes || {});
+  }, [selectedArchetype]);
 
   const [saveArchetypeOpen, setSaveArchetypeOpen] = useState(false);
   const saveArchetypeForm = useForm({
