@@ -3,7 +3,7 @@ import * as Form from "@radix-ui/react-form";
 import { Button, Switch, Link, Select } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
-import { PiCheckBold, PiPlusCircle, PiX, PiXCircle } from "react-icons/pi";
+import {PiBookmark, PiCheckBold, PiPlusCircle, PiX, PiXCircle} from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import clsx from "clsx";
 
@@ -12,6 +12,10 @@ export default function AttributesForm({
   dirty = false,
   setDirty,
   jsonMode = false,
+  textareaAttributes,
+  setTextareaAttributes,
+  textareaError,
+  setTextareaError,
   schema,
   canAddRemoveFields = true,
 }: {
@@ -19,14 +23,21 @@ export default function AttributesForm({
   dirty?: boolean;
   setDirty?: (d: boolean) => void;
   jsonMode?: boolean;
+  textareaAttributes?: string;
+  setTextareaAttributes?: (v: string) => void;
+  textareaError?: boolean;
+  setTextareaError?: (v: boolean) => void;
   schema?: Record<string, string>;
   canAddRemoveFields?: boolean;
 }) {
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
+
   const [addingCustom, setAddingCustom] = useState(false);
   const [addCustomId, setAddCustomId] = useState("");
   const [addCustomType, setAddCustomType] = useState("string");
   const formAttributes = form.getValues();
+  const hasAttributes = Object.keys(formAttributes).length > 0;
+  const formAttributesString = JSON.stringify(formAttributes, null, 2);
 
   const addField = (key: string, type: string) => {
     setDirty?.(true);
@@ -57,9 +68,23 @@ export default function AttributesForm({
     setAddCustomType("string");
   };
   const applyAttributes = () => {
-    setAttributes(formAttributes);
-    form.reset(formAttributes);
-    setDirty?.(false);
+    if (!jsonMode) {
+      setAttributes(formAttributes);
+      form.reset(formAttributes);
+      setDirty?.(false);
+    } else {
+      try {
+        const newAttributes: Attributes = JSON.parse(textareaAttributes || "");
+        if (!newAttributes || typeof newAttributes !== "object") {
+          throw new Error("invalid type");
+        }
+        setAttributes(newAttributes);
+        form.reset(newAttributes);
+        setDirty?.(false);
+      } catch (e) {
+        setTextareaError?.(true);
+      }
+    }
   };
   const resetAttributes = () => {
     form.reset(attributes);
@@ -72,8 +97,13 @@ export default function AttributesForm({
     }
   }, [form.formState, dirty]);
 
+  useEffect(() => {
+    setTextareaAttributes?.(formAttributesString);
+    setTextareaError?.(false);
+  }, [formAttributesString]);
+
   return (
-    <div className={clsx({ "mb-[60px]": dirty })}>
+    <div className={clsx({ "mb-[60px]": hasAttributes })}>
       <Form.Root className="FormRoot small">
         <div className="box">
           {!jsonMode ? (
@@ -111,16 +141,24 @@ export default function AttributesForm({
             })
           ) : (
             <textarea
-              className="Textarea mono mt-1"
+              className={clsx("Textarea mono mt-1", {
+                "border-red-700": textareaError
+              })}
               name={"__JSON_attributes__"}
-              // todo: make uncontrolled, sync with form if valid JSON
-              value={JSON.stringify(formAttributes, null, 2)}
-              rows={12}
+              value={textareaAttributes}
+              onChange={(e) => {
+                const v = e.target.value;
+                setTextareaAttributes?.(v);
+                setTextareaError?.(false);
+                setDirty?.(true);
+              }}
+              style={{ fontSize: "10px", lineHeight: "15px" }}
+              rows={15}
             />
           )}
         </div>
 
-        {canAddRemoveFields && (
+        {canAddRemoveFields && !jsonMode && (
           <div className="m-2">
             {/*todo: map through unused attributes from schema*/}
             {!addingCustom ? (
@@ -206,20 +244,6 @@ export default function AttributesForm({
                 </div>
               </div>
             )}
-          </div>
-        )}
-        {dirty && (
-          <div
-            className="flex items-center gap-3 shadow-sm-up fixed bottom-0 left-0 px-3 py-2 w-full bg-zinc-50"
-            style={{ zIndex: 100000 }}
-          >
-            <div className="flex-1" />
-            <Link href="#" role="button" color="gray" onClick={resetAttributes}>
-              Reset
-            </Link>
-            <Button type="button" size="2" onClick={applyAttributes}>
-              Apply
-            </Button>
           </div>
         )}
       </Form.Root>

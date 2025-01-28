@@ -94,6 +94,7 @@ export const App = () => {
               >
                 SDK
               </Button>
+
               <Dialog.Root
                 open={settingsOpen}
                 onOpenChange={(o) => setSettingsOpen(o)}
