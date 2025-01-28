@@ -102,7 +102,7 @@ export default function AttributesTab() {
         attributes: formAttributes,
       };
       setArchetypes({
-        ...archetypes,
+        growthbook: archetypes.growthbook || [],
         local: [...archetypes.local, archetype],
       });
       saveArchetypeForm.reset({
