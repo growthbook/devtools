@@ -7,8 +7,8 @@ export default function SdkTab() {
   const { sdkFound, version, errorMessage, canConnect, hasPayload } = sdkData as SDKHealthCheckResult;
   console.log("data for sdk", sdkData);
   return (
-    <div className="box mb-3 Z">
-      <div className="label">GrowthBook SDK</div>
+    <div className="box mb-3">
+      <div className="label lg">GrowthBook SDK</div>
       {sdkFound ? (
         canConnect ? (
           <div>

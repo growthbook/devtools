@@ -28,10 +28,17 @@
 }
 
 .label {
+  font-size: var(--font-size-3);
+  @apply font-semibold text-gray-800;
+}
+.label.lg {
   font-size: var(--font-size-4);
   @apply font-semibold text-gray-800;
 }
-
+.text-2xs {
+  font-size: 9px;
+  line-height: 12px;
+}
 .ModalBody {
   width: 400px;
 }
@@ -42,6 +49,15 @@
 
 .box {
   @apply px-3 py-2 border border-gray-200 rounded-lg bg-white;
+}
+
+/*todo: remove*/
+.featureCard {
+  @apply p-2 border border-violet-200 rounded-md bg-violet-50 shadow-sm;
+  cursor: pointer;
+}
+.featureCard.selected {
+  @apply border-violet-500 bg-violet-200;
 }
 
 .accordionCard {
@@ -66,6 +82,7 @@ code {
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
     var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
+
 
 /* Prevent modal jumping when inner content changes shape and weird scroll bar */
 .rt-BaseDialogScroll {

@@ -153,7 +153,7 @@ export default function AttributesTab() {
       <div className="flex justify-between items-top">
         <div className="flex-none basis-[50%]">
           <div className="">
-            <div className="label mb-2">Archetypes</div>
+            <div className="label lg mb-2">Archetypes</div>
             <ArchetypesList
               archetypes={archetypes}
               selectedArchetypeId={selectedArchetypeId}
@@ -163,7 +163,7 @@ export default function AttributesTab() {
         </div>
         <div className="flex-none basis-[50%]">
           <div className="flex items-end justify-between mb-2">
-            <div className="label">
+            <div className="label lg">
               User Attributes
               {dirty && (
                 <PiAsterisk
