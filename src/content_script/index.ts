@@ -28,7 +28,7 @@ try {
   if (state.forcedFeatures && !(state.forcedFeatures instanceof Map)) {
     state.forcedFeatures = new Map(Object.entries(state.forcedFeatures));
   }
-  console.log({state})
+  console.log({ state });
 } catch (e) {
   console.error("Failed to parse saved tab state");
 }
@@ -70,7 +70,10 @@ function setState(property: string, value: any) {
       propertiesWithCustomMessage[
         property as keyof typeof propertiesWithCustomMessage
       ];
-    window.postMessage({ type: customMessage, data: value }, window.location.origin);
+    window.postMessage(
+      { type: customMessage, data: value },
+      window.location.origin,
+    );
   }
 }
 
@@ -131,7 +134,7 @@ window.addEventListener(
         chrome.runtime.sendMessage(data);
         break;
       default:
-        console.log("incoming custom message", data)
+        console.log("incoming custom message", data);
         break;
     }
   },

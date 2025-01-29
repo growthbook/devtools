@@ -1,7 +1,14 @@
-import {useMemo} from "react";
-import {Attributes, Experiment, FeatureDefinition, FeatureResult, GrowthBook, Result} from "@growthbook/growthbook";
+import { useMemo } from "react";
+import {
+  Attributes,
+  Experiment,
+  FeatureDefinition,
+  FeatureResult,
+  GrowthBook,
+  Result,
+} from "@growthbook/growthbook";
 import useTabState from "@/app/hooks/useTabState";
-import {DebugLogs} from "devtools";
+import { DebugLogs } from "devtools";
 
 export type EvaluatedFeature = {
   result: FeatureResult;
@@ -16,17 +23,27 @@ export type EvaluatedExperiment = {
 
 export default function useGBSandboxEval() {
   const [attributes] = useTabState<Attributes>("attributes", {});
-  const [features] = useTabState<Record<string, FeatureDefinition>>("features", {});
+  const [features] = useTabState<Record<string, FeatureDefinition>>(
+    "features",
+    {},
+  );
   const [experiments] = useTabState<Experiment<any>[]>("experiments", []);
-  const [forcedFeatures] = useTabState<Map<string, any>>("forcedFeatures", new Map());
-  const [forcedVariations] = useTabState<Record<string, number>>("forcedVariations", {});
+  const [forcedFeatures] = useTabState<Map<string, any>>(
+    "forcedFeatures",
+    new Map(),
+  );
+  const [forcedVariations] = useTabState<Record<string, number>>(
+    "forcedVariations",
+    {},
+  );
   const [url] = useTabState<string>("url", "");
   let forcedFeaturesMap = new Map<string, any>();
   try {
     // because persistent state is JSON encoded, need to make sure this specific var is safe to use
-    forcedFeaturesMap = forcedFeatures && (forcedFeatures instanceof Map) ?
-      forcedFeatures :
-      new Map(Object.entries(forcedFeatures));
+    forcedFeaturesMap =
+      forcedFeatures && forcedFeatures instanceof Map
+        ? forcedFeatures
+        : new Map(Object.entries(forcedFeatures));
   } catch (_) {
     // do nothing
   }
@@ -34,7 +51,7 @@ export default function useGBSandboxEval() {
   return useMemo(() => {
     let log: DebugLogs = [];
 
-    const payload = {features, experiments};
+    const payload = { features, experiments };
 
     const growthbook = new GrowthBook({
       attributes,
@@ -45,7 +62,7 @@ export default function useGBSandboxEval() {
       },
     });
     growthbook.setForcedFeatures(forcedFeaturesMap);
-    growthbook.initSync({payload});
+    growthbook.initSync({ payload });
 
     const evaluatedFeatures: Record<string, EvaluatedFeature> = {};
     const evaluatedExperiments: EvaluatedExperiment[] = [];
@@ -60,7 +77,7 @@ export default function useGBSandboxEval() {
       evaluatedFeatures[fid] = {
         result,
         debug,
-      }
+      };
     }
 
     experiments.forEach((experiment) => {
@@ -83,5 +100,12 @@ export default function useGBSandboxEval() {
       evaluatedFeatures,
       evaluatedExperiments,
     };
-  }, [attributes, features, experiments, forcedFeaturesMap, forcedVariations, url]);
+  }, [
+    attributes,
+    features,
+    experiments,
+    forcedFeaturesMap,
+    forcedVariations,
+    url,
+  ]);
 }

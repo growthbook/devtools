@@ -26,7 +26,6 @@ function getValidGrowthBookInstance(cb: (gb: GrowthBook) => void) {
   return true;
 }
 
-
 // Wait for window._growthbook to be available
 function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
   if (getValidGrowthBookInstance(cb)) return;
@@ -122,9 +121,9 @@ function updateFeatures(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (data) {
       gb.setForcedFeatures(
-        (data instanceof Map) ?
-          data :
-          new Map(Object.entries(data as Record<string, any>)),
+        data instanceof Map
+          ? data
+          : new Map(Object.entries(data as Record<string, any>)),
       );
     } else {
       // todo: do something with these messages or remove them

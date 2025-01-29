@@ -45,7 +45,11 @@
 }
 
 .featureCard {
-  @apply px-3 py-2 border border-violet-300 rounded-sm bg-violet-100 shadow-sm;
+  @apply p-2 border border-violet-200 rounded-md bg-violet-50 shadow-sm;
+  cursor: pointer;
+}
+.featureCard.selected {
+  @apply border-violet-500 bg-violet-200;
 }
 
 .shadow-sm-up {
