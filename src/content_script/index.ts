@@ -32,7 +32,6 @@ window.addEventListener(
   "message",
   function (event: MessageEvent<Message | BGMessage>) {
     const data = event.data;
-    console.log("Received message from page", data);
     if (data?.type === "UPDATE_TAB_STATE") {
       const { property, value } = data.data;
       setState(property, value);
@@ -123,7 +122,6 @@ window.addEventListener(
       case "GB_SDK_UPDATED":
         // passthrough to background worker:nvm
         console.log("sending message to background", data);
-        // get tabid
         chrome.runtime.sendMessage(data);
         break;
       default:

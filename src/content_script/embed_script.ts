@@ -1,9 +1,10 @@
 import type { Experiment, GrowthBook } from "@growthbook/growthbook";
-import type { ErrorMessage, Message, RefreshMessage } from "devtools";
+import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import useTabState from "@/app/hooks/useTabState";
 import { Attributes } from "@growthbook/growthbook";
 import { at, has, update } from "lodash";
 import { m } from "framer-motion";
+import { version } from "node_modules/@types/react";
 
 declare global {
   interface Window {
@@ -60,12 +61,9 @@ function init() {
 }
 
 function pushAppUpdates() {
-
   onGrowthBookLoad((gb) => {
     pushSDKUpdate(gb);
-    console.log("push updates");
     if (gb) {
-      console.log("attr updates", gb.getAttributes());
       updateTabState("attributes", gb.getAttributes());
       updateTabState("features", gb.getForcedFeatures());
       updateTabState("experiments", gb.getForcedVariations());
@@ -73,10 +71,13 @@ function pushAppUpdates() {
   });
 }
 
-function pushSDKUpdate(gb?: GrowthBook) {
-  updateTabState("sdkFound", !!gb);
+async function pushSDKUpdate(gb?: GrowthBook) {
+  const sdkData = await SDKHealthCheck(gb);
+  const { canConnect, hasPayload, sdkFound, errorMessage } = sdkData;
+
+  updateTabState("sdkData", sdkData);
   updateTabState("sdkVersion", gb?.version);
-  updateBackgroundSDK(gb);
+  updateBackgroundSDK(sdkData);
 }
 
 function setupListeners() {
@@ -153,24 +154,18 @@ function updateExperiments(data: unknown) {
   });
 }
 
-function updateBackgroundSDK(gb?: GrowthBook) {
-  console.log("this is gb", gb);
+async function updateBackgroundSDK(data: SDKHealthCheckResult) {
   window.postMessage(
     {
       type: "GB_SDK_UPDATED",
-      data: {
-        sdkFound: !!gb,
-        sdkVersion: gb?.version || null,
-      },
+      data,
     },
-    window.location.origin,
+    window.location.origin
   );
 }
 
 // send a message that the tabstate has been updated
 function updateTabState(property: string, value: unknown) {
-  try {
-    console.log("posting message");
     window.postMessage(
       {
         type: "UPDATE_TAB_STATE",
@@ -181,8 +176,51 @@ function updateTabState(property: string, value: unknown) {
       },
       window.location.origin,
     );
-  } catch (error) {
-    console.log("shoot this is not working");
+}
+
+async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
+  if (!gb) {
+    return {
+      canConnect: false,
+      hasPayload: false,
+      sdkFound: false,
+      errorMessage: "SDK not found"
+    }
+  } 
+  const [apiHost, clientKey] = gb.getApiInfo();
+  const hasPayload =  !!gb.getDecryptedPayload?.() || (Object.keys(gb.getFeatures()).length > 0 && gb.getExperiments().length > 0);
+
+  if (!clientKey) {
+    return {
+      canConnect: false,
+      hasClientKey: false,
+      hasPayload,
+      sdkFound: true,
+      version: gb?.version,
+      errorMessage: "No API Client Key found"
+    };
+  }
+ const res = await fetch(`${apiHost}/api/features/${clientKey}`)
+  if(res.status === 200) {
+    return {
+      canConnect: true,
+      hasClientKey: true,
+      hasPayload,
+      version: gb?.version,
+      sdkFound: true,
+    };
+  }
+  else {
+    const data = await res.json();
+
+    return {
+      canConnect: false,
+      hasPayload,
+      hasClientKey: true,
+      errorMessage: data.error,
+      version: gb?.version,
+      sdkFound: true,
+    };
   }
 }
 

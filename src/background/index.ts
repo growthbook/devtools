@@ -10,6 +10,8 @@ import {
   BGLoadVisualChangsetMessage,
   BGUpdateVisualChangsetMessage,
   BGTransformCopyMessage,
+  SDKHealthCheckResult,
+  BGSetSDKUsageData,
 } from "devtools";
 import {
   handleLoadVisualChangeset,
@@ -100,31 +102,9 @@ chrome.runtime.onMessage.addListener(
     const { type, data } = message;
     const senderOrigin = sender.origin;
     let tabId = sender.tab?.id;
-    console.log("Received message", message, sender);
     switch (type) {
       case "GB_SDK_UPDATED":
-        if (!tabId) tabId = data?.tabId;
-        console.log("SDK updated", data, tabId);
-        let title = "GrowthBook DevTools";
-        let text = "";
-
-        if (data.sdkFound) {
-          chrome.action.setIcon({
-            tabId,
-            path: chrome.runtime.getURL("/logo128-connected.png"),
-          });
-          title = "GrowthBook DevTools\n🟢 SDK connected";
-          if (data?.sdkVersion) title += ` (${data.sdkVersion})`;
-        } else {
-          chrome.action.setIcon({
-            tabId,
-            path: chrome.runtime.getURL("/logo128.png"),
-          });
-          title = "GrowthBook DevTools\n⚪ no SDK present";
-        }
-
-        chrome.action.setBadgeText({ tabId, text });
-        chrome.action.setTitle({ title, tabId });
+        UpdateTabIconBasedOnSDK(message as BGSetSDKUsageData, tabId);
         break;
 
       case "BG_LOAD_VISUAL_CHANGESET":
@@ -157,6 +137,44 @@ chrome.runtime.onMessage.addListener(
     return true;
   },
 );
+
+const UpdateTabIconBasedOnSDK = (message: BGSetSDKUsageData , tabId?: number) => {
+  const { data } = message;
+  if (!tabId) tabId = data?.tabId;
+  console.log("data background", data);
+  let title = "GrowthBook DevTools";
+  let text = " ";
+  if (data.canConnect) {
+    chrome.action.setIcon({
+      tabId,
+      path: chrome.runtime.getURL("/logo128-connected.png"),
+    });
+    title = "GrowthBook DevTools\n🟢 SDK connected";
+    if (data?.version) title += ` (${data.version})`;
+  } else if (data.sdkFound && data.hasPayload) {
+    chrome.action.setIcon({
+      tabId,
+      path: chrome.runtime.getURL("/logo128-connected.png"),
+    });
+    title = "GrowthBook DevTools\n🟢 SDK connected with Payload \n Client Key is not connected";
+  } else if (!data.canConnect) {
+    chrome.action.setIcon({
+      tabId,
+      path: chrome.runtime.getURL("/logo128.png"),
+    });
+    title = "GrowthBook DevTools\n🔴 SDK not connected";
+  } else if (!data.sdkFound) {
+    chrome.action.setIcon({
+      tabId,
+      path: chrome.runtime.getURL("/logo128.png"),
+    });
+    title = "GrowthBook DevTools\n⚪ no SDK present";
+  }
+
+  // update the badge and icon
+  chrome.action.setBadgeText({ tabId, text });
+  chrome.action.setTitle({ title, tabId });
+};
 
 export const genHeaders = (apiKey: string) => ({
   Authorization: `Basic ${btoa(apiKey + ":")}`,

@@ -201,15 +201,20 @@ export type BGTransformCopyMessage = {
   };
 };
 
+type SDKHealthCheckResult = {
+  canConnect: boolean;
+  hasPayload: boolean;
+  hasClientKey?: boolean;
+  errorMessage?: string;
+  version?: string;
+  sdkFound: boolean;
+};
+
 type BGSetSDKUsageData = {
   type: "GB_SDK_UPDATED";
-  data: {
-    sdkFound?: boolean;
-    sdkVersion?: string;
-    totalItems?: number;
-    tabId?: number;
-  };
+  data: SDKHealthCheckResult & { tabId?: number };
 }
+
 
 // Messages sent to background script
 export type BGMessage =
