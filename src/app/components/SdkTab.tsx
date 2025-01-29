@@ -27,8 +27,10 @@ export default function SdkTab() {
           <div>
             <h4>🔴 SDK not connected</h4>
             <div><strong>API error message: </strong><em> {errorMessage}</em></div>
-            <div><strong>SDK Version: </strong> <em>{version}</em></div>
-          </div>)
+            {!!version ? <div><strong>SDK Version: </strong> <em>{version}</em></div> :
+            <div> <em>Version Not Found your version might be less than 0.29.0</em></div>}
+          </div>
+        )
       ) : sdkFound === false ? (
         <div>
           <h4>⚪ no SDK present</h4>
