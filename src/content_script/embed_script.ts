@@ -31,6 +31,12 @@ function getValidGrowthBookInstance(cb: (gb: GrowthBook) => void) {
 function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
   if (getValidGrowthBookInstance(cb)) return;
   let timer = window.setTimeout(() => {
+    updateTabState("sdkData", {
+      canConnect: false,
+      hasPayload: false,
+      sdkFound: false,
+      errorMessage: "SDK not found"
+    });
     const msg: ErrorMessage = {
       type: "GB_ERROR",
       error:
@@ -75,10 +81,7 @@ function pushAppUpdates() {
 
 async function pushSDKUpdate(gb?: GrowthBook) {
   const sdkData = await SDKHealthCheck(gb);
-  const { canConnect, hasPayload, sdkFound, errorMessage } = sdkData;
-
   updateTabState("sdkData", sdkData);
-  updateTabState("sdkVersion", gb?.version);
   updateBackgroundSDK(sdkData);
 }
 
