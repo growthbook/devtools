@@ -2,12 +2,14 @@ import * as Accordion from "@radix-ui/react-accordion";
 
 import React from "react";
 import { Archetype } from "../tempGbExports";
-import { Badge, Container, Flex } from "@radix-ui/themes";
+import { Badge, Container, Flex, Text } from "@radix-ui/themes";
 import { Image } from "@chakra-ui/image";
+import clsx from "clsx";
+import style from "react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark";
 
 function ArchetypeLabel({ archetype }: { archetype: Archetype }) {
   return (
-    <Flex className="bg-white" width="100%">
+    <Flex width="100%">
       {archetype.name}{" "}
       <Badge>
         {archetype.source === "growthbook" ? (
@@ -40,16 +42,34 @@ export default function ArchetypesList({
           value={selectedArchetypeId}
           onValueChange={setSelectedArchetypeId}
         >
-          <Accordion.Item value={arch.id} style={{ width: "100%" }}>
-            <Accordion.Trigger style={{ width: "100%" }}>
+          <Accordion.Item
+            className="mb-2"
+            value={arch.id}
+            style={{ width: "100%" }}
+          >
+            <Accordion.Trigger
+              className={clsx("accordionCard", {
+                selected: selectedArchetypeId === arch.id,
+              })}
+              style={{ width: "100%" }}
+            >
               <ArchetypeLabel archetype={arch} />
             </Accordion.Trigger>
-            <Accordion.Content style={{ width: "100%" }}>
-              <Container style={{ border: "2px solid black" }}>
-                {Object.keys(arch.attributes).map((key) => (
-                  <div className="bg-white" key={key}>
-                    {key}: {arch.attributes[key]}
-                  </div>
+            <Accordion.Content
+              className="accordionContent"
+              style={{ width: "100%" }}
+            >
+              <Container>
+                {Object.keys(arch.attributes).map((key, i) => (
+                  <Container
+                    key={key}
+                    mb={i < Object.keys(arch.attributes).length - 1 ? "1" : "0"}
+                  >
+                    {key}:{" "}
+                    <Text truncate>
+                      <code>{JSON.stringify(arch.attributes[key])}</code>
+                    </Text>
+                  </Container>
                 ))}
               </Container>
             </Accordion.Content>

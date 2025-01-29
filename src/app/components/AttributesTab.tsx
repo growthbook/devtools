@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import uniqid from "uniqid";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
@@ -78,12 +78,10 @@ export default function AttributesTab() {
     (arch) => arch.id === selectedArchetypeId
   );
 
-  const archetypeAttributesForm = useForm<Attributes>({
-    defaultValues: selectedArchetype?.attributes || {},
-  });
-
-  useEffect(() => {
-    archetypeAttributesForm.reset(selectedArchetype?.attributes || {});
+  const applyArchetype = useCallback(() => {
+    if (!selectedArchetype) return;
+    attributesForm.reset({ ...attributes, ...selectedArchetype.attributes });
+    setDirty(true);
   }, [selectedArchetype]);
 
   const [saveArchetypeOpen, setSaveArchetypeOpen] = useState(false);
@@ -208,7 +206,15 @@ export default function AttributesTab() {
           className="flex items-center gap-3 shadow-sm-up fixed bottom-0 left-0 px-3 py-2 w-full bg-zinc-50"
           style={{ height: 50, zIndex: 100000 }}
         >
-          <div className="flex-1 items-center w-[50%]">Use Archetype</div>
+          <div className="flex-1 items-center w-[50%]">
+            <Button
+              disabled={!selectedArchetype}
+              onClick={applyArchetype}
+              variant="soft"
+            >
+              Use Archetype
+            </Button>
+          </div>
           <div className="flex items-center gap-3 w-[50%]">
             <Popover.Root
               open={saveArchetypeOpen}

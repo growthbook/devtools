@@ -14,7 +14,7 @@ export default function FeaturesTab() {
   >("features", {});
   const [forcedFeatures] = useTabState<Map<string, any>>(
     "forcedFeatures",
-    new Map(),
+    new Map()
   );
   let forcedFeaturesMap = new Map<string, any>();
   try {
@@ -31,7 +31,7 @@ export default function FeaturesTab() {
 
   const [selectedFid, setSelectedFeature] = useTabState<string | undefined>(
     "selectedFid",
-    undefined,
+    undefined
   );
   const selectedFeature = selectedFid
     ? getFeatureDetails({
@@ -60,7 +60,7 @@ export default function FeaturesTab() {
             return (
               <div
                 key={fid}
-                className={clsx("featureCard mb-2", {
+                className={clsx("accordionCard mb-2", {
                   selected: selectedFid === fid,
                 })}
                 onClick={() => clickFeature(fid)}

@@ -25,10 +25,10 @@ export default function useApi<Response = unknown>(path: string) {
 
       return responseData;
     },
-    [apiHost, apiKey],
+    [apiHost, apiKey]
   );
 
   return useSWR<Response, Error>(path, async () =>
-    apiCall(path, { method: "GET" }),
+    apiCall(path, { method: "GET" })
   );
 }
