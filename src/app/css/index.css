@@ -44,6 +44,10 @@
   @apply px-3 py-2 border border-gray-200 rounded-lg bg-white;
 }
 
+.featureCard {
+  @apply px-3 py-2 border border-violet-300 rounded-sm bg-violet-100 shadow-sm;
+}
+
 .shadow-sm-up {
   --tw-shadow: 0 -1px 2px 0 rgb(0 0 0 / 0.05);
   --tw-shadow-colored: 0 -1px 2px 0 var(--tw-shadow-color);

@@ -60,12 +60,15 @@ function init() {
 }
 
 function pushAppUpdates() {
+  updateTabState("url", window.location.href || "");
   onGrowthBookLoad((gb) => {
     pushSDKUpdate(gb);
     if (gb) {
       updateTabState("attributes", gb.getAttributes());
-      updateTabState("features", gb.getForcedFeatures());
-      updateTabState("experiments", gb.getForcedVariations());
+      updateTabState("features", gb.getFeatures());
+      updateTabState("experiments", gb.getExperiments());
+      updateTabState("forcedFeatures", gb.getForcedFeatures());
+      updateTabState("forcedVariations", gb.getForcedVariations());
     }
   });
 }
@@ -84,12 +87,15 @@ function setupListeners() {
 
     switch (message.type) {
       case "GB_UPDATE_ATTRIBUTES":
+        // setAttributes:
         updateAttributes(message.data);
         break;
       case "GB_UPDATE_FEATURES":
+        // setForcedFeatures:
         updateFeatures(message.data);
         break;
       case "GB_UPDATE_EXPERIMENTS":
+        // setForcedVariations:
         updateExperiments(message.data);
         break;
       default:
@@ -101,8 +107,9 @@ function setupListeners() {
 function updateAttributes(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (typeof data === "object" && data !== null) {
-      gb.setAttributeOverrides(data as Attributes);
+      gb.setAttributes(data as Attributes);
     } else {
+      // todo: do something with these messages or remove them
       const msg: ErrorMessage = {
         type: "GB_ERROR",
         error: "Invalid attributes data",
@@ -113,11 +120,14 @@ function updateAttributes(data: unknown) {
 
 function updateFeatures(data: unknown) {
   onGrowthBookLoad((gb) => {
-    if (typeof data === "object" && data !== null) {
+    if (data) {
       gb.setForcedFeatures(
-        new Map(Object.entries(data as Record<string, any>)),
+        (data instanceof Map) ?
+          data :
+          new Map(Object.entries(data as Record<string, any>)),
       );
     } else {
+      // todo: do something with these messages or remove them
       const msg: ErrorMessage = {
         type: "GB_ERROR",
         error: "Invalid features data",
@@ -135,6 +145,7 @@ function updateExperiments(data: unknown) {
             [experiment.id]: experiment.forcedVariation,
           });
         } else {
+          // todo: do something with these messages or remove them
           const msg: ErrorMessage = {
             type: "GB_ERROR",
             error: "Invalid experiment data",
@@ -142,6 +153,7 @@ function updateExperiments(data: unknown) {
         }
       });
     } else {
+      // todo: do something with these messages or remove them
       const msg: ErrorMessage = {
         type: "GB_ERROR",
         error: "Invalid experiments data",
