@@ -145,7 +145,9 @@ export const App = () => {
         </div>
 
         <div className="mt-[95px] mx-3">
-          {currentTab === "attributes" ? (
+          {showSdkDebug ? (
+            <SdkTab />
+          ) : currentTab === "attributes" ? (
             <AttributesTab />
           ) : currentTab === "features" ? (
             <FeaturesTab />
@@ -153,8 +155,6 @@ export const App = () => {
             <ExperimentsTab />
           ) : currentTab === "logs" ? (
             <LogsTab />
-          ) : showSdkDebug ? (
-            <SdkTab />
           ) : null}
         </div>
       </div>

@@ -11,12 +11,13 @@ import { at } from "lodash";
 const forceLoadVisualEditor = false;
 export const SESSION_STORAGE_TAB_STATE_KEY = "growthbook-devtools-tab-state";
 
-//
+// Special state variables will push their updates to the embed script / SDK when changed:
 const propertiesWithCustomMessage = {
-  attributes: "GB_UPDATE_ATTRIBUTES",
-  features: "GB_UPDATE_FEATURES",
-  experiments: "GB_UPDATE_EXPERIMENTS",
+  attributes: "GB_UPDATE_ATTRIBUTES", // setAttributes
+  forcedFeatures: "GB_UPDATE_FEATURES", // setForcedFeatures
+  forcedVariations: "GB_UPDATE_EXPERIMENTS", // setForcedVariations
 };
+
 // Tab-specific state store
 // has a write-through cache in memory and is persisted to sessionStorage
 let state: Record<string, any> = {};
@@ -24,6 +25,10 @@ try {
   state = JSON.parse(
     window.sessionStorage.getItem(SESSION_STORAGE_TAB_STATE_KEY) || "{}",
   );
+  if (state.forcedFeatures && !(state.forcedFeatures instanceof Map)) {
+    state.forcedFeatures = new Map(Object.entries(state.forcedFeatures));
+  }
+  console.log({ state });
 } catch (e) {
   console.error("Failed to parse saved tab state");
 }
@@ -64,9 +69,11 @@ function setState(property: string, value: any) {
       propertiesWithCustomMessage[
         property as keyof typeof propertiesWithCustomMessage
       ];
-    window.postMessage({ type: customMessage, data: value }, window.location.origin);
+    window.postMessage(
+      { type: customMessage, data: value },
+      window.location.origin,
+    );
   }
-  window.sessionStorage.setItem("tabState", JSON.stringify(state));
 }
 
 // Listen for messages from the App
@@ -125,12 +132,14 @@ window.addEventListener(
         chrome.runtime.sendMessage(data);
         break;
       default:
+        console.log("incoming custom message", data);
         break;
     }
   },
 );
 
 // Listen for messages from devtools, background, etc.
+// todo: remove 1 ore more?:
 chrome.runtime.onMessage.addListener(async (msg: Message) => {
   switch (msg.type) {
     case "GB_SET_OVERRIDES":

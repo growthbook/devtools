@@ -23,13 +23,13 @@ export default function AttributesTab() {
   const [dirty, setDirty] = useState(false);
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
-    false
+    false,
   );
 
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
     "allArchetypes",
     [],
-    true
+    true,
   );
   const {
     isLoading: archetypesLoading,
@@ -42,7 +42,7 @@ export default function AttributesTab() {
     setArchetypes(
       archetypes
         .filter((arch) => arch.source === "local")
-        .concat(archetypesData.archetypes || [])
+        .concat(archetypesData.archetypes || []),
     );
   }, [archetypesLoading, archetypesError, archetypesData]);
 
@@ -50,7 +50,7 @@ export default function AttributesTab() {
     string | undefined
   >("selectedArchetypeId", undefined);
   const selectedArchetype = archetypes.find(
-    (arch) => arch.id === selectedArchetypeId
+    (arch) => arch.id === selectedArchetypeId,
   );
 
   const archetypeAttributesForm = useForm<Attributes>({
@@ -72,7 +72,7 @@ export default function AttributesTab() {
   const newArchetypeIsValid =
     saveArchetypeForm.watch("name").trim().length > 0 &&
     !archetypes.find(
-      (archetype) => archetype.name !== saveArchetypeForm.watch("name")
+      (archetype) => archetype.name !== saveArchetypeForm.watch("name"),
     );
   const submitArchetypeForm = (e: React.SyntheticEvent) => {
     e.preventDefault();

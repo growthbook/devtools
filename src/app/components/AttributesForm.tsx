@@ -3,7 +3,13 @@ import * as Form from "@radix-ui/react-form";
 import { Button, Switch, Link, Select } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
-import {PiBookmark, PiCheckBold, PiPlusCircle, PiX, PiXCircle} from "react-icons/pi";
+import {
+  PiBookmark,
+  PiCheckBold,
+  PiPlusCircle,
+  PiX,
+  PiXCircle,
+} from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import clsx from "clsx";
 
@@ -142,7 +148,7 @@ export default function AttributesForm({
           ) : (
             <textarea
               className={clsx("Textarea mono mt-1", {
-                "border-red-700": textareaError
+                "border-red-700": textareaError,
               })}
               name={"__JSON_attributes__"}
               value={textareaAttributes}

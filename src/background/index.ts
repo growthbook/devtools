@@ -82,7 +82,6 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
       }
       if (message.type === "setState") {
         await setState(message.property, message.value, message.persist);
-        console.log("Global state updated", message.property, message.value);
         sendResponse({ success: true });
       }
     } catch (error) {
