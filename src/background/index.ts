@@ -80,7 +80,6 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
       }
       if (message.type === "setState") {
         await setState(message.property, message.value, message.persist);
-        console.log("Global state updated", message.property, message.value);
         sendResponse({ success: true });
       }
     } catch (error) {
@@ -100,11 +99,9 @@ chrome.runtime.onMessage.addListener(
     const { type, data } = message;
     const senderOrigin = sender.origin;
     let tabId = sender.tab?.id;
-    console.log("Received message", message, sender);
     switch (type) {
       case "GB_SDK_UPDATED":
         if (!tabId) tabId = data?.tabId;
-        console.log("SDK updated", data, tabId);
         let title = "GrowthBook DevTools";
         let text = "";
 

@@ -60,12 +60,9 @@ function init() {
 }
 
 function pushAppUpdates() {
-
   onGrowthBookLoad((gb) => {
     pushSDKUpdate(gb);
-    console.log("push updates");
     if (gb) {
-      console.log("attr updates", gb.getAttributes());
       updateTabState("attributes", gb.getAttributes());
       updateTabState("features", gb.getForcedFeatures());
       updateTabState("experiments", gb.getForcedVariations());
@@ -80,7 +77,7 @@ function pushSDKUpdate(gb?: GrowthBook) {
 }
 
 function setupListeners() {
-  // listen for state change events that will effect the SDK
+  // listen for state change events that will affect the SDK
   window.addEventListener("message", (event) => {
     const message = event.data;
     if (typeof message !== "object" || message === null) return;
@@ -154,7 +151,6 @@ function updateExperiments(data: unknown) {
 }
 
 function updateBackgroundSDK(gb?: GrowthBook) {
-  console.log("this is gb", gb);
   window.postMessage(
     {
       type: "GB_SDK_UPDATED",
