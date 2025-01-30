@@ -28,7 +28,6 @@ try {
   if (state.forcedFeatures && !(state.forcedFeatures instanceof Map)) {
     state.forcedFeatures = new Map(Object.entries(state.forcedFeatures));
   }
-  console.log({ state });
 } catch (e) {
   console.error("Failed to parse saved tab state");
 }
@@ -128,11 +127,9 @@ window.addEventListener(
       case "GB_ERROR":
       case "GB_SDK_UPDATED":
         // passthrough to background worker:nvm
-        console.log("sending message to background", data);
         chrome.runtime.sendMessage(data);
         break;
       default:
-        console.log("incoming custom message", data);
         break;
     }
   },

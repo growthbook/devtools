@@ -5,7 +5,6 @@ import { SDKHealthCheckResult } from "devtools";
 export default function SdkTab() {
   const [sdkData] = useTabState<SDKHealthCheckResult | {}>("sdkData", {});
   const { sdkFound, version, errorMessage, canConnect, hasPayload } = sdkData as SDKHealthCheckResult;
-  console.log("data for sdk", sdkData);
   return (
     <div className="box mb-3">
       <div className="label lg">GrowthBook SDK</div>

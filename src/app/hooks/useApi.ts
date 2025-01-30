@@ -28,7 +28,7 @@ export default function useApi<Response = unknown>(path: string) {
     [apiHost, apiKey]
   );
 
-  return useSWR<Response, Error>(path, async () =>
+  return useSWR<Response, Error>(`${path}_${apiHost}_${apiKey}`, async () =>
     apiCall(path, { method: "GET" })
   );
 }

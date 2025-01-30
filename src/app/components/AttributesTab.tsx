@@ -66,7 +66,7 @@ export default function AttributesTab() {
     if (attributesLoading || attributesError || !attributesData) return;
     setAttributeSchema(
       Object.fromEntries(
-        attributesData.attributes.map((attr) => [attr.property, attr.datatype])
+        (attributesData.attributes || []).map((attr) => [attr.property, attr.datatype])
       )
     );
   }, [attributesLoading, attributesError, attributesData]);
