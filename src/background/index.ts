@@ -142,7 +142,6 @@ const UpdateTabIconBasedOnSDK = (message: BGSetSDKUsageData , tabId?: number) =>
   if (!tabId) tabId = data?.tabId;
   console.log("data background", data);
   let title = "GrowthBook DevTools";
-  let text = " ";
   if (data.canConnect) {
     chrome.action.setIcon({
       tabId,
@@ -171,7 +170,7 @@ const UpdateTabIconBasedOnSDK = (message: BGSetSDKUsageData , tabId?: number) =>
   }
 
   // update the badge and icon
-  chrome.action.setBadgeText({ tabId, text });
+  chrome.action.setBadgeText({ tabId, text: "" });
   chrome.action.setTitle({ title, tabId });
 };
 

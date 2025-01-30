@@ -208,6 +208,7 @@ type SDKHealthCheckResult = {
   errorMessage?: string;
   version?: string;
   sdkFound: boolean;
+  payload?: Record<string, any>;
 };
 
 type BGSetSDKUsageData = {

@@ -202,6 +202,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     }
   } 
   const [apiHost, clientKey] = gb.getApiInfo();
+  const payload = gb.getDecryptedPayload?.() || {features: gb.getFeatures(), experiments: gb.getExperiments()};
   const hasPayload =  !!gb.getDecryptedPayload?.() || (Object.keys(gb.getFeatures()).length > 0 && gb.getExperiments().length > 0);
 
   if (!clientKey) {
@@ -222,6 +223,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       hasPayload,
       version: gb?.version,
       sdkFound: true,
+      payload,
     };
   }
   else {
@@ -234,6 +236,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       errorMessage: data.error,
       version: gb?.version,
       sdkFound: true,
+      payload,
     };
   }
 }
