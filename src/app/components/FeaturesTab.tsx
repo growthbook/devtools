@@ -8,6 +8,16 @@ import { Avatar } from "@radix-ui/themes";
 import { PiFlagBold } from "react-icons/pi";
 import clsx from "clsx";
 import TextareaAutosize from "react-textarea-autosize";
+import {Prism} from "react-syntax-highlighter";
+import {ghcolors as codeTheme} from "react-syntax-highlighter/dist/esm/styles/prism";
+const customTheme = {
+  padding: "5px",
+  margin: 0,
+  border: "0px none",
+  backgroundColor: "transparent",
+  whiteSpace: "pre-wrap",
+  lineHeight: "12px",
+};
 
 export default function FeaturesTab() {
   const [features, setFeatures] = useTabState<
@@ -42,12 +52,6 @@ export default function FeaturesTab() {
         forcedFeatures: forcedFeaturesMap,
       })
     : undefined;
-  const selectedFeatureDefaultValueStr = selectedFeature?.feature
-    ? JSON.stringify(selectedFeature.feature.defaultValue, null, 2)
-    : "null";
-  const selectedFeatureEvaluatedStr = selectedFeature?.evaluatedFeature?.result
-    ? JSON.stringify(selectedFeature.evaluatedFeature.result?.value, null, 2)
-    : "null";
   const clickFeature = (fid: string) =>
     setSelectedFeature(selectedFid !== fid ? fid : undefined);
 
@@ -122,32 +126,10 @@ export default function FeaturesTab() {
 
               <div className="my-2">
                 <div className="label">Evaluated value</div>
-                {["json", "string"].includes(selectedFeature.valueType) ? (
-                  <div className="border border-gray-200 bg-gray-50 p-1">
-                    <TextareaAutosize
-                      readOnly
-                      maxRows={6}
-                      className="text-slate-800 w-full text-2xs whitespace-pre mono"
-                      value={selectedFeatureEvaluatedStr}
-                    />
-                  </div>
-                ) : (
-                  <code
-                    className={clsx(
-                      "text-slate-800 text-sm whitespace-pre mono",
-                      {
-                        "inline-block px-1 bg-rose-100 rounded-md text-rose-900":
-                          selectedFeatureDefaultValueStr === "false",
-                        "inline-block px-1 bg-blue-100 rounded-md text-blue-900":
-                          selectedFeatureDefaultValueStr === "true",
-                        "inline-block px-1 bg-gray-100 rounded-md text-gray-900":
-                          selectedFeatureDefaultValueStr === "null",
-                      },
-                    )}
-                  >
-                    {selectedFeatureEvaluatedStr}
-                  </code>
-                )}
+                <ValueField
+                  value={selectedFeature?.evaluatedFeature?.result?.value}
+                  valueType={selectedFeature?.valueType}
+                />
               </div>
 
               <hr className="my-4" />
@@ -155,32 +137,10 @@ export default function FeaturesTab() {
 
               <div className="my-2">
                 <div className="label">Default value</div>
-                {["json", "string"].includes(selectedFeature.valueType) ? (
-                  <div className="border border-gray-200 bg-gray-50 p-1">
-                    <TextareaAutosize
-                      readOnly
-                      maxRows={6}
-                      className="text-slate-800 w-full text-2xs whitespace-pre mono"
-                      value={selectedFeatureDefaultValueStr}
-                    />
-                  </div>
-                ) : (
-                  <code
-                    className={clsx(
-                      "text-slate-800 text-sm whitespace-pre mono",
-                      {
-                        "inline-block px-1 bg-rose-100 rounded-md text-rose-900":
-                          selectedFeatureDefaultValueStr === "false",
-                        "inline-block px-1 bg-blue-100 rounded-md text-blue-900":
-                          selectedFeatureDefaultValueStr === "true",
-                        "inline-block px-1 bg-gray-100 rounded-md text-gray-900":
-                          selectedFeatureDefaultValueStr === "null",
-                      },
-                    )}
-                  >
-                    {selectedFeatureDefaultValueStr}
-                  </code>
-                )}
+                <ValueField
+                  value={selectedFeature?.feature?.defaultValue}
+                  valueType={selectedFeature?.valueType}
+                />
               </div>
 
               <textarea
@@ -195,6 +155,53 @@ export default function FeaturesTab() {
   );
 }
 
+function ValueField({
+  value,
+  valueType = "string",
+}:{
+  value: string;
+  valueType?: ValueType
+}) {
+  const formattedValue = value !== undefined ?
+    JSON.stringify(value, null, 2) :
+    "null";
+  return (
+    <>
+      {["json", "string"].includes(valueType) ? (
+        <div className="border border-gray-200 rounded-md bg-gray-50">
+          <Prism
+            language="json"
+            style={codeTheme}
+            customStyle={{ ...customTheme, maxHeight: 120 }}
+            codeTagProps={{
+              className: "text-2xs-important !whitespace-pre-wrap",
+            }}
+          >
+            {formattedValue}
+          </Prism>
+        </div>
+      ) : (
+        <code
+          className={clsx(
+            "text-slate-800 text-sm whitespace-pre-wrap mono",
+            {
+              "inline-block px-1 bg-rose-100 rounded-md text-rose-900":
+                formattedValue === "false",
+              "inline-block px-1 bg-blue-100 rounded-md text-blue-900":
+                formattedValue === "true",
+              "inline-block px-1 bg-gray-100 rounded-md text-gray-900":
+                formattedValue === "null",
+            },
+          )}
+        >
+          {formattedValue}
+        </code>
+      )}
+    </>
+  );
+}
+
+type ValueType = "string" | "number" | "boolean" | "json";
 function getFeatureDetails({
   fid,
   features,
@@ -212,11 +219,12 @@ function getFeatureDetails({
   const meta = featuresMeta?.[fid];
   const evaluatedFeature = evaluatedFeatures?.[fid];
   const isForced = forcedFeatures ? fid in forcedFeatures : false;
-  let valueType: string;
+  let valueType: ValueType;
   if (meta?.valueType) {
     valueType = meta?.valueType;
   } else {
-    valueType = typeof (feature?.defaultValue ?? "string");
+    valueType = typeof (feature?.defaultValue ?? "string") as ValueType || "object";
+    // @ts-ignore
     if (valueType === "object") {
       valueType = "json";
     }

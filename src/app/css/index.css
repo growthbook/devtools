@@ -39,6 +39,10 @@
   font-size: 9px;
   line-height: 12px;
 }
+.text-2xs-important {
+  font-size: 9px !important;
+  line-height: 12px !important;
+}
 .ModalBody {
   width: 400px;
 }
