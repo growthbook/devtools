@@ -108,6 +108,12 @@ export default function AttributesForm({
     setTextareaError?.(false);
   }, [formAttributesString]);
 
+  useEffect(() => {
+    if (schema?.[addCustomId]) {
+      setAddCustomType(schema[addCustomId]);
+    }
+  }, [addCustomId]);
+
   return (
     <div className={clsx({ "mb-[60px]": hasAttributes })}>
       <Form.Root className="FormRoot small">
@@ -206,9 +212,17 @@ export default function AttributesForm({
                     }}
                   />
                   <datalist id="schema-attributes">
-                    {Object.keys(schema || {}).map((key) => (
-                      <option key={key}>{key}</option>
-                    ))}
+                    {Object.keys(schema || {})
+                      .filter(
+                        (key) =>
+                          !Object.prototype.hasOwnProperty.call(
+                            formAttributes,
+                            key
+                          )
+                      )
+                      .map((key) => (
+                        <option key={key}>{key}</option>
+                      ))}
                   </datalist>
                   <Select.Root
                     defaultValue="string"

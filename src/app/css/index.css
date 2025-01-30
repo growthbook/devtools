@@ -67,6 +67,9 @@
 .accordionCard.selected {
   @apply border-violet-500 bg-violet-200;
 }
+.accordionCard.active {
+  @apply border-orange-500 bg-orange-200 bg-opacity-50;
+}
 .accordionContent {
   @apply p-2 border border-violet-200 rounded-md bg-violet-50 shadow-sm;
 }
@@ -82,7 +85,6 @@
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
     var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
-
 
 /* Prevent modal jumping when inner content changes shape and weird scroll bar */
 .rt-BaseDialogScroll {

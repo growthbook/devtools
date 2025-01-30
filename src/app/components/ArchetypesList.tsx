@@ -26,10 +26,12 @@ export default function ArchetypesList({
   archetypes,
   selectedArchetypeId,
   setSelectedArchetypeId,
+  appliedArchetypeId,
 }: {
   archetypes: Archetype[];
   selectedArchetypeId: string | undefined;
   setSelectedArchetypeId: (value: string | undefined) => void;
+  appliedArchetypeId: string | undefined;
 }) {
   return (
     <Container width="100%">
@@ -50,6 +52,7 @@ export default function ArchetypesList({
             <Accordion.Trigger
               className={clsx("accordionCard", {
                 selected: selectedArchetypeId === arch.id,
+                active: appliedArchetypeId === arch.id,
               })}
               style={{ width: "100%" }}
             >

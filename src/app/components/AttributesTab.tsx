@@ -3,7 +3,14 @@ import uniqid from "uniqid";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
-import { Button, Checkbox, Link, Popover, Select } from "@radix-ui/themes";
+import {
+  Button,
+  Checkbox,
+  Link,
+  Popover,
+  RadioGroup,
+  Select,
+} from "@radix-ui/themes";
 import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
@@ -11,6 +18,7 @@ import { PiAsterisk, PiBookmark } from "react-icons/pi";
 import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
 import ArchetypesList from "./ArchetypesList";
+import { isMatch } from "lodash";
 
 export default function AttributesTab() {
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
@@ -66,7 +74,10 @@ export default function AttributesTab() {
     if (attributesLoading || attributesError || !attributesData) return;
     setAttributeSchema(
       Object.fromEntries(
-        (attributesData.attributes || []).map((attr) => [attr.property, attr.datatype])
+        (attributesData.attributes || []).map((attr) => [
+          attr.property,
+          attr.datatype,
+        ])
       )
     );
   }, [attributesLoading, attributesError, attributesData]);
@@ -77,6 +88,10 @@ export default function AttributesTab() {
   const selectedArchetype = archetypes.find(
     (arch) => arch.id === selectedArchetypeId
   );
+
+  const [appliedArchetypeId, setAppliedArchetypeId] = useTabState<
+    string | undefined
+  >("appliedArchetypeId", undefined);
 
   const applyArchetype = useCallback(() => {
     if (!selectedArchetype) return;
@@ -93,14 +108,21 @@ export default function AttributesTab() {
     },
   });
   const newArchetypeIsValid =
+    saveArchetypeForm.watch("type") === "new" &&
     saveArchetypeForm.watch("name").trim().length > 0 &&
     !archetypes.find(
-      (archetype) => archetype.name !== saveArchetypeForm.watch("name")
+      (archetype) => archetype.name === saveArchetypeForm.watch("name")
+    );
+  const existingArchetypeIsValid =
+    saveArchetypeForm.watch("type") === "existing" &&
+    !!archetypes.find(
+      (archetype) => archetype.id === saveArchetypeForm.watch("id")
     );
   const submitArchetypeForm = (e: React.SyntheticEvent) => {
     e.preventDefault();
     const values = saveArchetypeForm.getValues();
     if (values.type === "new") {
+      if (!newArchetypeIsValid) return;
       const archetype: Archetype = {
         id: uniqid("sam_"),
         name: values.name,
@@ -113,29 +135,52 @@ export default function AttributesTab() {
         name: archetype.name,
         id: archetype.id,
       });
+    } else {
+      if (!existingArchetypeIsValid) return;
+      const existingArchIndex = archetypes.findIndex(
+        (arch) => arch.id === values.id
+      );
+      const archetype = archetypes[existingArchIndex];
+      archetype.attributes = formAttributes;
+      setArchetypes([
+        ...archetypes.slice(0, existingArchIndex),
+        archetype,
+        ...archetypes.slice(existingArchIndex + 1),
+      ]);
     }
     setSaveArchetypeOpen(false);
   };
 
   const applyAttributes = () => {
+    let newAttributes: Attributes;
     if (!jsonMode) {
-      setAttributes(formAttributes);
-      attributesForm.reset(formAttributes);
-      setDirty?.(false);
+      newAttributes = formAttributes;
     } else {
       try {
-        const newAttributes: Attributes = JSON.parse(textareaAttributes);
+        newAttributes = JSON.parse(textareaAttributes);
         if (!newAttributes || typeof newAttributes !== "object") {
           throw new Error("invalid type");
         }
-        setAttributes(newAttributes);
-        attributesForm.reset(newAttributes);
-        setDirty?.(false);
       } catch (e) {
         setTextareaError(true);
+        return;
       }
     }
+    setAttributes(newAttributes);
+    // isMatch checks for a subset rather than full equality, so if all of the archetype's attributes
+    // are included in the attr form and unchanged then it's considered in-use
+    if (
+      selectedArchetype &&
+      isMatch(newAttributes, selectedArchetype.attributes)
+    ) {
+      setAppliedArchetypeId(selectedArchetypeId);
+    } else {
+      setAppliedArchetypeId(undefined);
+    }
+    attributesForm.reset(newAttributes);
+    setDirty?.(false);
   };
+
   const resetAttributes = () => {
     attributesForm.reset(attributes);
     setDirty?.(false);
@@ -158,6 +203,7 @@ export default function AttributesTab() {
               archetypes={archetypes}
               selectedArchetypeId={selectedArchetypeId}
               setSelectedArchetypeId={setSelectedArchetypeId}
+              appliedArchetypeId={appliedArchetypeId}
             />
           </div>
         </div>
@@ -235,40 +281,67 @@ export default function AttributesTab() {
                     <Form.Label className="FormLabel">
                       Save User Attributes as...
                     </Form.Label>
-                    <Select.Root
-                      size="1"
+                    <RadioGroup.Root
                       value={saveArchetypeForm.watch("type")}
-                      onValueChange={(v) =>
-                        saveArchetypeForm.setValue("type", v)
-                      }
+                      onValueChange={(value) => {
+                        saveArchetypeForm.setValue("type", value);
+                        saveArchetypeForm.setValue(
+                          "id",
+                          value === "new" ? "" : selectedArchetype?.id || ""
+                        );
+                      }}
                     >
-                      <Select.Trigger variant="surface" className="w-full" />
-                      <Select.Content>
-                        {/* TODO: does this need to filter only local archetypes? */}
-                        {archetypes.length > 0 && (
-                          <Select.Item value="existing">
-                            {saveArchetypeForm.watch("name")}
-                          </Select.Item>
-                        )}
-                        <Select.Item value="new">New Archetype</Select.Item>
-                      </Select.Content>
-                    </Select.Root>
+                      <RadioGroup.Item value="new">
+                        New Archetype
+                      </RadioGroup.Item>
+                      <RadioGroup.Item value="existing">
+                        Update Existing Archetype
+                      </RadioGroup.Item>
+                    </RadioGroup.Root>
                   </Form.Field>
-                  {saveArchetypeForm.watch("type") === "new" && (
-                    <Form.Field className="FormField" name="name">
-                      <Form.Label className="FormLabel">
-                        Archetype Name
-                      </Form.Label>
+                  <Form.Field className="FormField" name="name">
+                    <Form.Label className="FormLabel">
+                      Archetype Name
+                    </Form.Label>
+                    {saveArchetypeForm.watch("type") === "new" ? (
                       <Form.Control asChild>
                         <input
                           className="Input"
                           {...saveArchetypeForm.register("name")}
                         />
                       </Form.Control>
-                    </Form.Field>
-                  )}
+                    ) : (
+                      <Select.Root
+                        size="1"
+                        value={saveArchetypeForm.watch("id")}
+                        onValueChange={(v) => {
+                          saveArchetypeForm.setValue("id", v);
+                        }}
+                      >
+                        <Select.Trigger variant="surface" className="w-full" />
+                        <Select.Content>
+                          {archetypes.map((arch) => (
+                            <Select.Item key={arch.id} value={arch.id}>
+                              {arch.name}
+                            </Select.Item>
+                          ))}
+                        </Select.Content>
+                      </Select.Root>
+                    )}
+                  </Form.Field>
+
                   <div className="mt-4">
-                    <Form.Submit asChild disabled={!newArchetypeIsValid}>
+                    <Form.Submit
+                      asChild
+                      disabled={
+                        !(
+                          (saveArchetypeForm.watch("type") === "new" &&
+                            newArchetypeIsValid) ||
+                          (saveArchetypeForm.watch("type") === "existing" &&
+                            existingArchetypeIsValid)
+                        )
+                      }
+                    >
                       <Button size="1" className="w-full">
                         Save
                       </Button>
