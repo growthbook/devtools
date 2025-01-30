@@ -10,7 +10,7 @@ export default function SdkTab() {
   var jsonPretty = payload ? JSON.stringify(payload, null, 2) : "";  
 
   return (
-    <div className="box mb-3 Z">
+    <div className="box mb-3">
       <Text weight="medium" size="4">GrowthBook SDK</Text>
       {sdkFound ? (
         canConnect ? (

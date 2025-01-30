@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import uniqid from "uniqid";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
 import { Button, Checkbox, Link, Popover, Select } from "@radix-ui/themes";
-import { Archetype } from "../tempGbExports";
+import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
 import { PiAsterisk, PiBookmark } from "react-icons/pi";
 import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
+import ArchetypesList from "./ArchetypesList";
 
 export default function AttributesTab() {
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
@@ -23,13 +24,13 @@ export default function AttributesTab() {
   const [dirty, setDirty] = useState(false);
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
-    false,
+    false
   );
 
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
     "allArchetypes",
     [],
-    true,
+    true
   );
   const {
     isLoading: archetypesLoading,
@@ -42,23 +43,45 @@ export default function AttributesTab() {
     setArchetypes(
       archetypes
         .filter((arch) => arch.source === "local")
-        .concat(archetypesData.archetypes || []),
+        .concat(
+          (archetypesData.archetypes || []).map((arch) => ({
+            ...arch,
+            source: "growthbook",
+          }))
+        )
     );
   }, [archetypesLoading, archetypesError, archetypesData]);
+
+  const [attributeSchema, setAttributeSchema] = useGlobalState<
+    Record<string, string>
+  >("attributeSchema", {}, true);
+
+  const {
+    isLoading: attributesLoading,
+    error: attributesError,
+    data: attributesData,
+  } = useApi<{ attributes: SDKAttribute[] }>("/api/v1/attributes");
+
+  useEffect(() => {
+    if (attributesLoading || attributesError || !attributesData) return;
+    setAttributeSchema(
+      Object.fromEntries(
+        (attributesData.attributes || []).map((attr) => [attr.property, attr.datatype])
+      )
+    );
+  }, [attributesLoading, attributesError, attributesData]);
 
   const [selectedArchetypeId, setSelectedArchetypeId] = useTabState<
     string | undefined
   >("selectedArchetypeId", undefined);
   const selectedArchetype = archetypes.find(
-    (arch) => arch.id === selectedArchetypeId,
+    (arch) => arch.id === selectedArchetypeId
   );
 
-  const archetypeAttributesForm = useForm<Attributes>({
-    defaultValues: selectedArchetype?.attributes || {},
-  });
-
-  useEffect(() => {
-    archetypeAttributesForm.reset(selectedArchetype?.attributes || {});
+  const applyArchetype = useCallback(() => {
+    if (!selectedArchetype) return;
+    attributesForm.reset({ ...attributes, ...selectedArchetype.attributes });
+    setDirty(true);
   }, [selectedArchetype]);
 
   const [saveArchetypeOpen, setSaveArchetypeOpen] = useState(false);
@@ -72,7 +95,7 @@ export default function AttributesTab() {
   const newArchetypeIsValid =
     saveArchetypeForm.watch("name").trim().length > 0 &&
     !archetypes.find(
-      (archetype) => archetype.name !== saveArchetypeForm.watch("name"),
+      (archetype) => archetype.name !== saveArchetypeForm.watch("name")
     );
   const submitArchetypeForm = (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -130,27 +153,17 @@ export default function AttributesTab() {
       <div className="flex justify-between items-top">
         <div className="flex-none basis-[50%]">
           <div className="">
-            <div className="label mb-2">Archetypes</div>
-            <Select.Root
-              defaultValue={archetypes[0]?.id}
-              value={selectedArchetype?.id}
-              onValueChange={setSelectedArchetypeId}
-            >
-              <Select.Trigger placeholder="Archetype..." variant="surface" />
-              <Select.Content>
-                {archetypes.map((arch) => (
-                  <Select.Item value={arch.id}>{arch.name}</Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
+            <div className="label lg mb-2">Archetypes</div>
+            <ArchetypesList
+              archetypes={archetypes}
+              selectedArchetypeId={selectedArchetypeId}
+              setSelectedArchetypeId={setSelectedArchetypeId}
+            />
           </div>
-          {selectedArchetype ? (
-            <AttributesForm form={archetypeAttributesForm} />
-          ) : null}
         </div>
         <div className="flex-none basis-[50%]">
           <div className="flex items-end justify-between mb-2">
-            <div className="label">
+            <div className="label lg">
               User Attributes
               {dirty && (
                 <PiAsterisk
@@ -183,6 +196,7 @@ export default function AttributesTab() {
             setTextareaAttributes={setTextareaAttributes}
             textareaError={textareaError}
             setTextareaError={setTextareaError}
+            schema={attributeSchema}
           />
         </div>
       </div>
@@ -192,7 +206,15 @@ export default function AttributesTab() {
           className="flex items-center gap-3 shadow-sm-up fixed bottom-0 left-0 px-3 py-2 w-full bg-zinc-50"
           style={{ height: 50, zIndex: 100000 }}
         >
-          <div className="flex-1" />
+          <div className="flex-1 items-center w-[50%]">
+            <Button
+              disabled={!selectedArchetype}
+              onClick={applyArchetype}
+              variant="soft"
+            >
+              Use Archetype
+            </Button>
+          </div>
           <div className="flex items-center gap-3 w-[50%]">
             <Popover.Root
               open={saveArchetypeOpen}

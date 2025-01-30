@@ -14,7 +14,7 @@ export default function FeaturesTab() {
   >("features", {});
   const [forcedFeatures] = useTabState<Map<string, any>>(
     "forcedFeatures",
-    new Map(),
+    new Map()
   );
   let forcedFeaturesMap = new Map<string, any>();
   try {
@@ -31,7 +31,7 @@ export default function FeaturesTab() {
 
   const [selectedFid, setSelectedFeature] = useTabState<string | undefined>(
     "selectedFid",
-    undefined,
+    undefined
   );
   const selectedFeature = selectedFid
     ? getFeatureDetails({
@@ -47,8 +47,8 @@ export default function FeaturesTab() {
   return (
     <>
       <div className="flex justify-between items-top">
-        <div className="flex-none basis-[50%]">
-          <div className="label mb-2">Features</div>
+        <div className="w-[50%] pr-2">
+          <div className="label lg mb-2">Features</div>
           {Object.keys(features).map((fid, i) => {
             const { feature, meta, evaluatedFeature, isForced } =
               getFeatureDetails({
@@ -57,40 +57,68 @@ export default function FeaturesTab() {
                 evaluatedFeatures,
                 forcedFeatures: forcedFeaturesMap,
               });
+            const valueStr = evaluatedFeature?.result ?
+              JSON.stringify(evaluatedFeature?.result?.value) :
+              "null";
             return (
               <div
                 key={fid}
-                className={clsx("featureCard mb-2", {
+                className={clsx("featureCard relative mb-2", {
                   selected: selectedFid === fid,
                 })}
                 onClick={() => clickFeature(fid)}
               >
-                <div className="flex gap-3 items-center">
+                <div className="flex gap-2 items-center">
                   <Avatar size="1" radius="full" fallback={<PiFlagBold />} />
-                  <div>{fid}</div>
-                  {evaluatedFeature ? (
-                    <div>{JSON.stringify(evaluatedFeature.result.value)}</div>
-                  ) : (
-                    <div></div>
-                  )}
-                  {isForced && <div>FORCED</div>}
+                  <code className="text-xs font-bold">{fid}</code>
+                  <div className="flex-1" />
+                  <code className={clsx("flex-shrink-0 text-slate-800 line-clamp-3 max-w-[100px]", {
+                    "text-right text-xs": valueStr.length < 10,
+                    "text-left text-2xs": valueStr.length >= 10,
+                    "inline-block px-1 bg-rose-50 rounded-md text-rose-900": valueStr === "false",
+                    "inline-block px-1 bg-blue-50 rounded-md text-blue-900": valueStr === "true",
+                    "inline-block px-1 bg-gray-50 rounded-md text-gray-900": valueStr === "null",
+                  })}>
+                    {valueStr}
+                  </code>
                 </div>
+                {isForced && (
+                  <div className="absolute top-0 right-0">FORCED</div>
+                )}
               </div>
             );
           })}
         </div>
-        <div className="flex-none basis-[50%] overflow-y-auto px-3 py-2 -mr-3">
+
+        <div
+          className="w-[50%] overflow-y-auto pl-2 pr-3 pt-3 pb-2 fixed right-0"
+          style={{
+            zIndex: 1000,
+            top: 85,
+            height: "calc(100vh - 85px)"
+        }}
+        >
           {!!selectedFeature && (
-            <>
-              <div className="mb-3">
-                <h2>{selectedFid}</h2>
+            <div key={`selected_${selectedFid}`}>
+              <div className="flex items-center gap-2 mb-3">
+                <Avatar size="2" radius="full" fallback={<PiFlagBold/>}/>
+                <h2 className="font-bold">{selectedFid}</h2>
               </div>
+
+              <div>
+                <div className="label">Default value</div>
+                <code className="text-sm">{JSON.stringify(selectedFeature.feature?.defaultValue)}</code>
+              </div>
+              <textarea className="w-full h-[400px]">
+                {JSON.stringify(selectedFeature.feature)}
+              </textarea>
+
               {!!selectedFeature.evaluatedFeature && (
-                <textarea>
+                <textarea className="w-full h-[400px]">
                   {JSON.stringify(selectedFeature.evaluatedFeature)}
                 </textarea>
               )}
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -117,6 +145,7 @@ function getFeatureDetails({
   const isForced = forcedFeatures ? fid in forcedFeatures : false;
 
   return {
+    fid,
     feature,
     meta,
     evaluatedFeature,

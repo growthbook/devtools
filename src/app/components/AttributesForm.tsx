@@ -166,7 +166,6 @@ export default function AttributesForm({
 
         {canAddRemoveFields && !jsonMode && (
           <div className="m-2">
-            {/*todo: map through unused attributes from schema*/}
             {!addingCustom ? (
               <div key="add_custom">
                 <Button
@@ -178,7 +177,7 @@ export default function AttributesForm({
                     setAddingCustom(true);
                   }}
                 >
-                  <PiPlusCircle /> Add {schema ? "custom" : ""}attribute...
+                  <PiPlusCircle /> Add attribute...
                 </Button>
               </div>
             ) : (
@@ -190,6 +189,8 @@ export default function AttributesForm({
                 <div className="flex items-center gap-1">
                   <span>Add</span>
                   <input
+                    type="text"
+                    list="schema-attributes"
                     autoFocus
                     placeholder="field name"
                     className="Input bg-white"
@@ -204,11 +205,17 @@ export default function AttributesForm({
                       }
                     }}
                   />
+                  <datalist id="schema-attributes">
+                    {Object.keys(schema || {}).map((key) => (
+                      <option key={key}>{key}</option>
+                    ))}
+                  </datalist>
                   <Select.Root
                     defaultValue="string"
                     size="1"
                     value={addCustomType}
                     onValueChange={(v) => setAddCustomType(v)}
+                    disabled={!!schema?.[addCustomId]}
                   >
                     <Select.Trigger className="uppercase">
                       <div className="text-green-700">
@@ -269,7 +276,7 @@ function renderInputField({
   let attributeType = getAttributeType(
     attributeKey,
     form.watch(attributeKey),
-    schema,
+    schema
   );
   // todo: enum, number[], string[]
   // todo (maybe. or just use string): secureString, secureString[]

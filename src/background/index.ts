@@ -140,7 +140,6 @@ chrome.runtime.onMessage.addListener(
 const UpdateTabIconBasedOnSDK = (message: BGSetSDKUsageData , tabId?: number) => {
   const { data } = message;
   if (!tabId) tabId = data?.tabId;
-  console.log("data background", data);
   let title = "GrowthBook DevTools";
   if (data.canConnect) {
     chrome.action.setIcon({

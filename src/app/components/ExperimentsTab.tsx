@@ -6,7 +6,7 @@ export default function ExperimentsTab() {
   const [experiments] = useTabState<Experiment<any>[]>("experiments", []);
   return (
     <div className="box mb-3">
-      <div className="label">Experiments</div>
+      <div className="label lg">Experiments</div>
       <textarea value={JSON.stringify(experiments, null, 2)} />
     </div>
   );
