@@ -223,6 +223,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       hasPayload,
       version: gb?.version,
       sdkFound: true,
+      clientKey,
       payload,
     };
   }
@@ -236,6 +237,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       errorMessage: data.error,
       version: gb?.version,
       sdkFound: true,
+      clientKey,
       payload,
     };
   }
