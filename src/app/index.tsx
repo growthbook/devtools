@@ -146,7 +146,6 @@ export const App = () => {
         <div className="mt-[95px] mx-3">
           {showSdkDebug ? (
             <SdkTab />
-
           ) : currentTab === "attributes" ? (
             <AttributesTab />
           ) : currentTab === "features" ? (

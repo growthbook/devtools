@@ -217,8 +217,8 @@ export default function AttributesForm({
                         (key) =>
                           !Object.prototype.hasOwnProperty.call(
                             formAttributes,
-                            key
-                          )
+                            key,
+                          ),
                       )
                       .map((key) => (
                         <option key={key}>{key}</option>
@@ -290,7 +290,7 @@ function renderInputField({
   let attributeType = getAttributeType(
     attributeKey,
     form.watch(attributeKey),
-    schema
+    schema,
   );
   // todo: enum, number[], string[]
   // todo (maybe. or just use string): secureString, secureString[]

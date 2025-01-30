@@ -35,7 +35,7 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
       canConnect: false,
       hasPayload: false,
       sdkFound: false,
-      errorMessage: "SDK not found"
+      errorMessage: "SDK not found",
     });
     const msg: ErrorMessage = {
       type: "GB_ERROR",
@@ -174,22 +174,22 @@ async function updateBackgroundSDK(data: SDKHealthCheckResult) {
       type: "GB_SDK_UPDATED",
       data,
     },
-    window.location.origin
+    window.location.origin,
   );
 }
 
 // send a message that the tabstate has been updated
 function updateTabState(property: string, value: unknown) {
-    window.postMessage(
-      {
-        type: "UPDATE_TAB_STATE",
-        data: {
-          property,
-          value,
-        },
+  window.postMessage(
+    {
+      type: "UPDATE_TAB_STATE",
+      data: {
+        property,
+        value,
       },
-      window.location.origin,
-    );
+    },
+    window.location.origin,
+  );
 }
 
 async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
@@ -198,12 +198,18 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       canConnect: false,
       hasPayload: false,
       sdkFound: false,
-      errorMessage: "SDK not found"
-    }
-  } 
+      errorMessage: "SDK not found",
+    };
+  }
   const [apiHost, clientKey] = gb.getApiInfo();
-  const payload = gb.getDecryptedPayload?.() || {features: gb.getFeatures(), experiments: gb.getExperiments()};
-  const hasPayload =  !!gb.getDecryptedPayload?.() || (Object.keys(gb.getFeatures()).length > 0 && gb.getExperiments().length > 0);
+  const payload = gb.getDecryptedPayload?.() || {
+    features: gb.getFeatures(),
+    experiments: gb.getExperiments(),
+  };
+  const hasPayload =
+    !!gb.getDecryptedPayload?.() ||
+    (Object.keys(gb.getFeatures()).length > 0 &&
+      gb.getExperiments().length > 0);
 
   if (!clientKey) {
     return {
@@ -212,11 +218,11 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       hasPayload,
       sdkFound: true,
       version: gb?.version,
-      errorMessage: "No API Client Key found"
+      errorMessage: "No API Client Key found",
     };
   }
- const res = await fetch(`${apiHost}/api/features/${clientKey}`)
-  if(res.status === 200) {
+  const res = await fetch(`${apiHost}/api/features/${clientKey}`);
+  if (res.status === 200) {
     return {
       canConnect: true,
       hasClientKey: true,
@@ -226,8 +232,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       clientKey,
       payload,
     };
-  }
-  else {
+  } else {
     const data = await res.json();
 
     return {

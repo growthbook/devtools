@@ -7,6 +7,7 @@ import useGBSandboxEval, {
 import { Avatar } from "@radix-ui/themes";
 import { PiFlagBold } from "react-icons/pi";
 import clsx from "clsx";
+import TextareaAutosize from "react-textarea-autosize";
 
 export default function FeaturesTab() {
   const [features, setFeatures] = useTabState<
@@ -14,7 +15,7 @@ export default function FeaturesTab() {
   >("features", {});
   const [forcedFeatures] = useTabState<Map<string, any>>(
     "forcedFeatures",
-    new Map()
+    new Map(),
   );
   let forcedFeaturesMap = new Map<string, any>();
   try {
@@ -31,7 +32,7 @@ export default function FeaturesTab() {
 
   const [selectedFid, setSelectedFeature] = useTabState<string | undefined>(
     "selectedFid",
-    undefined
+    undefined,
   );
   const selectedFeature = selectedFid
     ? getFeatureDetails({
@@ -41,6 +42,12 @@ export default function FeaturesTab() {
         forcedFeatures: forcedFeaturesMap,
       })
     : undefined;
+  const selectedFeatureDefaultValueStr = selectedFeature?.feature
+    ? JSON.stringify(selectedFeature.feature.defaultValue, null, 2)
+    : "null";
+  const selectedFeatureEvaluatedStr = selectedFeature?.evaluatedFeature?.result
+    ? JSON.stringify(selectedFeature.evaluatedFeature.result?.value, null, 2)
+    : "null";
   const clickFeature = (fid: string) =>
     setSelectedFeature(selectedFid !== fid ? fid : undefined);
 
@@ -57,9 +64,9 @@ export default function FeaturesTab() {
                 evaluatedFeatures,
                 forcedFeatures: forcedFeaturesMap,
               });
-            const valueStr = evaluatedFeature?.result ?
-              JSON.stringify(evaluatedFeature?.result?.value) :
-              "null";
+            const valueStr = evaluatedFeature?.result
+              ? JSON.stringify(evaluatedFeature.result?.value)
+              : "null";
             return (
               <div
                 key={fid}
@@ -70,15 +77,23 @@ export default function FeaturesTab() {
               >
                 <div className="flex gap-2 items-center">
                   <Avatar size="1" radius="full" fallback={<PiFlagBold />} />
-                  <code className="text-xs font-bold">{fid}</code>
+                  <code className="text-xs text-gray-800">{fid}</code>
                   <div className="flex-1" />
-                  <code className={clsx("flex-shrink-0 text-slate-800 line-clamp-3 max-w-[100px]", {
-                    "text-right text-xs": valueStr.length < 10,
-                    "text-left text-2xs": valueStr.length >= 10,
-                    "inline-block px-1 bg-rose-50 rounded-md text-rose-900": valueStr === "false",
-                    "inline-block px-1 bg-blue-50 rounded-md text-blue-900": valueStr === "true",
-                    "inline-block px-1 bg-gray-50 rounded-md text-gray-900": valueStr === "null",
-                  })}>
+                  <code
+                    className={clsx(
+                      "flex-shrink-0 text-slate-800 line-clamp-3 max-w-[100px]",
+                      {
+                        "text-right text-xs": valueStr.length < 10,
+                        "text-left text-2xs": valueStr.length >= 10,
+                        "inline-block px-1 bg-rose-100 rounded-md text-rose-900":
+                          valueStr === "false",
+                        "inline-block px-1 bg-blue-100 rounded-md text-blue-900":
+                          valueStr === "true",
+                        "inline-block px-1 bg-gray-100 rounded-md text-gray-900":
+                          valueStr === "null",
+                      },
+                    )}
+                  >
                     {valueStr}
                   </code>
                 </div>
@@ -91,33 +106,87 @@ export default function FeaturesTab() {
         </div>
 
         <div
-          className="w-[50%] overflow-y-auto pl-2 pr-3 pt-3 pb-2 fixed right-0"
+          className="w-[50%] overflow-y-auto pl-2 pr-4 pt-3 pb-2 fixed right-0"
           style={{
             zIndex: 1000,
             top: 85,
-            height: "calc(100vh - 85px)"
-        }}
+            height: "calc(100vh - 85px)",
+          }}
         >
           {!!selectedFeature && (
             <div key={`selected_${selectedFid}`}>
               <div className="flex items-center gap-2 mb-3">
-                <Avatar size="2" radius="full" fallback={<PiFlagBold/>}/>
+                <Avatar size="2" radius="full" fallback={<PiFlagBold />} />
                 <h2 className="font-bold">{selectedFid}</h2>
               </div>
 
-              <div>
-                <div className="label">Default value</div>
-                <code className="text-sm">{JSON.stringify(selectedFeature.feature?.defaultValue)}</code>
+              <div className="my-2">
+                <div className="label">Evaluated value</div>
+                {["json", "string"].includes(selectedFeature.valueType) ? (
+                  <div className="border border-gray-200 bg-gray-50 p-1">
+                    <TextareaAutosize
+                      readOnly
+                      maxRows={6}
+                      className="text-slate-800 w-full text-2xs whitespace-pre mono"
+                      value={selectedFeatureEvaluatedStr}
+                    />
+                  </div>
+                ) : (
+                  <code
+                    className={clsx(
+                      "text-slate-800 text-sm whitespace-pre mono",
+                      {
+                        "inline-block px-1 bg-rose-100 rounded-md text-rose-900":
+                          selectedFeatureDefaultValueStr === "false",
+                        "inline-block px-1 bg-blue-100 rounded-md text-blue-900":
+                          selectedFeatureDefaultValueStr === "true",
+                        "inline-block px-1 bg-gray-100 rounded-md text-gray-900":
+                          selectedFeatureDefaultValueStr === "null",
+                      },
+                    )}
+                  >
+                    {selectedFeatureEvaluatedStr}
+                  </code>
+                )}
               </div>
-              <textarea className="w-full h-[400px]">
-                {JSON.stringify(selectedFeature.feature)}
-              </textarea>
 
-              {!!selectedFeature.evaluatedFeature && (
-                <textarea className="w-full h-[400px]">
-                  {JSON.stringify(selectedFeature.evaluatedFeature)}
-                </textarea>
-              )}
+              <hr className="my-4" />
+              <h2 className="label font-bold">Rules</h2>
+
+              <div className="my-2">
+                <div className="label">Default value</div>
+                {["json", "string"].includes(selectedFeature.valueType) ? (
+                  <div className="border border-gray-200 bg-gray-50 p-1">
+                    <TextareaAutosize
+                      readOnly
+                      maxRows={6}
+                      className="text-slate-800 w-full text-2xs whitespace-pre mono"
+                      value={selectedFeatureDefaultValueStr}
+                    />
+                  </div>
+                ) : (
+                  <code
+                    className={clsx(
+                      "text-slate-800 text-sm whitespace-pre mono",
+                      {
+                        "inline-block px-1 bg-rose-100 rounded-md text-rose-900":
+                          selectedFeatureDefaultValueStr === "false",
+                        "inline-block px-1 bg-blue-100 rounded-md text-blue-900":
+                          selectedFeatureDefaultValueStr === "true",
+                        "inline-block px-1 bg-gray-100 rounded-md text-gray-900":
+                          selectedFeatureDefaultValueStr === "null",
+                      },
+                    )}
+                  >
+                    {selectedFeatureDefaultValueStr}
+                  </code>
+                )}
+              </div>
+
+              <textarea
+                className="mt-8 w-full h-[400px]"
+                value={JSON.stringify(selectedFeature.feature)}
+              />
             </div>
           )}
         </div>
@@ -143,10 +212,20 @@ function getFeatureDetails({
   const meta = featuresMeta?.[fid];
   const evaluatedFeature = evaluatedFeatures?.[fid];
   const isForced = forcedFeatures ? fid in forcedFeatures : false;
+  let valueType: string;
+  if (meta?.valueType) {
+    valueType = meta?.valueType;
+  } else {
+    valueType = typeof (feature?.defaultValue ?? "string");
+    if (valueType === "object") {
+      valueType = "json";
+    }
+  }
 
   return {
     fid,
     feature,
+    valueType,
     meta,
     evaluatedFeature,
     isForced,

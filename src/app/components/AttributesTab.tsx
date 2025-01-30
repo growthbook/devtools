@@ -32,13 +32,13 @@ export default function AttributesTab() {
   const [dirty, setDirty] = useState(false);
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
-    false
+    false,
   );
 
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
     "allArchetypes",
     [],
-    true
+    true,
   );
   const {
     isLoading: archetypesLoading,
@@ -55,8 +55,8 @@ export default function AttributesTab() {
           (archetypesData.archetypes || []).map((arch) => ({
             ...arch,
             source: "growthbook",
-          }))
-        )
+          })),
+        ),
     );
   }, [archetypesLoading, archetypesError, archetypesData]);
 
@@ -77,8 +77,8 @@ export default function AttributesTab() {
         (attributesData.attributes || []).map((attr) => [
           attr.property,
           attr.datatype,
-        ])
-      )
+        ]),
+      ),
     );
   }, [attributesLoading, attributesError, attributesData]);
 
@@ -86,7 +86,7 @@ export default function AttributesTab() {
     string | undefined
   >("selectedArchetypeId", undefined);
   const selectedArchetype = archetypes.find(
-    (arch) => arch.id === selectedArchetypeId
+    (arch) => arch.id === selectedArchetypeId,
   );
 
   const [appliedArchetypeId, setAppliedArchetypeId] = useTabState<
@@ -111,12 +111,12 @@ export default function AttributesTab() {
     saveArchetypeForm.watch("type") === "new" &&
     saveArchetypeForm.watch("name").trim().length > 0 &&
     !archetypes.find(
-      (archetype) => archetype.name === saveArchetypeForm.watch("name")
+      (archetype) => archetype.name === saveArchetypeForm.watch("name"),
     );
   const existingArchetypeIsValid =
     saveArchetypeForm.watch("type") === "existing" &&
     !!archetypes.find(
-      (archetype) => archetype.id === saveArchetypeForm.watch("id")
+      (archetype) => archetype.id === saveArchetypeForm.watch("id"),
     );
   const submitArchetypeForm = (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -138,7 +138,7 @@ export default function AttributesTab() {
     } else {
       if (!existingArchetypeIsValid) return;
       const existingArchIndex = archetypes.findIndex(
-        (arch) => arch.id === values.id
+        (arch) => arch.id === values.id,
       );
       const archetype = archetypes[existingArchIndex];
       archetype.attributes = formAttributes;
@@ -287,7 +287,7 @@ export default function AttributesTab() {
                         saveArchetypeForm.setValue("type", value);
                         saveArchetypeForm.setValue(
                           "id",
-                          value === "new" ? "" : selectedArchetype?.id || ""
+                          value === "new" ? "" : selectedArchetype?.id || "",
                         );
                       }}
                     >

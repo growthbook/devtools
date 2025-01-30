@@ -137,7 +137,10 @@ chrome.runtime.onMessage.addListener(
   },
 );
 
-const UpdateTabIconBasedOnSDK = (message: BGSetSDKUsageData , tabId?: number) => {
+const UpdateTabIconBasedOnSDK = (
+  message: BGSetSDKUsageData,
+  tabId?: number,
+) => {
   const { data } = message;
   if (!tabId) tabId = data?.tabId;
   let title = "GrowthBook DevTools";
@@ -153,7 +156,8 @@ const UpdateTabIconBasedOnSDK = (message: BGSetSDKUsageData , tabId?: number) =>
       tabId,
       path: chrome.runtime.getURL("/logo128-connected.png"),
     });
-    title = "GrowthBook DevTools\n🟢 SDK connected with Payload \n Client Key is not connected";
+    title =
+      "GrowthBook DevTools\n🟢 SDK connected with Payload \n Client Key is not connected";
   } else if (!data.canConnect) {
     chrome.action.setIcon({
       tabId,

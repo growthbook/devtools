@@ -15,12 +15,12 @@ export default () => {
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [apiHost, setApiHost] = useState<string | null>(null);
   const [apiKeyValid, setApiKeyValid] = useState<boolean | undefined>(
-    undefined
+    undefined,
   );
   const [_organization, setOrganization] = useGlobalState<string | undefined>(
     "orgId",
     undefined,
-    true
+    true,
   );
 
   const { clientKey } = useSdkData();
@@ -75,7 +75,7 @@ export default () => {
       const response = await apiCall(
         apiHost,
         apiKey,
-        `/api/v1/sdk-connections/lookup/${clientKey}`
+        `/api/v1/sdk-connections/lookup/${clientKey}`,
       );
       if (response?.sdkConnection?.organization) {
         setOrganization(response.sdkConnection.organization);

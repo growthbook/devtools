@@ -29,7 +29,7 @@
 
 .label {
   font-size: var(--font-size-3);
-  @apply font-semibold text-gray-800;
+  @apply text-gray-800;
 }
 .label.lg {
   font-size: var(--font-size-4);
@@ -53,11 +53,14 @@
 
 /*todo: remove? */
 .featureCard {
-  @apply p-2 border border-violet-300 rounded-md bg-white shadow-sm;
+  @apply p-1.5 border border-violet-200 rounded-md bg-white shadow-sm;
   cursor: pointer;
 }
+.featureCard:not(.selected):hover {
+  @apply border-violet-400;
+}
 .featureCard.selected {
-  @apply border-violet-500 bg-violet-100;
+  @apply border-violet-400 bg-violet-100;
 }
 
 .accordionCard {
