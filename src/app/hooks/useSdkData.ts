@@ -1,9 +1,8 @@
 import useTabState from "@/app/hooks/useTabState";
 import type { SDKHealthCheckResult } from "devtools";
 
-
 export default function useSdkData() {
-  const [sdkData, setSdkData] = useTabState<SDKHealthCheckResult>("sdkData",{
+  const [sdkData] = useTabState<SDKHealthCheckResult>("sdkData", {
     canConnect: false,
     hasPayload: false,
     hasClientKey: false,
@@ -14,5 +13,5 @@ export default function useSdkData() {
     isLoading: true, // set to true to show loading state if needed
     payload: undefined,
   });
-  return [sdkData, setSdkData];
-  } 
+  return sdkData;
+}

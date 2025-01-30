@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   loadApiHost,
   saveApiHost,
@@ -6,11 +6,24 @@ import {
   saveApiKey,
   clearApiKey,
 } from "@/app/storage";
+import { apiCall } from "./useApi";
+import useSdkData from "./useSdkData";
+import useGlobalState from "./useGlobalState";
 
 export default () => {
   const [loading, setLoading] = useState(true);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [apiHost, setApiHost] = useState<string | null>(null);
+  const [apiKeyValid, setApiKeyValid] = useState<boolean | undefined>(
+    undefined
+  );
+  const [_organization, setOrganization] = useGlobalState<string | undefined>(
+    "orgId",
+    undefined,
+    true
+  );
+
+  const { clientKey } = useSdkData();
 
   const _loadApiKey = async () => {
     setApiKey(await loadApiKey());
@@ -53,10 +66,37 @@ export default () => {
     load();
   }, []);
 
+  const validateApiKey = useCallback(async () => {
+    if (!clientKey || !apiHost || !apiKey) {
+      setApiKeyValid(false);
+      return;
+    }
+    try {
+      const response = await apiCall(
+        apiHost,
+        apiKey,
+        `/api/v1/sdk-connections/lookup/${clientKey}`
+      );
+      if (response?.sdkConnection?.organization) {
+        setOrganization(response.sdkConnection.organization);
+        setApiKeyValid(true);
+      } else {
+        setApiKeyValid(false);
+      }
+    } catch {
+      setApiKeyValid(false);
+    }
+  }, [clientKey, apiHost, apiKey, apiCall]);
+
+  useEffect(() => {
+    validateApiKey();
+  }, [clientKey, apiHost, apiKey, apiCall]);
+
   return {
     apiHost,
     apiKey,
     loading,
+    apiKeyValid,
     saveApiHost: _saveApiHost,
     saveApiKey: _saveApiKey,
     clearApiKey: _clearApiKey,
