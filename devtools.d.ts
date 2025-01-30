@@ -209,6 +209,7 @@ type SDKHealthCheckResult = {
   version?: string;
   sdkFound: boolean;
   clientKey?: string;
+  isLoading?: boolean;
   payload?: Record<string, any>;
 };
 
