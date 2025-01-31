@@ -4,7 +4,7 @@ import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
-import {Avatar, Button, Switch} from "@radix-ui/themes";
+import {Avatar, Button, Link, Switch} from "@radix-ui/themes";
 import { PiFlagBold } from "react-icons/pi";
 import clsx from "clsx";
 import {Prism} from "react-syntax-highlighter";
@@ -68,6 +68,13 @@ export default function FeaturesTab() {
     }
   }, [selectedFid, JSON.stringify(forcedFeatures)]);
 
+  useEffect(() => {
+    if (selectedFid) {
+      const el = document.querySelector(`#featuresTab_featureList_${selectedFid}`);
+      el?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [selectedFid]);
+
   return (
     <>
       <div className="flex justify-between items-top">
@@ -86,6 +93,7 @@ export default function FeaturesTab() {
               : "null";
             return (
               <div
+                id={`featuresTab_featureList_${fid}`}
                 key={fid}
                 className={clsx("featureCard relative mb-2", {
                   selected: selectedFid === fid,
@@ -94,13 +102,13 @@ export default function FeaturesTab() {
               >
                 <div className="flex gap-2 items-center">
                   <Avatar
-                    color={isForced ? "lime" : undefined}
+                    color={isForced ? "amber" : undefined}
                     variant={isForced ? "solid" : "soft"}
-                    className={isForced ? "border border-lime-500" : undefined}
+                    // className={isForced ? "border border-amber-500" : undefined}
                     size="1"
                     radius="full"
                     fallback={
-                      <span className={isForced ? "text-lime-700" : undefined}>
+                      <span className={isForced ? "text-amber-800" : undefined}>
                         <PiFlagBold />
                       </span>
                     }
@@ -126,7 +134,7 @@ export default function FeaturesTab() {
                   </code>
                 </div>
                 {isForced && (
-                  <div className="pointer-events-none absolute top-[-6px] right-[-12px] px-1 bg-white shadow-sm rounded-md text-2xs mr-1 font-bold uppercase text-lime-600">
+                  <div className="pointer-events-none absolute top-[-6px] right-[-12px] px-1 bg-white shadow-sm rounded-md text-2xs mr-1 font-bold uppercase text-amber-600">
                     Override
                   </div>
                 )}
@@ -136,7 +144,7 @@ export default function FeaturesTab() {
         </div>
 
         <div
-          className="w-[50%] overflow-y-auto pl-2 pr-4 pt-3 pb-2 fixed right-0"
+          className="w-[50%] overflow-y-auto pl-2 pr-4 pt-2 pb-2 fixed right-0"
           style={{
             zIndex: 1000,
             top: 85,
@@ -145,64 +153,66 @@ export default function FeaturesTab() {
         >
           {!!selectedFid && !!selectedFeature && (
             <div key={`selected_${selectedFid}`}>
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-1">
                 <Avatar size="2" radius="full" fallback={<PiFlagBold />} />
                 <h2 className="font-bold">{selectedFid}</h2>
               </div>
 
-              <div className="my-2">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="label">Current value</div>
-                  {!(selectedFeature?.valueType === "boolean" && !overrideFeature) && (
-                    <label className="flex items-center cursor-pointer select-none">
-                      <span className={clsx("text-xs mr-1 font-bold uppercase", {
-                        "text-lime-600": overrideFeature,
-                        "text-gray-600": !overrideFeature,
-                      })}>Override</span>
-                      <Switch
-                        radius="small"
-                        color="lime"
-                        checked={overrideFeature}
-                        onCheckedChange={(v) => {
-                          setOverrideFeature(v);
-                          if (!v) unsetForcedFeature(selectedFid);
-                        }}
-                      />
-                    </label>
+              <div className="box">
+                <div className="my-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="label">Current value</div>
+                    {!(selectedFeature?.valueType === "boolean" && !overrideFeature) && (
+                      <label className="flex items-center cursor-pointer select-none">
+                        <span className={clsx("text-xs mr-1 font-bold uppercase", {
+                          "text-amber-600": overrideFeature,
+                          "text-gray-600": !overrideFeature,
+                        })}>Override</span>
+                        <Switch
+                          radius="small"
+                          color="amber"
+                          checked={overrideFeature}
+                          onCheckedChange={(v) => {
+                            setOverrideFeature(v);
+                            if (!v) unsetForcedFeature(selectedFid);
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                  {overrideFeature || selectedFeature?.valueType === "boolean" ? (
+                    <EditableValueField
+                      value={selectedFeature?.evaluatedFeature?.result?.value}
+                      setValue={(v) => {
+                        setForcedFeature(selectedFid, v);
+                        setOverrideFeature(true);
+                      }}
+                      valueType={selectedFeature?.valueType}
+                    />
+                  ) : (
+                    <ValueField
+                      value={selectedFeature?.evaluatedFeature?.result?.value}
+                      valueType={selectedFeature?.valueType}
+                    />
                   )}
                 </div>
-                {overrideFeature || selectedFeature?.valueType === "boolean" ? (
-                  <EditableValueField
-                    value={selectedFeature?.evaluatedFeature?.result?.value}
-                    setValue={(v) => {
-                      setForcedFeature(selectedFid, v);
-                      setOverrideFeature(true);
-                    }}
-                    valueType={selectedFeature?.valueType}
-                  />
-                ) : (
+
+                <hr className="my-4" />
+                <h2 className="label font-bold">Rules</h2>
+
+                <div className="my-2">
+                  <div className="label mb-1">Default value</div>
                   <ValueField
-                    value={selectedFeature?.evaluatedFeature?.result?.value}
+                    value={selectedFeature?.feature?.defaultValue}
                     valueType={selectedFeature?.valueType}
                   />
-                )}
-              </div>
+                </div>
 
-              <hr className="my-4" />
-              <h2 className="label font-bold">Rules</h2>
-
-              <div className="my-2">
-                <div className="label mb-1">Default value</div>
-                <ValueField
-                  value={selectedFeature?.feature?.defaultValue}
-                  valueType={selectedFeature?.valueType}
+                <textarea
+                  className="mt-8 w-full h-[400px]"
+                  value={JSON.stringify(selectedFeature.feature)}
                 />
               </div>
-
-              <textarea
-                className="mt-8 w-full h-[400px]"
-                value={JSON.stringify(selectedFeature.feature)}
-              />
             </div>
           )}
         </div>
@@ -264,12 +274,29 @@ function EditableValueField({
 }:{
   value: any;
   setValue: (v: any) => void;
-  valueType?: ValueType
+  valueType?: ValueType;
 }) {
   const formattedValue = valueType === "json" ? JSON.stringify(value, null, 2) : value;
   const [editedValue, setEditedValue] = useState<any>(formattedValue);
   const [textareaError, setTextareaError] = useState(false);
   const [dirty, setDirty] = useState(false);
+
+  const submit = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    let newValue: any;
+    if (valueType === "json") {
+      try {
+        newValue = JSON.parse(editedValue);
+      } catch (e) {
+        setTextareaError(true);
+        return;
+      }
+    } else {
+      newValue = editedValue;
+    }
+    setValue(newValue);
+    setDirty(false);
+  }
 
   return (
     <>
@@ -278,8 +305,11 @@ function EditableValueField({
           className="Input"
           type="number"
           value={formattedValue}
-          // todo: dirty etc
-          onChange={(e) => setEditedValue(e.target.value)}
+          onChange={(e) => {
+            const v = e.target.value;
+            setEditedValue(v);
+            setDirty(true);
+          }}
         />
       ) : valueType === "boolean" ? (
         // switches set the value directly without going through save step
@@ -315,19 +345,35 @@ function EditableValueField({
           value={editedValue}
           onChange={(e) => {
             const v = e.target.value;
-            setEditedValue?.(v);
-            setTextareaError?.(false);
-            setDirty?.(true);
+            setEditedValue(v);
+            setTextareaError(false);
+            setDirty(true);
           }}
           style={{fontSize: "10px", lineHeight: "15px", padding: "2px 6px"}}
           rows={valueType === "json" ? 10 : 3}
         />
       )}
+
       {valueType !== "boolean" && (
         <div className="flex items-center justify-end gap-3">
           {dirty && (
-            <Button>Save (not working)</Button>
+            <Link
+              href="#"
+              size="2"
+              role="button"
+              color="gray"
+              onClick={() => {
+                setEditedValue(formattedValue);
+                setTextareaError(false);
+                setDirty(false);
+              }}
+            >
+              Undo typing
+            </Link>
           )}
+          <Button type="button" size="2" onClick={submit} disabled={!dirty}>
+            Apply
+          </Button>
         </div>
       )}
     </>
