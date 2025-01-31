@@ -28,25 +28,16 @@ export default function useGBSandboxEval() {
     {},
   );
   const [experiments] = useTabState<Experiment<any>[]>("experiments", []);
-  const [forcedFeatures] = useTabState<Map<string, any>>(
+  const [forcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
-    new Map(),
+    {},
   );
   const [forcedVariations] = useTabState<Record<string, number>>(
     "forcedVariations",
     {},
   );
   const [url] = useTabState<string>("url", "");
-  let forcedFeaturesMap = new Map<string, any>();
-  try {
-    // because persistent state is JSON encoded, need to make sure this specific var is safe to use
-    forcedFeaturesMap =
-      forcedFeatures && forcedFeatures instanceof Map
-        ? forcedFeatures
-        : new Map(Object.entries(forcedFeatures));
-  } catch (_) {
-    // do nothing
-  }
+  const forcedFeaturesMap = new Map(Object.entries(forcedFeatures));
 
   return useMemo(() => {
     let log: DebugLogs = [];

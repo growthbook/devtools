@@ -25,9 +25,6 @@ try {
   state = JSON.parse(
     window.sessionStorage.getItem(SESSION_STORAGE_TAB_STATE_KEY) || "{}",
   );
-  if (state.forcedFeatures && !(state.forcedFeatures instanceof Map)) {
-    state.forcedFeatures = new Map(Object.entries(state.forcedFeatures));
-  }
 } catch (e) {
   console.error("Failed to parse saved tab state");
 }

@@ -1,13 +1,12 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { FeatureDefinition } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
-import { Avatar } from "@radix-ui/themes";
+import {Avatar, Button, Switch} from "@radix-ui/themes";
 import { PiFlagBold } from "react-icons/pi";
 import clsx from "clsx";
-import TextareaAutosize from "react-textarea-autosize";
 import {Prism} from "react-syntax-highlighter";
 import {ghcolors as codeTheme} from "react-syntax-highlighter/dist/esm/styles/prism";
 const customTheme = {
@@ -23,20 +22,9 @@ export default function FeaturesTab() {
   const [features, setFeatures] = useTabState<
     Record<string, FeatureDefinition>
   >("features", {});
-  const [forcedFeatures] = useTabState<Map<string, any>>(
-    "forcedFeatures",
-    new Map(),
-  );
-  let forcedFeaturesMap = new Map<string, any>();
-  try {
-    // because persistent state is JSON encoded, need to make sure this specific var is safe to use
-    forcedFeaturesMap =
-      forcedFeatures && forcedFeatures instanceof Map
-        ? forcedFeatures
-        : new Map(Object.entries(forcedFeatures));
-  } catch (_) {
-    // do nothing
-  }
+  const [forcedFeatures, setForcedFeatures] = useTabState<
+    Record<string, any>
+  >("forcedFeatures", {},);
 
   const { evaluatedFeatures } = useGBSandboxEval();
 
@@ -49,11 +37,36 @@ export default function FeaturesTab() {
         fid: selectedFid,
         features,
         evaluatedFeatures,
-        forcedFeatures: forcedFeaturesMap,
+        forcedFeatures,
       })
     : undefined;
+
+  const [overrideFeature, setOverrideFeature] = useState(false);
+
   const clickFeature = (fid: string) =>
     setSelectedFeature(selectedFid !== fid ? fid : undefined);
+
+  const setForcedFeature = (fid: string, value: any) => {
+    const newForcedFeatures = { ...forcedFeatures };
+    newForcedFeatures[fid] = value;
+    setForcedFeatures(newForcedFeatures);
+  };
+  const unsetForcedFeature = (fid: string) => {
+    const newForcedFeatures = { ...forcedFeatures };
+    delete newForcedFeatures[fid];
+    setForcedFeatures(newForcedFeatures);
+    setOverrideFeature(false);
+  }
+
+  useEffect(() => {
+    if (selectedFid) {
+      if (selectedFid in forcedFeatures) {
+        setOverrideFeature(true);
+      } else {
+        setOverrideFeature(false);
+      }
+    }
+  }, [selectedFid, JSON.stringify(forcedFeatures)]);
 
   return (
     <>
@@ -66,7 +79,7 @@ export default function FeaturesTab() {
                 fid,
                 features,
                 evaluatedFeatures,
-                forcedFeatures: forcedFeaturesMap,
+                forcedFeatures,
               });
             const valueStr = evaluatedFeature?.result
               ? JSON.stringify(evaluatedFeature.result?.value)
@@ -80,7 +93,18 @@ export default function FeaturesTab() {
                 onClick={() => clickFeature(fid)}
               >
                 <div className="flex gap-2 items-center">
-                  <Avatar size="1" radius="full" fallback={<PiFlagBold />} />
+                  <Avatar
+                    color={isForced ? "lime" : undefined}
+                    variant={isForced ? "solid" : "soft"}
+                    className={isForced ? "border border-lime-500" : undefined}
+                    size="1"
+                    radius="full"
+                    fallback={
+                      <span className={isForced ? "text-lime-700" : undefined}>
+                        <PiFlagBold />
+                      </span>
+                    }
+                  />
                   <code className="text-xs text-gray-800">{fid}</code>
                   <div className="flex-1" />
                   <code
@@ -102,7 +126,9 @@ export default function FeaturesTab() {
                   </code>
                 </div>
                 {isForced && (
-                  <div className="absolute top-0 right-0">FORCED</div>
+                  <div className="pointer-events-none absolute top-[-6px] right-[-12px] px-1 bg-white shadow-sm rounded-md text-2xs mr-1 font-bold uppercase text-lime-600">
+                    Override
+                  </div>
                 )}
               </div>
             );
@@ -117,7 +143,7 @@ export default function FeaturesTab() {
             height: "calc(100vh - 85px)",
           }}
         >
-          {!!selectedFeature && (
+          {!!selectedFid && !!selectedFeature && (
             <div key={`selected_${selectedFid}`}>
               <div className="flex items-center gap-2 mb-3">
                 <Avatar size="2" radius="full" fallback={<PiFlagBold />} />
@@ -125,18 +151,48 @@ export default function FeaturesTab() {
               </div>
 
               <div className="my-2">
-                <div className="label">Evaluated value</div>
-                <ValueField
-                  value={selectedFeature?.evaluatedFeature?.result?.value}
-                  valueType={selectedFeature?.valueType}
-                />
+                <div className="flex items-center justify-between mb-1">
+                  <div className="label">Current value</div>
+                  {!(selectedFeature?.valueType === "boolean" && !overrideFeature) && (
+                    <label className="flex items-center cursor-pointer select-none">
+                      <span className={clsx("text-xs mr-1 font-bold uppercase", {
+                        "text-lime-600": overrideFeature,
+                        "text-gray-600": !overrideFeature,
+                      })}>Override</span>
+                      <Switch
+                        radius="small"
+                        color="lime"
+                        checked={overrideFeature}
+                        onCheckedChange={(v) => {
+                          setOverrideFeature(v);
+                          if (!v) unsetForcedFeature(selectedFid);
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
+                {overrideFeature || selectedFeature?.valueType === "boolean" ? (
+                  <EditableValueField
+                    value={selectedFeature?.evaluatedFeature?.result?.value}
+                    setValue={(v) => {
+                      setForcedFeature(selectedFid, v);
+                      setOverrideFeature(true);
+                    }}
+                    valueType={selectedFeature?.valueType}
+                  />
+                ) : (
+                  <ValueField
+                    value={selectedFeature?.evaluatedFeature?.result?.value}
+                    valueType={selectedFeature?.valueType}
+                  />
+                )}
               </div>
 
               <hr className="my-4" />
               <h2 className="label font-bold">Rules</h2>
 
               <div className="my-2">
-                <div className="label">Default value</div>
+                <div className="label mb-1">Default value</div>
                 <ValueField
                   value={selectedFeature?.feature?.defaultValue}
                   valueType={selectedFeature?.valueType}
@@ -201,7 +257,85 @@ function ValueField({
   );
 }
 
+function EditableValueField({
+  value,
+  setValue,
+  valueType = "string",
+}:{
+  value: any;
+  setValue: (v: any) => void;
+  valueType?: ValueType
+}) {
+  const formattedValue = valueType === "json" ? JSON.stringify(value, null, 2) : value;
+  const [editedValue, setEditedValue] = useState<any>(formattedValue);
+  const [textareaError, setTextareaError] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  return (
+    <>
+      {valueType === "number" ? (
+        <input
+          className="Input"
+          type="number"
+          value={formattedValue}
+          // todo: dirty etc
+          onChange={(e) => setEditedValue(e.target.value)}
+        />
+      ) : valueType === "boolean" ? (
+        // switches set the value directly without going through save step
+        <label className="flex items-center gap-2">
+          <Switch
+            size="2"
+            className="Switch"
+            checked={value}
+            onCheckedChange={(v: boolean) => {
+              setValue(v);
+            }}
+          />
+          <code
+            className={clsx(
+              "text-slate-800 text-sm whitespace-pre-wrap mono",
+              {
+                "inline-block px-1 bg-rose-100 rounded-md text-rose-900":
+                  editedValue === false,
+                "inline-block px-1 bg-blue-100 rounded-md text-blue-900":
+                  editedValue === true,
+              },
+            )}
+          >
+            {JSON.stringify(editedValue)}
+          </code>
+        </label>
+      ) : (
+        <textarea
+          className={clsx("Textarea bg-white mono mt-1", {
+            "border-red-700": textareaError,
+          })}
+          name={"__JSON_attributes__"}
+          value={editedValue}
+          onChange={(e) => {
+            const v = e.target.value;
+            setEditedValue?.(v);
+            setTextareaError?.(false);
+            setDirty?.(true);
+          }}
+          style={{fontSize: "10px", lineHeight: "15px", padding: "2px 6px"}}
+          rows={valueType === "json" ? 10 : 3}
+        />
+      )}
+      {valueType !== "boolean" && (
+        <div className="flex items-center justify-end gap-3">
+          {dirty && (
+            <Button>Save (not working)</Button>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
 type ValueType = "string" | "number" | "boolean" | "json";
+
 function getFeatureDetails({
   fid,
   features,
@@ -213,7 +347,7 @@ function getFeatureDetails({
   features: Record<string, FeatureDefinition>;
   featuresMeta?: Record<string, any>;
   evaluatedFeatures?: Record<string, EvaluatedFeature>;
-  forcedFeatures?: Map<string, any>;
+  forcedFeatures?: Record<string, any>;
 }) {
   const feature = features?.[fid];
   const meta = featuresMeta?.[fid];

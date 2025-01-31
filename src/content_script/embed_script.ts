@@ -127,11 +127,7 @@ function updateAttributes(data: unknown) {
 function updateFeatures(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (data) {
-      gb.setForcedFeatures(
-        data instanceof Map
-          ? data
-          : new Map(Object.entries(data as Record<string, any>)),
-      );
+      gb.setForcedFeatures(new Map(Object.entries(data as Record<string, any>)));
     } else {
       // todo: do something with these messages or remove them
       const msg: ErrorMessage = {
@@ -144,20 +140,8 @@ function updateFeatures(data: unknown) {
 
 function updateExperiments(data: unknown) {
   onGrowthBookLoad((gb) => {
-    if (Array.isArray(data)) {
-      data.forEach((experiment) => {
-        if (experiment.id && experiment.forcedVariation) {
-          gb.setForcedVariations({
-            [experiment.id]: experiment.forcedVariation,
-          });
-        } else {
-          // todo: do something with these messages or remove them
-          const msg: ErrorMessage = {
-            type: "GB_ERROR",
-            error: "Invalid experiment data",
-          };
-        }
-      });
+    if (data) {
+      gb.setForcedVariations(data as Record<string, number>);
     } else {
       // todo: do something with these messages or remove them
       const msg: ErrorMessage = {
