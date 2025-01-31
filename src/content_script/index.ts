@@ -171,3 +171,22 @@ if (
 
   document.body.appendChild(script);
 }
+// check if the storage has been removed and reload the data from embed script
+window.addEventListener("storage", (event) => {
+  if (event.key === SESSION_STORAGE_TAB_STATE_KEY) {
+    try {
+      state = JSON.parse(
+        window.sessionStorage.getItem(SESSION_STORAGE_TAB_STATE_KEY) || "{}",
+      );
+      if(!state) {
+        refreshSDK();
+      }
+    } catch (e) {
+      console.error("Failed to parse saved tab state");
+    }
+  }
+});
+
+function refreshSDK() {
+  window.postMessage({ type: "GB_REQUEST_REFRESH" }, window.location.origin);
+}

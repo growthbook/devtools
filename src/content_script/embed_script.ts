@@ -104,6 +104,9 @@ function setupListeners() {
         // setForcedVariations:
         updateExperiments(message.data);
         break;
+      case "GB_REQUEST_REFRESH":
+        pushAppUpdates();
+        break;
       default:
         return;
     }

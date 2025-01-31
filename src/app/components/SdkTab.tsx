@@ -36,9 +36,20 @@ export default function SdkTab() {
                 </Text>
               </Flex>
             </div>
+            <div>
+              <Flex direction="row" gap="1">
+                <Text size="2" weight="medium">
+                  Payload:
+                </Text>
+              </Flex>
+              <Code size="1" style={{ whiteSpace: "pre-wrap" }}>
+                {jsonPretty}
+              </Code>
+            </div>
           </Flex>
         ) : hasPayload ? (
-          <div>
+          <Flex gap="1">
+            <div>
             <div>
               <Flex gap="1">
                 <Text size="2" weight="medium">
@@ -58,32 +69,69 @@ export default function SdkTab() {
                 {version}
               </Text>
             </Flex>
-          </div>
-        ) : (
-          <div>
-            <h4>🔴 SDK not connected</h4>
-            <div>
-              <strong>API error message: </strong>
-              <em> {errorMessage}</em>
+            <Text size="1" weight="light">
+              We found payload but client key is not connected
+            </Text>
             </div>
+            <div>
+              <Flex direction="row" gap="1">
+                <Text size="2" weight="medium">
+                  Payload:
+                </Text>
+              </Flex>
+              <Code size="1" style={{ whiteSpace: "pre-wrap" }}>
+                {jsonPretty}
+              </Code>
+            </div>
+          </Flex>
+        ) : (
+            <div>
+              <Flex gap="1">
+                <Text size="2" weight="medium">
+                  Status:
+                </Text>
+                <Text size="2" weight="light" color="red">
+                  Not connected
+                </Text>
+              </Flex>
+              <Flex gap="1">
+              <Text size="2" weight="medium">
+                Error Message:
+              </Text>
+              <Text size="2" weight="light">
+                {errorMessage}
+              </Text>
+            </Flex>
             {!!version ? (
-              <div>
-                <strong>SDK Version: </strong> <em>{version}</em>
-              </div>
+            <Flex gap="1">
+              <Text size="2" weight="medium">
+                Version:
+              </Text>
+              <Text size="2" weight="light" color="green">
+                {version}
+              </Text>
+            </Flex>
             ) : (
-              <div>
-                {" "}
-                <em>
+              <Text size="1" weight="light">
                   Version Not Found your version might be less than 0.29.0
-                </em>
-              </div>
+              </Text>
             )}
-          </div>
+            </div>
         )
       ) : sdkFound === false ? (
         <div>
-          <h4>⚪ no SDK present</h4>
-          <em>
+          <div>
+         <Flex gap="1">
+          <Text size="2" weight="medium">
+            Status:
+          </Text>
+          <Text size="2" weight="light" color="red">
+            No SDK found
+          </Text>
+          </Flex>
+          </div>
+          <div>
+          <Text size="1" weight="light">
             Refer to the{" "}
             <a
               href="https://docs.growthbook.io/lib/js"
@@ -93,11 +141,12 @@ export default function SdkTab() {
               Getting Started with GrowthBook SDK
             </a>{" "}
             documentation
-          </em>
+          </Text>
+          </div>
         </div>
       ) : (
         <div>
-          <em>Loading...</em>
+          <Text size="2" weight="medium">Loading...</Text>
         </div>
       )}
     </div>
