@@ -60,7 +60,7 @@ export default function ArchetypesList({
               <ArchetypeLabel archetype={arch} />
             </Accordion.Trigger>
             <Accordion.Content
-              className="w-full"
+              className="accordionInner overflow-hidden w-full"
             >
               <div className="flex flex-col gap-0.5 box mx-2 mb-2 overflow-auto w-100 max-h-[100px] text-xs">
                 {Object.keys(arch.attributes).map((key, i) => (

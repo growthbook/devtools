@@ -7,7 +7,6 @@ export default function SdkTab() {
   const [sdkData] = useTabState<SDKHealthCheckResult | {}>("sdkData", {});
   const { sdkFound, version, errorMessage, canConnect, hasPayload, payload } =
     sdkData as SDKHealthCheckResult;
-  console.log("data for sdk", sdkData);
   var jsonPretty = payload ? JSON.stringify(payload, null, 2) : "";
 
   useEffect(() => window.scrollTo({ top: 0 }), []);

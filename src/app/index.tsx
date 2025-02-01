@@ -11,7 +11,6 @@ import {
 import React, { useEffect, useState } from "react";
 import logo from "@/devtools/ui/logo.svg";
 import useTabState from "@/app/hooks/useTabState";
-import { Message, BGMessage } from "devtools";
 import {
   Attributes,
   Experiment,
@@ -23,8 +22,7 @@ import ExperimentsTab from "./components/ExperimentsTab";
 import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
 import SettingsForm from "@/app/components/Settings";
-import { PiX, PiGearSix } from "react-icons/pi";
-import useGlobalState from "./hooks/useGlobalState";
+import {PiX, PiGearSix, PiUserBold, PiFlagBold, PiFlaskBold, PiListChecksBold} from "react-icons/pi";
 
 export const App = () => {
   const [showSdkDebug, setShowSdkDebug] = useState(false);
@@ -34,17 +32,6 @@ export const App = () => {
     "sdkFound",
     undefined,
   );
-  const [sdkVersion, setSdkVersion] = useTabState<string>("sdkVersion", "");
-  const [_sdkAttributes, setSdkAttributes] = useTabState<Attributes>(
-    "sdkAttributes",
-    {},
-  );
-  const [_sdkFeatures, setSdkFeatures] = useTabState<
-    Record<string, FeatureDefinition>
-  >("sdkFeatures", {});
-  const [_sdkExperiments, setSdkExperiments] = useState<
-    Record<string, Experiment<any>>
-  >({});
   const [currentTab, setCurrentTab] = useTabState("currentTab", "attributes");
 
   useEffect(() => {
@@ -133,10 +120,22 @@ export const App = () => {
             >
               <Tabs.List>
                 <div className="mx-2" />
-                <Tabs.Trigger value="attributes">User Attributes</Tabs.Trigger>
-                <Tabs.Trigger value="features">Features</Tabs.Trigger>
-                <Tabs.Trigger value="experiments">Experiments</Tabs.Trigger>
-                <Tabs.Trigger value="logs">Event Logs</Tabs.Trigger>
+                <Tabs.Trigger value="attributes">
+                  <PiUserBold className="mr-1" />
+                  Attributes
+                </Tabs.Trigger>
+                <Tabs.Trigger value="features">
+                  <PiFlagBold className="mr-1" />
+                  Features
+                </Tabs.Trigger>
+                <Tabs.Trigger value="experiments">
+                  <PiFlaskBold className="mr-1" />
+                  Experiments
+                </Tabs.Trigger>
+                <Tabs.Trigger value="logs">
+                  <PiListChecksBold className="mr-1" />
+                  Event Logs
+                </Tabs.Trigger>
                 <div className="mx-2" />
               </Tabs.List>
             </Tabs.Root>

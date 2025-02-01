@@ -82,9 +82,9 @@ export default function AttributesTab() {
     );
   }, [attributesLoading, attributesError, attributesData]);
 
-  const [selectedArchetypeId, setSelectedArchetypeId] = useTabState<
+  const [selectedArchetypeId, setSelectedArchetypeId] = useState<
     string | undefined
-  >("selectedArchetypeId", undefined);
+  >("selectedArchetypeId");
   const selectedArchetype = archetypes.find(
     (arch) => arch.id === selectedArchetypeId,
   );
