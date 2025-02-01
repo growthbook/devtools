@@ -35,7 +35,7 @@ window.addEventListener(
     const data = event.data;
     if (data?.type === "UPDATE_TAB_STATE") {
       const { property, value } = data.data;
-      setState(property, value);
+      setState(property, value, true);
     }
   },
 );
@@ -48,7 +48,7 @@ function getState(property: string): { state?: any; success: boolean } {
     return { success: false };
   }
 }
-function setState(property: string, value: any) {
+function setState(property: string, value: any, skipPostMessage?: boolean) {
   state[property] = value;
   window.sessionStorage.setItem(
     SESSION_STORAGE_TAB_STATE_KEY,
@@ -60,7 +60,7 @@ function setState(property: string, value: any) {
     value,
   });
   // send custom messages to Embed script for specific properties so that the Embed script can update the GB SDK
-  if (property in propertiesWithCustomMessage) {
+  if (!skipPostMessage && property in propertiesWithCustomMessage) {
     const customMessage =
       propertiesWithCustomMessage[
         property as keyof typeof propertiesWithCustomMessage

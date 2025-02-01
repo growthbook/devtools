@@ -70,6 +70,7 @@ function pushAppUpdates() {
   onGrowthBookLoad((gb) => {
     pushSDKUpdate(gb);
     if (gb) {
+      subscribeToSdkChanges(gb);
       updateTabState("attributes", gb.getAttributes());
       updateTabState("features", gb.getFeatures());
       updateTabState("experiments", gb.getExperiments());
@@ -177,6 +178,33 @@ function updateTabState(property: string, value: unknown) {
     },
     window.location.origin,
   );
+}
+
+// add a proxy to the SDKs methods so we know when anything important has been changed programmatically
+function subscribeToSdkChanges(gb: GrowthBook & { patchedMethods?: boolean }) {
+  if (gb?.patchedMethods) return;
+  gb.patchedMethods = true;
+
+  const _setAttributes = gb.setAttributes;
+  gb.setAttributes = async (attributes: Attributes) => {
+    await _setAttributes.call(gb, attributes);
+    updateTabState("attributes", gb.getAttributes());
+  }
+  if (gb.updateAttributes) {
+    const _updateAttributes = gb.updateAttributes;
+    gb.updateAttributes = async (attributes: Attributes) => {
+      await _updateAttributes.call(gb, attributes);
+      updateTabState("attributes", gb.getAttributes());
+    }
+  }
+  gb.setAttributeOverrides = async (attributes: Attributes) => {
+    const _setAttributeOverrides = gb.setAttributeOverrides;
+    await _setAttributeOverrides.call(gb, attributes);
+    updateTabState("attributes", gb.getAttributes());
+  }
+
+  // todo: hook into gb.trackingCallback, gb.setTrackingCallback()
+  // todo: differentiate gb._track from custom tracking callback
 }
 
 async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
