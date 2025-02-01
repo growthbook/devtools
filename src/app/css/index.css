@@ -59,6 +59,7 @@
 .featureCard {
   @apply p-1.5 border border-violet-200 rounded-md bg-white shadow-sm;
   cursor: pointer;
+  scroll-margin-top: 100px;
 }
 .featureCard:not(.selected):hover {
   @apply border-violet-400;
@@ -68,17 +69,14 @@
 }
 
 .accordionCard {
-  @apply p-2 border border-violet-200 rounded-md bg-violet-50 shadow-sm;
+  @apply border border-violet-200 rounded-md bg-white shadow-sm;
   cursor: pointer;
 }
 .accordionCard.selected {
-  @apply border-violet-500 bg-violet-200;
+  @apply border-violet-400 bg-violet-100;
 }
 .accordionCard.active {
   @apply border-orange-500 bg-orange-200 bg-opacity-50;
-}
-.accordionContent {
-  @apply p-2 border border-violet-200 rounded-md bg-violet-50 shadow-sm;
 }
 
 .shadow-sm-up {

@@ -285,6 +285,13 @@ function EditableValueField({
         setTextareaError(true);
         return;
       }
+    } else if (valueType === "number") {
+      try {
+        newValue = JSON.parse(editedValue);
+      } catch (e) {
+        newValue = parseFloat(editedValue);
+      }
+      if (!Number.isFinite(newValue)) newValue = 0
     } else {
       newValue = editedValue;
     }
