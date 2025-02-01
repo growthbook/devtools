@@ -161,7 +161,7 @@ export default function FeaturesTab() {
                 <div className="my-1">
                   <div className="flex items-center justify-between mb-1">
                     <div className="label">Current value</div>
-                    {!(selectedFeature?.valueType === "boolean" && !overrideFeature) && (
+                    {(selectedFeature?.valueType !== "boolean" || overrideFeature) && (
                       <label className="flex items-center cursor-pointer select-none">
                         <span className={clsx("text-xs mr-1 font-bold uppercase", {
                           "text-amber-600": overrideFeature,
@@ -196,7 +196,7 @@ export default function FeaturesTab() {
                   )}
                 </div>
 
-                <hr className="my-4" />
+                <hr className="my-4"/>
                 <h2 className="label font-bold">Rules</h2>
 
                 <div className="my-2">
@@ -207,10 +207,19 @@ export default function FeaturesTab() {
                   />
                 </div>
 
-                <textarea
-                  className="mt-8 w-full h-[400px]"
-                  value={JSON.stringify(selectedFeature.feature)}
-                />
+                <div className="my-2">
+                  <div className="label mb-1">Definition</div>
+                  <Prism
+                    language="json"
+                    style={codeTheme}
+                    customStyle={{...customTheme, maxHeight: 120}}
+                    codeTagProps={{
+                      className: "text-2xs-important !whitespace-pre-wrap",
+                    }}
+                  >
+                    {JSON.stringify(selectedFeature.feature, null, 2)}
+                  </Prism>
+                </div>
               </div>
             </div>
           )}
