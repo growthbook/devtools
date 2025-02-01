@@ -24,11 +24,11 @@ export default function FeaturesTab() {
   >("features", {});
   const [forcedFeatures, setForcedFeatures] = useTabState<
     Record<string, any>
-  >("forcedFeatures", {},);
+  >("forcedFeatures", {});
 
   const { evaluatedFeatures } = useGBSandboxEval();
 
-  const [selectedFid, setSelectedFeature] = useTabState<string | undefined>(
+  const [selectedFid, setSelectedFid] = useTabState<string | undefined>(
     "selectedFid",
     undefined,
   );
@@ -44,7 +44,7 @@ export default function FeaturesTab() {
   const [overrideFeature, setOverrideFeature] = useState(false);
 
   const clickFeature = (fid: string) =>
-    setSelectedFeature(selectedFid !== fid ? fid : undefined);
+    setSelectedFid(selectedFid !== fid ? fid : undefined);
 
   const setForcedFeature = (fid: string, value: any) => {
     const newForcedFeatures = { ...forcedFeatures };
@@ -104,7 +104,6 @@ export default function FeaturesTab() {
                   <Avatar
                     color={isForced ? "amber" : undefined}
                     variant={isForced ? "solid" : "soft"}
-                    // className={isForced ? "border border-amber-500" : undefined}
                     size="1"
                     radius="full"
                     fallback={
@@ -299,12 +298,12 @@ function EditableValueField({
   }
 
   return (
-    <>
+    <div className="FormRoot">
       {valueType === "number" ? (
         <input
-          className="Input"
+          className="Input mb-2"
           type="number"
-          value={formattedValue}
+          value={editedValue}
           onChange={(e) => {
             const v = e.target.value;
             setEditedValue(v);
@@ -376,7 +375,7 @@ function EditableValueField({
           </Button>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
