@@ -78,8 +78,8 @@ export default function ExperimentsTab() {
 
   return (
     <>
-      <div className="flex justify-between items-top">
-        <div className="w-[50%] pr-2">
+      <div className="max-w-[900px] mx-auto">
+        <div className="w-[50%] max-w-[450px] pr-2">
           <div className="label lg mb-2">Experiments</div>
           {experiments.map((experiment, i) => {
             const eid = experiment.key;
@@ -131,7 +131,7 @@ export default function ExperimentsTab() {
         </div>
 
         <div
-          className="w-[50%] overflow-y-auto pl-2 pr-4 pt-2 pb-2 fixed right-0"
+          className="w-[50%] max-w-[450px] overflow-y-auto pl-1 pr-3 py-2 fixed left-[50%]"
           style={{
             zIndex: 1000,
             top: 85,

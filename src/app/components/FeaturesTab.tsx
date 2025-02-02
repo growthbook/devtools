@@ -77,8 +77,8 @@ export default function FeaturesTab() {
 
   return (
     <>
-      <div className="flex justify-between items-top">
-        <div className="w-[50%] pr-2">
+      <div className="max-w-[900px] mx-auto">
+        <div className="w-[50%] max-w-[450px] pr-2">
           <div className="label lg mb-2">Features</div>
           {Object.keys(features).map((fid, i) => {
             const { feature, meta, evaluatedFeature, isForced } =
@@ -116,7 +116,7 @@ export default function FeaturesTab() {
                   <div className="flex-1" />
                   <code
                     className={clsx(
-                      "flex-shrink-0 text-slate-800 line-clamp-3 max-w-[100px]",
+                      "flex-shrink-0 text-slate-800 line-clamp-3 max-w-[35%]",
                       {
                         "text-right text-xs": valueStr.length < 10,
                         "text-left text-2xs": valueStr.length >= 10,
@@ -143,7 +143,7 @@ export default function FeaturesTab() {
         </div>
 
         <div
-          className="w-[50%] overflow-y-auto pl-2 pr-4 pt-2 pb-2 fixed right-0"
+          className="w-[50%] max-w-[450px] overflow-y-auto pl-1 pr-3 py-2 fixed left-[50%]"
           style={{
             zIndex: 1000,
             top: 85,

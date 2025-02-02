@@ -11,11 +11,6 @@ import {
 import React, { useEffect, useState } from "react";
 import logo from "@/devtools/_legacy/ui/logo.svg";
 import useTabState from "@/app/hooks/useTabState";
-import {
-  Attributes,
-  Experiment,
-  FeatureDefinition,
-} from "@growthbook/growthbook";
 import SdkTab from "./components/SdkTab";
 import AttributesTab from "./components/AttributesTab";
 import ExperimentsTab from "./components/ExperimentsTab";
@@ -119,24 +114,26 @@ export const App = () => {
               className="-mx-4"
             >
               <Tabs.List>
-                <div className="mx-2" />
-                <Tabs.Trigger value="attributes">
-                  <PiUserBold className="mr-1" />
-                  Attributes
-                </Tabs.Trigger>
-                <Tabs.Trigger value="features">
-                  <PiFlagBold className="mr-1" />
-                  Features
-                </Tabs.Trigger>
-                <Tabs.Trigger value="experiments">
-                  <PiFlaskBold className="mr-1" />
-                  Experiments
-                </Tabs.Trigger>
-                <Tabs.Trigger value="logs">
-                  <PiListChecksBold className="mr-1" />
-                  Event Logs
-                </Tabs.Trigger>
-                <div className="mx-2" />
+                <div className="flex items-end mx-auto w-[930px]">
+                  <div className="mx-2" />
+                  <Tabs.Trigger value="attributes">
+                    <PiUserBold className="mr-1" />
+                    Attributes
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="features">
+                    <PiFlagBold className="mr-1" />
+                    Features
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="experiments">
+                    <PiFlaskBold className="mr-1" />
+                    Experiments
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="logs">
+                    <PiListChecksBold className="mr-1" />
+                    Event Logs
+                  </Tabs.Trigger>
+                  <div className="mx-2" />
+                </div>
               </Tabs.List>
             </Tabs.Root>
           )}

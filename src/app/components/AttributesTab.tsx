@@ -196,7 +196,7 @@ export default function AttributesTab() {
   useEffect(() => window.scrollTo({ top: 0 }), []);
 
   return (
-    <>
+    <div className="max-w-[900px] mx-auto">
       <div className="flex justify-between items-top">
         <div className="w-[50%] pr-2">
           <div className="">
@@ -209,7 +209,7 @@ export default function AttributesTab() {
             />
           </div>
         </div>
-        <div className="w-[50%]">
+        <div className="w-[50%] pl-1">
           <div className="flex items-end justify-between mb-2">
             <div className="label lg">
               User Attributes
@@ -222,7 +222,7 @@ export default function AttributesTab() {
                 />
               )}
             </div>
-            <div className="mb-1">
+            <div className="mb-1 mr-1">
               <label className="flex items-center text-xs cursor-pointer select-none">
                 <Checkbox
                   checked={jsonMode}
@@ -251,127 +251,129 @@ export default function AttributesTab() {
 
       {hasAttributes && (
         <div
-          className="flex items-center gap-3 shadow-sm-up fixed bottom-0 left-0 px-3 py-2 w-full bg-zinc-50"
-          style={{ height: 50, zIndex: 100000 }}
+          className="flex items-center justify-center shadow-sm-up fixed bottom-0 left-0 px-3 py-2 w-full bg-zinc-50"
+          style={{height: 50, zIndex: 100000}}
         >
-          <div className="flex-1 items-center w-[50%]">
-            <Button
-              disabled={!selectedArchetype}
-              onClick={applyArchetype}
-              variant="soft"
-            >
-              Use Archetype
-            </Button>
-          </div>
-          <div className="flex items-center gap-3 w-[50%]">
-            <Popover.Root
-              open={saveArchetypeOpen}
-              onOpenChange={(o) => setSaveArchetypeOpen(o)}
-            >
-              <Popover.Trigger>
-                <Button variant="soft">
-                  <PiBookmark />
-                  Save...
-                </Button>
-              </Popover.Trigger>
-              <Popover.Content style={{ width: 200 }}>
-                <Form.Root
-                  className="FormRoot small"
-                  onSubmit={submitArchetypeForm}
-                >
-                  <Form.Field className="FormField" name="type">
-                    <Form.Label className="FormLabel">
-                      Save User Attributes as...
-                    </Form.Label>
-                    <RadioGroup.Root
-                      value={saveArchetypeForm.watch("type")}
-                      onValueChange={(value) => {
-                        saveArchetypeForm.setValue("type", value);
-                        saveArchetypeForm.setValue(
-                          "id",
-                          value === "new" ? "" : selectedArchetype?.id || "",
-                        );
-                      }}
-                    >
-                      <RadioGroup.Item value="new">
-                        New Archetype
-                      </RadioGroup.Item>
-                      <RadioGroup.Item value="existing">
-                        Update Existing Archetype
-                      </RadioGroup.Item>
-                    </RadioGroup.Root>
-                  </Form.Field>
-                  <Form.Field className="FormField" name="name">
-                    <Form.Label className="FormLabel">
-                      Archetype Name
-                    </Form.Label>
-                    {saveArchetypeForm.watch("type") === "new" ? (
-                      <Form.Control asChild>
-                        <input
-                          className="Input"
-                          {...saveArchetypeForm.register("name")}
-                        />
-                      </Form.Control>
-                    ) : (
-                      <Select.Root
-                        size="1"
-                        value={saveArchetypeForm.watch("id")}
-                        onValueChange={(v) => {
-                          saveArchetypeForm.setValue("id", v);
+          <div className="w-full max-w-[900px] mx-auto flex items-center">
+            <div className="w-[50%] pr-2 flex items-center">
+              <Button
+                disabled={!selectedArchetype}
+                onClick={applyArchetype}
+                variant="soft"
+              >
+                Use Archetype
+              </Button>
+            </div>
+            <div className="w-[50%] pl-1 flex items-center gap-3">
+              <Popover.Root
+                open={saveArchetypeOpen}
+                onOpenChange={(o) => setSaveArchetypeOpen(o)}
+              >
+                <Popover.Trigger>
+                  <Button variant="soft">
+                    <PiBookmark/>
+                    Save...
+                  </Button>
+                </Popover.Trigger>
+                <Popover.Content style={{width: 200}}>
+                  <Form.Root
+                    className="FormRoot small"
+                    onSubmit={submitArchetypeForm}
+                  >
+                    <Form.Field className="FormField" name="type">
+                      <Form.Label className="FormLabel">
+                        Save User Attributes as...
+                      </Form.Label>
+                      <RadioGroup.Root
+                        value={saveArchetypeForm.watch("type")}
+                        onValueChange={(value) => {
+                          saveArchetypeForm.setValue("type", value);
+                          saveArchetypeForm.setValue(
+                            "id",
+                            value === "new" ? "" : selectedArchetype?.id || "",
+                          );
                         }}
                       >
-                        <Select.Trigger variant="surface" className="w-full" />
-                        <Select.Content>
-                          {archetypes.map((arch) => (
-                            <Select.Item key={arch.id} value={arch.id}>
-                              {arch.name}
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Root>
-                    )}
-                  </Form.Field>
+                        <RadioGroup.Item value="new">
+                          New Archetype
+                        </RadioGroup.Item>
+                        <RadioGroup.Item value="existing">
+                          Update Existing Archetype
+                        </RadioGroup.Item>
+                      </RadioGroup.Root>
+                    </Form.Field>
+                    <Form.Field className="FormField" name="name">
+                      <Form.Label className="FormLabel">
+                        Archetype Name
+                      </Form.Label>
+                      {saveArchetypeForm.watch("type") === "new" ? (
+                        <Form.Control asChild>
+                          <input
+                            className="Input"
+                            {...saveArchetypeForm.register("name")}
+                          />
+                        </Form.Control>
+                      ) : (
+                        <Select.Root
+                          size="1"
+                          value={saveArchetypeForm.watch("id")}
+                          onValueChange={(v) => {
+                            saveArchetypeForm.setValue("id", v);
+                          }}
+                        >
+                          <Select.Trigger variant="surface" className="w-full"/>
+                          <Select.Content>
+                            {archetypes.map((arch) => (
+                              <Select.Item key={arch.id} value={arch.id}>
+                                {arch.name}
+                              </Select.Item>
+                            ))}
+                          </Select.Content>
+                        </Select.Root>
+                      )}
+                    </Form.Field>
 
-                  <div className="mt-4">
-                    <Form.Submit
-                      asChild
-                      disabled={
-                        !(
-                          (saveArchetypeForm.watch("type") === "new" &&
-                            newArchetypeIsValid) ||
-                          (saveArchetypeForm.watch("type") === "existing" &&
-                            existingArchetypeIsValid)
-                        )
-                      }
-                    >
-                      <Button size="1" className="w-full">
-                        Save
-                      </Button>
-                    </Form.Submit>
-                  </div>
-                </Form.Root>
-              </Popover.Content>
-            </Popover.Root>
-            <div className="flex-1" />
-            {dirty && (
-              <>
-                <Link
-                  href="#"
-                  size="2"
-                  role="button"
-                  color="gray"
-                  onClick={resetAttributes}
-                >
-                  Reset
-                </Link>
-                <Button type="button" size="2" onClick={applyAttributes}>
-                  Apply
-                </Button>
-              </>
-            )}
+                    <div className="mt-4">
+                      <Form.Submit
+                        asChild
+                        disabled={
+                          !(
+                            (saveArchetypeForm.watch("type") === "new" &&
+                              newArchetypeIsValid) ||
+                            (saveArchetypeForm.watch("type") === "existing" &&
+                              existingArchetypeIsValid)
+                          )
+                        }
+                      >
+                        <Button size="1" className="w-full">
+                          Save
+                        </Button>
+                      </Form.Submit>
+                    </div>
+                  </Form.Root>
+                </Popover.Content>
+              </Popover.Root>
+              <div className="flex-1"/>
+              {dirty && (
+                <>
+                  <Link
+                    href="#"
+                    size="2"
+                    role="button"
+                    color="gray"
+                    onClick={resetAttributes}
+                  >
+                    Reset
+                  </Link>
+                  <Button type="button" size="2" onClick={applyAttributes}>
+                    Apply
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
