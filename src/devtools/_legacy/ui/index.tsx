@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import * as ReactDOM from "react-dom/client";
-import App from "./App";
+import App from "src/devtools/_legacy/ui/App";
 import { ChakraProvider } from "@chakra-ui/react";
 import { Alert, AlertDescription, AlertIcon } from "@chakra-ui/alert";
 import { Box, Text } from "@chakra-ui/layout";
 import { Spinner } from "@chakra-ui/spinner";
-import { onGrowthBookData, requestRefresh } from "../controller";
+import { onGrowthBookData, requestRefresh } from "src/devtools/_legacy/controller";
 import { RefreshMessage } from "devtools";
 import { Button } from "@chakra-ui/button";
-import Layout from "./Layout";
+import Layout from "src/devtools/_legacy/ui/Layout";
 
 function WaitForGrowthBook() {
   const [data, setData] = useState<RefreshMessage | null>(null);

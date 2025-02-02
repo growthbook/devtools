@@ -4,17 +4,19 @@ const srcDir = path.join(__dirname, "..", "src");
 
 module.exports = {
   entry: {
-    devtools_init: path.join(srcDir, "devtools/init.ts"),
     background: path.join(srcDir, "background/index.ts"),
-    popup: path.join(srcDir, "popup/index.tsx"),
     content_script: path.join(srcDir, "content_script/index.ts"),
+
+    // popup
+    popup: path.join(srcDir, "popup/index.tsx"),
+    // bottom panel
+    devtools_init: path.join(srcDir, "devtools/init.ts"),
+    devtools_panel: path.join(srcDir, "devtools/index.tsx"),
+
 
     // embedded on page via content_script:
     devtools_embed_script: path.join(srcDir, "content_script/embed_script.ts"),
     visual_editor: path.join(srcDir, "visual_editor/index.tsx"),
-
-    // legacy:
-    devtools_panel: path.join(srcDir, "devtools/ui/index.tsx"),
   },
   output: {
     path: path.join(__dirname, "../dist/js"),

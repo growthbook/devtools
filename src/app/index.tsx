@@ -9,7 +9,7 @@ import {
 } from "@radix-ui/themes";
 
 import React, { useEffect, useState } from "react";
-import logo from "@/devtools/ui/logo.svg";
+import logo from "@/devtools/_legacy/ui/logo.svg";
 import useTabState from "@/app/hooks/useTabState";
 import {
   Attributes,

@@ -9,15 +9,15 @@ import {
   Attributes,
 } from "@growthbook/growthbook";
 import React, { useEffect, useMemo, useState } from "react";
-import Feature from "./Feature";
-import AttributesSection from "./AttributesSection";
-import Experiment from "./Experiment";
+import Feature from "src/devtools/_legacy/ui/Feature";
+import AttributesSection from "src/devtools/_legacy/ui/AttributesSection";
+import Experiment from "src/devtools/_legacy/ui/Experiment";
 import { IconButton } from "@chakra-ui/button";
 import { MdHistory } from "react-icons/md";
 import { DebugLogs } from "devtools";
-import { setOverrides } from "../controller";
-import Layout from "./Layout";
-import ClientInfo from "./ClientInfo";
+import { setOverrides } from "src/devtools/_legacy/controller";
+import Layout from "src/devtools/_legacy/ui/Layout";
+import ClientInfo from "src/devtools/_legacy/ui/ClientInfo";
 
 export interface Props {
   overrides: Record<string, ExperimentOverride>;
