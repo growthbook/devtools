@@ -36,7 +36,7 @@ export default function SdkTab() {
                 </Text>
               </Flex>
             </div>
-            <div>
+            {/* <div>
               <Flex direction="row" gap="1">
                 <Text size="2" weight="medium">
                   Payload:
@@ -45,7 +45,7 @@ export default function SdkTab() {
               <Code size="1" style={{ whiteSpace: "pre-wrap" }}>
                 {jsonPretty}
               </Code>
-            </div>
+            </div> */}
           </Flex>
         ) : hasPayload ? (
           <Flex gap="1">
@@ -73,7 +73,7 @@ export default function SdkTab() {
               We found payload but client key is not connected
             </Text>
             </div>
-            <div>
+            {/* <div>
               <Flex direction="row" gap="1">
                 <Text size="2" weight="medium">
                   Payload:
@@ -82,7 +82,7 @@ export default function SdkTab() {
               <Code size="1" style={{ whiteSpace: "pre-wrap" }}>
                 {jsonPretty}
               </Code>
-            </div>
+            </div> */}
           </Flex>
         ) : (
             <div>
