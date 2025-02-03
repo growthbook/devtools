@@ -207,10 +207,11 @@ function subscribeToSdkChanges(gb: GrowthBook & { patchedMethods?: boolean }) {
   gb.context.trackingCallback = async (experiment: Experiment<any>, result: Result<any>) => {
     // @ts-expect-error
     const _trackingCallback = gb.context.trackingCallback;
+    if(typeof _trackingCallback !== "function") return;
     await _trackingCallback.call(gb, experiment, result);
     updateTabState("trackingCallbackLog", { experiment, result }, true);
   }
-  
+
   // @ts-expect-error
   gb.context.log = async (msg: string, ctx: any) => {
     // @ts-expect-error
