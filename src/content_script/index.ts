@@ -37,11 +37,13 @@ window.addEventListener(
       const { property, value } = data.data;
       const shouldAppend = data.append;
       const currentValue = getState(property);
-
+      console.log(shouldAppend, "property", property);
       if (shouldAppend && (currentValue instanceof Array || currentValue === undefined)) {
         if (currentValue === undefined) {
+          console.log("value guy", [value]);
           setState(property, [value], true);
         } else {
+          console.log("value guy", [...currentValue, value]);
           setState(property, [...currentValue, value], true);
 
         }

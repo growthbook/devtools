@@ -174,8 +174,8 @@ function updateTabState(property: string, value: unknown, append = false) {
       data: {
         property,
         value,
-        append,
       },
+      append,
     },
     window.location.origin,
   );
@@ -217,7 +217,7 @@ function subscribeToSdkChanges(gb: GrowthBook & { patchedMethods?: boolean }) {
     // @ts-expect-error
     const _log = gb.context.log;
     await _log.call(gb, msg, ctx);
-    updateTabState("sdkLogs", {msg, ctx}, true);
+    updateTabState("sdkLogs", msg, true);
   }
 
 
