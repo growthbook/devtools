@@ -1,3 +1,4 @@
+import "@/app/css/index.css";
 import {
   Theme,
   Flex,

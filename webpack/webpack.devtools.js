@@ -33,9 +33,9 @@ module.exports = {
       },
       {
         test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
         // visual editor css loaded separately
         exclude: [path.join(srcDir, "visual_editor", "shadowDom.css")],
-        use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
       },
       {
         include: path.join(srcDir, "visual_editor", "shadowDom.css"),
