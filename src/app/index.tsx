@@ -1,4 +1,3 @@
-import "@/app/css/index.css";
 import {
   Theme,
   Flex,
@@ -9,7 +8,7 @@ import {
 } from "@radix-ui/themes";
 
 import React, { useEffect, useState } from "react";
-import logo from "@/devtools/_legacy/ui/logo.svg";
+import logo from "./logo.svg";
 import useTabState from "@/app/hooks/useTabState";
 import SdkTab from "./components/SdkTab";
 import AttributesTab from "./components/AttributesTab";

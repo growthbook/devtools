@@ -1,4 +1,5 @@
 const CopyPlugin = require("copy-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require("path");
 const srcDir = path.join(__dirname, "..", "src");
 
@@ -34,7 +35,7 @@ module.exports = {
         test: /\.css$/,
         // visual editor css loaded separately
         exclude: [path.join(srcDir, "visual_editor", "shadowDom.css")],
-        use: ["style-loader", "css-loader", "postcss-loader"],
+        use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
       },
       {
         include: path.join(srcDir, "visual_editor", "shadowDom.css"),
@@ -65,6 +66,9 @@ module.exports = {
     new CopyPlugin({
       patterns: [{ from: ".", to: "../", context: "public" }],
       options: {},
+    }),
+    new MiniCssExtractPlugin({
+      filename: "../css/[name].css",
     }),
   ],
 };
