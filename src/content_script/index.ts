@@ -45,8 +45,9 @@ window.addEventListener(
           setState(property, [...currentValue, value], true);
 
         }
-      }
+      } else {
       setState(property, value, true);
+      }
     }
   },
 );
