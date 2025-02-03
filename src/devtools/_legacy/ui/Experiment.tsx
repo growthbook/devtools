@@ -8,8 +8,8 @@ import {
 import { IconButton } from "@chakra-ui/button";
 import { Badge, Box, Flex, HStack, Stack, Text } from "@chakra-ui/layout";
 import { MdHistory } from "react-icons/md";
-import DebugLog from "./DebugLog";
-import JSONCode from "./JSONCode";
+import DebugLog from "src/devtools/_legacy/ui/DebugLog";
+import JSONCode from "src/devtools/_legacy/ui/JSONCode";
 import type {
   Result,
   Experiment as ExperimentInterface,

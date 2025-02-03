@@ -5,7 +5,7 @@ import { AlertIcon, Alert } from "@chakra-ui/alert";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { MdEdit, MdRestore } from "react-icons/md";
-import JSONCode from "./JSONCode";
+import JSONCode from "src/devtools/_legacy/ui/JSONCode";
 import { Attributes } from "@growthbook/growthbook";
 
 export default function AttributesSection({

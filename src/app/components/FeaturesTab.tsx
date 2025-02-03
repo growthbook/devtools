@@ -24,11 +24,11 @@ export default function FeaturesTab() {
   >("features", {});
   const [forcedFeatures, setForcedFeatures] = useTabState<
     Record<string, any>
-  >("forcedFeatures", {},);
+  >("forcedFeatures", {});
 
   const { evaluatedFeatures } = useGBSandboxEval();
 
-  const [selectedFid, setSelectedFeature] = useTabState<string | undefined>(
+  const [selectedFid, setSelectedFid] = useTabState<string | undefined>(
     "selectedFid",
     undefined,
   );
@@ -44,7 +44,7 @@ export default function FeaturesTab() {
   const [overrideFeature, setOverrideFeature] = useState(false);
 
   const clickFeature = (fid: string) =>
-    setSelectedFeature(selectedFid !== fid ? fid : undefined);
+    setSelectedFid(selectedFid !== fid ? fid : undefined);
 
   const setForcedFeature = (fid: string, value: any) => {
     const newForcedFeatures = { ...forcedFeatures };
@@ -71,14 +71,14 @@ export default function FeaturesTab() {
   useEffect(() => {
     if (selectedFid) {
       const el = document.querySelector(`#featuresTab_featureList_${selectedFid}`);
-      el?.scrollIntoView({ behavior: 'smooth' });
+      el?.scrollIntoView({ behavior: "smooth" });
     }
   }, [selectedFid]);
 
   return (
     <>
-      <div className="flex justify-between items-top">
-        <div className="w-[50%] pr-2">
+      <div className="max-w-[900px] mx-auto">
+        <div className="w-[50%] max-w-[450px] pr-2">
           <div className="label lg mb-2">Features</div>
           {Object.keys(features).map((fid, i) => {
             const { feature, meta, evaluatedFeature, isForced } =
@@ -104,7 +104,6 @@ export default function FeaturesTab() {
                   <Avatar
                     color={isForced ? "amber" : undefined}
                     variant={isForced ? "solid" : "soft"}
-                    // className={isForced ? "border border-amber-500" : undefined}
                     size="1"
                     radius="full"
                     fallback={
@@ -117,7 +116,7 @@ export default function FeaturesTab() {
                   <div className="flex-1" />
                   <code
                     className={clsx(
-                      "flex-shrink-0 text-slate-800 line-clamp-3 max-w-[100px]",
+                      "flex-shrink-0 text-slate-800 line-clamp-3 max-w-[35%]",
                       {
                         "text-right text-xs": valueStr.length < 10,
                         "text-left text-2xs": valueStr.length >= 10,
@@ -144,7 +143,7 @@ export default function FeaturesTab() {
         </div>
 
         <div
-          className="w-[50%] overflow-y-auto pl-2 pr-4 pt-2 pb-2 fixed right-0"
+          className="w-[50%] max-w-[450px] overflow-y-auto pl-1 pr-3 py-2 fixed left-[50%]"
           style={{
             zIndex: 1000,
             top: 85,
@@ -162,7 +161,7 @@ export default function FeaturesTab() {
                 <div className="my-1">
                   <div className="flex items-center justify-between mb-1">
                     <div className="label">Current value</div>
-                    {!(selectedFeature?.valueType === "boolean" && !overrideFeature) && (
+                    {(selectedFeature?.valueType !== "boolean" || overrideFeature) && (
                       <label className="flex items-center cursor-pointer select-none">
                         <span className={clsx("text-xs mr-1 font-bold uppercase", {
                           "text-amber-600": overrideFeature,
@@ -197,7 +196,7 @@ export default function FeaturesTab() {
                   )}
                 </div>
 
-                <hr className="my-4" />
+                <hr className="my-4"/>
                 <h2 className="label font-bold">Rules</h2>
 
                 <div className="my-2">
@@ -208,10 +207,19 @@ export default function FeaturesTab() {
                   />
                 </div>
 
-                <textarea
-                  className="mt-8 w-full h-[400px]"
-                  value={JSON.stringify(selectedFeature.feature)}
-                />
+                <div className="my-2">
+                  <div className="label mb-1">Definition</div>
+                  <Prism
+                    language="json"
+                    style={codeTheme}
+                    customStyle={{...customTheme, maxHeight: 120}}
+                    codeTagProps={{
+                      className: "text-2xs-important !whitespace-pre-wrap",
+                    }}
+                  >
+                    {JSON.stringify(selectedFeature.feature, null, 2)}
+                  </Prism>
+                </div>
               </div>
             </div>
           )}
@@ -291,6 +299,13 @@ function EditableValueField({
         setTextareaError(true);
         return;
       }
+    } else if (valueType === "number") {
+      try {
+        newValue = JSON.parse(editedValue);
+      } catch (e) {
+        newValue = parseFloat(editedValue);
+      }
+      if (!Number.isFinite(newValue)) newValue = 0
     } else {
       newValue = editedValue;
     }
@@ -299,12 +314,12 @@ function EditableValueField({
   }
 
   return (
-    <>
+    <div className="FormRoot">
       {valueType === "number" ? (
         <input
-          className="Input"
+          className="Input mb-2"
           type="number"
-          value={formattedValue}
+          value={editedValue}
           onChange={(e) => {
             const v = e.target.value;
             setEditedValue(v);
@@ -376,7 +391,7 @@ function EditableValueField({
           </Button>
         </div>
       )}
-    </>
+    </div>
   );
 }
 

@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as Form from "@radix-ui/react-form";
-import { Button, Switch, Link, Select } from "@radix-ui/themes";
+import { Button, Switch, Select } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
 import {
-  PiBookmark,
   PiCheckBold,
   PiPlusCircle,
   PiX,
@@ -146,7 +145,7 @@ export default function AttributesForm({
                         {attributeKey}
                       </div>
                     </Form.Label>
-                    {renderInputField({ attributeKey, form, schema })}
+                    {renderInputField({ attributeKey, form, schema, setDirty })}
                   </Form.Field>
                 </div>
               );
@@ -282,10 +281,12 @@ function renderInputField({
   attributeKey,
   form,
   schema,
+  setDirty,
 }: {
   attributeKey: string;
   form: UseFormReturn<Attributes>;
   schema?: Record<string, string>;
+  setDirty?: (b: boolean) => void;
 }) {
   let attributeType = getAttributeType(
     attributeKey,
@@ -307,7 +308,10 @@ function renderInputField({
           size="2"
           className="Switch"
           checked={form.watch(attributeKey)}
-          onCheckedChange={(v: boolean) => form.setValue(attributeKey, v)}
+          onCheckedChange={(v: boolean) => {
+            form.setValue(attributeKey, v);
+            setDirty?.(true);
+          }}
         />
       ) : (
         <input className="Input" {...form.register(attributeKey)} />

@@ -20,8 +20,8 @@ import stringify from "json-stringify-pretty-compact";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MdEdit, MdHistory } from "react-icons/md";
-import DebugLog from "./DebugLog";
-import JSONCode from "./JSONCode";
+import DebugLog from "src/devtools/_legacy/ui/DebugLog";
+import JSONCode from "src/devtools/_legacy/ui/JSONCode";
 import {
   FeatureResult,
   FeatureDefinition,

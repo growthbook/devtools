@@ -3,8 +3,8 @@ import { Image } from "@chakra-ui/image";
 import { Heading, HStack, Stack } from "@chakra-ui/layout";
 import React, { ReactNode } from "react";
 import { MdSync } from "react-icons/md";
-import { requestRefresh, setOverrides } from "../controller";
-import logo from "./logo.svg";
+import { requestRefresh, setOverrides } from "src/devtools/_legacy/controller";
+import logo from "src/devtools/_legacy/ui/logo.svg";
 
 export interface Props {
   children: ReactNode;

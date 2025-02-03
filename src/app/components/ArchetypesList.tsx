@@ -2,23 +2,28 @@ import * as Accordion from "@radix-ui/react-accordion";
 
 import React from "react";
 import { Archetype } from "../tempGbExports";
-import { Badge, Container, Flex, Text } from "@radix-ui/themes";
+import {Avatar, Badge, Container, Flex, Text} from "@radix-ui/themes";
 import { Image } from "@chakra-ui/image";
 import clsx from "clsx";
 import style from "react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark";
+import {PiUserBold} from "react-icons/pi";
 
 function ArchetypeLabel({ archetype }: { archetype: Archetype }) {
   return (
-    <Flex width="100%">
-      {archetype.name}{" "}
-      <Badge>
-        {archetype.source === "growthbook" ? (
-          <Image src="logo128.png" alt="GrowthBook" w="16px" />
-        ) : (
-          "DevTools"
-        )}
-      </Badge>
-    </Flex>
+    <div className="flex gap-2 items-center">
+      <Avatar
+        size="1"
+        radius="full"
+        fallback={
+          archetype.source === "growthbook"
+            ? <Image src="logo128.png" alt="GrowthBook" width="16px" />
+            : <PiUserBold />
+        }
+      />
+      <span className="text-xs text-gray-800">
+        {archetype.name}
+      </span>
+    </div>
   );
 }
 
@@ -40,41 +45,33 @@ export default function ArchetypesList({
           key={arch.id}
           collapsible
           type="single"
-          style={{ width: "100%" }}
           value={selectedArchetypeId}
           onValueChange={setSelectedArchetypeId}
+          className={clsx("accordionCard w-full mb-2", {
+            selected: selectedArchetypeId === arch.id,
+            active: appliedArchetypeId === arch.id,
+          })}
         >
           <Accordion.Item
-            className="mb-2"
             value={arch.id}
-            style={{ width: "100%" }}
+            className="w-full"
           >
-            <Accordion.Trigger
-              className={clsx("accordionCard", {
-                selected: selectedArchetypeId === arch.id,
-                active: appliedArchetypeId === arch.id,
-              })}
-              style={{ width: "100%" }}
-            >
+            <Accordion.Trigger className="w-full p-1.5">
               <ArchetypeLabel archetype={arch} />
             </Accordion.Trigger>
             <Accordion.Content
-              className="accordionContent"
-              style={{ width: "100%" }}
+              className="accordionInner overflow-hidden w-full"
             >
-              <Container>
+              <div className="flex flex-col gap-0.5 box mx-2 mb-2 overflow-auto w-100 max-h-[100px] text-xs">
                 {Object.keys(arch.attributes).map((key, i) => (
-                  <Container
-                    key={key}
-                    mb={i < Object.keys(arch.attributes).length - 1 ? "1" : "0"}
-                  >
+                  <div key={key}>
                     {key}:{" "}
                     <Text truncate>
                       <code>{JSON.stringify(arch.attributes[key])}</code>
                     </Text>
-                  </Container>
+                  </div>
                 ))}
-              </Container>
+              </div>
             </Accordion.Content>
           </Accordion.Item>
         </Accordion.Root>
