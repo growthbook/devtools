@@ -153,6 +153,7 @@ type TransformCopyResponseMessage = {
 };
 
 type UpdateTabState = {
+  append?: boolean;
   type: "UPDATE_TAB_STATE";
   data: {
     property: string;
@@ -218,10 +219,16 @@ type BGSetSDKUsageData = {
   data: SDKHealthCheckResult & { tabId?: number };
 }
 
+type GBGetStateMessage = {
+  type: "GB_GET_STATE";
+  property: string;
+}
+
 
 // Messages sent to background script
 export type BGMessage =
   | BGLoadVisualChangsetMessage
   | BGUpdateVisualChangsetMessage
   | BGTransformCopyMessage
-  | BGSetSDKUsageData;
+  | BGSetSDKUsageData
+  | GBGetStateMessage;

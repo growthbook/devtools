@@ -35,6 +35,17 @@ window.addEventListener(
     const data = event.data;
     if (data?.type === "UPDATE_TAB_STATE") {
       const { property, value } = data.data;
+      const shouldAppend = data.append;
+      const currentValue = getState(property);
+
+      if (shouldAppend && (currentValue instanceof Array || currentValue === undefined)) {
+        if (currentValue === undefined) {
+          setState(property, [value], true);
+        } else {
+          setState(property, [...currentValue, value], true);
+
+        }
+      }
       setState(property, value, true);
     }
   },

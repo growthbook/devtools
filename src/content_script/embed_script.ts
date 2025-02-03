@@ -1,4 +1,4 @@
-import type { Experiment, GrowthBook, TrackingCallback } from "@growthbook/growthbook";
+import type { Experiment, GrowthBook, Result, TrackingCallback } from "@growthbook/growthbook";
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import useTabState from "@/app/hooks/useTabState";
 import { Attributes } from "@growthbook/growthbook";
@@ -169,13 +169,14 @@ async function updateBackgroundSDK(data: SDKHealthCheckResult) {
 }
 
 // send a message that the tabstate has been updated
-function updateTabState(property: string, value: unknown) {
+function updateTabState(property: string, value: unknown, append = false) {
   window.postMessage(
     {
       type: "UPDATE_TAB_STATE",
       data: {
         property,
         value,
+        append,
       },
     },
     window.location.origin,
@@ -204,18 +205,16 @@ function subscribeToSdkChanges(gb: GrowthBook & { patchedMethods?: boolean }) {
     await _setAttributeOverrides.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
   }
+
   gb.setTrackingCallback = async (callback: TrackingCallback) => {
     const _setTrackingCallback = gb.setTrackingCallback;
-    await _setTrackingCallback.call(gb, callback);
-    updateTabState("trackingCallback", callback); // we might only want to check if the tracking callback has been set
-    SDKHealthCheck(gb).then((data) => {
-      updateTabState("sdkData", data);
-      updateBackgroundSDK(data);
-    });
-  }
+    const patchedCallBack = (experiment: Experiment<any>, result: Result<any>) => {
+      updateTabState("trackingCallbackLog", { experiment, result }, true);
+      callback(experiment, result);
+    }
+    await _setTrackingCallback.call(gb, patchedCallBack);
 
-  // todo: hook into gb.trackingCallback, gb.setTrackingCallback()
-  // todo: differentiate gb._track from custom tracking callback
+  }
 }
 
 async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
