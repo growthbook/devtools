@@ -68,10 +68,15 @@ export default function FeaturesTab() {
     }
   }, [selectedFid, JSON.stringify(forcedFeatures)]);
 
+  // load & scroll animations
+  const [firstLoad, setFirstLoad] = useState(true);
+  useEffect(() => {
+    window.setTimeout(() => setFirstLoad(false), 100);
+  }, []);
   useEffect(() => {
     if (selectedFid) {
       const el = document.querySelector(`#featuresTab_featureList_${selectedFid}`);
-      el?.scrollIntoView({ behavior: "smooth" });
+      el?.scrollIntoView({ behavior: firstLoad ? 'instant' : 'smooth' });
     }
   }, [selectedFid]);
 
@@ -195,6 +200,28 @@ export default function FeaturesTab() {
                     />
                   )}
                 </div>
+
+                {selectedFeature?.evaluatedFeature?.debug ? (
+                  <>
+                    <h2 className="label font-bold">Debug log</h2>
+                    <Prism
+                      language="json"
+                      style={codeTheme}
+                      customStyle={{...customTheme, maxHeight: 120}}
+                      codeTagProps={{
+                        className: "text-2xs-important !whitespace-pre-wrap",
+                      }}
+                    >
+                        {JSON.stringify(
+                          {
+                            result: selectedFeature.evaluatedFeature.result,
+                            debug: selectedFeature.evaluatedFeature.debug,
+                          }
+                        , null, 2)},
+                    </Prism>
+                  </>
+                ): null}
+
 
                 <hr className="my-4"/>
                 <h2 className="label font-bold">Rules</h2>
@@ -412,8 +439,7 @@ function getFeatureDetails({
 }) {
   const feature = features?.[fid];
   const meta = featuresMeta?.[fid];
-  const evaluatedFeature = evaluatedFeatures?.[fid];
-  const isForced = forcedFeatures ? fid in forcedFeatures : false;
+
   let valueType: ValueType;
   if (meta?.valueType) {
     valueType = meta?.valueType;
@@ -425,12 +451,19 @@ function getFeatureDetails({
     }
   }
 
+
+  const evaluatedFeature = evaluatedFeatures?.[fid];
+  const isForced = forcedFeatures ? fid in forcedFeatures : false;
+
+  // const debug = evaluatedFeature?.debug
+
   return {
     fid,
     feature,
     valueType,
     meta,
     evaluatedFeature,
+    // debug,
     isForced,
   };
 }

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {AutoExperiment} from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
@@ -69,10 +69,15 @@ export default function ExperimentsTab() {
     }
   }, [selectedEid, JSON.stringify(forcedVariations)]);
 
+  // load & scroll animations
+  const [firstLoad, setFirstLoad] = useState(true);
+  useEffect(() => {
+    window.setTimeout(() => setFirstLoad(false), 100);
+  }, []);
   useEffect(() => {
     if (selectedEid) {
       const el = document.querySelector(`#experimentsTab_experimentList_${selectedEid}`);
-      el?.scrollIntoView({ behavior: 'smooth' });
+      el?.scrollIntoView({ behavior: firstLoad ? 'instant' : 'smooth' });
     }
   }, [selectedEid]);
 
