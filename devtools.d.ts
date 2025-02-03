@@ -219,16 +219,9 @@ type BGSetSDKUsageData = {
   data: SDKHealthCheckResult & { tabId?: number };
 }
 
-type GBGetStateMessage = {
-  type: "GB_GET_STATE";
-  property: string;
-}
-
-
 // Messages sent to background script
 export type BGMessage =
   | BGLoadVisualChangsetMessage
   | BGUpdateVisualChangsetMessage
   | BGTransformCopyMessage
-  | BGSetSDKUsageData
-  | GBGetStateMessage;
+  | BGSetSDKUsageData;
