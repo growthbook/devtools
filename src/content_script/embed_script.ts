@@ -203,6 +203,14 @@ function subscribeToSdkChanges(gb: GrowthBook & { patchedMethods?: boolean }) {
     await _setAttributeOverrides.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
   }
+    // @ts-expect-error
+  gb.context.trackingCallback = async (experiment: Experiment<any>, result: Result<any>) => {
+    // @ts-expect-error
+    const _trackingCallback = gb.context.trackingCallback;
+    await _trackingCallback.call(gb, experiment, result);
+    updateTabState("trackingCallbackLog", { experiment, result }, true);
+  }
+  
   // @ts-expect-error
   gb.context.log = async (msg: string, ctx: any) => {
     // @ts-expect-error
@@ -210,6 +218,7 @@ function subscribeToSdkChanges(gb: GrowthBook & { patchedMethods?: boolean }) {
     await _log.call(gb, msg, ctx);
     updateTabState("sdkLogs", {msg, ctx}, true);
   }
+
 
   // add logging to setTrackingCallback
   gb.setTrackingCallback = async (callback: TrackingCallback) => {
