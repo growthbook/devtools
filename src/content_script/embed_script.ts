@@ -71,8 +71,6 @@ function pushAppUpdates() {
     pushSDKUpdate(gb);
     if (gb) {
       subscribeToSdkChanges(gb);
-      // @ts-expect-error - this is a private method but can be used for debugging
-      updateTabState("trackingCallback", gb.context.trackingCallback);
       updateTabState("attributes", gb.getAttributes());
       updateTabState("features", gb.getFeatures());
       updateTabState("experiments", gb.getExperiments());
@@ -205,7 +203,15 @@ function subscribeToSdkChanges(gb: GrowthBook & { patchedMethods?: boolean }) {
     await _setAttributeOverrides.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
   }
+  // @ts-expect-error
+  gb.context.log = async (msg: string, ctx: any) => {
+    // @ts-expect-error
+    const _log = gb.context.log;
+    await _log.call(gb, msg, ctx);
+    updateTabState("sdkLogs", {msg, ctx}, true);
+  }
 
+  // add logging to setTrackingCallback
   gb.setTrackingCallback = async (callback: TrackingCallback) => {
     const _setTrackingCallback = gb.setTrackingCallback;
     const patchedCallBack = (experiment: Experiment<any>, result: Result<any>) => {
@@ -215,7 +221,10 @@ function subscribeToSdkChanges(gb: GrowthBook & { patchedMethods?: boolean }) {
     await _setTrackingCallback.call(gb, patchedCallBack);
 
   }
+  
+
 }
+
 
 async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   if (!gb) {
