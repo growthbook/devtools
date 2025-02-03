@@ -1,4 +1,4 @@
-import type { Experiment, GrowthBook } from "@growthbook/growthbook";
+import type { Experiment, GrowthBook, TrackingCallback } from "@growthbook/growthbook";
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import useTabState from "@/app/hooks/useTabState";
 import { Attributes } from "@growthbook/growthbook";
@@ -71,6 +71,8 @@ function pushAppUpdates() {
     pushSDKUpdate(gb);
     if (gb) {
       subscribeToSdkChanges(gb);
+      // @ts-expect-error - this is a private method but can be used for debugging
+      updateTabState("trackingCallback", gb.context.trackingCallback);
       updateTabState("attributes", gb.getAttributes());
       updateTabState("features", gb.getFeatures());
       updateTabState("experiments", gb.getExperiments());
@@ -202,6 +204,15 @@ function subscribeToSdkChanges(gb: GrowthBook & { patchedMethods?: boolean }) {
     await _setAttributeOverrides.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
   }
+  gb.setTrackingCallback = async (callback: TrackingCallback) => {
+    const _setTrackingCallback = gb.setTrackingCallback;
+    await _setTrackingCallback.call(gb, callback);
+    updateTabState("trackingCallback", callback); // we might only want to check if the tracking callback has been set
+    SDKHealthCheck(gb).then((data) => {
+      updateTabState("sdkData", data);
+      updateBackgroundSDK(data);
+    });
+  }
 
   // todo: hook into gb.trackingCallback, gb.setTrackingCallback()
   // todo: differentiate gb._track from custom tracking callback
@@ -265,3 +276,4 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
 
 // start running
 init();
+
