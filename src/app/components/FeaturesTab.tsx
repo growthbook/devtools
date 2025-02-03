@@ -369,13 +369,13 @@ function EditableValueField({
               "text-slate-800 text-sm whitespace-pre-wrap mono",
               {
                 "inline-block px-1 bg-rose-100 rounded-md text-rose-900":
-                  editedValue === false,
+                  value === false,
                 "inline-block px-1 bg-blue-100 rounded-md text-blue-900":
-                  editedValue === true,
+                  value === true,
               },
             )}
           >
-            {JSON.stringify(editedValue)}
+            {JSON.stringify(value)}
           </code>
         </label>
       ) : (
