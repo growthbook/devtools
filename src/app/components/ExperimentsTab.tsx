@@ -46,7 +46,6 @@ export default function ExperimentsTab() {
       forcedVariations,
     })
     : undefined;
-  console.log({selectedExperiment})
 
   const [overrideExperiment, setOverrideExperiment] = useState(false);
 
@@ -392,7 +391,7 @@ function getExperimentDetails({
   };
 }
 
-function getFeatureExperiments(features: Record<string, FeatureDefinition>) {
+export function getFeatureExperiments(features: Record<string, FeatureDefinition>) {
   const experiments: (Experiment<any>)[] = [];
   for (const fid in features) {
     const feature = features[fid];
