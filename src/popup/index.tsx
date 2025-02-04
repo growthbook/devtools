@@ -4,9 +4,7 @@ import * as ReactDOM from "react-dom/client";
 
 const Popup = () => {
   return (
-    <div className="w-[600px] h-[450px] relative overflow-y-scroll bg-zinc-100">
-      <App />
-    </div>
+    <App />
   );
 };
 

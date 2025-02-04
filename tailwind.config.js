@@ -1,6 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  // classes used by the embedding html
+  safelist: [
+    "w-[600px]",
+    "h-[450px]",
+    "relative",
+    "overflow-y-scroll",
+    "bg-zinc-100",
+  ],
   theme: {
     fontSize: {
       xs: "12px",

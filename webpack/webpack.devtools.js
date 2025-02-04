@@ -10,9 +10,8 @@ module.exports = {
 
     // popup
     popup: path.join(srcDir, "popup/index.tsx"),
-    // bottom panel
+    // bottom panel (init only, embeds `popup`)
     devtools_init: path.join(srcDir, "devtools/init.ts"),
-    devtools_panel: path.join(srcDir, "devtools/index.tsx"),
 
 
     // embedded on page via content_script:
@@ -39,7 +38,11 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
+        use: [
+          MiniCssExtractPlugin.loader,
+          { loader: "css-loader", options: { modules: false } },
+          "postcss-loader"
+        ],
         // visual editor css loaded separately
         exclude: [path.join(srcDir, "visual_editor", "shadowDom.css")],
       },

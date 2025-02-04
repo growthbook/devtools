@@ -21,9 +21,7 @@
         "js/visual_editor.js",
         "js/logo128.png",
         "js/logo128-connected.png",
-        "js/logo128-problem.png",
-        "js/create-api-key.png",
-        "options.html"
+        "js/logo128-problem.png"
       ]
     }
   ],
