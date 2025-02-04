@@ -13,7 +13,6 @@ module.exports = {
     // bottom panel (init only, embeds `popup`)
     devtools_init: path.join(srcDir, "devtools/init.ts"),
 
-
     // embedded on page via content_script:
     devtools_embed_script: path.join(srcDir, "content_script/embed_script.ts"),
     visual_editor: path.join(srcDir, "visual_editor/index.tsx"),
@@ -37,17 +36,20 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: /\.css$/,
+        include: path.join(srcDir, "app", "css", "index.css"),
         use: [
           MiniCssExtractPlugin.loader,
           { loader: "css-loader", options: { modules: false } },
           "postcss-loader"
         ],
-        // visual editor css loaded separately
-        exclude: [path.join(srcDir, "visual_editor", "shadowDom.css")],
       },
       {
         include: path.join(srcDir, "visual_editor", "shadowDom.css"),
+        type: "asset/source",
+        loader: "postcss-loader",
+      },
+      {
+        include: path.join(srcDir, "visual_editor", "targetPage.css"),
         type: "asset/source",
         loader: "postcss-loader",
       },
