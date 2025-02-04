@@ -24,6 +24,12 @@ module.exports = {
     filename: "[name].js",
     assetModuleFilename: "[name][ext]",
   },
+  optimization: {
+    nodeEnv: "development",
+    splitChunks: {
+      name: "vendor",
+    },
+  },
   module: {
     rules: [
       {
