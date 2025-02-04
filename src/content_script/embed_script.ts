@@ -8,11 +8,7 @@ import type {
   TrackingCallback,
 } from "@growthbook/growthbook";
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
-import useTabState from "@/app/hooks/useTabState";
 import { Attributes } from "@growthbook/growthbook";
-import { at, has, update } from "lodash";
-import { m } from "framer-motion";
-import { version } from "node_modules/@types/react";
 
 declare global {
   interface Window {
@@ -230,7 +226,11 @@ function subscribeToSdkChanges(
     const _log = gb.log;
     gb.log = (msg: string, ctx: Record<string, unknown>) => {
       _log.call(gb, msg, ctx);
-      gb.logs!.push({ debug: { msg, ctx } });
+      gb.logs!.push({
+        debug: { msg, ctx },
+        timestamp: Date.now().toString(),
+        logType: "debug",
+      });
     };
 
     // Event logs
@@ -239,7 +239,12 @@ function subscribeToSdkChanges(
       eventName: string,
       properties?: Record<string, unknown>
     ) => {
-      gb.logs!.push({ eventName, properties });
+      gb.logs!.push({
+        eventName,
+        properties,
+        timestamp: Date.now().toString(),
+        logType: "event",
+      });
       _logEvent.call(gb, eventName, properties);
     };
 
@@ -251,7 +256,12 @@ function subscribeToSdkChanges(
         experiment: Experiment<any>,
         result: Result<any>
       ) => {
-        gb.logs!.push({ experiment, result });
+        gb.logs!.push({
+          experiment,
+          result,
+          timestamp: Date.now().toString(),
+          logType: "experiment",
+        });
         callback(experiment, result);
       };
       _setTrackingCallback.call(gb, patchedCallBack);
@@ -264,12 +274,19 @@ function subscribeToSdkChanges(
     if (typeof onFeatureUsage === "function") {
       // @ts-expect-error Context is private but we still need to write it here
       gb.context.onFeatureUsage = (key: string, result: FeatureResult<any>) => {
-        gb.logs!.push({ featureKey: key, result });
+        gb.logs!.push({
+          featureKey: key,
+          result,
+          timestamp: Date.now().toString(),
+          logType: "feature",
+        });
         onFeatureUsage(key, result);
       };
     }
   }
 
+  // Watch for incoming log events and send to tabstate
+  updateTabState("logEvents", []);
   const onLogEvent = (event: LogUnion) => {
     updateTabState("logEvents", event, true);
   };
