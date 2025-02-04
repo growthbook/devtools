@@ -3,9 +3,7 @@ import * as Accordion from "@radix-ui/react-accordion";
 import React from "react";
 import { Archetype } from "../tempGbExports";
 import {Avatar, Badge, Container, Flex, Text} from "@radix-ui/themes";
-import { Image } from "@chakra-ui/image";
 import clsx from "clsx";
-import style from "react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark";
 import {PiUserBold} from "react-icons/pi";
 
 function ArchetypeLabel({ archetype }: { archetype: Archetype }) {
@@ -16,7 +14,7 @@ function ArchetypeLabel({ archetype }: { archetype: Archetype }) {
         radius="full"
         fallback={
           archetype.source === "growthbook"
-            ? <Image src="logo128.png" alt="GrowthBook" width="16px" />
+            ? <img src="logo128.png" alt="GrowthBook" width="16px" />
             : <PiUserBold />
         }
       />

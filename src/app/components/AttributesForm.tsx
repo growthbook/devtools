@@ -118,7 +118,9 @@ export default function AttributesForm({
       <Form.Root className="FormRoot small">
         <div className="box">
           {!jsonMode ? (
-            Object.keys(formAttributes).map((attributeKey, i) => {
+            !Object.keys(formAttributes).length ? (
+              <em className="text-2xs">No attributes found</em>
+            ) : Object.keys(formAttributes).map((attributeKey, i) => {
               return (
                 <div key={attributeKey}>
                   <Form.Field

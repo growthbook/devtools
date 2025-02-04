@@ -10,10 +10,8 @@ module.exports = {
 
     // popup
     popup: path.join(srcDir, "popup/index.tsx"),
-    // bottom panel
+    // bottom panel (init only, embeds `popup`)
     devtools_init: path.join(srcDir, "devtools/init.ts"),
-    devtools_panel: path.join(srcDir, "devtools/index.tsx"),
-
 
     // embedded on page via content_script:
     devtools_embed_script: path.join(srcDir, "content_script/embed_script.ts"),
@@ -24,6 +22,12 @@ module.exports = {
     filename: "[name].js",
     assetModuleFilename: "[name][ext]",
   },
+  optimization: {
+    nodeEnv: "development",
+    splitChunks: {
+      name: "vendor",
+    },
+  },
   module: {
     rules: [
       {
@@ -32,13 +36,20 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
-        // visual editor css loaded separately
-        exclude: [path.join(srcDir, "visual_editor", "shadowDom.css")],
+        include: path.join(srcDir, "app", "css", "index.css"),
+        use: [
+          MiniCssExtractPlugin.loader,
+          { loader: "css-loader", options: { modules: false } },
+          "postcss-loader"
+        ],
       },
       {
         include: path.join(srcDir, "visual_editor", "shadowDom.css"),
+        type: "asset/source",
+        loader: "postcss-loader",
+      },
+      {
+        include: path.join(srcDir, "visual_editor", "targetPage.css"),
         type: "asset/source",
         loader: "postcss-loader",
       },
