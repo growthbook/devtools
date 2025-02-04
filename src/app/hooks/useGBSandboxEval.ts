@@ -9,6 +9,7 @@ import {
 } from "@growthbook/growthbook";
 import useTabState from "@/app/hooks/useTabState";
 import { DebugLogs } from "devtools";
+import {getFeatureExperiments} from "@/app/components/ExperimentsTab";
 
 export type EvaluatedFeature = {
   result: FeatureResult;
@@ -42,6 +43,7 @@ export default function useGBSandboxEval() {
   return useMemo(() => {
     let log: DebugLogs = [];
 
+    const featureExperiments = getFeatureExperiments(features);
     const payload = { features, experiments };
 
     const growthbook = new GrowthBook({
@@ -71,7 +73,7 @@ export default function useGBSandboxEval() {
       };
     }
 
-    experiments.forEach((experiment) => {
+    [...experiments, ...featureExperiments].forEach((experiment) => {
       growthbook.debug = true;
       const result = growthbook.run(experiment);
       growthbook.debug = false;
