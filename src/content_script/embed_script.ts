@@ -273,13 +273,13 @@ function subscribeToSdkChanges(
     }
   }
 
-  const onLogEvents = (events: LogUnion[]) => {
-    updateTabState("logEvents", events, true);
+  const onLogEvent = (event: LogUnion) => {
+    updateTabState("logEvents", event, true);
   };
-  onLogEvents(gb.logs);
-  gb.logs.push = (...args: LogUnion[]) => {
-    const retVal = Array.prototype.push.apply(gb.logs, args);
-    onLogEvents(args);
+  gb.logs.forEach(onLogEvent);
+  gb.logs.push = (...events: LogUnion[]) => {
+    const retVal = Array.prototype.push.apply(gb.logs, events);
+    events.forEach(onLogEvent);
     return retVal;
   };
 }

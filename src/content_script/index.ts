@@ -36,12 +36,12 @@ window.addEventListener(
     if (data?.type === "UPDATE_TAB_STATE") {
       const { property, value } = data.data;
       const shouldAppend = data.append;
-      const currentValue = getState(property);
+      const { state: currentValue, success } = getState(property);
       if (
         shouldAppend &&
-        (currentValue instanceof Array || currentValue === undefined)
+        (Array.isArray(currentValue) || currentValue === undefined || !success)
       ) {
-        if (currentValue === undefined) {
+        if (currentValue === undefined || !success) {
           setState(property, [value], true);
         } else {
           setState(property, [...currentValue, value], true);
