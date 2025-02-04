@@ -197,7 +197,8 @@ function subscribeToSdkChanges(
 ) {
   if (gb.patchedMethods) return;
   gb.patchedMethods = true;
-
+  // @ts-expect-error
+  gb.context.enableDevMode = true;
   const _setAttributes = gb.setAttributes;
   gb.setAttributes = async (attributes: Attributes) => {
     await _setAttributes.call(gb, attributes);
