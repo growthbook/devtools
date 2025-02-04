@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
-import {AutoExperiment} from "@growthbook/growthbook";
+import {AutoExperiment, Experiment, FeatureDefinition} from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedExperiment,
@@ -23,6 +23,11 @@ export default function ExperimentsTab() {
   const [experiments, setExperiments] = useTabState<
     AutoExperiment[]
   >("experiments", []);
+  const [features, setFeatures] = useTabState<
+    Record<string, FeatureDefinition>
+  >("features", {});
+  const featureExperiments = getFeatureExperiments(features);
+
   const [forcedVariations, setForcedVariations] = useTabState<
     Record<string, any>
   >("forcedVariations", {});
@@ -36,11 +41,12 @@ export default function ExperimentsTab() {
   const selectedExperiment = selectedEid
     ? getExperimentDetails({
       eid: selectedEid,
-      experiments,
+      experiments: [...experiments, ...featureExperiments],
       evaluatedExperiments,
       forcedVariations,
     })
     : undefined;
+  console.log({selectedExperiment})
 
   const [overrideExperiment, setOverrideExperiment] = useState(false);
 
@@ -88,7 +94,7 @@ export default function ExperimentsTab() {
           <div className="label lg mb-2">Experiments</div>
           {experiments.map((experiment, i) => {
             const eid = experiment.key;
-            const { meta, evaluatedExperiment, isForced } =
+            const {meta, evaluatedExperiment, isForced} =
               getExperimentDetails({
                 eid,
                 experiments,
@@ -114,19 +120,70 @@ export default function ExperimentsTab() {
                     radius="full"
                     fallback={
                       <span className={isForced ? "text-amber-800" : undefined}>
-                        <PiFlaskBold />
+                        <PiFlaskBold/>
                       </span>
                     }
                   />
                   <code className="text-xs text-gray-800">{eid}</code>
-                  <div className="flex-1" />
+                  <div className="flex-1"/>
                   <div className="flex items-center gap-1 text-sm mr-1">
-                    <FaBucket size={9} />
+                    <FaBucket size={9}/>
                     {value}
                   </div>
                 </div>
                 {isForced && (
-                  <div className="pointer-events-none absolute top-[-6px] right-[-12px] px-1 bg-white shadow-sm rounded-md text-2xs mr-1 font-bold uppercase text-amber-600">
+                  <div
+                    className="pointer-events-none absolute top-[-6px] right-[-12px] px-1 bg-white shadow-sm rounded-md text-2xs mr-1 font-bold uppercase text-amber-600">
+                    Override
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          <div className="label lg mb-2">Feature Flag Experiments</div>
+          {featureExperiments.map((experiment, i) => {
+            const eid = experiment.key;
+            const {meta, evaluatedExperiment, isForced} =
+              getExperimentDetails({
+                eid,
+                experiments: featureExperiments,
+                evaluatedExperiments,
+                forcedVariations,
+              });
+            const value = evaluatedExperiment?.result?.variationId ?? 0;
+
+            return (
+              <div
+                id={`experimentsTab_experimentList_${eid}`}
+                key={eid}
+                className={clsx("featureCard relative mb-2", {
+                  selected: selectedEid === eid,
+                })}
+                onClick={() => clickExperiment(eid)}
+              >
+                <div className="flex gap-2 items-center">
+                  <Avatar
+                    color={isForced ? "amber" : undefined}
+                    variant={isForced ? "solid" : "soft"}
+                    size="1"
+                    radius="full"
+                    fallback={
+                      <span className={isForced ? "text-amber-800" : undefined}>
+                        <PiFlaskBold/>
+                      </span>
+                    }
+                  />
+                  <code className="text-xs text-gray-800">{eid}</code>
+                  <div className="flex-1"/>
+                  <div className="flex items-center gap-1 text-sm mr-1">
+                    <FaBucket size={9}/>
+                    {value}
+                  </div>
+                </div>
+                {isForced && (
+                  <div
+                    className="pointer-events-none absolute top-[-6px] right-[-12px] px-1 bg-white shadow-sm rounded-md text-2xs mr-1 font-bold uppercase text-amber-600">
                     Override
                   </div>
                 )}
@@ -313,7 +370,7 @@ function getExperimentDetails({
   forcedVariations,
 }: {
   eid: string;
-  experiments: AutoExperiment[];
+  experiments: (AutoExperiment | Experiment<any>)[];
   experimentsMeta?: Record<string, any>;
   evaluatedExperiments?: EvaluatedExperiment[];
   forcedVariations?: Record<string, number>;
@@ -333,4 +390,21 @@ function getExperimentDetails({
     evaluatedExperiment,
     isForced,
   };
+}
+
+function getFeatureExperiments(features: Record<string, FeatureDefinition>) {
+  const experiments: (Experiment<any>)[] = [];
+  for (const fid in features) {
+    const feature = features[fid];
+    for (const rule of feature.rules || []) {
+      if (rule.variations) {
+        // @ts-ignore
+        experiments.push({
+          key: fid,
+          ...rule,
+        });
+      }
+    }
+  }
+  return experiments;
 }

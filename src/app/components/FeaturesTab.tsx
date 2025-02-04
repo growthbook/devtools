@@ -5,7 +5,7 @@ import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
 import {Avatar, Button, Link, Switch} from "@radix-ui/themes";
-import { PiFlagBold } from "react-icons/pi";
+import {PiFlagBold, PiFlaskBold} from "react-icons/pi";
 import clsx from "clsx";
 import {Prism} from "react-syntax-highlighter";
 import {ghcolors as codeTheme} from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -86,7 +86,7 @@ export default function FeaturesTab() {
         <div className="w-[50%] max-w-[450px] pr-2">
           <div className="label lg mb-2">Features</div>
           {Object.keys(features).map((fid, i) => {
-            const { feature, meta, evaluatedFeature, isForced } =
+            const { feature, meta, linkedExperiments, evaluatedFeature, isForced } =
               getFeatureDetails({
                 fid,
                 features,
@@ -118,6 +118,9 @@ export default function FeaturesTab() {
                     }
                   />
                   <code className="text-xs text-gray-800">{fid}</code>
+                  {linkedExperiments.length > 0 && (
+                    <PiFlaskBold />
+                  )}
                   <div className="flex-1" />
                   <code
                     className={clsx(
@@ -451,6 +454,8 @@ function getFeatureDetails({
     }
   }
 
+  const linkedExperiments = (feature?.rules || [])
+    .filter((rule) => rule.variations);
 
   const evaluatedFeature = evaluatedFeatures?.[fid];
   const isForced = forcedFeatures ? fid in forcedFeatures : false;
@@ -462,6 +467,7 @@ function getFeatureDetails({
     feature,
     valueType,
     meta,
+    linkedExperiments,
     evaluatedFeature,
     // debug,
     isForced,
