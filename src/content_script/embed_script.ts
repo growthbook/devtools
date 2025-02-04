@@ -217,13 +217,10 @@ function subscribeToSdkChanges(
   };
 
   const {
-    enableDevMode,
     trackingCallback,
     onFeatureUsage,
     // @ts-expect-error Context is private but we still need to read from it
   }: Options = gb.context;
-
-  if (!enableDevMode) return;
 
   // Monkeypatches for logging on outdated sdk versions
   if (!gb.logs) {
