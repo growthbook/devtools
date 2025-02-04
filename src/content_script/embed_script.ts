@@ -1,4 +1,12 @@
-import type { Experiment, GrowthBook, Result, TrackingCallback } from "@growthbook/growthbook";
+import type {
+  Experiment,
+  FeatureResult,
+  GrowthBook,
+  LogUnion,
+  Options,
+  Result,
+  TrackingCallback,
+} from "@growthbook/growthbook";
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import useTabState from "@/app/hooks/useTabState";
 import { Attributes } from "@growthbook/growthbook";
@@ -50,7 +58,7 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
       clearTimeout(timer);
       getValidGrowthBookInstance(cb);
     },
-    false,
+    false
   );
 }
 
@@ -131,7 +139,9 @@ function updateAttributes(data: unknown) {
 function updateFeatures(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (data) {
-      gb.setForcedFeatures(new Map(Object.entries(data as Record<string, any>)));
+      gb.setForcedFeatures(
+        new Map(Object.entries(data as Record<string, any>))
+      );
     } else {
       // todo: do something with these messages or remove them
       const msg: ErrorMessage = {
@@ -162,7 +172,7 @@ async function updateBackgroundSDK(data: SDKHealthCheckResult) {
       type: "GB_SDK_UPDATED",
       data,
     },
-    window.location.origin,
+    window.location.origin
   );
 }
 
@@ -177,64 +187,102 @@ function updateTabState(property: string, value: unknown, append = false) {
       },
       append,
     },
-    window.location.origin,
+    window.location.origin
   );
 }
 
 // add a proxy to the SDKs methods so we know when anything important has been changed programmatically
-function subscribeToSdkChanges(gb: GrowthBook & { patchedMethods?: boolean }) {
-  if (gb?.patchedMethods) return;
+function subscribeToSdkChanges(
+  gb: GrowthBook & { patchedMethods?: boolean; logs?: LogUnion[] }
+) {
+  if (gb.patchedMethods) return;
   gb.patchedMethods = true;
 
   const _setAttributes = gb.setAttributes;
   gb.setAttributes = async (attributes: Attributes) => {
     await _setAttributes.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
-  }
+  };
   if (gb.updateAttributes) {
     const _updateAttributes = gb.updateAttributes;
     gb.updateAttributes = async (attributes: Attributes) => {
       await _updateAttributes.call(gb, attributes);
       updateTabState("attributes", gb.getAttributes());
-    }
+    };
   }
   gb.setAttributeOverrides = async (attributes: Attributes) => {
     const _setAttributeOverrides = gb.setAttributeOverrides;
     await _setAttributeOverrides.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
-  }
-    // @ts-expect-error
-  gb.context.trackingCallback = async (experiment: Experiment<any>, result: Result<any>) => {
-    // @ts-expect-error
-    const _trackingCallback = gb.context.trackingCallback;
-    if(typeof _trackingCallback !== "function") return;
-    await _trackingCallback.call(gb, experiment, result);
-    updateTabState("trackingCallbackLog", { experiment, result }, true);
-  }
+  };
 
-  // @ts-expect-error
-  gb.context.log = async (msg: string, ctx: any) => {
-    // @ts-expect-error
-    const _log = gb.context.log;
-    await _log.call(gb, msg, ctx);
-    updateTabState("sdkLogs", msg, true);
-  }
+  const {
+    enableDevMode,
+    trackingCallback,
+    onFeatureUsage,
+    // @ts-expect-error Context is private but we still need to read from it
+  }: Options = gb.context;
 
+  if (!enableDevMode) return;
 
-  // add logging to setTrackingCallback
-  gb.setTrackingCallback = async (callback: TrackingCallback) => {
+  // Monkeypatches for logging on outdated sdk versions
+  if (!gb.logs) {
+    gb.logs = [];
+
+    // Debug logs
+    const _log = gb.log;
+    gb.log = (msg: string, ctx: Record<string, unknown>) => {
+      _log.call(gb, msg, ctx);
+      gb.logs!.push({ debug: { msg, ctx } });
+    };
+
+    // Event logs
+    const _logEvent = gb.logEvent;
+    gb.logEvent = async (
+      eventName: string,
+      properties?: Record<string, unknown>
+    ) => {
+      gb.logs!.push({ eventName, properties });
+      _logEvent.call(gb, eventName, properties);
+    };
+
+    // Experiment tracking callbacks
     const _setTrackingCallback = gb.setTrackingCallback;
-    const patchedCallBack = (experiment: Experiment<any>, result: Result<any>) => {
-      updateTabState("trackingCallbackLog", { experiment, result }, true);
-      callback(experiment, result);
+    // Create a helper to automatically patch any callbacks the user sets
+    gb.setTrackingCallback = (callback: TrackingCallback) => {
+      const patchedCallBack = (
+        experiment: Experiment<any>,
+        result: Result<any>
+      ) => {
+        gb.logs!.push({ experiment, result });
+        callback(experiment, result);
+      };
+      _setTrackingCallback.call(gb, patchedCallBack);
+    };
+    // Apply the patch helper above to the existing callback
+    if (typeof trackingCallback === "function")
+      gb.setTrackingCallback(trackingCallback);
+
+    // Feature usage callbacks
+    if (typeof onFeatureUsage === "function") {
+      // @ts-expect-error Context is private but we still need to write it here
+      gb.context.onFeatureUsage = (key: string, result: FeatureResult<any>) => {
+        gb.logs!.push({ featureKey: key, result });
+        onFeatureUsage(key, result);
+      };
     }
-    await _setTrackingCallback.call(gb, patchedCallBack);
-
   }
-  
 
+  const onLogEvents = (events: LogUnion[]) => {
+    updateTabState("logEvents", events, true);
+  };
+  onLogEvents(gb.logs);
+  gb.logs.push = (...args: LogUnion[]) => {
+    const retVal = Array.prototype.push.apply(gb.logs, args);
+    onLogEvents(args);
+    return retVal;
+  };
 }
-
 
 async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   if (!gb) {
@@ -242,6 +290,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       canConnect: false,
       hasPayload: false,
       sdkFound: false,
+      devModeEnabled: false,
       errorMessage: "SDK not found",
     };
   }
@@ -254,12 +303,15 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     !!gb.getDecryptedPayload?.() ||
     (Object.keys(gb.getFeatures()).length > 0 &&
       gb.getExperiments().length > 0);
+  // @ts-expect-error
+  const devModeEnabled = gb.context.enableDevMode;
 
   if (!clientKey) {
     return {
       canConnect: false,
       hasClientKey: false,
       hasPayload,
+      devModeEnabled,
       sdkFound: true,
       version: gb?.version,
       errorMessage: "No API Client Key found",
@@ -271,6 +323,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       canConnect: true,
       hasClientKey: true,
       hasPayload,
+      devModeEnabled,
       version: gb?.version,
       sdkFound: true,
       clientKey,
@@ -282,6 +335,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     return {
       canConnect: false,
       hasPayload,
+      devModeEnabled,
       hasClientKey: true,
       errorMessage: data.error,
       version: gb?.version,
@@ -294,4 +348,3 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
 
 // start running
 init();
-

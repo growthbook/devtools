@@ -6,6 +6,7 @@ export default function useSdkData() {
     canConnect: false,
     hasPayload: false,
     hasClientKey: false,
+    devModeEnabled: false,
     errorMessage: undefined,
     version: undefined,
     sdkFound: false,

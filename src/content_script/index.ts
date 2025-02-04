@@ -23,7 +23,7 @@ const propertiesWithCustomMessage = {
 let state: Record<string, any> = {};
 try {
   state = JSON.parse(
-    window.sessionStorage.getItem(SESSION_STORAGE_TAB_STATE_KEY) || "{}",
+    window.sessionStorage.getItem(SESSION_STORAGE_TAB_STATE_KEY) || "{}"
   );
 } catch (e) {
   console.error("Failed to parse saved tab state");
@@ -37,21 +37,20 @@ window.addEventListener(
       const { property, value } = data.data;
       const shouldAppend = data.append;
       const currentValue = getState(property);
-      console.log(shouldAppend, "property", property);
-      if (shouldAppend && (currentValue instanceof Array || currentValue === undefined)) {
+      if (
+        shouldAppend &&
+        (currentValue instanceof Array || currentValue === undefined)
+      ) {
         if (currentValue === undefined) {
-          console.log("value guy", [value]);
           setState(property, [value], true);
         } else {
-          console.log("value guy", [...currentValue, value]);
           setState(property, [...currentValue, value], true);
-
         }
       } else {
-      setState(property, value, true);
+        setState(property, value, true);
       }
     }
-  },
+  }
 );
 
 // Helper functions to manage tab state
@@ -66,7 +65,7 @@ function setState(property: string, value: any, skipPostMessage?: boolean) {
   state[property] = value;
   window.sessionStorage.setItem(
     SESSION_STORAGE_TAB_STATE_KEY,
-    JSON.stringify(state),
+    JSON.stringify(state)
   );
   chrome.runtime.sendMessage({
     type: "tabStateChanged",
@@ -81,7 +80,7 @@ function setState(property: string, value: any, skipPostMessage?: boolean) {
       ];
     window.postMessage(
       { type: customMessage, data: value },
-      window.location.origin,
+      window.location.origin
     );
   }
 }
@@ -143,7 +142,7 @@ window.addEventListener(
       default:
         break;
     }
-  },
+  }
 );
 
 // Listen for messages from devtools, background, etc.
@@ -190,9 +189,9 @@ window.addEventListener("storage", (event) => {
   if (event.key === SESSION_STORAGE_TAB_STATE_KEY) {
     try {
       state = JSON.parse(
-        window.sessionStorage.getItem(SESSION_STORAGE_TAB_STATE_KEY) || "{}",
+        window.sessionStorage.getItem(SESSION_STORAGE_TAB_STATE_KEY) || "{}"
       );
-      if(!state) {
+      if (!state) {
         refreshSDK();
       }
     } catch (e) {

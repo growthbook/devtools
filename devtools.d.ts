@@ -159,7 +159,7 @@ type UpdateTabState = {
     property: string;
     value: unknown;
     tabId: number;
-  }
+  };
 };
 
 // Messages sent to content script
@@ -212,12 +212,13 @@ type SDKHealthCheckResult = {
   clientKey?: string;
   isLoading?: boolean;
   payload?: Record<string, any>;
+  devModeEnabled: boolean;
 };
 
 type BGSetSDKUsageData = {
   type: "GB_SDK_UPDATED";
   data: SDKHealthCheckResult & { tabId?: number };
-}
+};
 
 // Messages sent to background script
 export type BGMessage =
