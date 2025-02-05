@@ -199,6 +199,7 @@ function subscribeToSdkChanges(
     await _setAttributes.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
   };
+
   if (gb.updateAttributes) {
     const _updateAttributes = gb.updateAttributes;
     gb.updateAttributes = async (attributes: Attributes) => {
@@ -206,11 +207,21 @@ function subscribeToSdkChanges(
       updateTabState("attributes", gb.getAttributes());
     };
   }
+
+  const _setAttributeOverrides = gb.setAttributeOverrides;
   gb.setAttributeOverrides = async (attributes: Attributes) => {
-    const _setAttributeOverrides = gb.setAttributeOverrides;
     await _setAttributeOverrides.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
   };
+
+  // // @ts-ignore Patching private method
+  // const __refresh = gb._refresh;
+  // // @ts-ignore Patching private method
+  // gb._refresh = async (props) => {
+  //   await __refresh.call(gb, props);
+  //   updateTabState("features", gb.getFeatures());
+  //   updateTabState("experiments", gb.getExperiments());
+  // }
 
   const {
     trackingCallback,

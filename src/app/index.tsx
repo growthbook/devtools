@@ -28,6 +28,28 @@ export const App = () => {
     undefined,
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "attributes");
+  const [features] = useTabState("features", {});
+  const [experiments] = useTabState("experiments", []);
+
+  const refresh = () => {
+    chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
+      let activeTab = tabs[0];
+      if (activeTab.id) {
+        await chrome.tabs.sendMessage(activeTab.id, {
+          type: "GB_REQUEST_REFRESH"
+        });
+      }
+    });
+  };
+  useEffect(() => {
+    refresh();
+    const interval = window.setInterval(() => {
+      if (!Object.keys(features).length && !experiments.length) {
+        refresh();
+      }
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     window.setTimeout(() => {
@@ -35,14 +57,6 @@ export const App = () => {
     }, 2000);
   }, []);
 
-  useEffect(() => {
-    chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-      let activeTab = tabs[0];
-      if (activeTab.id) {
-        chrome.tabs.sendMessage(activeTab.id, "GB_REQUEST_REFRESH");
-      }
-    });
-  }, []);
   return (
     <Theme
       accentColor="violet"
