@@ -51,8 +51,7 @@ export const App = () => {
     >
       <div id="main">
         <div
-          className="shadow-sm fixed top-0 px-3 pt-2 w-full bg-zinc-50"
-          style={{ zIndex: 100000 }}
+          className="shadow-sm fixed top-0 px-3 pt-2 w-full bg-zinc-50 z-front"
         >
           <Flex justify="between">
             <h1 className="text-lg">

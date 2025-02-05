@@ -1,4 +1,6 @@
 @import "@radix-ui/themes/styles.css";
+@import "@radix-ui/colors/violet.css";
+@import "@radix-ui/colors/violet-alpha.css";
 @import "forms.css";
 
 @tailwind base;
@@ -55,17 +57,20 @@
   @apply px-3 py-2 border border-gray-200 rounded-lg bg-white;
 }
 
-/*todo: remove? */
 .featureCard {
-  @apply p-1.5 border border-violet-200 rounded-md bg-white shadow-sm;
+  @apply pl-3 pr-6 py-1 border-l-2 border-gray-300;
   cursor: pointer;
   scroll-margin-top: 100px;
 }
 .featureCard:not(.selected):hover {
-  @apply border-violet-400;
+  @apply border-violet-a8 bg-violet-a2;
 }
 .featureCard.selected {
-  @apply border-violet-400 bg-violet-100;
+  @apply border-violet-8 bg-violet-3 sticky top-[100px] z-front;
+}
+
+.featureDetail {
+  @apply px-4 py-2 mt-[7px] mb-3 min-h-[calc(100vh-120px)] bg-violet-3;
 }
 
 .accordionCard {
