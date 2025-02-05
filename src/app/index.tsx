@@ -36,7 +36,7 @@ export const App = () => {
       let activeTab = tabs[0];
       if (activeTab.id) {
         await chrome.tabs.sendMessage(activeTab.id, {
-          type: "GB_REQUEST_REFRESH"
+          type: "GB_REQUEST_REFRESH",
         });
       }
     });

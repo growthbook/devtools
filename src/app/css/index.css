@@ -66,11 +66,11 @@
   @apply border-violet-a8 bg-violet-a2;
 }
 .featureCard.selected {
-  @apply border-violet-8 bg-violet-3 sticky top-[100px] z-front;
+  @apply border-violet-8 bg-violet-2 sticky top-[100px] z-front;
 }
 
 .featureDetail {
-  @apply px-4 py-2 mt-[7px] mb-3 min-h-[calc(100vh-120px)] bg-violet-3;
+  @apply px-4 py-2 mt-[7px] mb-3 min-h-[calc(100vh-120px)] bg-violet-2;
 }
 
 .accordion .trigger {
