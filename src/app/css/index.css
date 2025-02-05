@@ -1,0 +1,143 @@
+@import "@radix-ui/themes/styles.css";
+@import "@radix-ui/colors/violet.css";
+@import "@radix-ui/colors/violet-alpha.css";
+@import "forms.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-weight-light: 200;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+
+  --color-background: var(--accent-2);
+  --color-panel-solid: #ffffff;
+  --color-panel-translucent: rgba(255, 255, 255, 0.7);
+  --color-surface: rgba(255, 255, 255, 0.85);
+  --color-overlay: var(--black-a6);
+  --color-landmark: var(--indigo-12);
+  --color-text-high: var(--indigo-12);
+  --color-text-mid: rgba(31, 45, 92, 0.85);
+  --color-text-low: rgba(31, 45, 92, 0.65);
+  --color-text-disabled: rgba(31, 45, 92, 0.45);
+}
+
+.radix-themes {
+  --cursor-button: pointer;
+}
+
+.label {
+  font-size: var(--font-size-3);
+  @apply text-gray-800;
+}
+.label.lg {
+  font-size: var(--font-size-4);
+  @apply font-semibold text-gray-800;
+}
+.text-2xs {
+  font-size: 9px;
+  line-height: 12px;
+}
+.text-2xs-important {
+  font-size: 9px !important;
+  line-height: 12px !important;
+}
+.ModalBody {
+  width: 400px;
+}
+
+.mono {
+  font-family: monospace;
+}
+
+.box {
+  @apply px-3 py-2 border border-gray-200 rounded-lg bg-white;
+}
+
+.featureCard {
+  @apply pl-3 pr-6 py-1 border-l-2 border-gray-300;
+  cursor: pointer;
+  scroll-margin-top: 100px;
+}
+.featureCard:not(.selected):hover {
+  @apply border-violet-a8 bg-violet-a2;
+}
+.featureCard.selected {
+  @apply border-violet-8 bg-violet-3 sticky top-[100px] z-front;
+}
+
+.featureDetail {
+  @apply px-4 py-2 mt-[7px] mb-3 min-h-[calc(100vh-120px)] bg-violet-3;
+}
+
+.accordion .trigger {
+  cursor: pointer;
+}
+.accordionCard {
+  @apply border border-violet-200 rounded-md bg-white shadow-sm;
+  cursor: pointer;
+}
+@keyframes slideDown { from { height: 0; } to { height: var(--radix-accordion-content-height); } }
+@keyframes slideUp { from { height: var(--radix-accordion-content-height); } to { height: 0; } }
+.accordion .accordionInner[data-state="open"], .accordionCard .accordionInner[data-state="open"] { animation: slideDown 150ms cubic-bezier(0.87, 0, 0.13, 1) forwards; }
+.accordion .accordionInner[data-state="closed"], .accordionCard .accordionInner[data-state="closed"] { animation: slideUp 150ms cubic-bezier(0.87, 0, 0.13, 1) forwards; }
+.accordion .trigger .caret {
+  display: inline-block;
+  transition: 75ms transform;
+}
+.accordion .trigger[data-state="open"] .caret {
+  transform: rotate(90deg);
+}
+
+.accordionCard.selected {
+  @apply border-violet-400;
+}
+.accordionCard.active {
+  @apply border-orange-500 bg-orange-200 bg-opacity-50;
+}
+
+.shadow-sm-up {
+  --tw-shadow: 0 -1px 2px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 -1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.rt-SwitchRoot::before {
+  transition-duration: 60ms, 50ms, 50ms, 50ms !important;
+  cursor: unset;
+}
+.rt-SwitchThumb {
+  transition: transform 50ms cubic-bezier(0.45, 0.05, 0.55, 0.95), box-shadow 50ms ease-in-out;
+}
+
+/* Prevent modal jumping when inner content changes shape and weird scroll bar */
+.rt-BaseDialogScroll {
+  position: relative;
+}
+
+/* Fix Radix modal flicker bug (https://github.com/radix-ui/primitives/issues/3286) */
+.rt-BaseDialogOverlay {
+  &:where([data-state="closed"]) {
+    animation: rt-dialog-overlay-no-op 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  &:where([data-state="open"])::before {
+    animation: rt-fade-in 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  &:where([data-state="closed"])::before {
+    opacity: 0;
+    animation: rt-fade-out 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+}
+.rt-BaseDialogContent {
+  &:where([data-state="open"]) {
+    animation: rt-dialog-content-show 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  &:where([data-state="closed"]) {
+    opacity: 0;
+    animation: rt-dialog-content-hide 100ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+}

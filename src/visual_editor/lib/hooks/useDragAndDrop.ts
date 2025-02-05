@@ -1,9 +1,12 @@
 import { DeclarativeMutation } from "dom-mutator";
 import { RefObject, useCallback, useEffect, useState } from "react";
-import { CONTAINER_ID } from "../..";
-import getSelector from "../getSelector";
-import { onDrag, teardown as draggingTeardown } from "../moveElement";
-import useGhostElement from "./useGhostElement";
+import { CONTAINER_ID } from "@/visual_editor";
+import useGhostElement from "@/visual_editor/lib/hooks/useGhostElement";
+import getSelector from "@/visual_editor/lib/getSelector";
+import {
+  onDrag,
+  teardown as draggingTeardown,
+} from "@/visual_editor/lib/moveElement";
 
 type UseDragAndDropHook = (args: {
   isEnabled?: boolean;
