@@ -5,10 +5,11 @@ import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
 import {Avatar, Button, Link, Switch} from "@radix-ui/themes";
-import {PiFlagBold, PiFlaskBold} from "react-icons/pi";
+import {PiCaretRightFill, PiCircleFill, PiFlagBold, PiFlaskBold} from "react-icons/pi";
 import clsx from "clsx";
 import {Prism} from "react-syntax-highlighter";
 import {ghcolors as codeTheme} from "react-syntax-highlighter/dist/esm/styles/prism";
+import * as Accordion from "@radix-ui/react-accordion";
 const customTheme = {
   padding: "5px",
   margin: 0,
@@ -42,6 +43,12 @@ export default function FeaturesTab() {
     : undefined;
 
   const [overrideFeature, setOverrideFeature] = useState(false);
+
+  const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
+  const [selectedEid, setSelectedEid] = useTabState<string | undefined>(
+    "selectedEid",
+    undefined,
+  );
 
   const clickFeature = (fid: string) =>
     setSelectedFid(selectedFid !== fid ? fid : undefined);
@@ -83,8 +90,16 @@ export default function FeaturesTab() {
   return (
     <>
       <div className="max-w-[900px] mx-auto">
-        <div className="w-[50%] max-w-[450px] pr-2">
-          <div className="label lg mb-2">Features</div>
+        <div className="w-[45%] max-w-[405px] pb-3">
+          <div className="label lg h-[40px] flex items-top">
+            <Avatar
+              size="2"
+              radius="full"
+              mr="2"
+              fallback={<PiFlagBold />}
+            />
+            Features
+          </div>
           {Object.keys(features).map((fid, i) => {
             const { feature, meta, linkedExperiments, evaluatedFeature, isForced } =
               getFeatureDetails({
@@ -100,58 +115,48 @@ export default function FeaturesTab() {
               <div
                 id={`featuresTab_featureList_${fid}`}
                 key={fid}
-                className={clsx("featureCard relative mb-2", {
+                className={clsx("featureCard relative ml-3 mb-2", {
                   selected: selectedFid === fid,
                 })}
                 onClick={() => clickFeature(fid)}
               >
-                <div className="flex gap-2 items-center">
-                  <Avatar
-                    color={isForced ? "amber" : undefined}
-                    variant={isForced ? "solid" : "soft"}
-                    size="1"
-                    radius="full"
-                    fallback={
-                      <span className={isForced ? "text-amber-800" : undefined}>
-                        <PiFlagBold />
-                      </span>
-                    }
-                  />
-                  <code className="text-xs text-gray-800">{fid}</code>
+                <div className="flex gap-2 items-start">
+                  <span className="text-xs text-gray-800 font-semibold">{fid}</span>
                   {linkedExperiments.length > 0 && (
-                    <PiFlaskBold />
+                    <PiFlaskBold className="mt-0.5" size={14} />
                   )}
-                  <div className="flex-1" />
-                  <code
+                  {isForced && (
+                    <div
+                      className="flex-1 text-xs font-semibold -mr-2 text-right text-amber-600">
+                      Override
+                    </div>
+                  )}
+                </div>
+                <div className="text-slate-700">
+                  <div
                     className={clsx(
-                      "flex-shrink-0 text-slate-800 line-clamp-3 max-w-[35%]",
+                      "text-xs line-clamp-1 mt-0.5",
                       {
-                        "text-right text-xs": valueStr.length < 10,
-                        "text-left text-2xs": valueStr.length >= 10,
-                        "inline-block px-1 bg-rose-100 rounded-md text-rose-900":
+                        "text-gray-600 uppercase":
                           valueStr === "false",
-                        "inline-block px-1 bg-blue-100 rounded-md text-blue-900":
+                        "text-teal-600 uppercase":
                           valueStr === "true",
-                        "inline-block px-1 bg-gray-100 rounded-md text-gray-900":
+                        "text-gray-800 uppercase":
                           valueStr === "null",
                       },
                     )}
                   >
+                    {(valueStr === "true" || valueStr === "false") && (<PiCircleFill className="inline-block mr-0.5 -mt-0.5" />)}
                     {valueStr}
-                  </code>
-                </div>
-                {isForced && (
-                  <div className="pointer-events-none absolute top-[-6px] right-[-12px] px-1 bg-white shadow-sm rounded-md text-2xs mr-1 font-bold uppercase text-amber-600">
-                    Override
                   </div>
-                )}
+                </div>
               </div>
             );
           })}
         </div>
 
         <div
-          className="w-[50%] max-w-[450px] overflow-y-auto pl-1 pr-3 py-2 fixed left-[50%]"
+          className="w-[55%] max-w-[495px] overflow-y-auto pr-3 py-2 fixed left-[45%]"
           style={{
             zIndex: 1000,
             top: 85,
@@ -159,72 +164,94 @@ export default function FeaturesTab() {
           }}
         >
           {!!selectedFid && !!selectedFeature && (
-            <div key={`selected_${selectedFid}`}>
+            <div className="featureDetail" key={`selected_${selectedFid}`}>
               <div className="flex items-center gap-2 mb-1">
-                <Avatar size="2" radius="full" fallback={<PiFlagBold />} />
                 <h2 className="font-bold">{selectedFid}</h2>
               </div>
 
-              <div className="box">
-                <div className="my-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="label">Current value</div>
-                    {(selectedFeature?.valueType !== "boolean" || overrideFeature) && (
-                      <label className="flex items-center cursor-pointer select-none">
-                        <span className={clsx("text-xs mr-1 font-bold uppercase", {
-                          "text-amber-600": overrideFeature,
-                          "text-gray-600": !overrideFeature,
-                        })}>Override</span>
-                        <Switch
-                          radius="small"
-                          color="amber"
-                          checked={overrideFeature}
-                          onCheckedChange={(v) => {
-                            setOverrideFeature(v);
-                            if (!v) unsetForcedFeature(selectedFid);
-                          }}
-                        />
-                      </label>
-                    )}
-                  </div>
-                  {overrideFeature || selectedFeature?.valueType === "boolean" ? (
-                    <EditableValueField
-                      value={selectedFeature?.evaluatedFeature?.result?.value}
-                      setValue={(v) => {
-                        setForcedFeature(selectedFid, v);
-                        setOverrideFeature(true);
-                      }}
-                      valueType={selectedFeature?.valueType}
-                    />
-                  ) : (
-                    <ValueField
-                      value={selectedFeature?.evaluatedFeature?.result?.value}
-                      valueType={selectedFeature?.valueType}
-                    />
+              <div className="my-1">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="label">Current value</div>
+                  {(selectedFeature?.valueType !== "boolean" || overrideFeature) && (
+                    <label className="flex items-center cursor-pointer select-none">
+                      <Switch
+                        radius="medium"
+                        color="amber"
+                        checked={overrideFeature}
+                        onCheckedChange={(v) => {
+                          setOverrideFeature(v);
+                          if (!v) unsetForcedFeature(selectedFid);
+                        }}
+                      />
+                      <span className={clsx("text-xs ml-1", {
+                        "text-amber-600": overrideFeature,
+                        "text-gray-600": !overrideFeature,
+                      })}>Override</span>
+                    </label>
                   )}
                 </div>
+                {overrideFeature || selectedFeature?.valueType === "boolean" ? (
+                  <EditableValueField
+                    value={selectedFeature?.evaluatedFeature?.result?.value}
+                    setValue={(v) => {
+                      setForcedFeature(selectedFid, v);
+                      setOverrideFeature(true);
+                    }}
+                    valueType={selectedFeature?.valueType}
+                  />
+                ) : (
+                  <ValueField
+                    value={selectedFeature?.evaluatedFeature?.result?.value}
+                    valueType={selectedFeature?.valueType}
+                  />
+                )}
+              </div>
+
+              {(selectedFeature?.linkedExperiments || []).length ? (
+                <div className="mt-4">
+                  <div>Linked Experiments</div>
+                  {selectedFeature.linkedExperiments.map((experiment) => (
+                    <div>
+                      <Link size="2" role="button" href="#" onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentTab("experiments");
+                        setSelectedEid(experiment.key);
+                      }}>
+                        <PiFlaskBold className="inline-block mr-0.5" size={14} />
+                        {experiment.key}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
 
                 {selectedFeature?.evaluatedFeature?.debug ? (
-                  <>
-                    <h2 className="label font-bold">Debug log</h2>
-                    <Prism
-                      language="json"
-                      style={codeTheme}
-                      customStyle={{...customTheme, maxHeight: 120}}
-                      codeTagProps={{
-                        className: "text-2xs-important !whitespace-pre-wrap",
-                      }}
-                    >
-                        {JSON.stringify(
-                          {
-                            result: selectedFeature.evaluatedFeature.result,
+                  <Accordion.Root
+                    className="accordion mt-2"
+                    type="single"
+                    collapsible
+                  >
+                    <Accordion.Item value="debug-log">
+                      <Accordion.Trigger className="trigger mb-0.5">
+                        <Link size="2" role="button" className="hover:underline">
+                          <PiCaretRightFill className="caret mr-0.5" size={12} />
+                          Debug log
+                        </Link>
+                      </Accordion.Trigger>
+                      <Accordion.Content className="accordionInner overflow-hidden w-full">
+                        {/*todo: replace with logger display component?*/}
+                        <ValueField
+                          value={{
                             debug: selectedFeature.evaluatedFeature.debug,
-                          }
-                        , null, 2)},
-                    </Prism>
-                  </>
+                            result: selectedFeature.evaluatedFeature.result,
+                          }}
+                          valueType="json"
+                          maxHeight={200}
+                        />
+                      </Accordion.Content>
+                    </Accordion.Item>
+                  </Accordion.Root>
                 ): null}
-
 
                 <hr className="my-4"/>
                 <h2 className="label font-bold">Rules</h2>
@@ -239,18 +266,11 @@ export default function FeaturesTab() {
 
                 <div className="my-2">
                   <div className="label mb-1">Definition</div>
-                  <Prism
-                    language="json"
-                    style={codeTheme}
-                    customStyle={{...customTheme, maxHeight: 120}}
-                    codeTagProps={{
-                      className: "text-2xs-important !whitespace-pre-wrap",
-                    }}
-                  >
-                    {JSON.stringify(selectedFeature.feature, null, 2)}
-                  </Prism>
+                  <ValueField
+                    value={selectedFeature.feature}
+                    valueType="json"
+                  />
                 </div>
-              </div>
             </div>
           )}
         </div>
@@ -262,9 +282,11 @@ export default function FeaturesTab() {
 function ValueField({
   value,
   valueType = "string",
+  maxHeight = 120,
 }:{
-  value: string;
-  valueType?: ValueType
+  value: any;
+  valueType?: ValueType;
+  maxHeight?: number;
 }) {
   const formattedValue = value !== undefined ?
     JSON.stringify(value, null, 2) :
@@ -276,7 +298,7 @@ function ValueField({
           <Prism
             language="json"
             style={codeTheme}
-            customStyle={{ ...customTheme, maxHeight: 120 }}
+            customStyle={{ ...customTheme, maxHeight }}
             codeTagProps={{
               className: "text-2xs-important !whitespace-pre-wrap",
             }}
@@ -284,20 +306,27 @@ function ValueField({
             {formattedValue}
           </Prism>
         </div>
+      ) : ["false", "true", "null"].includes(formattedValue) ? (
+        <div className="text-slate-700">
+          <div
+            className={clsx(
+              "text-sm",
+              {
+                "text-gray-600 uppercase":
+                  formattedValue === "false",
+                "text-teal-700 uppercase":
+                  formattedValue === "true",
+                "text-gray-800 uppercase":
+                  formattedValue === "null",
+              },
+            )}
+          >
+            {(formattedValue === "true" || formattedValue === "false") && (<PiCircleFill className="inline-block mr-0.5 -mt-0.5" />)}
+            {formattedValue}
+          </div>
+        </div>
       ) : (
-        <code
-          className={clsx(
-            "text-slate-800 text-sm whitespace-pre-wrap mono",
-            {
-              "inline-block px-1 bg-rose-100 rounded-md text-rose-900":
-                formattedValue === "false",
-              "inline-block px-1 bg-blue-100 rounded-md text-blue-900":
-                formattedValue === "true",
-              "inline-block px-1 bg-gray-100 rounded-md text-gray-900":
-                formattedValue === "null",
-            },
-          )}
-        >
+        <code className="text-slate-700 text-sm whitespace-pre-wrap">
           {formattedValue}
         </code>
       )}
@@ -367,19 +396,22 @@ function EditableValueField({
               setValue(v);
             }}
           />
-          <code
-            className={clsx(
-              "text-slate-800 text-sm whitespace-pre-wrap mono",
-              {
-                "inline-block px-1 bg-rose-100 rounded-md text-rose-900":
-                  value === false,
-                "inline-block px-1 bg-blue-100 rounded-md text-blue-900":
-                  value === true,
-              },
-            )}
-          >
-            {JSON.stringify(value)}
-          </code>
+          <div className="text-slate-700">
+            <div
+              className={clsx(
+                "text-sm",
+                {
+                  "text-gray-600 uppercase":
+                    value === false,
+                  "text-teal-700 uppercase":
+                    value === true,
+                },
+              )}
+            >
+              {(value === true || value === false) && (<PiCircleFill className="inline-block mr-0.5 -mt-0.5" />)}
+              {JSON.stringify(value)}
+            </div>
+          </div>
         </label>
       ) : (
         <textarea
@@ -455,7 +487,11 @@ function getFeatureDetails({
   }
 
   const linkedExperiments = (feature?.rules || [])
-    .filter((rule) => rule.variations);
+    .filter((rule) => rule.variations)
+    .map((rule) => ({
+      key: rule.key ?? fid,
+      ...rule,
+    }))
 
   const evaluatedFeature = evaluatedFeatures?.[fid];
   const isForced = forcedFeatures ? fid in forcedFeatures : false;

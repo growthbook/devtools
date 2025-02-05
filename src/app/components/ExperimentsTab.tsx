@@ -26,7 +26,12 @@ export default function ExperimentsTab() {
   const [features, setFeatures] = useTabState<
     Record<string, FeatureDefinition>
   >("features", {});
+
+  // todo: remove this line:
   const featureExperiments = getFeatureExperiments(features);
+
+  // dedupe, merge FF + auto experiments
+  const processedExperiments = getConsolidatedExperiments(experiments, features);
 
   const [forcedVariations, setForcedVariations] = useTabState<
     Record<string, any>
@@ -399,11 +404,23 @@ export function getFeatureExperiments(features: Record<string, FeatureDefinition
       if (rule.variations) {
         // @ts-ignore
         experiments.push({
-          key: fid,
+          key: rule.key ?? fid,
           ...rule,
         });
       }
     }
   }
   return experiments;
+}
+
+export function getConsolidatedExperiments(
+  experiments: AutoExperiment[],
+  features: Record<string, FeatureDefinition>,
+) {
+  const featureExperiments = getFeatureExperiments(features);
+  const allExperiments = [...experiments, ...featureExperiments];
+
+  const result: Record<string, Experiment<any>> = {};
+
+
 }

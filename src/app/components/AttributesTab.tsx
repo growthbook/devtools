@@ -251,8 +251,7 @@ export default function AttributesTab() {
 
       {hasAttributes && (
         <div
-          className="flex items-center justify-center shadow-sm-up fixed bottom-0 left-0 px-3 py-2 w-full bg-zinc-50"
-          style={{height: 50, zIndex: 100000}}
+          className="flex items-center justify-center shadow-sm-up fixed bottom-0 left-0 px-3 py-2 w-full h-[50px] z-front bg-zinc-50"
         >
           <div className="w-full max-w-[900px] mx-auto flex items-center">
             <div className="w-[50%] pr-2 flex items-center">
