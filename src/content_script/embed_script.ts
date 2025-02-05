@@ -75,11 +75,18 @@ function pushAppUpdates() {
     pushSDKUpdate(gb);
     if (gb) {
       subscribeToSdkChanges(gb);
-      updateTabState("attributes", gb.getAttributes());
       updateTabState("features", gb.getFeatures());
       updateTabState("experiments", gb.getExperiments());
-      updateTabState("forcedFeatures", gb.getForcedFeatures());
-      updateTabState("forcedVariations", gb.getForcedVariations());
+
+      if (Object.keys(gb.getAttributes()).length) {
+        updateTabState("attributes", gb.getAttributes());
+      }
+      if (Object.keys(gb.getForcedFeatures()).length) {
+        updateTabState("forcedFeatures", gb.getForcedFeatures());
+      }
+      if (Object.keys(gb.getForcedVariations()).length) {
+        updateTabState("forcedVariations", gb.getForcedVariations());
+      }
     }
   });
 }
