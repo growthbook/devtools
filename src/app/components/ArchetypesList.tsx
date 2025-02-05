@@ -1,5 +1,4 @@
 import * as Accordion from "@radix-ui/react-accordion";
-
 import React from "react";
 import { Archetype } from "../tempGbExports";
 import {Avatar, Badge, Container, Flex, Text} from "@radix-ui/themes";

@@ -5,10 +5,11 @@ import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
 import {Avatar, Button, Link, Switch} from "@radix-ui/themes";
-import {PiCircleFill, PiFlagBold, PiFlaskBold} from "react-icons/pi";
+import {PiCaretRightFill, PiCircleFill, PiFlagBold, PiFlaskBold} from "react-icons/pi";
 import clsx from "clsx";
 import {Prism} from "react-syntax-highlighter";
 import {ghcolors as codeTheme} from "react-syntax-highlighter/dist/esm/styles/prism";
+import * as Accordion from "@radix-ui/react-accordion";
 const customTheme = {
   padding: "5px",
   margin: 0,
@@ -42,6 +43,12 @@ export default function FeaturesTab() {
     : undefined;
 
   const [overrideFeature, setOverrideFeature] = useState(false);
+
+  const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
+  const [selectedEid, setSelectedEid] = useTabState<string | undefined>(
+    "selectedEid",
+    undefined,
+  );
 
   const clickFeature = (fid: string) =>
     setSelectedFid(selectedFid !== fid ? fid : undefined);
@@ -116,7 +123,7 @@ export default function FeaturesTab() {
                 <div className="flex gap-2 items-start">
                   <span className="text-xs text-gray-800 font-semibold">{fid}</span>
                   {linkedExperiments.length > 0 && (
-                    <PiFlaskBold/>
+                    <PiFlaskBold className="mt-0.5" size={14} />
                   )}
                   {isForced && (
                     <div
@@ -132,7 +139,7 @@ export default function FeaturesTab() {
                       {
                         "text-gray-600 uppercase":
                           valueStr === "false",
-                        "text-teal-700 uppercase":
+                        "text-teal-600 uppercase":
                           valueStr === "true",
                         "text-gray-800 uppercase":
                           valueStr === "null",
@@ -162,65 +169,89 @@ export default function FeaturesTab() {
                 <h2 className="font-bold">{selectedFid}</h2>
               </div>
 
-                <div className="my-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="label">Current value</div>
-                    {(selectedFeature?.valueType !== "boolean" || overrideFeature) && (
-                      <label className="flex items-center cursor-pointer select-none">
-                        <Switch
-                          radius="medium"
-                          color="amber"
-                          checked={overrideFeature}
-                          onCheckedChange={(v) => {
-                            setOverrideFeature(v);
-                            if (!v) unsetForcedFeature(selectedFid);
-                          }}
-                        />
-                        <span className={clsx("text-xs ml-1", {
-                          "text-amber-600": overrideFeature,
-                          "text-gray-600": !overrideFeature,
-                        })}>Override</span>
-                      </label>
-                    )}
-                  </div>
-                  {overrideFeature || selectedFeature?.valueType === "boolean" ? (
-                    <EditableValueField
-                      value={selectedFeature?.evaluatedFeature?.result?.value}
-                      setValue={(v) => {
-                        setForcedFeature(selectedFid, v);
-                        setOverrideFeature(true);
-                      }}
-                      valueType={selectedFeature?.valueType}
-                    />
-                  ) : (
-                    <ValueField
-                      value={selectedFeature?.evaluatedFeature?.result?.value}
-                      valueType={selectedFeature?.valueType}
-                    />
+              <div className="my-1">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="label">Current value</div>
+                  {(selectedFeature?.valueType !== "boolean" || overrideFeature) && (
+                    <label className="flex items-center cursor-pointer select-none">
+                      <Switch
+                        radius="medium"
+                        color="amber"
+                        checked={overrideFeature}
+                        onCheckedChange={(v) => {
+                          setOverrideFeature(v);
+                          if (!v) unsetForcedFeature(selectedFid);
+                        }}
+                      />
+                      <span className={clsx("text-xs ml-1", {
+                        "text-amber-600": overrideFeature,
+                        "text-gray-600": !overrideFeature,
+                      })}>Override</span>
+                    </label>
                   )}
                 </div>
+                {overrideFeature || selectedFeature?.valueType === "boolean" ? (
+                  <EditableValueField
+                    value={selectedFeature?.evaluatedFeature?.result?.value}
+                    setValue={(v) => {
+                      setForcedFeature(selectedFid, v);
+                      setOverrideFeature(true);
+                    }}
+                    valueType={selectedFeature?.valueType}
+                  />
+                ) : (
+                  <ValueField
+                    value={selectedFeature?.evaluatedFeature?.result?.value}
+                    valueType={selectedFeature?.valueType}
+                  />
+                )}
+              </div>
+
+              {(selectedFeature?.linkedExperiments || []).length ? (
+                <div className="mt-4">
+                  <div>Linked Experiments</div>
+                  {selectedFeature.linkedExperiments.map((experiment) => (
+                    <div>
+                      <Link size="2" role="button" href="#" onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentTab("experiments");
+                        setSelectedEid(experiment.key);
+                      }}>
+                        <PiFlaskBold className="inline-block mr-0.5" size={14} />
+                        {experiment.key}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
 
                 {selectedFeature?.evaluatedFeature?.debug ? (
-                  <>
-                    <h2 className="label font-bold">Debug log</h2>
-                    <Prism
-                      language="json"
-                      style={codeTheme}
-                      customStyle={{...customTheme, maxHeight: 120}}
-                      codeTagProps={{
-                        className: "text-2xs-important !whitespace-pre-wrap",
-                      }}
-                    >
-                        {JSON.stringify(
-                          {
-                            result: selectedFeature.evaluatedFeature.result,
+                  <Accordion.Root
+                    className="accordion mt-2"
+                    type="single"
+                    collapsible
+                  >
+                    <Accordion.Item value="debug-log">
+                      <Accordion.Trigger className="trigger mb-0.5">
+                        <Link size="2" role="button" className="hover:underline">
+                          <PiCaretRightFill className="caret mr-0.5" size={12} />
+                          Debug log
+                        </Link>
+                      </Accordion.Trigger>
+                      <Accordion.Content className="accordionInner overflow-hidden w-full">
+                        {/*todo: replace with logger display component?*/}
+                        <ValueField
+                          value={{
                             debug: selectedFeature.evaluatedFeature.debug,
-                          }
-                        , null, 2)},
-                    </Prism>
-                  </>
+                            result: selectedFeature.evaluatedFeature.result,
+                          }}
+                          valueType="json"
+                          maxHeight={200}
+                        />
+                      </Accordion.Content>
+                    </Accordion.Item>
+                  </Accordion.Root>
                 ): null}
-
 
                 <hr className="my-4"/>
                 <h2 className="label font-bold">Rules</h2>
@@ -235,16 +266,10 @@ export default function FeaturesTab() {
 
                 <div className="my-2">
                   <div className="label mb-1">Definition</div>
-                  <Prism
-                    language="json"
-                    style={codeTheme}
-                    customStyle={{...customTheme, maxHeight: 120}}
-                    codeTagProps={{
-                      className: "text-2xs-important !whitespace-pre-wrap",
-                    }}
-                  >
-                    {JSON.stringify(selectedFeature.feature, null, 2)}
-                  </Prism>
+                  <ValueField
+                    value={selectedFeature.feature}
+                    valueType="json"
+                  />
                 </div>
             </div>
           )}
@@ -257,9 +282,11 @@ export default function FeaturesTab() {
 function ValueField({
   value,
   valueType = "string",
+  maxHeight = 120,
 }:{
-  value: string;
-  valueType?: ValueType
+  value: any;
+  valueType?: ValueType;
+  maxHeight?: number;
 }) {
   const formattedValue = value !== undefined ?
     JSON.stringify(value, null, 2) :
@@ -271,7 +298,7 @@ function ValueField({
           <Prism
             language="json"
             style={codeTheme}
-            customStyle={{ ...customTheme, maxHeight: 120 }}
+            customStyle={{ ...customTheme, maxHeight }}
             codeTagProps={{
               className: "text-2xs-important !whitespace-pre-wrap",
             }}
@@ -460,7 +487,11 @@ function getFeatureDetails({
   }
 
   const linkedExperiments = (feature?.rules || [])
-    .filter((rule) => rule.variations);
+    .filter((rule) => rule.variations)
+    .map((rule) => ({
+      key: rule.key ?? fid,
+      ...rule,
+    }))
 
   const evaluatedFeature = evaluatedFeatures?.[fid];
   const isForced = forcedFeatures ? fid in forcedFeatures : false;

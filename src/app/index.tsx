@@ -116,19 +116,15 @@ export const App = () => {
                 <div className="flex items-end mx-auto w-[930px]">
                   <div className="mx-2" />
                   <Tabs.Trigger value="attributes">
-                    <PiUserBold className="mr-1" />
                     Attributes
                   </Tabs.Trigger>
                   <Tabs.Trigger value="features">
-                    <PiFlagBold className="mr-1" />
                     Features
                   </Tabs.Trigger>
                   <Tabs.Trigger value="experiments">
-                    <PiFlaskBold className="mr-1" />
                     Experiments
                   </Tabs.Trigger>
                   <Tabs.Trigger value="logs">
-                    <PiListChecksBold className="mr-1" />
                     Event Logs
                   </Tabs.Trigger>
                   <div className="mx-2" />

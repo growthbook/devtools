@@ -399,7 +399,7 @@ export function getFeatureExperiments(features: Record<string, FeatureDefinition
       if (rule.variations) {
         // @ts-ignore
         experiments.push({
-          key: fid,
+          key: rule.key ?? fid,
           ...rule,
         });
       }
