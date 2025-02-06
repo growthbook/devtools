@@ -143,7 +143,13 @@ export default function FeaturesTab() {
                   {valueStr}
                 </div>
                 {isForced && (
-                  <div className="bg-amber-600 rotate-45 absolute top-[-10px] right-[-10px] w-[20px] h-[20px]" />
+                  <div
+                    className="bg-amber-600 absolute top-0 right-0 w-[14px] h-[14px]"
+                    style={{
+                      aspectRatio: 1,
+                      clipPath: "polygon(0 0, 100% 100%, 100% 0)",
+                    }}
+                  />
                 )}
               </div>
             );

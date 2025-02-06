@@ -58,7 +58,7 @@
 }
 
 .featureCard {
-  @apply pl-3 pr-6 py-1 border-l-2 border-b border-slate-a4 shadow-sm relative overflow-hidden;
+  @apply pl-3 pr-6 py-1 border-l-2 border-b border-slate-a4 shadow-sm relative;
   cursor: pointer;
   scroll-margin-top: 95px;
 }
