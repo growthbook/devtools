@@ -17,7 +17,7 @@ import ExperimentsTab from "./components/ExperimentsTab";
 import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
 import SettingsForm from "@/app/components/Settings";
-import {PiX, PiGearSix, PiUserBold, PiFlagBold, PiFlaskBold, PiListChecksBold} from "react-icons/pi";
+import {PiX, PiGearSix, PiUserFill, PiFlagFill, PiFlaskFill, PiListChecksBold} from "react-icons/pi";
 
 export const App = () => {
   const [showSdkDebug, setShowSdkDebug] = useState(false);
@@ -27,7 +27,7 @@ export const App = () => {
     "sdkFound",
     undefined,
   );
-  const [currentTab, setCurrentTab] = useTabState("currentTab", "attributes");
+  const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [features] = useTabState("features", {});
   const [experiments] = useTabState("experiments", []);
 
@@ -60,10 +60,11 @@ export const App = () => {
   return (
     <Theme
       accentColor="violet"
+      grayColor="slate"
       hasBackground={false}
       style={{ minHeight: "unset" }}
     >
-      <div id="main">
+      <div id="main" className="text-indigo-12">
         <div
           className="shadow-sm fixed top-0 px-3 pt-2 w-full bg-zinc-50 z-front"
         >
@@ -74,7 +75,7 @@ export const App = () => {
                 alt="GrowthBook"
                 className="w-[140px] inline-block mb-1 mr-2"
               />
-              <span className="text-gray-500 font-bold">DevTools</span>
+              <span className="font-bold text-slate-11">DevTools</span>
             </h1>
             <Flex>
               <Button
@@ -129,16 +130,20 @@ export const App = () => {
               <Tabs.List>
                 <div className="flex items-end mx-auto w-[930px]">
                   <div className="mx-2" />
-                  <Tabs.Trigger value="attributes">
-                    Attributes
-                  </Tabs.Trigger>
                   <Tabs.Trigger value="features">
+                    <PiFlagFill className="mr-1" />
                     Features
                   </Tabs.Trigger>
                   <Tabs.Trigger value="experiments">
+                    <PiFlaskFill className="mr-1" />
                     Experiments
                   </Tabs.Trigger>
+                  <Tabs.Trigger value="attributes">
+                    <PiUserFill className="mr-1" />
+                    Attributes
+                  </Tabs.Trigger>
                   <Tabs.Trigger value="logs">
+                    <PiListChecksBold className="mr-1" />
                     Event Logs
                   </Tabs.Trigger>
                   <div className="mx-2" />

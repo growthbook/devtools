@@ -1,13 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
-  // classes used by the embedding html
-  safelist: [
-    "w-[600px]",
-    "h-[450px]",
-    "relative",
-    "overflow-y-scroll",
-  ],
   theme: {
     fontSize: {
       xs: "12px",
@@ -63,7 +56,8 @@ module.exports = {
       // radix colors
       colors: {
         violet: generateRadixScale("violet"),
-        gray: generateRadixScale("gray"),
+        indigo: generateRadixScale("indigo"),
+        slate: generateRadixScale("slate"),
       },
       zIndex: {
         max: "2147483647",

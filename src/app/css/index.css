@@ -58,19 +58,25 @@
 }
 
 .featureCard {
-  @apply pl-3 pr-6 py-1 border-l-2 border-gray-300;
+  @apply pl-3 pr-6 py-1 border-l-2 border-slate-a3;
   cursor: pointer;
-  scroll-margin-top: 100px;
+  scroll-margin-top: 95px;
 }
 .featureCard:not(.selected):hover {
-  @apply border-violet-a8 bg-violet-a2;
+  @apply border-violet-a7 bg-violet-1;
 }
 .featureCard.selected {
-  @apply border-violet-8 bg-violet-2 sticky top-[100px] z-front;
+  @apply border-violet-9 bg-violet-2;
 }
 
 .featureDetail {
-  @apply px-4 py-2 mt-[7px] mb-3 min-h-[calc(100vh-120px)] bg-violet-2;
+  @apply mb-3 min-h-[calc(100vh-120px)] bg-violet-2;
+}
+.featureDetail .header {
+  @apply px-4 py-3 sticky top-0 z-center bg-violet-2 shadow-sm;
+}
+.featureDetail .content {
+  @apply px-4 py-2 mb-1;
 }
 
 .accordion .trigger {

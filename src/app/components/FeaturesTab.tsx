@@ -5,7 +5,7 @@ import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
 import {Avatar, Button, Link, Switch} from "@radix-ui/themes";
-import {PiCaretRightFill, PiCircleFill, PiFlagBold, PiFlaskBold} from "react-icons/pi";
+import {PiCaretRightFill, PiCircleFill, PiFlagBold, PiFlaskBold, PiPlusSquareBold} from "react-icons/pi";
 import clsx from "clsx";
 import {Prism} from "react-syntax-highlighter";
 import {ghcolors as codeTheme} from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -50,6 +50,8 @@ export default function FeaturesTab() {
     undefined,
   );
 
+  const [expandLinks, setExpandLinks] = useState(false);
+
   const clickFeature = (fid: string) =>
     setSelectedFid(selectedFid !== fid ? fid : undefined);
 
@@ -64,6 +66,10 @@ export default function FeaturesTab() {
     setForcedFeatures(newForcedFeatures);
     setOverrideFeature(false);
   }
+
+  useEffect(() => {
+    setExpandLinks(false);
+  }, [selectedFid, setExpandLinks]);
 
   useEffect(() => {
     if (selectedFid) {
@@ -91,15 +97,6 @@ export default function FeaturesTab() {
     <>
       <div className="max-w-[900px] mx-auto">
         <div className="w-[45%] max-w-[405px] pb-3">
-          <div className="label lg h-[40px] flex items-top">
-            <Avatar
-              size="2"
-              radius="full"
-              mr="2"
-              fallback={<PiFlagBold />}
-            />
-            Features
-          </div>
           {Object.keys(features).map((fid, i) => {
             const { feature, meta, linkedExperiments, evaluatedFeature, isForced } =
               getFeatureDetails({
@@ -115,13 +112,13 @@ export default function FeaturesTab() {
               <div
                 id={`featuresTab_featureList_${fid}`}
                 key={fid}
-                className={clsx("featureCard relative ml-3 mb-2", {
+                className={clsx("featureCard relative ml-1 mb-2", {
                   selected: selectedFid === fid,
                 })}
                 onClick={() => clickFeature(fid)}
               >
                 <div className="flex gap-2 items-start">
-                  <span className="text-xs text-gray-800 font-semibold">{fid}</span>
+                  <span className="text-xs text-indigo-12 font-semibold">{fid}</span>
                   {linkedExperiments.length > 0 && (
                     <PiFlaskBold className="mt-0.5" size={14} />
                   )}
@@ -132,7 +129,7 @@ export default function FeaturesTab() {
                     </div>
                   )}
                 </div>
-                <div className="text-slate-700">
+                <div className="text-indigo-12">
                   <div
                     className={clsx(
                       "text-xs line-clamp-1 mt-0.5",
@@ -146,7 +143,7 @@ export default function FeaturesTab() {
                       },
                     )}
                   >
-                    {(valueStr === "true" || valueStr === "false") && (<PiCircleFill className="inline-block mr-0.5 -mt-0.5" />)}
+                    {(valueStr === "true" || valueStr === "false") && (<PiCircleFill className="inline-block mr-1 -mt-0.5" size={8} />)}
                     {valueStr}
                   </div>
                 </div>
@@ -156,19 +153,54 @@ export default function FeaturesTab() {
         </div>
 
         <div
-          className="w-[55%] max-w-[495px] overflow-y-auto pr-3 py-2 fixed left-[45%]"
+          className="w-[55%] max-w-[495px] overflow-y-auto pr-3 pb-2 fixed left-[45%]"
           style={{
             zIndex: 1000,
-            top: 85,
-            height: "calc(100vh - 85px)",
+            top: 95,
+            height: "calc(100vh - 95px)",
           }}
         >
           {!!selectedFid && !!selectedFeature && (
             <div className="featureDetail" key={`selected_${selectedFid}`}>
-              <div className="flex items-center gap-2 mb-1">
+              <div className="header">
                 <h2 className="font-bold">{selectedFid}</h2>
+                {(selectedFeature?.linkedExperiments || []).length ? (
+                    <div className="mt-1 flex items-start gap-4">
+                      <Link size="2" role="button" href="#" onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentTab("experiments");
+                        setSelectedEid(selectedFeature?.linkedExperiments?.[0].key);
+                      }}>
+                        <PiFlaskBold className="inline-block mr-0.5" size={14} />
+                        {selectedFeature?.linkedExperiments?.[0].key}
+                      </Link>
+                      {(selectedFeature?.linkedExperiments || []).length > 1 && !expandLinks ? (
+                        <Link size="1" role="button" className="mt-0.5 hover:underline text-indigo-11" onClick={() => setExpandLinks(true)}>
+                          <PiPlusSquareBold className="mr-1 inline-block" />
+                          {(selectedFeature?.linkedExperiments || []).length-1} more
+                        </Link>
+                      ): null}
+                    </div>
+                ) : null}
+                {(selectedFeature?.linkedExperiments || []).length > 1 && expandLinks ?
+                  selectedFeature.linkedExperiments.map((experiment, i) => {
+                    if (i===0) return null;
+                    return (
+                      <div>
+                        <Link size="2" role="button" href="#" onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentTab("experiments");
+                          setSelectedEid(experiment.key);
+                        }}>
+                          <PiFlaskBold className="inline-block mr-0.5" size={14}/>
+                          {experiment.key}
+                        </Link>
+                      </div>
+                    );
+                  }) : null}
               </div>
 
+              <div className="content">
               <div className="my-1">
                 <div className="flex items-center justify-between mb-1">
                   <div className="label">Current value</div>
@@ -207,71 +239,54 @@ export default function FeaturesTab() {
                 )}
               </div>
 
-              {(selectedFeature?.linkedExperiments || []).length ? (
-                <div className="mt-4">
-                  <div>Linked Experiments</div>
-                  {selectedFeature.linkedExperiments.map((experiment) => (
-                    <div>
-                      <Link size="2" role="button" href="#" onClick={(e) => {
-                        e.preventDefault();
-                        setCurrentTab("experiments");
-                        setSelectedEid(experiment.key);
-                      }}>
-                        <PiFlaskBold className="inline-block mr-0.5" size={14} />
-                        {experiment.key}
+              {selectedFeature?.evaluatedFeature?.debug ? (
+                <Accordion.Root
+                  className="accordion mt-2"
+                  type="single"
+                  collapsible
+                >
+                  <Accordion.Item value="debug-log">
+                    <Accordion.Trigger className="trigger mb-0.5">
+                      <Link size="2" role="button" className="hover:underline">
+                        <PiCaretRightFill className="caret mr-0.5" size={12} />
+                        Debug log
                       </Link>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
+                    </Accordion.Trigger>
+                    <Accordion.Content className="accordionInner overflow-hidden w-full">
+                      {/*todo: replace with logger display component?*/}
+                      <ValueField
+                        value={{
+                          debug: selectedFeature.evaluatedFeature.debug,
+                          result: selectedFeature.evaluatedFeature.result,
+                        }}
+                        valueType="json"
+                        maxHeight={200}
+                      />
+                    </Accordion.Content>
+                  </Accordion.Item>
+                </Accordion.Root>
+              ): null}
 
-                {selectedFeature?.evaluatedFeature?.debug ? (
-                  <Accordion.Root
-                    className="accordion mt-2"
-                    type="single"
-                    collapsible
-                  >
-                    <Accordion.Item value="debug-log">
-                      <Accordion.Trigger className="trigger mb-0.5">
-                        <Link size="2" role="button" className="hover:underline">
-                          <PiCaretRightFill className="caret mr-0.5" size={12} />
-                          Debug log
-                        </Link>
-                      </Accordion.Trigger>
-                      <Accordion.Content className="accordionInner overflow-hidden w-full">
-                        {/*todo: replace with logger display component?*/}
-                        <ValueField
-                          value={{
-                            debug: selectedFeature.evaluatedFeature.debug,
-                            result: selectedFeature.evaluatedFeature.result,
-                          }}
-                          valueType="json"
-                          maxHeight={200}
-                        />
-                      </Accordion.Content>
-                    </Accordion.Item>
-                  </Accordion.Root>
-                ): null}
+              <hr className="my-4"/>
+              <h2 className="label font-bold">Rules</h2>
 
-                <hr className="my-4"/>
-                <h2 className="label font-bold">Rules</h2>
+              <div className="my-2">
+                <div className="label mb-1">Default value</div>
+                <ValueField
+                  value={selectedFeature?.feature?.defaultValue}
+                  valueType={selectedFeature?.valueType}
+                />
+              </div>
 
-                <div className="my-2">
-                  <div className="label mb-1">Default value</div>
-                  <ValueField
-                    value={selectedFeature?.feature?.defaultValue}
-                    valueType={selectedFeature?.valueType}
-                  />
-                </div>
-
-                <div className="my-2">
-                  <div className="label mb-1">Definition</div>
-                  <ValueField
-                    value={selectedFeature.feature}
-                    valueType="json"
-                  />
-                </div>
+              <div className="my-2">
+                <div className="label mb-1">Definition</div>
+                <ValueField
+                  value={selectedFeature.feature}
+                  valueType="json"
+                />
+              </div>
             </div>
+          </div>
           )}
         </div>
       </div>
@@ -321,7 +336,7 @@ function ValueField({
               },
             )}
           >
-            {(formattedValue === "true" || formattedValue === "false") && (<PiCircleFill className="inline-block mr-0.5 -mt-0.5" />)}
+            {(formattedValue === "true" || formattedValue === "false") && (<PiCircleFill className="inline-block mr-1 -mt-0.5" size={8} />)}
             {formattedValue}
           </div>
         </div>
@@ -373,7 +388,7 @@ function EditableValueField({
   }
 
   return (
-    <div className="FormRoot">
+    <div>
       {valueType === "number" ? (
         <input
           className="Input mb-2"
@@ -408,7 +423,7 @@ function EditableValueField({
                 },
               )}
             >
-              {(value === true || value === false) && (<PiCircleFill className="inline-block mr-0.5 -mt-0.5" />)}
+              {(value === true || value === false) && (<PiCircleFill className="inline-block mr-1 -mt-0.5" size={8} />)}
               {JSON.stringify(value)}
             </div>
           </div>
@@ -496,8 +511,6 @@ function getFeatureDetails({
   const evaluatedFeature = evaluatedFeatures?.[fid];
   const isForced = forcedFeatures ? fid in forcedFeatures : false;
 
-  // const debug = evaluatedFeature?.debug
-
   return {
     fid,
     feature,
@@ -505,7 +518,6 @@ function getFeatureDetails({
     meta,
     linkedExperiments,
     evaluatedFeature,
-    // debug,
     isForced,
   };
 }
