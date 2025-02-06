@@ -5,7 +5,7 @@ import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
 import {Avatar, Button, Link, Switch} from "@radix-ui/themes";
-import {PiCaretRightFill, PiCircleFill, PiFlagBold, PiFlaskBold, PiPlusSquareBold} from "react-icons/pi";
+import {PiCaretRightFill, PiCircleFill, PiFlagBold, PiFlaskFill, PiPlusSquareBold} from "react-icons/pi";
 import clsx from "clsx";
 import {Prism} from "react-syntax-highlighter";
 import {ghcolors as codeTheme} from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -108,45 +108,43 @@ export default function FeaturesTab() {
             const valueStr = evaluatedFeature?.result
               ? JSON.stringify(evaluatedFeature.result?.value)
               : "null";
+            const isBoolean = (valueStr === "true" || valueStr === "false");
             return (
               <div
                 id={`featuresTab_featureList_${fid}`}
                 key={fid}
-                className={clsx("featureCard relative ml-1 mb-2", {
+                className={clsx("featureCard ml-1 mb-2", {
                   selected: selectedFid === fid,
                 })}
                 onClick={() => clickFeature(fid)}
               >
-                <div className="flex gap-2 items-start">
-                  <span className="text-xs text-indigo-12 font-semibold">{fid}</span>
+                <div className={clsx("text-sm font-semibold", {
+                  "text-amber-700": isForced,
+                  "text-indigo-12": !isForced,
+                })}>
                   {linkedExperiments.length > 0 && (
-                    <PiFlaskBold className="mt-0.5" size={14} />
+                    <PiFlaskFill className="inline-block mr-0.5" size={12}/>
                   )}
-                  {isForced && (
-                    <div
-                      className="flex-1 text-xs font-semibold -mr-2 text-right text-amber-600">
-                      Override
-                    </div>
+                  {fid}
+                </div>
+                <div className={clsx("text-indigo-12 text-xs line-clamp-1 mt-0", {
+                  "uppercase": isBoolean,
+                })}>
+                  {isBoolean && (
+                    <PiCircleFill
+                      size={8}
+                      className={clsx("inline-block mr-0.5 -mt-0.5",
+                        {
+                          "text-slate-a7": valueStr === "false",
+                          "text-teal-600": valueStr === "true",
+                        })}
+                    />
                   )}
+                  {valueStr}
                 </div>
-                <div className="text-indigo-12">
-                  <div
-                    className={clsx(
-                      "text-xs line-clamp-1 mt-0.5",
-                      {
-                        "text-gray-600 uppercase":
-                          valueStr === "false",
-                        "text-teal-600 uppercase":
-                          valueStr === "true",
-                        "text-gray-800 uppercase":
-                          valueStr === "null",
-                      },
-                    )}
-                  >
-                    {(valueStr === "true" || valueStr === "false") && (<PiCircleFill className="inline-block mr-1 -mt-0.5" size={8} />)}
-                    {valueStr}
-                  </div>
-                </div>
+                {isForced && (
+                  <div className="bg-amber-600 rotate-45 absolute top-[-10px] right-[-10px] w-[20px] h-[20px]" />
+                )}
               </div>
             );
           })}
@@ -171,7 +169,7 @@ export default function FeaturesTab() {
                         setCurrentTab("experiments");
                         setSelectedEid(selectedFeature?.linkedExperiments?.[0].key);
                       }}>
-                        <PiFlaskBold className="inline-block mr-0.5" size={14} />
+                        <PiFlaskFill className="inline-block mr-0.5" size={14} />
                         {selectedFeature?.linkedExperiments?.[0].key}
                       </Link>
                       {(selectedFeature?.linkedExperiments || []).length > 1 && !expandLinks ? (
@@ -192,7 +190,7 @@ export default function FeaturesTab() {
                           setCurrentTab("experiments");
                           setSelectedEid(experiment.key);
                         }}>
-                          <PiFlaskBold className="inline-block mr-0.5" size={14}/>
+                          <PiFlaskFill className="inline-block mr-0.5" size={14}/>
                           {experiment.key}
                         </Link>
                       </div>

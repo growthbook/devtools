@@ -58,15 +58,15 @@
 }
 
 .featureCard {
-  @apply pl-3 pr-6 py-1 border-l-2 border-slate-a3;
+  @apply pl-3 pr-6 py-1 border-l-2 border-b border-slate-a4 shadow-sm relative overflow-hidden;
   cursor: pointer;
   scroll-margin-top: 95px;
 }
 .featureCard:not(.selected):hover {
-  @apply border-violet-a7 bg-violet-1;
+  @apply border-l-violet-a7 bg-violet-1;
 }
 .featureCard.selected {
-  @apply border-violet-9 bg-violet-2;
+  @apply border-l-violet-9 bg-violet-2;
 }
 
 .featureDetail {

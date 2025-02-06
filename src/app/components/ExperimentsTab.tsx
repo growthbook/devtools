@@ -5,7 +5,7 @@ import useGBSandboxEval, {
   EvaluatedExperiment,
 } from "@/app/hooks/useGBSandboxEval";
 import {Avatar, Select, Switch} from "@radix-ui/themes";
-import {PiFlaskBold, PiWarningBold, PiWarningCircle, PiWarningCircleBold} from "react-icons/pi";
+import {PiFlaskFill, PiWarningBold, PiWarningCircle, PiWarningCircleBold} from "react-icons/pi";
 import clsx from "clsx";
 import {Prism} from "react-syntax-highlighter";
 import {ghcolors as codeTheme} from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -124,7 +124,7 @@ export default function ExperimentsTab() {
                     radius="full"
                     fallback={
                       <span className={isForced ? "text-amber-800" : undefined}>
-                        <PiFlaskBold/>
+                        <PiFlaskFill/>
                       </span>
                     }
                   />
@@ -174,7 +174,7 @@ export default function ExperimentsTab() {
                     radius="full"
                     fallback={
                       <span className={isForced ? "text-amber-800" : undefined}>
-                        <PiFlaskBold/>
+                        <PiFlaskFill/>
                       </span>
                     }
                   />
@@ -207,7 +207,7 @@ export default function ExperimentsTab() {
           {!!selectedEid && !!selectedExperiment && (
             <div key={`selected_${selectedEid}`}>
               <div className="flex items-center gap-2 mb-1">
-                <Avatar size="2" radius="full" fallback={<PiFlaskBold />} />
+                <Avatar size="2" radius="full" fallback={<PiFlaskFill />} />
                 <h2 className="font-bold">{selectedEid}</h2>
               </div>
 
