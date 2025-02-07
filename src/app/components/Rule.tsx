@@ -39,7 +39,7 @@ export default function Rule({
   let nsRange: number | undefined;
   if (namespace) {
     nsRange = (namespace[2] ?? 0) - (namespace[1] ?? 0);
-    appliedCoverage = (coverage ?? 1) - nsRange;
+    appliedCoverage = (coverage ?? 1) * nsRange;
   }
 
   return (
@@ -71,18 +71,17 @@ export default function Rule({
                 <>
                   {" "}in namespace{" "}
                   <span className="conditionValue inline-block flex-shrink-0 whitespace-nowrap overflow-hidden overflow-ellipsis max-w-[70px] leading-4 align-middle">{namespace[0]}</span>
-                  <span className="text-nowrap text-2xs">({namespace[1]}, {namespace[2]})</span>
                 </>
               )}
             </div>
             <div className="mt-1 flex items-center gap-3 text-xs">
               <span className="font-semibold flex-shrink-0">INCLUDE</span>
               <Progress size="3" radius="small" value={(appliedCoverage || 0) * 100}/>
-              <span className="conditionValue flex-shrink-0">{(appliedCoverage || 0) * 100}%</span>
+              <span className="conditionValue flex-shrink-0">{Math.round((appliedCoverage || 0) * 1000)/10}%</span>
             </div>
             {nsRange ? (
               <div className="leading-3">
-                ({nsRange} namespace, {coverage ?? 1} exposure)
+                ({nsRange*100}% namespace, {(coverage ?? 1)*100}% exposure)
               </div>
             ) : null}
             <div className="mt-1 mb-2 text-xs">
@@ -124,16 +123,16 @@ export default function Rule({
                       // @ts-expect-error css var
                       "--progress-value": 100,
                       "--accent-track": getVariationColor(i),
-                      width: w * 100 + "%",
+                      width: w * (appliedCoverage ?? 1) * 100 + "%",
                       filter: "saturate(.85)"
                     }}
                   >
-                    {(w >= .15) && (
+                    {(w * (appliedCoverage ?? 1) >= .15) && (
                       <div
                         className="text-2xs font-bold relative top-[2px] left-[2px] z-center text-white"
                         style={{ textShadow: "0 1px #0006, 0 0 1px #0006" }}
                       >
-                        {w*100}%
+                        {Math.round(w * (appliedCoverage ?? 1) * 1000)/10}%
                       </div>
                     )}
                   </div>
