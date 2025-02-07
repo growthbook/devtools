@@ -58,7 +58,8 @@
 }
 
 .featureCard {
-  @apply pl-3 pr-6 py-1 border-l-2 border-b border-slate-a4 shadow-sm relative;
+  @apply pl-3 pr-6 py-1 border-l-[3px] border-slate-a4 relative;
+  box-shadow: 0 -1.5px 0 var(--slate-a4) inset;
   cursor: pointer;
   scroll-margin-top: 95px;
 }
@@ -77,6 +78,19 @@
 }
 .featureDetail .content {
   @apply px-4 py-2 mb-1;
+}
+
+.rule {
+  @apply flex items-start pt-2 pb-0 px-2 mb-2 text-2xs bg-white rounded-md border border-slate-a3;
+}
+.condition {
+  @apply leading-[1.15rem];
+}
+.conditionValue {
+  @apply px-1 border border-slate-a3 rounded-sm bg-gray-50 break-all;
+}
+.conditionOperator {
+  @apply text-gray-600 mx-1;
 }
 
 .accordion .trigger {

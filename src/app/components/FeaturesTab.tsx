@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {CSSProperties, useEffect, useState} from "react";
 import { FeatureDefinition } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
@@ -10,6 +10,7 @@ import clsx from "clsx";
 import {Prism} from "react-syntax-highlighter";
 import {ghcolors as codeTheme} from "react-syntax-highlighter/dist/esm/styles/prism";
 import * as Accordion from "@radix-ui/react-accordion";
+import Rule from "@/app/components/Rule";
 const customTheme = {
   padding: "5px",
   margin: 0,
@@ -205,92 +206,108 @@ export default function FeaturesTab() {
               </div>
 
               <div className="content">
-              <div className="my-1">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="label">Current value</div>
-                  {(selectedFeature?.valueType !== "boolean" || overrideFeature) && (
-                    <label className="flex items-center cursor-pointer select-none">
-                      <Switch
-                        radius="medium"
-                        color="amber"
-                        checked={overrideFeature}
-                        onCheckedChange={(v) => {
-                          setOverrideFeature(v);
-                          if (!v) unsetForcedFeature(selectedFid);
-                        }}
-                      />
-                      <span className={clsx("text-xs ml-1", {
-                        "text-amber-600": overrideFeature,
-                        "text-gray-600": !overrideFeature,
-                      })}>Override</span>
-                    </label>
+                <div className="my-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="label font-semibold">Current value</div>
+                    {(selectedFeature?.valueType !== "boolean" || overrideFeature) && (
+                      <label className="flex items-center cursor-pointer select-none">
+                        <Switch
+                          radius="medium"
+                          color="amber"
+                          checked={overrideFeature}
+                          onCheckedChange={(v) => {
+                            setOverrideFeature(v);
+                            if (!v) unsetForcedFeature(selectedFid);
+                          }}
+                        />
+                        <span className={clsx("text-xs ml-1", {
+                          "text-amber-600": overrideFeature,
+                          "text-gray-600": !overrideFeature,
+                        })}>Override</span>
+                      </label>
+                    )}
+                  </div>
+                  {overrideFeature || selectedFeature?.valueType === "boolean" ? (
+                    <EditableValueField
+                      value={selectedFeature?.evaluatedFeature?.result?.value}
+                      setValue={(v) => {
+                        setForcedFeature(selectedFid, v);
+                        setOverrideFeature(true);
+                      }}
+                      valueType={selectedFeature?.valueType}
+                    />
+                  ) : (
+                    <ValueField
+                      value={selectedFeature?.evaluatedFeature?.result?.value}
+                      valueType={selectedFeature?.valueType}
+                    />
                   )}
                 </div>
-                {overrideFeature || selectedFeature?.valueType === "boolean" ? (
-                  <EditableValueField
-                    value={selectedFeature?.evaluatedFeature?.result?.value}
-                    setValue={(v) => {
-                      setForcedFeature(selectedFid, v);
-                      setOverrideFeature(true);
-                    }}
-                    valueType={selectedFeature?.valueType}
-                  />
-                ) : (
+
+                {selectedFeature?.evaluatedFeature?.debug ? (
+                  <Accordion.Root
+                    className="accordion mt-2"
+                    type="single"
+                    collapsible
+                  >
+                    <Accordion.Item value="debug-log">
+                      <Accordion.Trigger className="trigger mb-0.5">
+                        <Link size="2" role="button" className="hover:underline">
+                          <PiCaretRightFill className="caret mr-0.5" size={12}/>
+                          Debug log
+                        </Link>
+                      </Accordion.Trigger>
+                      <Accordion.Content className="accordionInner overflow-hidden w-full">
+                        {/*todo: replace with logger display component?*/}
+                        <ValueField
+                          value={{
+                            debug: selectedFeature.evaluatedFeature.debug,
+                            result: selectedFeature.evaluatedFeature.result,
+                          }}
+                          valueType="json"
+                          maxHeight={200}
+                        />
+                      </Accordion.Content>
+                    </Accordion.Item>
+                  </Accordion.Root>
+                ) : null}
+
+                <hr className="my-4"/>
+
+                <div className="my-2">
+                  <div className="label font-semibold">Default value</div>
                   <ValueField
-                    value={selectedFeature?.evaluatedFeature?.result?.value}
+                    value={selectedFeature?.feature?.defaultValue}
                     valueType={selectedFeature?.valueType}
                   />
-                )}
-              </div>
+                </div>
 
-              {selectedFeature?.evaluatedFeature?.debug ? (
-                <Accordion.Root
-                  className="accordion mt-2"
-                  type="single"
-                  collapsible
-                >
-                  <Accordion.Item value="debug-log">
-                    <Accordion.Trigger className="trigger mb-0.5">
-                      <Link size="2" role="button" className="hover:underline">
-                        <PiCaretRightFill className="caret mr-0.5" size={12} />
-                        Debug log
-                      </Link>
-                    </Accordion.Trigger>
-                    <Accordion.Content className="accordionInner overflow-hidden w-full">
-                      {/*todo: replace with logger display component?*/}
-                      <ValueField
-                        value={{
-                          debug: selectedFeature.evaluatedFeature.debug,
-                          result: selectedFeature.evaluatedFeature.result,
-                        }}
-                        valueType="json"
-                        maxHeight={200}
-                      />
-                    </Accordion.Content>
-                  </Accordion.Item>
-                </Accordion.Root>
-              ): null}
+                {(selectedFeature?.feature?.rules ?? []).length ? (
+                  <>
+                    <h2 className="label font-semibold">Rules</h2>
+                    {selectedFeature?.feature?.rules?.map((rule, i) => {
+                      return (
+                        <Rule
+                          rule={rule}
+                          i={i}
+                          fid={selectedFid}
+                          feature={selectedFeature.feature}
+                          valueType={selectedFeature.valueType}
+                        />
+                      );
+                    })}
+                  </>
+                ): null}
 
-              <hr className="my-4"/>
-              <h2 className="label font-bold">Rules</h2>
-
-              <div className="my-2">
-                <div className="label mb-1">Default value</div>
-                <ValueField
-                  value={selectedFeature?.feature?.defaultValue}
-                  valueType={selectedFeature?.valueType}
-                />
-              </div>
-
-              <div className="my-2">
-                <div className="label mb-1">Definition</div>
-                <ValueField
-                  value={selectedFeature.feature}
-                  valueType="json"
-                />
+                <div className="my-2">
+                  <div className="label mb-1">Definition</div>
+                  <ValueField
+                    value={selectedFeature.feature}
+                    valueType="json"
+                  />
+                </div>
               </div>
             </div>
-          </div>
           )}
         </div>
       </div>
@@ -298,26 +315,36 @@ export default function FeaturesTab() {
   );
 }
 
-function ValueField({
+export function ValueField({
   value,
   valueType = "string",
   maxHeight = 120,
+  customPrismStyle,
+  customPrismOuterStyle,
+  customBooleanStyle,
+  stringAsCode = true,
+  formatDefaultTypeAsConditionValue = false,
 }:{
   value: any;
   valueType?: ValueType;
   maxHeight?: number;
+  customPrismStyle?: CSSProperties;
+  customPrismOuterStyle?: CSSProperties;
+  customBooleanStyle?: CSSProperties;
+  stringAsCode?: boolean;
+  formatDefaultTypeAsConditionValue?: boolean;
 }) {
   const formattedValue = value !== undefined ?
     JSON.stringify(value, null, 2) :
     "null";
   return (
     <>
-      {["json", "string"].includes(valueType) ? (
-        <div className="border border-gray-200 rounded-md bg-gray-50">
+      {(stringAsCode ? ["json", "string"] : ["json"]).includes(valueType) ? (
+        <div className="border border-gray-200 rounded-md bg-gray-50" style={customPrismOuterStyle}>
           <Prism
             language="json"
             style={codeTheme}
-            customStyle={{ ...customTheme, maxHeight }}
+            customStyle={{ ...customTheme, maxHeight, ...customPrismStyle }}
             codeTagProps={{
               className: "text-2xs-important !whitespace-pre-wrap",
             }}
@@ -326,24 +353,26 @@ function ValueField({
           </Prism>
         </div>
       ) : ["false", "true", "null"].includes(formattedValue) ? (
-        <div className="text-slate-700">
-          <div
-            className={clsx(
-              "text-sm",
-              {
-                "text-gray-600 uppercase":
-                  formattedValue === "false",
-                "text-teal-700 uppercase":
-                  formattedValue === "true",
-                "text-gray-800 uppercase":
-                  formattedValue === "null",
-              },
-            )}
-          >
-            {(formattedValue === "true" || formattedValue === "false") && (<PiCircleFill className="inline-block mr-1 -mt-0.5" size={8} />)}
-            {formattedValue}
-          </div>
+        <div className="text-indigo-12 uppercase" style={customBooleanStyle}>
+          {(value === true || value === false) && (
+            <PiCircleFill
+              size={8}
+              className={clsx("inline-block mr-0.5 -mt-0.5",
+                {
+                  "text-slate-a7": formattedValue === "false",
+                  "text-teal-600": formattedValue === "true",
+                })}
+            />
+          )}
+          {formattedValue}
         </div>
+      ) : formatDefaultTypeAsConditionValue ? (
+        <span
+          className="conditionValue"
+          style={typeof value === "string" ? { color: "rgb(227, 17, 108)" } : undefined}
+        >
+          {formattedValue}
+        </span>
       ) : (
         <code className="text-slate-700 text-sm whitespace-pre-wrap">
           {formattedValue}
@@ -476,7 +505,7 @@ function EditableValueField({
   );
 }
 
-type ValueType = "string" | "number" | "boolean" | "json";
+export type ValueType = "string" | "number" | "boolean" | "json";
 
 function getFeatureDetails({
   fid,
