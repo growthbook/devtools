@@ -9,7 +9,8 @@ import {
 } from "@growthbook/growthbook";
 import useTabState from "@/app/hooks/useTabState";
 import { DebugLogs } from "devtools";
-import {getFeatureExperiments} from "@/app/components/ExperimentsTab";
+import { getFeatureExperiments } from "@/app/components/ExperimentsTab";
+import useSdkData from "./useSdkData";
 
 export type EvaluatedFeature = {
   result: FeatureResult;
@@ -23,19 +24,20 @@ export type EvaluatedExperiment = {
 };
 
 export default function useGBSandboxEval() {
+  const { payload: sdkPayload } = useSdkData();
   const [attributes] = useTabState<Attributes>("attributes", {});
   const [features] = useTabState<Record<string, FeatureDefinition>>(
     "features",
-    {},
+    {}
   );
   const [experiments] = useTabState<Experiment<any>[]>("experiments", []);
   const [forcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
-    {},
+    {}
   );
   const [forcedVariations] = useTabState<Record<string, number>>(
     "forcedVariations",
-    {},
+    {}
   );
   const [url] = useTabState<string>("url", "");
   const forcedFeaturesMap = new Map(Object.entries(forcedFeatures));
@@ -44,7 +46,7 @@ export default function useGBSandboxEval() {
     let log: DebugLogs = [];
 
     const featureExperiments = getFeatureExperiments(features);
-    const payload = { features, experiments };
+    const payload = { ...sdkPayload, features, experiments };
 
     const growthbook = new GrowthBook({
       attributes,
