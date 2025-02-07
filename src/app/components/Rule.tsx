@@ -2,7 +2,7 @@ import React, {ReactNode} from "react";
 import {ConditionInterface, FeatureDefinition, FeatureRule, ParentConditionInterface} from "@growthbook/growthbook";
 import {upperFirst} from "lodash";
 import {ValueField, ValueType} from "@/app/components/FeaturesTab";
-import {Link, Progress} from "@radix-ui/themes";
+import {Link, Progress, Slider} from "@radix-ui/themes";
 import useTabState from "@/app/hooks/useTabState";
 import {PiFlagFill} from "react-icons/pi";
 
@@ -41,6 +41,71 @@ export default function Rule({
             parentConditions={rule.parentConditions}
           />
         </div>
+        {ruleType === "experiment" && (
+          <>
+            <div className="mt-2 text-xs">
+              <span className="font-semibold">SPLIT</span>
+              {" "}users by{" "}
+              <span className="conditionValue">{hashAttribute}</span>
+            </div>
+            <div className="mt-1 flex items-center gap-3 text-xs">
+              <span className="font-semibold flex-shrink-0">INCLUDE</span>
+              <Progress size="3" radius="small" value={(rule.coverage || 0) * 100}/>
+              <span className="conditionValue flex-shrink-0">{(rule.coverage || 0) * 100}%</span>
+            </div>
+            <div className="mt-1 mb-2 text-xs">
+              <div className="font-semibold mb-1">SERVE</div>
+              <table>
+                <tbody>
+                  {rule?.variations?.map?.((variation, i) => (
+                    <tr key={i} className="">
+                      <td className="pr-2 py-1">
+                        <div
+                          className="px-0.5 rounded-full border font-semibold"
+                          style={{
+                            fontSize: "11px",
+                            color: getVariationColor(i),
+                            borderColor: getVariationColor(i),
+                          }}
+                        >
+                          {i}
+                        </div>
+                      </td>
+                      <td width="100%" className="py-1">
+                        <ValueField value={variation} valueType={valueType} stringAsCode maxHeight={50} />
+                      </td>
+                      <td className="pl-2 py-1">
+                        {rule?.weights?.[i] !== undefined ? rule?.weights?.[i] * 100 + "%" : null}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div
+                className="rt-ProgressRoot rt-r-size-3 rt-variant-surface flex overflow-hidden h-[20px]"
+                data-radius="small"
+              >
+                {rule?.weights?.map((w, i) => (
+                  <div
+                    className="rt-ProgressIndicator relative"
+                    style={{
+                      // @ts-expect-error css var
+                      "--progress-value": 100,
+                      "--accent-track": getVariationColor(i),
+                      width: w * 100 + "%",
+                      filter: "saturate(.85)"
+                    }}
+                  >
+                    <div
+                      className="text-2xs font-bold relative top-[3px] left-[4px] z-center text-white"
+                      style={{ textShadow: "0 1px #0006, 0 0 1px #0006" }}
+                    >{w*100}%</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
         {ruleType === "rollout" && (
           <>
             <div className="mt-2 text-xs">
@@ -50,11 +115,11 @@ export default function Rule({
             </div>
             <div className="mt-1 mb-2 flex items-center gap-3 text-xs">
               <span className="font-semibold flex-shrink-0">ROLLOUT</span>
-              <Progress size="3" style={{width: 100}} value={(rule.coverage || 0) * 100}/>
+              <Progress size="3" radius="small" value={(rule.coverage || 0) * 100}/>
               <span className="conditionValue flex-shrink-0">{(rule.coverage || 0) * 100}%</span>
             </div>
           </>
-          )}
+        )}
         {"force" in rule ? (
           <div className="my-2 text-xs">
             <span className="mr-2 font-semibold">SERVE</span>
@@ -376,4 +441,18 @@ function operatorToText(operator: string, isPrerequisite?: boolean): string {
       return `does not match`;
   }
   return operator;
+}
+
+function getVariationColor(i: number) {
+  const colors = [
+    "#4f69ff",
+    "#03d1ca",
+    "#e67112",
+    "#e83e8c",
+    "#fdc714",
+    "#bd41d9",
+    "#57d9a3",
+    "#f87a7a",
+  ];
+  return colors[i % colors.length];
 }
