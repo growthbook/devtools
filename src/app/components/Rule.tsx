@@ -27,7 +27,7 @@ export default function Rule({
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
 
-  const { condition, parentConditions, force, variations, weights, hashAttribute, coverage, ...other } = rule;
+  const { condition, parentConditions, force, variations, weights, hashAttribute, coverage, namespace, ...other } = rule;
   const key = rule.key ?? fid;
   let ruleType: RuleType =
     rule.variations ? "experiment"
@@ -35,6 +35,12 @@ export default function Rule({
     : rule?.parentConditions?.some((p) => p.gate) ? "prerequisite"
     : "force";
   const ruleName = upperFirst(ruleType) + " rule";
+  let appliedCoverage = coverage;
+  let nsRange: number | undefined;
+  if (namespace) {
+    nsRange = (namespace[2] ?? 0) - (namespace[1] ?? 0);
+    appliedCoverage = (coverage ?? 1) - nsRange;
+  }
 
   return (
     <div className="rule">
@@ -48,7 +54,7 @@ export default function Rule({
           />
         </div>
         {ruleType === "experiment" && (
-          <>
+          <div className="condition">
             <Link size="1" role="button" href="#" onClick={(e) => {
               e.preventDefault();
               setSelectedEid(key);
@@ -61,15 +67,27 @@ export default function Rule({
               <span className="font-semibold">SPLIT</span>
               {" "}users by{" "}
               <span className="conditionValue">{hashAttribute}</span>
+              {namespace && (
+                <>
+                  {" "}in namespace{" "}
+                  <span className="conditionValue inline-block flex-shrink-0 whitespace-nowrap overflow-hidden overflow-ellipsis max-w-[70px] leading-4 align-middle">{namespace[0]}</span>
+                  <span className="text-nowrap text-2xs">({namespace[1]}, {namespace[2]})</span>
+                </>
+              )}
             </div>
             <div className="mt-1 flex items-center gap-3 text-xs">
               <span className="font-semibold flex-shrink-0">INCLUDE</span>
-              <Progress size="3" radius="small" value={(rule.coverage || 0) * 100}/>
-              <span className="conditionValue flex-shrink-0 py-0.5">{(rule.coverage || 0) * 100}%</span>
+              <Progress size="3" radius="small" value={(appliedCoverage || 0) * 100}/>
+              <span className="conditionValue flex-shrink-0">{(appliedCoverage || 0) * 100}%</span>
             </div>
+            {nsRange ? (
+              <div className="leading-3">
+                ({nsRange} namespace, {coverage ?? 1} exposure)
+              </div>
+            ) : null}
             <div className="mt-1 mb-2 text-xs">
               <div className="font-semibold mb-1">SERVE</div>
-              <table>
+              <table className="leading-3">
                 <tbody>
                   {rule?.variations?.map?.((variation, i) => (
                     <tr key={i} className="">
@@ -122,7 +140,7 @@ export default function Rule({
                 ))}
               </div>
             </div>
-          </>
+          </div>
         )}
         {ruleType === "rollout" && (
           <>
