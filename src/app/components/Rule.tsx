@@ -4,7 +4,7 @@ import {upperFirst} from "lodash";
 import {ValueField, ValueType} from "@/app/components/FeaturesTab";
 import {Link, Progress, Slider} from "@radix-ui/themes";
 import useTabState from "@/app/hooks/useTabState";
-import {PiFlagFill} from "react-icons/pi";
+import {PiFlagFill, PiFlaskFill} from "react-icons/pi";
 
 type RuleType = "force" | "rollout" | "experiment" | "prerequisite";
 
@@ -21,6 +21,12 @@ export default function Rule({
   feature: FeatureDefinition;
   valueType?: ValueType;
 }) {
+  const [selectedEid, setSelectedEid] = useTabState<string | undefined>(
+    "selectedEid",
+    undefined,
+  );
+  const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
+
   const { condition, parentConditions, force, variations, weights, hashAttribute, coverage, ...other } = rule;
   const key = rule.key ?? fid;
   let ruleType: RuleType =
@@ -43,6 +49,14 @@ export default function Rule({
         </div>
         {ruleType === "experiment" && (
           <>
+            <Link size="1" role="button" href="#" onClick={(e) => {
+              e.preventDefault();
+              setSelectedEid(key);
+              setCurrentTab("experiments");
+            }}>
+              <PiFlaskFill className="inline-block mr-0.5" size={12} />
+              {key}
+            </Link>
             <div className="mt-2 text-xs">
               <span className="font-semibold">SPLIT</span>
               {" "}users by{" "}
@@ -51,7 +65,7 @@ export default function Rule({
             <div className="mt-1 flex items-center gap-3 text-xs">
               <span className="font-semibold flex-shrink-0">INCLUDE</span>
               <Progress size="3" radius="small" value={(rule.coverage || 0) * 100}/>
-              <span className="conditionValue flex-shrink-0">{(rule.coverage || 0) * 100}%</span>
+              <span className="conditionValue flex-shrink-0 py-0.5">{(rule.coverage || 0) * 100}%</span>
             </div>
             <div className="mt-1 mb-2 text-xs">
               <div className="font-semibold mb-1">SERVE</div>
@@ -59,7 +73,7 @@ export default function Rule({
                 <tbody>
                   {rule?.variations?.map?.((variation, i) => (
                     <tr key={i} className="">
-                      <td className="pr-2 py-1">
+                      <td className="pr-2 py-0.5">
                         <div
                           className="px-0.5 rounded-full border font-semibold"
                           style={{
@@ -71,10 +85,10 @@ export default function Rule({
                           {i}
                         </div>
                       </td>
-                      <td width="100%" className="py-1">
+                      <td width="100%" className="py-0.5">
                         <ValueField value={variation} valueType={valueType} stringAsCode maxHeight={50} />
                       </td>
-                      <td className="pl-2 py-1">
+                      <td className="pl-2 py-0.5">
                         {rule?.weights?.[i] !== undefined ? rule?.weights?.[i] * 100 + "%" : null}
                       </td>
                     </tr>
@@ -82,7 +96,7 @@ export default function Rule({
                 </tbody>
               </table>
               <div
-                className="rt-ProgressRoot rt-r-size-3 rt-variant-surface flex overflow-hidden h-[20px]"
+                className="mt-1 rt-ProgressRoot rt-r-size-3 rt-variant-surface flex overflow-hidden h-[15px]"
                 data-radius="small"
               >
                 {rule?.weights?.map((w, i) => (
@@ -96,10 +110,14 @@ export default function Rule({
                       filter: "saturate(.85)"
                     }}
                   >
-                    <div
-                      className="text-2xs font-bold relative top-[3px] left-[4px] z-center text-white"
-                      style={{ textShadow: "0 1px #0006, 0 0 1px #0006" }}
-                    >{w*100}%</div>
+                    {(w >= .15) && (
+                      <div
+                        className="text-2xs font-bold relative top-[2px] left-[2px] z-center text-white"
+                        style={{ textShadow: "0 1px #0006, 0 0 1px #0006" }}
+                      >
+                        {w*100}%
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -116,7 +134,7 @@ export default function Rule({
             <div className="mt-1 mb-2 flex items-center gap-3 text-xs">
               <span className="font-semibold flex-shrink-0">ROLLOUT</span>
               <Progress size="3" radius="small" value={(rule.coverage || 0) * 100}/>
-              <span className="conditionValue flex-shrink-0">{(rule.coverage || 0) * 100}%</span>
+              <span className="conditionValue flex-shrink-0 py-0.5">{(rule.coverage || 0) * 100}%</span>
             </div>
           </>
         )}
