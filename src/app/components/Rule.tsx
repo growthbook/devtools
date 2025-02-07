@@ -1,8 +1,8 @@
-import React, {ReactNode} from "react";
+import React, {useState} from "react";
 import {ConditionInterface, FeatureDefinition, FeatureRule, ParentConditionInterface} from "@growthbook/growthbook";
 import {upperFirst} from "lodash";
 import {ValueField, ValueType} from "@/app/components/FeaturesTab";
-import {Link, Progress, Slider} from "@radix-ui/themes";
+import {Checkbox, Link, Progress} from "@radix-ui/themes";
 import useTabState from "@/app/hooks/useTabState";
 import {PiFlagFill, PiFlaskFill} from "react-icons/pi";
 
@@ -26,6 +26,7 @@ export default function Rule({
     undefined,
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
+  const [jsonMode, setJsonMode] = useState(false);
 
   const { condition, parentConditions, force, variations, weights, hashAttribute, coverage, namespace, ...other } = rule;
   const key = rule.key ?? fid;
@@ -46,7 +47,31 @@ export default function Rule({
     <div className="rule">
       <div className="bg-slate-4 text-xs -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">{i+1}</div>
       <div className="w-full">
-        <div className="text-sm font-bold mb-2">{ruleName}</div>
+        <div className="flex items-start mb-2" style={jsonMode ? { width: "calc(100% - 21px)" } : undefined}>
+          <div className="flex-1 text-sm font-bold">{ruleName}</div>
+          <label className="flex-shrink-0 flex items-center text-2xs cursor-pointer select-none">
+            <Checkbox
+              checked={jsonMode}
+              onCheckedChange={(v) => setJsonMode(!jsonMode)}
+              size="1"
+              mr="1"
+              className="cursor-pointer"
+            />
+            <span>View JSON</span>
+          </label>
+        </div>
+        {ruleType === "experiment" && (
+          <Link size="1" role="button" href="#" onClick={(e) => {
+            e.preventDefault();
+            setSelectedEid(key);
+            setCurrentTab("experiments");
+          }}>
+            <PiFlaskFill className="inline-block mr-0.5" size={12}/>
+            {key}
+          </Link>
+        )}
+        {!jsonMode ? (
+          <>
         <div className="my-2 text-xs">
           <ConditionDisplay
             condition={rule.condition}
@@ -55,14 +80,6 @@ export default function Rule({
         </div>
         {ruleType === "experiment" && (
           <div className="condition">
-            <Link size="1" role="button" href="#" onClick={(e) => {
-              e.preventDefault();
-              setSelectedEid(key);
-              setCurrentTab("experiments");
-            }}>
-              <PiFlaskFill className="inline-block mr-0.5" size={12} />
-              {key}
-            </Link>
             <div className="mt-2 text-xs">
               <span className="font-semibold">SPLIT</span>
               {" "}users by{" "}
@@ -170,6 +187,13 @@ export default function Rule({
             />
           </div>
         ): null}
+        </>) : (
+          <ValueField
+            value={rule}
+            valueType="json"
+            customPrismOuterStyle={{ marginRight: 20, marginLeft: -20, marginBottom: 5 }}
+          />
+        )}
       </div>
     </div>
   )
@@ -195,7 +219,12 @@ export function ConditionDisplay({
     if (!pConds.length) return;
     conds.push(...pConds.map((pc) => ({ ...pc, field: p.id, prereq: true })));
   });
-  if (!conds.length) return null;
+  if (!conds.length) return (
+    <div>
+      <div className="mr-2 font-semibold">IF</div>
+      <ValueField value={parentConditions ? {condition, parentConditions} : condition} valueType="json" maxHeight={50} customPrismOuterStyle={{ width: 230 }} />
+    </div>
+  );
   return (
     <>
       {conds.map((cond, i) => (
@@ -225,21 +254,6 @@ export function ConditionDisplay({
       ))}
     </>
   )
-  // if (condition) {
-  //   // Could not parse into simple conditions
-  //   if (conds === null) {
-  //     parts.push(
-  //       <ValueField value={condition} maxHeight={50} />
-  //     );
-  //   } else {
-  //     const conditionParts = getConditionParts({
-  //       conditions: conds,
-  //       savedGroups,
-  //       keyPrefix: `${partId++}-condition-`,
-  //     });
-  //     parts.push(...conditionParts);
-  //   }
-  // }
 }
 
 
@@ -259,8 +273,28 @@ export function jsonToConds(
   if (json.match(/\$(or|nor|all|type)/)) return null;
 
   try {
-    const parsed = JSON.parse(json);
-    if (parsed["$not"]) return null;
+    const _parsed = JSON.parse(json);
+    if (_parsed["$not"]) return null;
+
+    // quick pass to break out $and (saved groups and simple logic)
+    const parsed: any = {};
+    try {
+      Object.keys(_parsed).forEach((field) => {
+        const value = _parsed[field];
+        if (field === "$and" && Array.isArray(value)) {
+          value.forEach((o: any) => {
+            if (o["$not"]) throw new Error("invalid nested condition");
+            Object.keys(o).forEach((k) => {
+              parsed[k] = o[k];
+            });
+          });
+        } else {
+          parsed[field] = value;
+        }
+      });
+    } catch (e) {
+      return null;
+    }
 
     const conds: Condition[] = [];
     let valid = true;
