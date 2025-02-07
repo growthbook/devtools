@@ -17,22 +17,29 @@ import ExperimentsTab from "./components/ExperimentsTab";
 import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
 import SettingsForm from "@/app/components/Settings";
-import {PiX, PiGearSix, PiUserFill, PiFlagFill, PiFlaskFill, PiListChecksBold} from "react-icons/pi";
+import {
+  PiX,
+  PiGearSix,
+  PiUserFill,
+  PiFlagFill,
+  PiFlaskFill,
+  PiListChecksBold,
+} from "react-icons/pi";
 
 export const App = () => {
-  const [showSdkDebug, setShowSdkDebug] = useState(false);
+  const [showSdkDebug, setShowSdkDebug] = useTabState("showSdkDebug", false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
     "sdkFound",
-    undefined,
+    undefined
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [features] = useTabState("features", {});
   const [experiments] = useTabState("experiments", []);
 
   const refresh = () => {
-    chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
+    chrome.tabs.query({ currentWindow: true, active: true }, async (tabs) => {
       let activeTab = tabs[0];
       if (activeTab.id) {
         await chrome.tabs.sendMessage(activeTab.id, {
@@ -65,9 +72,7 @@ export const App = () => {
       style={{ minHeight: "unset" }}
     >
       <div id="main" className="text-indigo-12">
-        <div
-          className="shadow-sm fixed top-0 px-3 pt-2 w-full bg-zinc-50 z-front"
-        >
+        <div className="shadow-sm fixed top-0 px-3 pt-2 w-full bg-zinc-50 z-front">
           <Flex justify="between">
             <h1 className="text-lg">
               <img

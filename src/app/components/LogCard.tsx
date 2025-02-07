@@ -1,13 +1,12 @@
 import { LogUnion } from "@growthbook/growthbook";
 import React from "react";
-import { Text } from "@radix-ui/themes";
 
 export default function LogCard({ logEvent }: { logEvent: LogUnion }) {
   const { logType, timestamp, ...rest } = logEvent;
+
   return (
-    <div className="box mb-3">
-      <Text>Timestamp: {timestamp}</Text>
-      <div>{JSON.stringify(rest)}</div>
+    <div className="bg-slate-4 -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">
+      {JSON.stringify(rest)}
     </div>
   );
 }
