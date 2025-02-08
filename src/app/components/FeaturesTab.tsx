@@ -4,15 +4,13 @@ import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
-import { Button, RadioGroup, Link, Switch } from "@radix-ui/themes";
+import { Button, RadioGroup, Link } from "@radix-ui/themes";
 import {
   PiArrowClockwise,
   PiCaretRightFill,
   PiCircleFill,
-  PiFlagBold,
   PiFlaskFill,
   PiPlusBold,
-  PiPlusSquareBold,
 } from "react-icons/pi";
 import clsx from "clsx";
 import { Prism } from "react-syntax-highlighter";
@@ -20,6 +18,8 @@ import { ghcolors as codeTheme } from "react-syntax-highlighter/dist/esm/styles/
 import * as Accordion from "@radix-ui/react-accordion";
 import Rule from "@/app/components/Rule";
 import TextareaAutosize from "react-textarea-autosize";
+import useGlobalState from "@/app/hooks/useGlobalState";
+import {API_HOST, APP_ORIGIN, CLOUD_API_HOST, CLOUD_APP_ORIGIN} from "@/app/components/Settings";
 const customTheme = {
   padding: "5px",
   margin: 0,
@@ -30,6 +30,8 @@ const customTheme = {
 };
 
 export default function FeaturesTab() {
+  const [apiHost] = useGlobalState(API_HOST, CLOUD_API_HOST, true);
+  const [appOrigin] = useGlobalState(APP_ORIGIN, CLOUD_APP_ORIGIN, true);
   const [features, setFeatures] = useTabState<
     Record<string, FeatureDefinition>
   >("features", {});
@@ -185,7 +187,19 @@ export default function FeaturesTab() {
           {!!selectedFid && !!selectedFeature && (
             <div className="featureDetail" key={`selected_${selectedFid}`}>
               <div className="header">
-                <h2 className="font-bold">{selectedFid}</h2>
+                <div className="flex items-start gap-2">
+                  <h2 className="font-bold flex-1">{selectedFid}</h2>
+                  <Link
+                    size="1"
+                    className="flex-shrink-0"
+                    href={`${appOrigin}/features/${selectedFid}`}
+                    target="_blank"
+                  >
+                    <Button>
+                      View in GB
+                    </Button>
+                  </Link>
+                </div>
                 {(selectedFeature?.linkedExperiments || []).length ? (
                   <div className="mt-1 flex items-center gap-4">
                     <Link
