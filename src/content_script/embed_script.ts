@@ -54,7 +54,7 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
       clearTimeout(timer);
       getValidGrowthBookInstance(cb);
     },
-    false
+    false,
   );
 }
 
@@ -143,7 +143,7 @@ function updateFeatures(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (data) {
       gb.setForcedFeatures(
-        new Map(Object.entries(data as Record<string, any>))
+        new Map(Object.entries(data as Record<string, any>)),
       );
     } else {
       // todo: do something with these messages or remove them
@@ -175,7 +175,7 @@ async function updateBackgroundSDK(data: SDKHealthCheckResult) {
       type: "GB_SDK_UPDATED",
       data,
     },
-    window.location.origin
+    window.location.origin,
   );
 }
 
@@ -190,13 +190,13 @@ function updateTabState(property: string, value: unknown, append = false) {
       },
       append,
     },
-    window.location.origin
+    window.location.origin,
   );
 }
 
 // add a proxy to the SDKs methods so we know when anything important has been changed programmatically
 function subscribeToSdkChanges(
-  gb: GrowthBook & { patchedMethods?: boolean; logs?: LogUnion[] }
+  gb: GrowthBook & { patchedMethods?: boolean; logs?: LogUnion[] },
 ) {
   if (gb.patchedMethods) return;
   gb.patchedMethods = true;
@@ -255,7 +255,7 @@ function subscribeToSdkChanges(
     const _logEvent = gb.logEvent;
     gb.logEvent = async (
       eventName: string,
-      properties?: Record<string, unknown>
+      properties?: Record<string, unknown>,
     ) => {
       gb.logs!.push({
         eventName,
@@ -272,7 +272,7 @@ function subscribeToSdkChanges(
     gb.setTrackingCallback = (callback: TrackingCallback) => {
       const patchedCallBack = (
         experiment: Experiment<any>,
-        result: Result<any>
+        result: Result<any>,
       ) => {
         gb.logs!.push({
           experiment,

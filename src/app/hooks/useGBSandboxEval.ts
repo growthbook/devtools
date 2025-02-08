@@ -28,16 +28,16 @@ export default function useGBSandboxEval() {
   const [attributes] = useTabState<Attributes>("attributes", {});
   const [features] = useTabState<Record<string, FeatureDefinition>>(
     "features",
-    {}
+    {},
   );
   const [experiments] = useTabState<Experiment<any>[]>("experiments", []);
   const [forcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
-    {}
+    {},
   );
   const [forcedVariations] = useTabState<Record<string, number>>(
     "forcedVariations",
-    {}
+    {},
   );
   const [url] = useTabState<string>("url", "");
   const forcedFeaturesMap = new Map(Object.entries(forcedFeatures));

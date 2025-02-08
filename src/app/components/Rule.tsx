@@ -1,10 +1,15 @@
-import React, {useState} from "react";
-import {ConditionInterface, FeatureDefinition, FeatureRule, ParentConditionInterface} from "@growthbook/growthbook";
-import {upperFirst} from "lodash";
-import {ValueField, ValueType} from "@/app/components/FeaturesTab";
-import {Checkbox, Link, Progress} from "@radix-ui/themes";
+import React, { useState } from "react";
+import {
+  ConditionInterface,
+  FeatureDefinition,
+  FeatureRule,
+  ParentConditionInterface,
+} from "@growthbook/growthbook";
+import { upperFirst } from "lodash";
+import { ValueField, ValueType } from "@/app/components/FeaturesTab";
+import { Checkbox, Link, Progress } from "@radix-ui/themes";
 import useTabState from "@/app/hooks/useTabState";
-import {PiFlagFill, PiFlaskFill} from "react-icons/pi";
+import { PiFlagFill, PiFlaskFill } from "react-icons/pi";
 
 type RuleType = "force" | "rollout" | "experiment" | "prerequisite";
 
@@ -28,13 +33,25 @@ export default function Rule({
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [jsonMode, setJsonMode] = useState(false);
 
-  const { condition, parentConditions, force, variations, weights, hashAttribute, coverage, namespace, ...other } = rule;
+  const {
+    condition,
+    parentConditions,
+    force,
+    variations,
+    weights,
+    hashAttribute,
+    coverage,
+    namespace,
+    ...other
+  } = rule;
   const key = rule.key ?? fid;
-  let ruleType: RuleType =
-    rule.variations ? "experiment"
-    : "coverage" in rule ? "rollout"
-    : rule?.parentConditions?.some((p) => p.gate) ? "prerequisite"
-    : "force";
+  let ruleType: RuleType = rule.variations
+    ? "experiment"
+    : "coverage" in rule
+      ? "rollout"
+      : rule?.parentConditions?.some((p) => p.gate)
+        ? "prerequisite"
+        : "force";
   const ruleName = upperFirst(ruleType) + " rule";
   let appliedCoverage = coverage;
   let nsRange: number | undefined;
@@ -45,9 +62,11 @@ export default function Rule({
 
   return (
     <div className="rule">
-      <div className="bg-slate-4 text-xs -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">{i+1}</div>
+      <div className="bg-slate-4 text-xs -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">
+        {i + 1}
+      </div>
       <div className="w-full">
-        <div className="flex items-start mb-2" >
+        <div className="flex items-start mb-2">
           <div className="flex-1 text-sm font-bold">{ruleName}</div>
           <label className="flex-shrink-0 flex items-center text-2xs cursor-pointer select-none">
             <Checkbox
@@ -61,142 +80,178 @@ export default function Rule({
           </label>
         </div>
         {ruleType === "experiment" && (
-          <Link size="1" role="button" href="#" onClick={(e) => {
-            e.preventDefault();
-            setSelectedEid(key);
-            setCurrentTab("experiments");
-          }}>
-            <PiFlaskFill className="inline-block mr-0.5" size={12}/>
+          <Link
+            size="1"
+            role="button"
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setSelectedEid(key);
+              setCurrentTab("experiments");
+            }}
+          >
+            <PiFlaskFill className="inline-block mr-0.5" size={12} />
             {key}
           </Link>
         )}
         {!jsonMode ? (
           <>
-        <div className="my-2 text-xs">
-          <ConditionDisplay
-            condition={rule.condition}
-            parentConditions={rule.parentConditions}
-          />
-        </div>
-        {ruleType === "experiment" && (
-          <div className="condition">
-            <div className="mt-2 text-xs">
-              <span className="font-semibold">SPLIT</span>
-              {" "}users by{" "}
-              <span className="conditionValue">{hashAttribute}</span>
-              {namespace && (
-                <>
-                  {" "}in namespace{" "}
-                  <span className="conditionValue inline-block flex-shrink-0 whitespace-nowrap overflow-hidden overflow-ellipsis max-w-[70px] leading-4 align-middle">{namespace[0]}</span>
-                </>
-              )}
+            <div className="my-2 text-xs">
+              <ConditionDisplay
+                condition={rule.condition}
+                parentConditions={rule.parentConditions}
+              />
             </div>
-            <div className="mt-1 flex items-center gap-3 text-xs">
-              <span className="font-semibold flex-shrink-0">INCLUDE</span>
-              <Progress size="3" radius="small" value={(appliedCoverage || 0) * 100}/>
-              <span className="conditionValue flex-shrink-0">{Math.round((appliedCoverage || 0) * 1000)/10}%</span>
-            </div>
-            {nsRange ? (
-              <div className="leading-3">
-                ({nsRange*100}% namespace, {(coverage ?? 1)*100}% exposure)
+            {ruleType === "experiment" && (
+              <div className="condition">
+                <div className="mt-2 text-xs">
+                  <span className="font-semibold">SPLIT</span> users by{" "}
+                  <span className="conditionValue">{hashAttribute}</span>
+                  {namespace && (
+                    <>
+                      {" "}
+                      in namespace{" "}
+                      <span className="conditionValue inline-block flex-shrink-0 whitespace-nowrap overflow-hidden overflow-ellipsis max-w-[70px] leading-4 align-middle">
+                        {namespace[0]}
+                      </span>
+                    </>
+                  )}
+                </div>
+                <div className="mt-1 flex items-center gap-3 text-xs">
+                  <span className="font-semibold flex-shrink-0">INCLUDE</span>
+                  <Progress
+                    size="3"
+                    radius="small"
+                    value={(appliedCoverage || 0) * 100}
+                  />
+                  <span className="conditionValue flex-shrink-0">
+                    {Math.round((appliedCoverage || 0) * 1000) / 10}%
+                  </span>
+                </div>
+                {nsRange ? (
+                  <div className="leading-3">
+                    ({nsRange * 100}% namespace, {(coverage ?? 1) * 100}%
+                    exposure)
+                  </div>
+                ) : null}
+                <div className="mt-1 mb-2 text-xs">
+                  <div className="font-semibold mb-1">SERVE</div>
+                  <table className="leading-3">
+                    <tbody>
+                      {rule?.variations?.map?.((variation, i) => (
+                        <tr key={i} className="">
+                          <td className="pr-2 py-0.5">
+                            <div
+                              className="px-0.5 rounded-full border font-semibold"
+                              style={{
+                                fontSize: "11px",
+                                color: getVariationColor(i),
+                                borderColor: getVariationColor(i),
+                              }}
+                            >
+                              {i}
+                            </div>
+                          </td>
+                          <td width="100%" className="py-0.5">
+                            <ValueField
+                              value={variation}
+                              valueType={valueType}
+                              stringAsCode
+                              maxHeight={50}
+                            />
+                          </td>
+                          <td className="pl-2 py-0.5">
+                            {rule?.weights?.[i] !== undefined
+                              ? rule?.weights?.[i] * 100 + "%"
+                              : null}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div
+                    className="mt-1 rt-ProgressRoot rt-r-size-3 rt-variant-surface flex overflow-hidden h-[15px]"
+                    data-radius="small"
+                  >
+                    {rule?.weights?.map((w, i) => (
+                      <div
+                        className="rt-ProgressIndicator relative"
+                        style={{
+                          // @ts-expect-error css var
+                          "--progress-value": 100,
+                          "--accent-track": getVariationColor(i),
+                          width: w * (appliedCoverage ?? 1) * 100 + "%",
+                          filter: "saturate(.85)",
+                        }}
+                      >
+                        {w * (appliedCoverage ?? 1) >= 0.15 && (
+                          <div
+                            className="text-2xs font-bold relative top-[2px] left-[2px] z-center text-white"
+                            style={{ textShadow: "0 1px #0006, 0 0 1px #0006" }}
+                          >
+                            {Math.round(w * (appliedCoverage ?? 1) * 1000) / 10}
+                            %
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            {ruleType === "rollout" && (
+              <>
+                <div className="mt-2 text-xs">
+                  <span className="font-semibold">SAMPLE</span> users by{" "}
+                  <span className="conditionValue">{hashAttribute}</span>
+                </div>
+                <div className="mt-1 mb-2 flex items-center gap-3 text-xs">
+                  <span className="font-semibold flex-shrink-0">ROLLOUT</span>
+                  <Progress
+                    size="3"
+                    radius="small"
+                    value={(rule.coverage || 0) * 100}
+                  />
+                  <span className="conditionValue flex-shrink-0 py-0.5">
+                    {(rule.coverage || 0) * 100}%
+                  </span>
+                </div>
+              </>
+            )}
+            {"force" in rule ? (
+              <div className="my-2 text-xs">
+                <span className="mr-2 font-semibold">SERVE</span>
+                <ValueField
+                  value={rule.force}
+                  valueType={valueType}
+                  maxHeight={60}
+                  customPrismStyle={{ padding: "2px" }}
+                  customPrismOuterStyle={{ marginTop: "2px" }}
+                  customBooleanStyle={{
+                    marginTop: "5px",
+                    fontSize: "12px",
+                    display: "inline-block",
+                  }}
+                  stringAsCode={false}
+                  formatDefaultTypeAsConditionValue={true}
+                />
               </div>
             ) : null}
-            <div className="mt-1 mb-2 text-xs">
-              <div className="font-semibold mb-1">SERVE</div>
-              <table className="leading-3">
-                <tbody>
-                  {rule?.variations?.map?.((variation, i) => (
-                    <tr key={i} className="">
-                      <td className="pr-2 py-0.5">
-                        <div
-                          className="px-0.5 rounded-full border font-semibold"
-                          style={{
-                            fontSize: "11px",
-                            color: getVariationColor(i),
-                            borderColor: getVariationColor(i),
-                          }}
-                        >
-                          {i}
-                        </div>
-                      </td>
-                      <td width="100%" className="py-0.5">
-                        <ValueField value={variation} valueType={valueType} stringAsCode maxHeight={50} />
-                      </td>
-                      <td className="pl-2 py-0.5">
-                        {rule?.weights?.[i] !== undefined ? rule?.weights?.[i] * 100 + "%" : null}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div
-                className="mt-1 rt-ProgressRoot rt-r-size-3 rt-variant-surface flex overflow-hidden h-[15px]"
-                data-radius="small"
-              >
-                {rule?.weights?.map((w, i) => (
-                  <div
-                    className="rt-ProgressIndicator relative"
-                    style={{
-                      // @ts-expect-error css var
-                      "--progress-value": 100,
-                      "--accent-track": getVariationColor(i),
-                      width: w * (appliedCoverage ?? 1) * 100 + "%",
-                      filter: "saturate(.85)"
-                    }}
-                  >
-                    {(w * (appliedCoverage ?? 1) >= .15) && (
-                      <div
-                        className="text-2xs font-bold relative top-[2px] left-[2px] z-center text-white"
-                        style={{ textShadow: "0 1px #0006, 0 0 1px #0006" }}
-                      >
-                        {Math.round(w * (appliedCoverage ?? 1) * 1000)/10}%
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-        {ruleType === "rollout" && (
-          <>
-            <div className="mt-2 text-xs">
-              <span className="font-semibold">SAMPLE</span>
-              {" "}users by{" "}
-              <span className="conditionValue">{hashAttribute}</span>
-            </div>
-            <div className="mt-1 mb-2 flex items-center gap-3 text-xs">
-              <span className="font-semibold flex-shrink-0">ROLLOUT</span>
-              <Progress size="3" radius="small" value={(rule.coverage || 0) * 100}/>
-              <span className="conditionValue flex-shrink-0 py-0.5">{(rule.coverage || 0) * 100}%</span>
-            </div>
           </>
-        )}
-        {"force" in rule ? (
-          <div className="my-2 text-xs">
-            <span className="mr-2 font-semibold">SERVE</span>
-            <ValueField
-              value={rule.force}
-              valueType={valueType}
-              maxHeight={60}
-              customPrismStyle={{ padding: "2px" }}
-              customPrismOuterStyle={{ marginTop: "2px" }}
-              customBooleanStyle={{ marginTop: "5px", fontSize: "12px", display: "inline-block" }}
-              stringAsCode={false}
-              formatDefaultTypeAsConditionValue={true}
-            />
-          </div>
-        ): null}
-        </>) : (
+        ) : (
           <ValueField
             value={rule}
             valueType="json"
-            customPrismOuterStyle={{ marginLeft: -22, marginTop: 10, marginBottom: 8 }}
+            customPrismOuterStyle={{
+              marginLeft: -22,
+              marginTop: 10,
+              marginBottom: 8,
+            }}
           />
         )}
       </div>
     </div>
-  )
+  );
 }
 
 export function ConditionDisplay({
@@ -214,49 +269,60 @@ export function ConditionDisplay({
   const conditionJson = condition ? JSON.stringify(condition) : undefined;
   let conds = (conditionJson ? jsonToConds(conditionJson) : []) ?? [];
   parentConditions?.forEach((p) => {
-    const pConditionJson = p.condition ? JSON.stringify(p.condition) : undefined;
+    const pConditionJson = p.condition
+      ? JSON.stringify(p.condition)
+      : undefined;
     let pConds = (pConditionJson ? jsonToConds(pConditionJson) : []) ?? [];
     if (!pConds.length) return;
     conds.push(...pConds.map((pc) => ({ ...pc, field: p.id, prereq: true })));
   });
-  if (!conds.length) return (
-    <div>
-      <div className="mr-2 font-semibold">IF</div>
-      <ValueField value={parentConditions ? {condition, parentConditions} : condition} valueType="json" maxHeight={50} customPrismOuterStyle={{ width: 230 }} />
-    </div>
-  );
+  if (!conds.length)
+    return (
+      <div>
+        <div className="mr-2 font-semibold">IF</div>
+        <ValueField
+          value={parentConditions ? { condition, parentConditions } : condition}
+          valueType="json"
+          maxHeight={50}
+          customPrismOuterStyle={{ width: 230 }}
+        />
+      </div>
+    );
   return (
     <>
       {conds.map((cond, i) => (
         <div className="condition">
-          {i === 0 && (<span className="mr-2 font-semibold">IF</span>)}
-          {i > 0 && (<span className="mr-2 font-semibold">AND</span>)}
+          {i === 0 && <span className="mr-2 font-semibold">IF</span>}
+          {i > 0 && <span className="mr-2 font-semibold">AND</span>}
           <span className="conditionValue">
             {cond.prereq ? (
-                <Link size="1" role="button" href="#" onClick={(e) => {
+              <Link
+                size="1"
+                role="button"
+                href="#"
+                onClick={(e) => {
                   e.preventDefault();
                   setSelectedFid(cond.field);
-                }}>
-                  <PiFlagFill className="inline-block mr-0.5" size={12} />
-                  {cond.field}
-                </Link>
-            ) : cond.field}
+                }}
+              >
+                <PiFlagFill className="inline-block mr-0.5" size={12} />
+                {cond.field}
+              </Link>
+            ) : (
+              cond.field
+            )}
           </span>
           <span className="conditionOperator">
             {operatorToText(cond.operator)}
           </span>
           {"value" in cond ? (
-            <span className="conditionValue">
-              {cond.value}
-            </span>
-          ) : null }
+            <span className="conditionValue">{cond.value}</span>
+          ) : null}
         </div>
       ))}
     </>
-  )
+  );
 }
-
-
 
 export interface Condition {
   field: string;
@@ -265,9 +331,7 @@ export interface Condition {
   prereq?: boolean;
 }
 
-export function jsonToConds(
-  json: string,
-): null | Condition[] {
+export function jsonToConds(json: string): null | Condition[] {
   if (!json || json === "{}") return [];
   // Advanced use case where we can't use the simple editor
   if (json.match(/\$(or|nor|all|type)/)) return null;
@@ -324,7 +388,9 @@ export function jsonToConds(
         const v: any = value[operator];
 
         if (operator === "$in" || operator === "$nin") {
-          if (v.some((str: any) => typeof str === "string" && str.includes(","))) {
+          if (
+            v.some((str: any) => typeof str === "string" && str.includes(","))
+          ) {
             valid = false;
             return;
           }
@@ -458,7 +524,6 @@ export function jsonToConds(
     return null;
   }
 }
-
 
 function operatorToText(operator: string, isPrerequisite?: boolean): string {
   switch (operator) {

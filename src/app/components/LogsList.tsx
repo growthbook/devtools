@@ -31,7 +31,7 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
 
   const filteredLogEvents = useMemo(
     () => logEvents.filter((evt) => filters.includes(evt.logType)),
-    [filters, logEvents]
+    [filters, logEvents],
   );
 
   const {
@@ -79,7 +79,7 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
                   {copy}
                   <Badge>{logTypeCounts[filter]}</Badge>
                 </Button>
-              )
+              ),
             )}
           </Flex>
         </Flex>

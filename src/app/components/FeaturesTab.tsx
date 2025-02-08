@@ -1,4 +1,4 @@
-import React, {CSSProperties, useEffect, useState} from "react";
+import React, { CSSProperties, useEffect, useState } from "react";
 import { FeatureDefinition } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
@@ -10,12 +10,13 @@ import {
   PiCaretRightFill,
   PiCircleFill,
   PiFlagBold,
-  PiFlaskFill, PiPlusBold,
-  PiPlusSquareBold
+  PiFlaskFill,
+  PiPlusBold,
+  PiPlusSquareBold,
 } from "react-icons/pi";
 import clsx from "clsx";
-import {Prism} from "react-syntax-highlighter";
-import {ghcolors as codeTheme} from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Prism } from "react-syntax-highlighter";
+import { ghcolors as codeTheme } from "react-syntax-highlighter/dist/esm/styles/prism";
 import * as Accordion from "@radix-ui/react-accordion";
 import Rule from "@/app/components/Rule";
 import TextareaAutosize from "react-textarea-autosize";
@@ -32,9 +33,10 @@ export default function FeaturesTab() {
   const [features, setFeatures] = useTabState<
     Record<string, FeatureDefinition>
   >("features", {});
-  const [forcedFeatures, setForcedFeatures] = useTabState<
-    Record<string, any>
-  >("forcedFeatures", {});
+  const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
+    "forcedFeatures",
+    {},
+  );
 
   const { evaluatedFeatures } = useGBSandboxEval();
 
@@ -74,7 +76,7 @@ export default function FeaturesTab() {
     delete newForcedFeatures[fid];
     setForcedFeatures(newForcedFeatures);
     setOverrideFeature(false);
-  }
+  };
 
   useEffect(() => {
     setExpandLinks(false);
@@ -97,8 +99,10 @@ export default function FeaturesTab() {
   }, []);
   useEffect(() => {
     if (selectedFid) {
-      const el = document.querySelector(`#featuresTab_featureList_${selectedFid}`);
-      el?.scrollIntoView({ behavior: firstLoad ? 'instant' : 'smooth' });
+      const el = document.querySelector(
+        `#featuresTab_featureList_${selectedFid}`,
+      );
+      el?.scrollIntoView({ behavior: firstLoad ? "instant" : "smooth" });
     }
   }, [selectedFid]);
 
@@ -107,17 +111,22 @@ export default function FeaturesTab() {
       <div className="max-w-[900px] mx-auto">
         <div className="w-[45%] max-w-[405px] pb-3">
           {Object.keys(features).map((fid, i) => {
-            const { feature, meta, linkedExperiments, evaluatedFeature, isForced } =
-              getFeatureDetails({
-                fid,
-                features,
-                evaluatedFeatures,
-                forcedFeatures,
-              });
+            const {
+              feature,
+              meta,
+              linkedExperiments,
+              evaluatedFeature,
+              isForced,
+            } = getFeatureDetails({
+              fid,
+              features,
+              evaluatedFeatures,
+              forcedFeatures,
+            });
             const valueStr = evaluatedFeature?.result
               ? JSON.stringify(evaluatedFeature.result?.value)
               : "null";
-            const isBoolean = (valueStr === "true" || valueStr === "false");
+            const isBoolean = valueStr === "true" || valueStr === "false";
             return (
               <div
                 id={`featuresTab_featureList_${fid}`}
@@ -127,26 +136,29 @@ export default function FeaturesTab() {
                 })}
                 onClick={() => clickFeature(fid)}
               >
-                <div className={clsx("text-sm font-semibold", {
-                  "text-amber-700": isForced,
-                  "text-indigo-12": !isForced,
-                })}>
+                <div
+                  className={clsx("text-sm font-semibold", {
+                    "text-amber-700": isForced,
+                    "text-indigo-12": !isForced,
+                  })}
+                >
                   {/*{linkedExperiments.length > 0 && (*/}
                   {/*  <PiFlaskFill className="inline-block mr-0.5" size={12}/>*/}
                   {/*)}*/}
                   {fid}
                 </div>
-                <div className={clsx("text-indigo-12 text-xs line-clamp-1 mt-0", {
-                  "uppercase": isBoolean,
-                })}>
+                <div
+                  className={clsx("text-indigo-12 text-xs line-clamp-1 mt-0", {
+                    uppercase: isBoolean,
+                  })}
+                >
                   {isBoolean && (
                     <PiCircleFill
                       size={8}
-                      className={clsx("inline-block mr-0.5 -mt-0.5",
-                        {
-                          "text-slate-a7": valueStr === "false",
-                          "text-teal-600": valueStr === "true",
-                        })}
+                      className={clsx("inline-block mr-0.5 -mt-0.5", {
+                        "text-slate-a7": valueStr === "false",
+                        "text-teal-600": valueStr === "true",
+                      })}
                     />
                   )}
                   {valueStr}
@@ -178,63 +190,92 @@ export default function FeaturesTab() {
               <div className="header">
                 <h2 className="font-bold">{selectedFid}</h2>
                 {(selectedFeature?.linkedExperiments || []).length ? (
-                    <div className="mt-1 flex items-center gap-4">
-                      <Link size="2" role="button" href="#" onClick={(e) => {
+                  <div className="mt-1 flex items-center gap-4">
+                    <Link
+                      size="2"
+                      role="button"
+                      href="#"
+                      onClick={(e) => {
                         e.preventDefault();
                         setCurrentTab("experiments");
-                        setSelectedEid(selectedFeature?.linkedExperiments?.[0].key);
-                      }}>
-                        <PiFlaskFill className="inline-block mr-0.5" size={14} />
-                        {selectedFeature?.linkedExperiments?.[0].key}
-                      </Link>
-                      {(selectedFeature?.linkedExperiments || []).length > 1 && !expandLinks ? (
-                        <Link size="2" role="button" href="#" onClick={(e) => {
+                        setSelectedEid(
+                          selectedFeature?.linkedExperiments?.[0].key,
+                        );
+                      }}
+                    >
+                      <PiFlaskFill className="inline-block mr-0.5" size={14} />
+                      {selectedFeature?.linkedExperiments?.[0].key}
+                    </Link>
+                    {(selectedFeature?.linkedExperiments || []).length > 1 &&
+                    !expandLinks ? (
+                      <Link
+                        size="2"
+                        role="button"
+                        href="#"
+                        onClick={(e) => {
                           e.preventDefault();
                           setExpandLinks(true);
-                        }}>
-                          <PiPlusBold className="mr-0.5 inline-block" />
-                          {(selectedFeature?.linkedExperiments || []).length-1} more
-                        </Link>
-                      ): null}
-                    </div>
+                        }}
+                      >
+                        <PiPlusBold className="mr-0.5 inline-block" />
+                        {(selectedFeature?.linkedExperiments || []).length -
+                          1}{" "}
+                        more
+                      </Link>
+                    ) : null}
+                  </div>
                 ) : null}
-                {(selectedFeature?.linkedExperiments || []).length > 1 && expandLinks ?
-                  selectedFeature.linkedExperiments.map((experiment, i) => {
-                    if (i===0) return null;
-                    return (
-                      <div>
-                        <Link size="2" role="button" href="#" onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentTab("experiments");
-                          setSelectedEid(experiment.key);
-                        }}>
-                          <PiFlaskFill className="inline-block mr-0.5" size={14}/>
-                          {experiment.key}
-                        </Link>
-                      </div>
-                    );
-                  }) : null}
+                {(selectedFeature?.linkedExperiments || []).length > 1 &&
+                expandLinks
+                  ? selectedFeature.linkedExperiments.map((experiment, i) => {
+                      if (i === 0) return null;
+                      return (
+                        <div>
+                          <Link
+                            size="2"
+                            role="button"
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setCurrentTab("experiments");
+                              setSelectedEid(experiment.key);
+                            }}
+                          >
+                            <PiFlaskFill
+                              className="inline-block mr-0.5"
+                              size={14}
+                            />
+                            {experiment.key}
+                          </Link>
+                        </div>
+                      );
+                    })
+                  : null}
               </div>
 
               <div className="content">
                 <div className="my-1">
                   <div className="flex items-center mb-1 gap-3">
-                    <div className="label font-semibold">
-                      Current value
-                    </div>
+                    <div className="label font-semibold">Current value</div>
                     {overrideFeature && (
-                      <div className="text-sm font-semibold text-amber-700 bg-amber-200 px-1.5 py-0.5 rounded-md">Override</div>
+                      <div className="text-sm font-semibold text-amber-700 bg-amber-200 px-1.5 py-0.5 rounded-md">
+                        Override
+                      </div>
                     )}
                     <div className="flex flex-1 items-center justify-end">
-                    {overrideFeature && (
-                      <Button variant="ghost" size="2" onClick={() => {
-                        setOverrideFeature(false);
-                        unsetForcedFeature(selectedFid);
-                      }}>
-                        <PiArrowClockwise className="inline-block mr-0.5" />
-                        Revert
-                      </Button>
-                    )}
+                      {overrideFeature && (
+                        <Button
+                          variant="ghost"
+                          size="2"
+                          onClick={() => {
+                            setOverrideFeature(false);
+                            unsetForcedFeature(selectedFid);
+                          }}
+                        >
+                          <PiArrowClockwise className="inline-block mr-0.5" />
+                          Revert
+                        </Button>
+                      )}
                     </div>
                   </div>
                   <EditableValueField
@@ -255,8 +296,15 @@ export default function FeaturesTab() {
                   >
                     <Accordion.Item value="debug-log">
                       <Accordion.Trigger className="trigger mb-0.5">
-                        <Link size="2" role="button" className="hover:underline">
-                          <PiCaretRightFill className="caret mr-0.5" size={12}/>
+                        <Link
+                          size="2"
+                          role="button"
+                          className="hover:underline"
+                        >
+                          <PiCaretRightFill
+                            className="caret mr-0.5"
+                            size={12}
+                          />
                           Debug log
                         </Link>
                       </Accordion.Trigger>
@@ -275,7 +323,7 @@ export default function FeaturesTab() {
                   </Accordion.Root>
                 ) : null}
 
-                <hr className="my-4"/>
+                <hr className="my-4" />
 
                 <div className="my-2">
                   <div className="label font-semibold">Default value</div>
@@ -300,7 +348,7 @@ export default function FeaturesTab() {
                       );
                     })}
                   </>
-                ): null}
+                ) : null}
 
                 <div className="my-2">
                   <div className="label mb-1">Definition</div>
@@ -327,7 +375,7 @@ export function ValueField({
   customBooleanStyle,
   stringAsCode = true,
   formatDefaultTypeAsConditionValue = false,
-}:{
+}: {
   value: any;
   valueType?: ValueType;
   maxHeight?: number;
@@ -337,13 +385,15 @@ export function ValueField({
   stringAsCode?: boolean;
   formatDefaultTypeAsConditionValue?: boolean;
 }) {
-  const formattedValue = value !== undefined ?
-    JSON.stringify(value, null, 2) :
-    "null";
+  const formattedValue =
+    value !== undefined ? JSON.stringify(value, null, 2) : "null";
   return (
     <>
       {(stringAsCode ? ["json", "string"] : ["json"]).includes(valueType) ? (
-        <div className="border border-gray-200 rounded-md bg-gray-50" style={customPrismOuterStyle}>
+        <div
+          className="border border-gray-200 rounded-md bg-gray-50"
+          style={customPrismOuterStyle}
+        >
           <Prism
             language="json"
             style={codeTheme}
@@ -360,11 +410,10 @@ export function ValueField({
           {(value === true || value === false) && (
             <PiCircleFill
               size={10}
-              className={clsx("inline-block mr-0.5 -mt-0.5",
-                {
-                  "text-slate-a7": formattedValue === "false",
-                  "text-teal-600": formattedValue === "true",
-                })}
+              className={clsx("inline-block mr-0.5 -mt-0.5", {
+                "text-slate-a7": formattedValue === "false",
+                "text-teal-600": formattedValue === "true",
+              })}
             />
           )}
           {formattedValue}
@@ -372,7 +421,11 @@ export function ValueField({
       ) : formatDefaultTypeAsConditionValue ? (
         <span
           className="conditionValue"
-          style={typeof value === "string" ? { color: "rgb(227, 17, 108)" } : undefined}
+          style={
+            typeof value === "string"
+              ? { color: "rgb(227, 17, 108)" }
+              : undefined
+          }
         >
           {formattedValue}
         </span>
@@ -389,12 +442,13 @@ function EditableValueField({
   value,
   setValue,
   valueType = "string",
-}:{
+}: {
   value: any;
   setValue: (v: any) => void;
   valueType?: ValueType;
 }) {
-  const formattedValue = valueType === "json" ? JSON.stringify(value, null, 2) : value;
+  const formattedValue =
+    valueType === "json" ? JSON.stringify(value, null, 2) : value;
   const [editedValue, setEditedValue] = useState<any>(formattedValue);
   const [textareaError, setTextareaError] = useState(false);
   const [editing, setEditing] = useState(valueType !== "json");
@@ -421,14 +475,14 @@ function EditableValueField({
       } catch (e) {
         newValue = parseFloat(editedValue);
       }
-      if (!Number.isFinite(newValue)) newValue = 0
+      if (!Number.isFinite(newValue)) newValue = 0;
     } else {
       newValue = editedValue;
     }
     setValue(newValue);
     setDirty(false);
     setEditing(false);
-  }
+  };
 
   if (!editing && valueType === "json") {
     return (
@@ -445,7 +499,7 @@ function EditableValueField({
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -468,8 +522,18 @@ function EditableValueField({
             value={JSON.stringify(value)}
             onValueChange={(v) => setValue(JSON.parse(v))}
           >
-            <RadioGroup.Item value="true" className="font-semibold my-1 cursor-pointer">TRUE</RadioGroup.Item>
-            <RadioGroup.Item value="false" className="font-semibold my-1 cursor-pointer">FALSE</RadioGroup.Item>
+            <RadioGroup.Item
+              value="true"
+              className="font-semibold my-1 cursor-pointer"
+            >
+              TRUE
+            </RadioGroup.Item>
+            <RadioGroup.Item
+              value="false"
+              className="font-semibold my-1 cursor-pointer"
+            >
+              FALSE
+            </RadioGroup.Item>
           </RadioGroup.Root>
         </div>
       ) : (
@@ -485,7 +549,7 @@ function EditableValueField({
             setTextareaError(false);
             setDirty(true);
           }}
-          style={{fontSize: "10px", lineHeight: "15px", padding: "2px 6px"}}
+          style={{ fontSize: "10px", lineHeight: "15px", padding: "2px 6px" }}
           maxRows={valueType === "json" ? 10 : 3}
         />
       )}
@@ -538,7 +602,8 @@ function getFeatureDetails({
   if (meta?.valueType) {
     valueType = meta?.valueType;
   } else {
-    valueType = typeof (feature?.defaultValue ?? "string") as ValueType || "object";
+    valueType =
+      (typeof (feature?.defaultValue ?? "string") as ValueType) || "object";
     // @ts-ignore
     if (valueType === "object") {
       valueType = "json";

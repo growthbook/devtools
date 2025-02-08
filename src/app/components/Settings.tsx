@@ -15,7 +15,7 @@ const SettingsForm = ({ close }: { close?: () => void }) => {
   const [apiHost, setApiHost, apiHostReady] = useGlobalState(
     API_HOST,
     CLOUD_API_HOST,
-    true
+    true,
   );
   const [apiKey, setApiKey, apiKeyReady] = useGlobalState(API_KEY, "", true);
   const ready = apiHostReady && apiKeyReady;

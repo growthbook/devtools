@@ -3,12 +3,7 @@ import * as Form from "@radix-ui/react-form";
 import { Button, Switch, Select } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
-import {
-  PiCheckBold,
-  PiPlusCircle,
-  PiX,
-  PiXCircle,
-} from "react-icons/pi";
+import { PiCheckBold, PiPlusCircle, PiX, PiXCircle } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import clsx from "clsx";
 
@@ -120,38 +115,45 @@ export default function AttributesForm({
           {!jsonMode ? (
             !Object.keys(formAttributes).length ? (
               <em className="text-2xs">No attributes found</em>
-            ) : Object.keys(formAttributes).map((attributeKey, i) => {
-              return (
-                <div key={attributeKey}>
-                  <Form.Field
-                    className="FormFieldInline my-1"
-                    name={attributeKey}
-                  >
-                    <Form.Label className="FormLabel mr-1 text-nowrap">
-                      {canAddRemoveFields && (
-                        <Button
-                          type="button"
-                          size="1"
-                          variant="ghost"
-                          color="red"
-                          className="px-1 mt-0.5 mr-0.5"
-                          onClick={() => removeField(attributeKey)}
+            ) : (
+              Object.keys(formAttributes).map((attributeKey, i) => {
+                return (
+                  <div key={attributeKey}>
+                    <Form.Field
+                      className="FormFieldInline my-1"
+                      name={attributeKey}
+                    >
+                      <Form.Label className="FormLabel mr-1 text-nowrap">
+                        {canAddRemoveFields && (
+                          <Button
+                            type="button"
+                            size="1"
+                            variant="ghost"
+                            color="red"
+                            className="px-1 mt-0.5 mr-0.5"
+                            onClick={() => removeField(attributeKey)}
+                          >
+                            <PiXCircle />
+                          </Button>
+                        )}
+                        <div
+                          className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
+                          style={{ minWidth: 80, maxWidth: 120 }}
                         >
-                          <PiXCircle />
-                        </Button>
-                      )}
-                      <div
-                        className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
-                        style={{ minWidth: 80, maxWidth: 120 }}
-                      >
-                        {attributeKey}
-                      </div>
-                    </Form.Label>
-                    {renderInputField({ attributeKey, form, schema, setDirty })}
-                  </Form.Field>
-                </div>
-              );
-            })
+                          {attributeKey}
+                        </div>
+                      </Form.Label>
+                      {renderInputField({
+                        attributeKey,
+                        form,
+                        schema,
+                        setDirty,
+                      })}
+                    </Form.Field>
+                  </div>
+                );
+              })
+            )
           ) : (
             <textarea
               className={clsx("Textarea mono mt-1", {
