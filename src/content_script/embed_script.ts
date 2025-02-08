@@ -316,6 +316,7 @@ function subscribeToSdkChanges(
   };
 }
 
+let cachedHostRes: any = undefined;
 async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   if (!gb) {
     return {
@@ -349,8 +350,9 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       errorMessage: "No API Client Key found",
     };
   }
-  const res = await fetch(`${apiHost}/api/features/${clientKey}`);
+  const res = cachedHostRes ?? await fetch(`${apiHost}/api/features/${clientKey}`);
   if (res.status === 200) {
+    cachedHostRes = res;
     return {
       canConnect: true,
       hasClientKey: true,
