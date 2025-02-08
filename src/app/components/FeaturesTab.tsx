@@ -137,18 +137,15 @@ export default function FeaturesTab() {
                 onClick={() => clickFeature(fid)}
               >
                 <div
-                  className={clsx("text-sm font-semibold", {
+                  className={clsx("title", {
                     "text-amber-700": isForced,
                     "text-indigo-12": !isForced,
                   })}
                 >
-                  {/*{linkedExperiments.length > 0 && (*/}
-                  {/*  <PiFlaskFill className="inline-block mr-0.5" size={12}/>*/}
-                  {/*)}*/}
                   {fid}
                 </div>
                 <div
-                  className={clsx("text-indigo-12 text-xs line-clamp-1 mt-0", {
+                  className={clsx("value", {
                     uppercase: isBoolean,
                   })}
                 >
@@ -351,11 +348,35 @@ export default function FeaturesTab() {
                 ) : null}
 
                 <div className="my-2">
-                  <div className="label mb-1">Definition</div>
-                  <ValueField
-                    value={selectedFeature.feature}
-                    valueType="json"
-                  />
+
+                  <Accordion.Root
+                    className="accordion mt-2"
+                    type="single"
+                    collapsible
+                  >
+                    <Accordion.Item value="feature-definition">
+                      <Accordion.Trigger className="trigger mb-0.5">
+                        <Link
+                          size="2"
+                          role="button"
+                          className="hover:underline"
+                        >
+                          <PiCaretRightFill
+                            className="caret mr-0.5"
+                            size={12}
+                          />
+                          Full definition
+                        </Link>
+                      </Accordion.Trigger>
+                      <Accordion.Content className="accordionInner overflow-hidden w-full">
+                        <ValueField
+                          value={selectedFeature.feature}
+                          valueType="json"
+                          maxHeight={null}
+                        />
+                      </Accordion.Content>
+                    </Accordion.Item>
+                  </Accordion.Root>
                 </div>
               </div>
             </div>
@@ -378,7 +399,7 @@ export function ValueField({
 }: {
   value: any;
   valueType?: ValueType;
-  maxHeight?: number;
+  maxHeight?: number | null;
   customPrismStyle?: CSSProperties;
   customPrismOuterStyle?: CSSProperties;
   customBooleanStyle?: CSSProperties;
@@ -397,7 +418,11 @@ export function ValueField({
           <Prism
             language="json"
             style={codeTheme}
-            customStyle={{ ...customTheme, maxHeight, ...customPrismStyle }}
+            customStyle={{
+              ...customTheme,
+              maxHeight: maxHeight ?? undefined,
+              ...customPrismStyle
+            }}
             codeTagProps={{
               className: "text-2xs-important !whitespace-pre-wrap",
             }}

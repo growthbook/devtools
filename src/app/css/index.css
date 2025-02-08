@@ -68,6 +68,12 @@
 .featureCard.selected {
   @apply bg-violet-2;
 }
+.featureCard .title {
+  @apply text-sm font-semibold;
+}
+.featureCard .value {
+  @apply text-indigo-12 text-xs line-clamp-1 mt-0 w-full text-right pl-[50%];
+}
 
 .featureDetail {
   @apply mb-3 min-h-[calc(100vh-120px)] bg-violet-2;
@@ -80,7 +86,10 @@
 }
 
 .rule {
-  @apply flex items-start pt-2 pb-0 px-2 mb-2 text-2xs bg-white rounded-md border border-slate-a3;
+  @apply pt-2 pb-0 px-2 mb-2 text-2xs bg-white rounded-md border border-slate-a3;
+}
+.rule .inner {
+  @apply flex items-start;
 }
 .condition {
   @apply leading-[1.15rem];

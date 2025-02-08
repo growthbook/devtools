@@ -62,194 +62,197 @@ export default function Rule({
 
   return (
     <div className="rule">
-      <div className="bg-slate-4 text-xs -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">
-        {i + 1}
-      </div>
-      <div className="w-full">
-        <div className="flex items-start mb-2">
-          <div className="flex-1 text-sm font-bold">{ruleName}</div>
-          <label className="flex-shrink-0 flex items-center text-2xs cursor-pointer select-none">
-            <Checkbox
-              checked={jsonMode}
-              onCheckedChange={(v) => setJsonMode(!jsonMode)}
-              size="1"
-              mr="1"
-              className="cursor-pointer"
-            />
-            <span>View JSON</span>
-          </label>
+      <div className="inner">
+        <div className="bg-slate-4 text-xs -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">
+          {i + 1}
         </div>
-        {ruleType === "experiment" && (
-          <Link
-            size="1"
-            role="button"
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              setSelectedEid(key);
-              setCurrentTab("experiments");
-            }}
-          >
-            <PiFlaskFill className="inline-block mr-0.5" size={12} />
-            {key}
-          </Link>
-        )}
-        {!jsonMode ? (
-          <>
-            <div className="my-2 text-xs">
-              <ConditionDisplay
-                condition={rule.condition}
-                parentConditions={rule.parentConditions}
-              />
+        <div className="w-full">
+          <div className="mb-2">
+            <div className="flex items-start">
+              <div className="flex-1 text-sm font-bold">{ruleName}</div>
+              <label className="flex-shrink-0 flex items-center text-2xs cursor-pointer select-none">
+                <Checkbox
+                  checked={jsonMode}
+                  onCheckedChange={(v) => setJsonMode(!jsonMode)}
+                  size="1"
+                  mr="1"
+                  className="cursor-pointer"
+                />
+                <span>View JSON</span>
+              </label>
             </div>
             {ruleType === "experiment" && (
-              <div className="condition">
-                <div className="mt-2 text-xs">
-                  <span className="font-semibold">SPLIT</span> users by{" "}
-                  <span className="conditionValue">{hashAttribute}</span>
-                  {namespace && (
-                    <>
-                      {" "}
-                      in namespace{" "}
-                      <span className="conditionValue inline-block flex-shrink-0 whitespace-nowrap overflow-hidden overflow-ellipsis max-w-[70px] leading-4 align-middle">
-                        {namespace[0]}
-                      </span>
-                    </>
-                  )}
-                </div>
-                <div className="mt-1 flex items-center gap-3 text-xs">
-                  <span className="font-semibold flex-shrink-0">INCLUDE</span>
-                  <Progress
-                    size="3"
-                    radius="small"
-                    value={(appliedCoverage || 0) * 100}
-                  />
-                  <span className="conditionValue flex-shrink-0">
-                    {Math.round((appliedCoverage || 0) * 1000) / 10}%
-                  </span>
-                </div>
-                {nsRange ? (
-                  <div className="leading-3">
-                    ({nsRange * 100}% namespace, {(coverage ?? 1) * 100}%
-                    exposure)
-                  </div>
-                ) : null}
-                <div className="mt-1 mb-2 text-xs">
-                  <div className="font-semibold mb-1">SERVE</div>
-                  <table className="leading-3">
-                    <tbody>
-                      {rule?.variations?.map?.((variation, i) => (
-                        <tr key={i} className="">
-                          <td className="pr-2 py-0.5">
-                            <div
-                              className="px-0.5 rounded-full border font-semibold"
-                              style={{
-                                fontSize: "11px",
-                                color: getVariationColor(i),
-                                borderColor: getVariationColor(i),
-                              }}
-                            >
-                              {i}
-                            </div>
-                          </td>
-                          <td width="100%" className="py-0.5">
-                            <ValueField
-                              value={variation}
-                              valueType={valueType}
-                              stringAsCode
-                              maxHeight={50}
-                            />
-                          </td>
-                          <td className="pl-2 py-0.5">
-                            {rule?.weights?.[i] !== undefined
-                              ? rule?.weights?.[i] * 100 + "%"
-                              : null}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div
-                    className="mt-1 rt-ProgressRoot rt-r-size-3 rt-variant-surface flex overflow-hidden h-[15px]"
-                    data-radius="small"
-                  >
-                    {rule?.weights?.map((w, i) => (
-                      <div
-                        className="rt-ProgressIndicator relative"
-                        style={{
-                          // @ts-expect-error css var
-                          "--progress-value": 100,
-                          "--accent-track": getVariationColor(i),
-                          width: w * (appliedCoverage ?? 1) * 100 + "%",
-                          filter: "saturate(.85)",
-                        }}
-                      >
-                        {w * (appliedCoverage ?? 1) >= 0.15 && (
-                          <div
-                            className="text-2xs font-bold relative top-[2px] left-[2px] z-center text-white"
-                            style={{ textShadow: "0 1px #0006, 0 0 1px #0006" }}
-                          >
-                            {Math.round(w * (appliedCoverage ?? 1) * 1000) / 10}
-                            %
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <Link
+                size="1"
+                role="button"
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setSelectedEid(key);
+                  setCurrentTab("experiments");
+                }}
+              >
+                <PiFlaskFill className="inline-block mr-0.5" size={12} />
+                {key}
+              </Link>
             )}
-            {ruleType === "rollout" && (
-              <>
-                <div className="mt-2 text-xs">
-                  <span className="font-semibold">SAMPLE</span> users by{" "}
-                  <span className="conditionValue">{hashAttribute}</span>
-                </div>
-                <div className="mt-1 mb-2 flex items-center gap-3 text-xs">
-                  <span className="font-semibold flex-shrink-0">ROLLOUT</span>
-                  <Progress
-                    size="3"
-                    radius="small"
-                    value={(rule.coverage || 0) * 100}
-                  />
-                  <span className="conditionValue flex-shrink-0 py-0.5">
-                    {(rule.coverage || 0) * 100}%
-                  </span>
-                </div>
-              </>
-            )}
-            {"force" in rule ? (
+          </div>
+          {!jsonMode && (
+            <>
               <div className="my-2 text-xs">
-                <span className="mr-2 font-semibold">SERVE</span>
-                <ValueField
-                  value={rule.force}
-                  valueType={valueType}
-                  maxHeight={60}
-                  customPrismStyle={{ padding: "2px" }}
-                  customPrismOuterStyle={{ marginTop: "2px" }}
-                  customBooleanStyle={{
-                    marginTop: "5px",
-                    fontSize: "12px",
-                    display: "inline-block",
-                  }}
-                  stringAsCode={false}
-                  formatDefaultTypeAsConditionValue={true}
+                <ConditionDisplay
+                  condition={rule.condition}
+                  parentConditions={rule.parentConditions}
                 />
               </div>
-            ) : null}
-          </>
-        ) : (
-          <ValueField
-            value={rule}
-            valueType="json"
-            customPrismOuterStyle={{
-              marginLeft: -22,
-              marginTop: 10,
-              marginBottom: 8,
-            }}
-          />
-        )}
+              {ruleType === "experiment" && (
+                <div className="condition">
+                  <div className="mt-2 text-xs">
+                    <span className="font-semibold">SPLIT</span> users by{" "}
+                    <span className="conditionValue">{hashAttribute}</span>
+                    {namespace && (
+                      <>
+                        {" "}
+                        in namespace{" "}
+                        <span className="conditionValue inline-block flex-shrink-0 whitespace-nowrap overflow-hidden overflow-ellipsis max-w-[70px] leading-4 align-middle">
+                          {namespace[0]}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  <div className="mt-1 flex items-center gap-3 text-xs">
+                    <span className="font-semibold flex-shrink-0">INCLUDE</span>
+                    <Progress
+                      size="3"
+                      radius="small"
+                      value={(appliedCoverage || 0) * 100}
+                    />
+                    <span className="conditionValue flex-shrink-0">
+                      {Math.round((appliedCoverage || 0) * 1000) / 10}%
+                    </span>
+                  </div>
+                  {nsRange ? (
+                    <div className="leading-3">
+                      ({nsRange * 100}% namespace, {(coverage ?? 1) * 100}%
+                      exposure)
+                    </div>
+                  ) : null}
+                  <div className="mt-1 mb-2 text-xs">
+                    <div className="font-semibold mb-1">SERVE</div>
+                    <table className="leading-3">
+                      <tbody>
+                        {rule?.variations?.map?.((variation, i) => (
+                          <tr key={i} className="">
+                            <td className="pr-2 py-0.5">
+                              <div
+                                className="px-0.5 rounded-full border font-semibold"
+                                style={{
+                                  fontSize: "11px",
+                                  color: getVariationColor(i),
+                                  borderColor: getVariationColor(i),
+                                }}
+                              >
+                                {i}
+                              </div>
+                            </td>
+                            <td width="100%" className="py-0.5">
+                              <ValueField
+                                value={variation}
+                                valueType={valueType}
+                                stringAsCode
+                                maxHeight={50}
+                              />
+                            </td>
+                            <td className="pl-2 py-0.5">
+                              {rule?.weights?.[i] !== undefined
+                                ? rule?.weights?.[i] * 100 + "%"
+                                : null}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div
+                      className="mt-1 rt-ProgressRoot rt-r-size-3 rt-variant-surface flex overflow-hidden h-[15px]"
+                      data-radius="small"
+                    >
+                      {rule?.weights?.map((w, i) => (
+                        <div
+                          className="rt-ProgressIndicator relative"
+                          style={{
+                            // @ts-expect-error css var
+                            "--progress-value": 100,
+                            "--accent-track": getVariationColor(i),
+                            width: w * (appliedCoverage ?? 1) * 100 + "%",
+                            filter: "saturate(.85)",
+                          }}
+                        >
+                          {w * (appliedCoverage ?? 1) >= 0.15 && (
+                            <div
+                              className="text-2xs font-bold relative top-[2px] left-[2px] z-center text-white"
+                              style={{ textShadow: "0 1px #0006, 0 0 1px #0006" }}
+                            >
+                              {Math.round(w * (appliedCoverage ?? 1) * 1000) / 10}
+                              %
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {ruleType === "rollout" && (
+                <>
+                  <div className="mt-2 text-xs">
+                    <span className="font-semibold">SAMPLE</span> users by{" "}
+                    <span className="conditionValue">{hashAttribute}</span>
+                  </div>
+                  <div className="mt-1 mb-2 flex items-center gap-3 text-xs">
+                    <span className="font-semibold flex-shrink-0">ROLLOUT</span>
+                    <Progress
+                      size="3"
+                      radius="small"
+                      value={(rule.coverage || 0) * 100}
+                    />
+                    <span className="conditionValue flex-shrink-0 py-0.5">
+                      {(rule.coverage || 0) * 100}%
+                    </span>
+                  </div>
+                </>
+              )}
+              {"force" in rule ? (
+                <div className="my-2 text-xs">
+                  <span className="mr-2 font-semibold">SERVE</span>
+                  <ValueField
+                    value={rule.force}
+                    valueType={valueType}
+                    maxHeight={60}
+                    customPrismStyle={{ padding: "2px" }}
+                    customPrismOuterStyle={{ marginTop: "2px" }}
+                    customBooleanStyle={{
+                      marginTop: "5px",
+                      fontSize: "12px",
+                      display: "inline-block",
+                    }}
+                    stringAsCode={false}
+                    formatDefaultTypeAsConditionValue={true}
+                  />
+                </div>
+              ) : null}
+            </>
+          )}
+        </div>
       </div>
+      {jsonMode && (
+        <ValueField
+          value={rule}
+          valueType="json"
+          customPrismOuterStyle={{
+            marginBottom: 8,
+          }}
+        />
+      )}
     </div>
   );
 }
