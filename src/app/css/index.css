@@ -54,20 +54,19 @@
 }
 
 .box {
-  @apply px-3 py-2 border border-gray-200 rounded-lg bg-white;
+  @apply px-3 py-2 border border-slate-a3 rounded-md bg-white;
 }
 
 .featureCard {
-  @apply pl-3 pr-6 py-1 border-l-[3px] border-slate-a4 relative;
-  box-shadow: 0 -1.5px 0 var(--slate-a4) inset;
+  @apply pl-3 pr-6 py-1 border-b border-slate-a3 relative;
   cursor: pointer;
   scroll-margin-top: 95px;
 }
 .featureCard:not(.selected):hover {
-  @apply border-l-violet-a7 bg-violet-1;
+  @apply bg-violet-1;
 }
 .featureCard.selected {
-  @apply border-l-violet-9 bg-violet-2;
+  @apply bg-violet-2;
 }
 
 .featureDetail {

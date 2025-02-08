@@ -4,13 +4,21 @@ import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
-import {Avatar, Button, Link, Switch} from "@radix-ui/themes";
-import {PiCaretRightFill, PiCircleFill, PiFlagBold, PiFlaskFill, PiPlusSquareBold} from "react-icons/pi";
+import { Button, RadioGroup, Link, Switch } from "@radix-ui/themes";
+import {
+  PiArrowClockwise,
+  PiCaretRightFill,
+  PiCircleFill,
+  PiFlagBold,
+  PiFlaskFill, PiPlusBold,
+  PiPlusSquareBold
+} from "react-icons/pi";
 import clsx from "clsx";
 import {Prism} from "react-syntax-highlighter";
 import {ghcolors as codeTheme} from "react-syntax-highlighter/dist/esm/styles/prism";
 import * as Accordion from "@radix-ui/react-accordion";
 import Rule from "@/app/components/Rule";
+import TextareaAutosize from "react-textarea-autosize";
 const customTheme = {
   padding: "5px",
   margin: 0,
@@ -114,7 +122,7 @@ export default function FeaturesTab() {
               <div
                 id={`featuresTab_featureList_${fid}`}
                 key={fid}
-                className={clsx("featureCard ml-1 mb-2", {
+                className={clsx("featureCard ml-1", {
                   selected: selectedFid === fid,
                 })}
                 onClick={() => clickFeature(fid)}
@@ -123,9 +131,9 @@ export default function FeaturesTab() {
                   "text-amber-700": isForced,
                   "text-indigo-12": !isForced,
                 })}>
-                  {linkedExperiments.length > 0 && (
-                    <PiFlaskFill className="inline-block mr-0.5" size={12}/>
-                  )}
+                  {/*{linkedExperiments.length > 0 && (*/}
+                  {/*  <PiFlaskFill className="inline-block mr-0.5" size={12}/>*/}
+                  {/*)}*/}
                   {fid}
                 </div>
                 <div className={clsx("text-indigo-12 text-xs line-clamp-1 mt-0", {
@@ -170,7 +178,7 @@ export default function FeaturesTab() {
               <div className="header">
                 <h2 className="font-bold">{selectedFid}</h2>
                 {(selectedFeature?.linkedExperiments || []).length ? (
-                    <div className="mt-1 flex items-start gap-4">
+                    <div className="mt-1 flex items-center gap-4">
                       <Link size="2" role="button" href="#" onClick={(e) => {
                         e.preventDefault();
                         setCurrentTab("experiments");
@@ -180,8 +188,11 @@ export default function FeaturesTab() {
                         {selectedFeature?.linkedExperiments?.[0].key}
                       </Link>
                       {(selectedFeature?.linkedExperiments || []).length > 1 && !expandLinks ? (
-                        <Link size="1" role="button" className="mt-0.5 hover:underline text-indigo-11" onClick={() => setExpandLinks(true)}>
-                          <PiPlusSquareBold className="mr-1 inline-block" />
+                        <Link size="2" role="button" href="#" onClick={(e) => {
+                          e.preventDefault();
+                          setExpandLinks(true);
+                        }}>
+                          <PiPlusBold className="mr-0.5 inline-block" />
                           {(selectedFeature?.linkedExperiments || []).length-1} more
                         </Link>
                       ): null}
@@ -207,41 +218,33 @@ export default function FeaturesTab() {
 
               <div className="content">
                 <div className="my-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="label font-semibold">Current value</div>
-                    {(selectedFeature?.valueType !== "boolean" || overrideFeature) && (
-                      <label className="flex items-center cursor-pointer select-none">
-                        <Switch
-                          radius="medium"
-                          color="amber"
-                          checked={overrideFeature}
-                          onCheckedChange={(v) => {
-                            setOverrideFeature(v);
-                            if (!v) unsetForcedFeature(selectedFid);
-                          }}
-                        />
-                        <span className={clsx("text-xs ml-1", {
-                          "text-amber-600": overrideFeature,
-                          "text-gray-600": !overrideFeature,
-                        })}>Override</span>
-                      </label>
+                  <div className="flex items-center mb-1 gap-3">
+                    <div className="label font-semibold">
+                      Current value
+                    </div>
+                    {overrideFeature && (
+                      <div className="text-sm font-semibold text-amber-700 bg-amber-200 px-1.5 py-0.5 rounded-md">Override</div>
                     )}
+                    <div className="flex flex-1 items-center justify-end">
+                    {overrideFeature && (
+                      <Button variant="ghost" size="2" onClick={() => {
+                        setOverrideFeature(false);
+                        unsetForcedFeature(selectedFid);
+                      }}>
+                        <PiArrowClockwise className="inline-block mr-0.5" />
+                        Revert
+                      </Button>
+                    )}
+                    </div>
                   </div>
-                  {overrideFeature || selectedFeature?.valueType === "boolean" ? (
-                    <EditableValueField
-                      value={selectedFeature?.evaluatedFeature?.result?.value}
-                      setValue={(v) => {
-                        setForcedFeature(selectedFid, v);
-                        setOverrideFeature(true);
-                      }}
-                      valueType={selectedFeature?.valueType}
-                    />
-                  ) : (
-                    <ValueField
-                      value={selectedFeature?.evaluatedFeature?.result?.value}
-                      valueType={selectedFeature?.valueType}
-                    />
-                  )}
+                  <EditableValueField
+                    value={selectedFeature?.evaluatedFeature?.result?.value}
+                    setValue={(v) => {
+                      setForcedFeature(selectedFid, v);
+                      setOverrideFeature(true);
+                    }}
+                    valueType={selectedFeature?.valueType}
+                  />
                 </div>
 
                 {selectedFeature?.evaluatedFeature?.debug ? (
@@ -356,7 +359,7 @@ export function ValueField({
         <div className="text-indigo-12 uppercase" style={customBooleanStyle}>
           {(value === true || value === false) && (
             <PiCircleFill
-              size={8}
+              size={10}
               className={clsx("inline-block mr-0.5 -mt-0.5",
                 {
                   "text-slate-a7": formattedValue === "false",
@@ -394,7 +397,13 @@ function EditableValueField({
   const formattedValue = valueType === "json" ? JSON.stringify(value, null, 2) : value;
   const [editedValue, setEditedValue] = useState<any>(formattedValue);
   const [textareaError, setTextareaError] = useState(false);
+  const [editing, setEditing] = useState(valueType !== "json");
   const [dirty, setDirty] = useState(false);
+  useEffect(() => {
+    if (!editing) {
+      setEditedValue(formattedValue);
+    }
+  }, [value]);
 
   const submit = (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -418,13 +427,32 @@ function EditableValueField({
     }
     setValue(newValue);
     setDirty(false);
+    setEditing(false);
+  }
+
+  if (!editing && valueType === "json") {
+    return (
+      <div>
+        <ValueField value={value} valueType={valueType} stringAsCode={false} />
+        <div className="flex justify-end py-1">
+          <Link
+            href="#"
+            size="2"
+            role="button"
+            onClick={() => setEditing(true)}
+          >
+            Edit
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div>
       {valueType === "number" ? (
         <input
-          className="Input mb-2"
+          className="Input mb-2 px-2 py-1 bg-white"
           type="number"
           value={editedValue}
           onChange={(e) => {
@@ -434,35 +462,18 @@ function EditableValueField({
           }}
         />
       ) : valueType === "boolean" ? (
-        // switches set the value directly without going through save step
-        <label className="flex items-center gap-2">
-          <Switch
-            size="2"
-            className="Switch"
-            checked={value}
-            onCheckedChange={(v: boolean) => {
-              setValue(v);
-            }}
-          />
-          <div className="text-slate-700">
-            <div
-              className={clsx(
-                "text-sm",
-                {
-                  "text-gray-600 uppercase":
-                    value === false,
-                  "text-teal-700 uppercase":
-                    value === true,
-                },
-              )}
-            >
-              {(value === true || value === false) && (<PiCircleFill className="inline-block mr-1 -mt-0.5" size={8} />)}
-              {JSON.stringify(value)}
-            </div>
-          </div>
-        </label>
+        // booleans set the value directly without going through save step
+        <div className="box">
+          <RadioGroup.Root
+            value={JSON.stringify(value)}
+            onValueChange={(v) => setValue(JSON.parse(v))}
+          >
+            <RadioGroup.Item value="true" className="font-semibold my-1 cursor-pointer">TRUE</RadioGroup.Item>
+            <RadioGroup.Item value="false" className="font-semibold my-1 cursor-pointer">FALSE</RadioGroup.Item>
+          </RadioGroup.Root>
+        </div>
       ) : (
-        <textarea
+        <TextareaAutosize
           className={clsx("Textarea bg-white mono mt-1", {
             "border-red-700": textareaError,
           })}
@@ -475,25 +486,25 @@ function EditableValueField({
             setDirty(true);
           }}
           style={{fontSize: "10px", lineHeight: "15px", padding: "2px 6px"}}
-          rows={valueType === "json" ? 10 : 3}
+          maxRows={valueType === "json" ? 10 : 3}
         />
       )}
 
       {valueType !== "boolean" && (
         <div className="flex items-center justify-end gap-3">
-          {dirty && (
+          {(valueType === "json" || dirty) && (
             <Link
               href="#"
               size="2"
               role="button"
-              color="gray"
               onClick={() => {
                 setEditedValue(formattedValue);
                 setTextareaError(false);
                 setDirty(false);
+                setEditing(false);
               }}
             >
-              Undo typing
+              Cancel
             </Link>
           )}
           <Button type="button" size="2" onClick={submit} disabled={!dirty}>
@@ -539,7 +550,7 @@ function getFeatureDetails({
     .map((rule) => ({
       key: rule.key ?? fid,
       ...rule,
-    }))
+    }));
 
   const evaluatedFeature = evaluatedFeatures?.[fid];
   const isForced = forcedFeatures ? fid in forcedFeatures : false;
