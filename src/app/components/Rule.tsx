@@ -47,7 +47,7 @@ export default function Rule({
     <div className="rule">
       <div className="bg-slate-4 text-xs -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">{i+1}</div>
       <div className="w-full">
-        <div className="flex items-start mb-2" style={jsonMode ? { width: "calc(100% - 21px)" } : undefined}>
+        <div className="flex items-start mb-2" >
           <div className="flex-1 text-sm font-bold">{ruleName}</div>
           <label className="flex-shrink-0 flex items-center text-2xs cursor-pointer select-none">
             <Checkbox
@@ -191,7 +191,7 @@ export default function Rule({
           <ValueField
             value={rule}
             valueType="json"
-            customPrismOuterStyle={{ marginRight: 20, marginLeft: -20, marginBottom: 5 }}
+            customPrismOuterStyle={{ marginLeft: -22, marginTop: 10, marginBottom: 8 }}
           />
         )}
       </div>
