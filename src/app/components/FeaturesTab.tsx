@@ -20,6 +20,7 @@ import Rule from "@/app/components/Rule";
 import TextareaAutosize from "react-textarea-autosize";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import {API_HOST, APP_ORIGIN, CLOUD_API_HOST, CLOUD_APP_ORIGIN} from "@/app/components/Settings";
+import {MW} from "@/app";
 const customTheme = {
   padding: "5px",
   margin: 0,
@@ -28,6 +29,8 @@ const customTheme = {
   whiteSpace: "pre-wrap",
   lineHeight: "12px",
 };
+
+const LEFT_PERCENT = .4;
 
 export default function FeaturesTab() {
   const [apiHost] = useGlobalState(API_HOST, CLOUD_API_HOST, true);
@@ -108,10 +111,16 @@ export default function FeaturesTab() {
     }
   }, [selectedFid]);
 
+  const leftPercent = !selectedFid || !selectedFeature ? 1 : LEFT_PERCENT;
+  const rightPercent = 1 - leftPercent;
+
   return (
     <>
-      <div className="max-w-[900px] mx-auto">
-        <div className="w-[45%] max-w-[405px] pb-3">
+      <div className={`max-w-[${MW}px] mx-auto`}>
+        <div
+          className={`max-w-[${MW * leftPercent}px] pb-3`}
+          style={{ width: `${leftPercent * 100}%` }}
+        >
           {Object.keys(features).map((fid, i) => {
             const {
               feature,
@@ -176,15 +185,17 @@ export default function FeaturesTab() {
           })}
         </div>
 
+        {!!selectedFid && !!selectedFeature && (
         <div
-          className="w-[55%] max-w-[495px] overflow-y-auto pr-3 pb-2 fixed left-[45%]"
+          className={`max-w-[${MW * rightPercent}px] fixed overflow-y-auto pr-3 pb-2`}
           style={{
+            width: `${rightPercent * 100}%`,
+            left: `${leftPercent * 100}%`,
             zIndex: 1000,
             top: 95,
             height: "calc(100vh - 95px)",
           }}
         >
-          {!!selectedFid && !!selectedFeature && (
             <div className="featureDetail" key={`selected_${selectedFid}`}>
               <div className="header">
                 <div className="flex items-start gap-2">
@@ -425,8 +436,8 @@ export default function FeaturesTab() {
                 </div>
               </div>
             </div>
-          )}
         </div>
+            )}
       </div>
     </>
   );

@@ -7,7 +7,6 @@ import {
   Dialog,
   Tabs,
 } from "@radix-ui/themes";
-
 import React, { useEffect, useState } from "react";
 import logo from "./logo.svg";
 import useTabState from "@/app/hooks/useTabState";
@@ -25,6 +24,8 @@ import {
   PiFlaskFill,
   PiListChecksBold,
 } from "react-icons/pi";
+
+export const MW = 900; // max-width
 
 export const App = () => {
   const [showSdkDebug, setShowSdkDebug] = useTabState("showSdkDebug", false);

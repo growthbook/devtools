@@ -19,6 +19,7 @@ import clsx from "clsx";
 import { Prism } from "react-syntax-highlighter";
 import { ghcolors as codeTheme } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { FaBucket } from "react-icons/fa6";
+import {MW} from "@/app";
 const customTheme = {
   padding: "5px",
   margin: 0,
@@ -108,8 +109,8 @@ export default function ExperimentsTab() {
 
   return (
     <>
-      <div className="max-w-[900px] mx-auto">
-        <div className="w-[50%] max-w-[450px] pr-2">
+      <div className={`max-w-[${MW}px] mx-auto`}>
+        <div className={`w-[50%] max-w-[${MW/2}px] pr-2`}>
           <div className="label lg mb-2">Experiments</div>
           {experiments.map((experiment, i) => {
             const eid = experiment.key;
@@ -210,7 +211,7 @@ export default function ExperimentsTab() {
         </div>
 
         <div
-          className="w-[50%] max-w-[450px] overflow-y-auto pl-1 pr-3 py-2 fixed left-[50%]"
+          className={`w-[50%] max-w-[${MW/2}px] fixed left-[50%] overflow-y-auto pl-1 pr-3 py-2`}
           style={{
             zIndex: 1000,
             top: 85,

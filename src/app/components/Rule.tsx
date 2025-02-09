@@ -123,7 +123,7 @@ export default function Rule({
           {i + 1}
         </div>
         <div className="w-full">
-          <div className="mb-2">
+          <div className="mb-3">
             <div className="flex items-start">
               <div className="flex-1 text-sm font-bold">{ruleName}</div>
               <label className="flex-shrink-0 flex items-center text-2xs cursor-pointer select-none">
@@ -198,7 +198,7 @@ export default function Rule({
                       exposure)
                     </div>
                   ) : null}
-                  <div className="mt-1 mb-2 text-xs">
+                  <div className="my-2 text-xs">
                     <div className="font-semibold mb-1">SERVE</div>
                     <table className="leading-3">
                       <tbody>
@@ -315,7 +315,7 @@ export default function Rule({
           }}
         />
       )}
-      <div className="mb-1">
+      <div className="pt-1 border-t border-t-slate-200">
         <Accordion.Root
           className="accordion"
           type="single"
@@ -374,12 +374,12 @@ export function ConditionDisplay({
   if (!conds.length)
     return (
       <div>
-        <div className="mr-2 font-semibold">IF</div>
+        <div className="mr-2 font-semibold mb-0.5">IF</div>
         <ValueField
           value={parentConditions ? { condition, parentConditions } : condition}
           valueType="json"
-          maxHeight={50}
-          customPrismOuterStyle={{ width: 230 }}
+          maxHeight={80}
+          customPrismOuterStyle={{ width: "calc(100% - 10px)", marginRight: -60 }}
         />
       </div>
     );

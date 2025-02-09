@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import useTabState from "../hooks/useTabState";
 import LogsList from "./LogsList";
 import { Link } from "@radix-ui/themes";
+import {MW} from "@/app";
 
 export default function LogsTab() {
   const [_showSdkDebug, setShowSdkDebug] = useTabState("showSdkDebug", false);
@@ -14,7 +15,7 @@ export default function LogsTab() {
   );
 
   return (
-    <div className="max-w-[900px] mx-auto">
+    <div className={`max-w-[${MW}px] mx-auto`}>
       {typeof logEvents === "undefined" ? (
         <>
           SDK logging not connected, see the{" "}

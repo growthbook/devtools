@@ -76,20 +76,20 @@
 }
 
 .featureDetail {
-  @apply mb-3 min-h-[calc(100vh-120px)] bg-violet-2;
+  @apply mb-1 min-h-[calc(100vh-120px)] bg-violet-2;
 }
 .featureDetail .header {
-  @apply px-4 py-3 sticky top-0 z-center bg-violet-2 shadow-sm;
+  @apply px-6 py-3 sticky top-0 z-center bg-violet-2 shadow-sm;
 }
 .featureDetail .content {
-  @apply px-4 py-2 mb-1;
+  @apply px-6 py-2 mb-1;
 }
 
 .rule {
-  @apply pt-2 pb-0 px-2 mb-2 text-2xs bg-white rounded-sm border border-slate-a3;
+  @apply pt-3 pb-2 pl-2.5 pr-4 my-3 text-2xs bg-white rounded-md border border-l-[3px] border-slate-a3;
 }
 .rule .inner {
-  @apply flex items-start;
+  @apply flex items-start pb-2;
 }
 .condition {
   @apply leading-[1.15rem];
@@ -102,31 +102,31 @@
 }
 /*rule statuses*/
 .rule.skipped {
-  @apply border-l-2 border-l-violet-a6;
+  @apply border-l-[3px] border-l-violet-a6;
   .status {
     @apply text-violet-8;
   }
 }
 .rule.gates {
-  @apply border-l-2 border-l-red-300;
+  @apply border-l-red-300;
   .status {
     @apply text-red-400;
   }
 }
 .rule.unreachable {
-  @apply border-l-2 border-l-slate-200;
+  @apply border-l-slate-200;
   .status {
     @apply text-slate-400;
   }
 }
 .rule.matches {
-  @apply border-l-2 border-l-emerald-400;
+  @apply border-l-emerald-400;
   .status {
     @apply text-emerald-600;
   }
 }
 .rule.overridden {
-  @apply border-l-2 border-l-amber-300;
+  @apply border-l-amber-300;
   .status {
     @apply text-amber-600;
   }
