@@ -20,6 +20,9 @@ const RULE_MATCHED_LOGS = [
   "Force",
   "In experiment", // should also have `ctx.variation` set
 ];
+const RULE_GATES_LOGS = [
+  "Feature blocked",
+];
 const RULE_FORCED_LOGS = [
   "Global override",
   "Force variation",
@@ -70,7 +73,7 @@ export default function Rule({
     return d;
   }, [fid, i, debug]);
 
-  let status: "skipped" | "unreachable" | "matches" | "overridden" = "skipped";
+  let status: "skipped" | "unreachable" | "matches" | "gates" | "overridden" = "skipped";
   let lastDebugIndex = debugForRule.length - 1;
   if (debugForRule?.[lastDebugIndex]?.[0] === USE_PREVIOUS_LOG_IF_MATCH) {
     lastDebugIndex--;
@@ -80,6 +83,8 @@ export default function Rule({
     status = "unreachable";
   } else if (RULE_MATCHED_LOGS.some((log) => lastDebug[0].startsWith(log))) {
     status = "matches";
+  } else if (RULE_GATES_LOGS.some((log) => lastDebug[0].startsWith(log))) {
+    status = "gates";
   } else if (RULE_FORCED_LOGS.some((log) => lastDebug[0].startsWith(log))) {
     status = "overridden";
   }

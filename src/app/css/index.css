@@ -107,6 +107,12 @@
     @apply text-violet-8;
   }
 }
+.rule.gates {
+  @apply border-l-2 border-l-red-300;
+  .status {
+    @apply text-red-400;
+  }
+}
 .rule.unreachable {
   @apply border-l-2 border-l-slate-200;
   .status {
