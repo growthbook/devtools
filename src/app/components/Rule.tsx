@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useMemo, useState} from "react";
 import {
   ConditionInterface,
   FeatureDefinition,
@@ -9,9 +9,22 @@ import { upperFirst } from "lodash";
 import { ValueField, ValueType } from "@/app/components/FeaturesTab";
 import { Checkbox, Link, Progress } from "@radix-ui/themes";
 import useTabState from "@/app/hooks/useTabState";
-import { PiFlagFill, PiFlaskFill } from "react-icons/pi";
+import {PiCaretRightFill, PiFlagFill, PiFlaskFill} from "react-icons/pi";
+import {EvaluatedFeature} from "@/app/hooks/useGBSandboxEval";
+import {DebugLogs} from "devtools";
+import * as Accordion from "@radix-ui/react-accordion";
 
 type RuleType = "force" | "rollout" | "experiment" | "prerequisite";
+
+const RULE_MATCHED_LOGS = [
+  "Force",
+  "In experiment", // should also have `ctx.variation` set
+];
+const RULE_FORCED_LOGS = [
+  "Global override",
+  "Force variation",
+];
+const USE_PREVIOUS_LOG_IF_MATCH = "Use default value"; // last rule
 
 export default function Rule({
   rule,
@@ -19,12 +32,14 @@ export default function Rule({
   fid,
   feature,
   valueType = "string",
+  evaluatedFeature,
 }: {
   rule: FeatureRule;
   i: number;
   fid: string;
   feature: FeatureDefinition;
   valueType?: ValueType;
+  evaluatedFeature?: EvaluatedFeature;
 }) {
   const [selectedEid, setSelectedEid] = useTabState<string | undefined>(
     "selectedEid",
@@ -32,6 +47,42 @@ export default function Rule({
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [jsonMode, setJsonMode] = useState(false);
+
+  const debug = evaluatedFeature?.debug || [];
+  const debugForRule = useMemo(() => {
+    const d: DebugLogs = [];
+    let r = 0; // current parent rule number
+    debug.forEach((item, itemNo) => {
+      // If the log id matches our feature's id, assume we can rely on the log's
+      // rule number (i).
+      if (item?.[1]?.id === fid && item?.[1]?.rule?.i !== undefined) {
+        r = item[1].rule.i as number;
+      }
+      // Probably an experiment rule (no rule, has id, id doesn't match),
+      // assume this log belongs to current feature's next rule.
+      if (!item?.[1]?.rule && item?.[1]?.id && item[1].id !== fid && itemNo > 0) {
+        r++;
+      }
+      if (r === i) {
+        d.push(item);
+      }
+    });
+    return d;
+  }, [fid, i, debug]);
+
+  let status: "skipped" | "unreachable" | "matches" | "overridden" = "skipped";
+  let lastDebugIndex = debugForRule.length - 1;
+  if (debugForRule?.[lastDebugIndex]?.[0] === USE_PREVIOUS_LOG_IF_MATCH) {
+    lastDebugIndex--;
+  }
+  const lastDebug = debugForRule?.[lastDebugIndex];
+  if (!lastDebug?.[0]) {
+    status = "unreachable";
+  } else if (RULE_MATCHED_LOGS.some((log) => lastDebug[0].startsWith(log))) {
+    status = "matches";
+  } else if (RULE_FORCED_LOGS.some((log) => lastDebug[0].startsWith(log))) {
+    status = "overridden";
+  }
 
   const {
     condition,
@@ -61,7 +112,7 @@ export default function Rule({
   }
 
   return (
-    <div className="rule">
+    <div className={`rule ${status}`}>
       <div className="inner">
         <div className="bg-slate-4 text-xs -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">
           {i + 1}
@@ -96,15 +147,20 @@ export default function Rule({
                 {key}
               </Link>
             )}
+            <div className="status uppercase text-2xs my-1 font-bold">
+              Rule {status}
+            </div>
           </div>
           {!jsonMode && (
             <>
-              <div className="my-2 text-xs">
-                <ConditionDisplay
-                  condition={rule.condition}
-                  parentConditions={rule.parentConditions}
-                />
-              </div>
+              {rule.condition || rule.parentConditions ? (
+                <div className="my-2 text-xs">
+                  <ConditionDisplay
+                    condition={rule.condition}
+                    parentConditions={rule.parentConditions}
+                  />
+                </div>
+              ): null}
               {ruleType === "experiment" && (
                 <div className="condition">
                   <div className="mt-2 text-xs">
@@ -178,6 +234,7 @@ export default function Rule({
                     >
                       {rule?.weights?.map((w, i) => (
                         <div
+                          key={i}
                           className="rt-ProgressIndicator relative"
                           style={{
                             // @ts-expect-error css var
@@ -253,6 +310,36 @@ export default function Rule({
           }}
         />
       )}
+      <div className="mb-1">
+        <Accordion.Root
+          className="accordion"
+          type="single"
+          collapsible
+        >
+          <Accordion.Item value="debug-log">
+            <Accordion.Trigger className="trigger mb-0.5">
+              <Link
+                size="2"
+                role="button"
+                className="hover:underline"
+              >
+                <PiCaretRightFill
+                  className="caret mr-0.5"
+                  size={12}
+                />
+                Debug Log
+              </Link>
+            </Accordion.Trigger>
+            <Accordion.Content className="accordionInner overflow-hidden w-full">
+              <ValueField
+                value={debugForRule}
+                valueType="json"
+                maxHeight={200}
+              />
+            </Accordion.Content>
+          </Accordion.Item>
+        </Accordion.Root>
+      </div>
     </div>
   );
 }
@@ -294,7 +381,7 @@ export function ConditionDisplay({
   return (
     <>
       {conds.map((cond, i) => (
-        <div className="condition">
+        <div className="condition" key={i}>
           {i === 0 && <span className="mr-2 font-semibold">IF</span>}
           {i > 0 && <span className="mr-2 font-semibold">AND</span>}
           <span className="conditionValue">

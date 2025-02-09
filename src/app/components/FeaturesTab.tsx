@@ -241,7 +241,7 @@ export default function FeaturesTab() {
                   ? selectedFeature.linkedExperiments.map((experiment, i) => {
                       if (i === 0) return null;
                       return (
-                        <div>
+                        <div key={i}>
                           <Link
                             size="2"
                             role="button"
@@ -275,17 +275,19 @@ export default function FeaturesTab() {
                     )}
                     <div className="flex flex-1 items-center justify-end">
                       {overrideFeature && (
-                        <Button
-                          variant="ghost"
+                        <Link
                           size="2"
-                          onClick={() => {
+                          role="button"
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
                             setOverrideFeature(false);
                             unsetForcedFeature(selectedFid);
                           }}
                         >
-                          <PiArrowClockwise className="inline-block mr-0.5" />
+                          <PiArrowClockwise className="inline-block mr-0.5"/>
                           Revert
-                        </Button>
+                        </Link>
                       )}
                     </div>
                   </div>
@@ -297,44 +299,40 @@ export default function FeaturesTab() {
                     }}
                     valueType={selectedFeature?.valueType}
                   />
+
+                  <div className={clsx({"-mt-4": selectedFeature?.valueType !== "boolean"})}>
+                    <Accordion.Root
+                      className="accordion"
+                      type="single"
+                      collapsible
+                    >
+                      <Accordion.Item value="debug-log">
+                        <Accordion.Trigger className="trigger mb-0.5">
+                          <Link
+                            size="2"
+                            role="button"
+                            className="hover:underline"
+                          >
+                            <PiCaretRightFill
+                              className="caret mr-0.5"
+                              size={12}
+                            />
+                            Evaluation Results
+                          </Link>
+                        </Accordion.Trigger>
+                        <Accordion.Content className="accordionInner overflow-hidden w-full">
+                          <ValueField
+                            value={selectedFeature?.evaluatedFeature?.result}
+                            valueType="json"
+                            maxHeight={200}
+                          />
+                        </Accordion.Content>
+                      </Accordion.Item>
+                    </Accordion.Root>
+                  </div>
                 </div>
 
-                {selectedFeature?.evaluatedFeature?.debug ? (
-                  <Accordion.Root
-                    className="accordion mt-2"
-                    type="single"
-                    collapsible
-                  >
-                    <Accordion.Item value="debug-log">
-                      <Accordion.Trigger className="trigger mb-0.5">
-                        <Link
-                          size="2"
-                          role="button"
-                          className="hover:underline"
-                        >
-                          <PiCaretRightFill
-                            className="caret mr-0.5"
-                            size={12}
-                          />
-                          Debug log
-                        </Link>
-                      </Accordion.Trigger>
-                      <Accordion.Content className="accordionInner overflow-hidden w-full">
-                        {/*todo: replace with logger display component?*/}
-                        <ValueField
-                          value={{
-                            debug: selectedFeature.evaluatedFeature.debug,
-                            result: selectedFeature.evaluatedFeature.result,
-                          }}
-                          valueType="json"
-                          maxHeight={200}
-                        />
-                      </Accordion.Content>
-                    </Accordion.Item>
-                  </Accordion.Root>
-                ) : null}
-
-                <hr className="my-4" />
+                <hr className="my-4"/>
 
                 <div className="my-2">
                   <div className="label font-semibold">Default value</div>
@@ -350,18 +348,51 @@ export default function FeaturesTab() {
                     {selectedFeature?.feature?.rules?.map((rule, i) => {
                       return (
                         <Rule
+                          key={i}
                           rule={rule}
                           i={i}
                           fid={selectedFid}
                           feature={selectedFeature.feature}
                           valueType={selectedFeature.valueType}
+                          evaluatedFeature={selectedFeature.evaluatedFeature}
                         />
                       );
                     })}
                   </>
                 ) : null}
 
-                <div className="my-2">
+                <div className="mt-3 mb-1">
+
+                  {selectedFeature?.evaluatedFeature?.debug ? (
+                    <Accordion.Root
+                      className="accordion mt-2"
+                      type="single"
+                      collapsible
+                    >
+                      <Accordion.Item value="debug-log">
+                        <Accordion.Trigger className="trigger mb-0.5">
+                          <Link
+                            size="2"
+                            role="button"
+                            className="hover:underline"
+                          >
+                            <PiCaretRightFill
+                              className="caret mr-0.5"
+                              size={12}
+                            />
+                            Full debug log
+                          </Link>
+                        </Accordion.Trigger>
+                        <Accordion.Content className="accordionInner overflow-hidden w-full">
+                          <ValueField
+                            value={selectedFeature.evaluatedFeature.debug}
+                            valueType="json"
+                            maxHeight={200}
+                          />
+                        </Accordion.Content>
+                      </Accordion.Item>
+                    </Accordion.Root>
+                  ) : null}
 
                   <Accordion.Root
                     className="accordion mt-2"
@@ -379,7 +410,7 @@ export default function FeaturesTab() {
                             className="caret mr-0.5"
                             size={12}
                           />
-                          Full definition
+                          Full feature definition
                         </Link>
                       </Accordion.Trigger>
                       <Accordion.Content className="accordionInner overflow-hidden w-full">

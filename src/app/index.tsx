@@ -48,15 +48,6 @@ export const App = () => {
       }
     });
   };
-  useEffect(() => {
-    refresh();
-    const interval = window.setInterval(() => {
-      if (!Object.keys(features).length && !experiments.length) {
-        refresh();
-      }
-    }, 1000);
-    return () => window.clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     window.setTimeout(() => {

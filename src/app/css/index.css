@@ -86,7 +86,7 @@
 }
 
 .rule {
-  @apply pt-2 pb-0 px-2 mb-2 text-2xs bg-white rounded-md border border-slate-a3;
+  @apply pt-2 pb-0 px-2 mb-2 text-2xs bg-white rounded-sm border border-slate-a3;
 }
 .rule .inner {
   @apply flex items-start;
@@ -99,6 +99,31 @@
 }
 .conditionOperator {
   @apply text-gray-600 mx-1;
+}
+/*rule statuses*/
+.rule.skipped {
+  @apply border-l-2 border-l-violet-a6;
+  .status {
+    @apply text-violet-8;
+  }
+}
+.rule.unreachable {
+  @apply border-l-2 border-l-slate-200;
+  .status {
+    @apply text-slate-400;
+  }
+}
+.rule.matches {
+  @apply border-l-2 border-l-emerald-400;
+  .status {
+    @apply text-emerald-600;
+  }
+}
+.rule.overridden {
+  @apply border-l-2 border-l-amber-300;
+  .status {
+    @apply text-amber-600;
+  }
 }
 
 .accordion .trigger {

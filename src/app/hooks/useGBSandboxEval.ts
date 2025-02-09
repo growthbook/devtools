@@ -14,13 +14,13 @@ import useSdkData from "./useSdkData";
 
 export type EvaluatedFeature = {
   result: FeatureResult;
-  debug: [string, any][];
+  debug: DebugLogs;
 };
 
 export type EvaluatedExperiment = {
   key: string;
   result: Result<any>;
-  debug: [string, any][];
+  debug: DebugLogs;
 };
 
 export default function useGBSandboxEval() {
@@ -46,7 +46,16 @@ export default function useGBSandboxEval() {
     let log: DebugLogs = [];
 
     const featureExperiments = getFeatureExperiments(features);
-    const payload = { ...sdkPayload, features, experiments };
+
+    // add extra info (index) for debugging:
+    const _features = {...features};
+    for (const fid in _features) {
+      _features[fid].rules = _features[fid]?.rules?.map((rule, i) => ({
+        ...rule, i,
+      }));
+    }
+
+    const payload = { ...sdkPayload, features: _features, experiments };
 
     const growthbook = new GrowthBook({
       attributes,
