@@ -2,19 +2,33 @@ import { LogUnion } from "@growthbook/growthbook";
 import React, { useEffect } from "react";
 import useTabState from "../hooks/useTabState";
 import LogsList from "./LogsList";
+import { Link } from "@radix-ui/themes";
+import {MW} from "@/app";
 
 export default function LogsTab() {
+  const [_showSdkDebug, setShowSdkDebug] = useTabState("showSdkDebug", false);
+
   useEffect(() => window.scrollTo({ top: 0 }), []);
   const [logEvents] = useTabState<LogUnion[] | undefined>(
     "logEvents",
-    undefined
+    undefined,
   );
 
   return (
-    <div className="max-w-[900px] mx-auto">
-      <div className="label lg mb-2">Event Logs</div>
+    <div className={`max-w-[${MW}px] mx-auto`}>
       {typeof logEvents === "undefined" ? (
-        <>Logging not connected! TODO: add debug info for why</>
+        <>
+          SDK logging not connected, see the{" "}
+          <Link
+            className="cursor-pointer"
+            onClick={() => {
+              setShowSdkDebug(true);
+            }}
+          >
+            SDK Health
+          </Link>{" "}
+          tab
+        </>
       ) : (
         <LogsList logEvents={logEvents}></LogsList>
       )}

@@ -275,14 +275,65 @@ export default function SdkTab() {
               documentation
             </Text>
           </div>
-        </div>
-      ) : (
-        <div>
-          <Text size="2" weight="medium">
-            Loading...
-          </Text>
-        </div>
-      )}
+        )}
+
+        {sdkFound && (
+          <div>
+            <Flex gap="1">
+              <Text size="2" weight="medium">
+                Version:
+              </Text>
+              {!!version ? (
+                <Text size="2" weight="light" color="green">
+                  {version}
+                </Text>
+              ) : (
+                <Text size="1" weight="light">
+                  Version Not Found your version might be less than 0.29.0
+                </Text>
+              )}
+            </Flex>
+            <Flex gap="1">
+              <Text size="2" weight="medium">
+                Dev mode set:
+              </Text>{" "}
+              <Text
+                size="2"
+                weight="light"
+                color={devModeEnabled ? "green" : "red"}
+              >
+                {devModeEnabled ? "yes" : "no"}
+              </Text>{" "}
+            </Flex>
+          </div>
+        )}
+
+        {hasPayload && (
+          <div>
+            <Flex gap="1">
+              <Text size="2" weight="medium">
+                Payload:
+              </Text>
+            </Flex>
+            <div className="max-h-[200px] box overflow-auto">
+              <Code size="1" style={{ whiteSpace: "pre-wrap" }}>
+                {jsonPretty}
+              </Code>
+            </div>
+          </div>
+        )}
+
+        {errorMessage && (
+          <Flex gap="1">
+            <Text size="2" weight="medium">
+              Error Message:
+            </Text>
+            <Text size="2" weight="light">
+              {errorMessage}
+            </Text>
+          </Flex>
+        )}
+      </Flex>
     </div>
   );
 }

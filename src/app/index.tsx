@@ -7,7 +7,6 @@ import {
   Dialog,
   Tabs,
 } from "@radix-ui/themes";
-
 import React, { useEffect, useState } from "react";
 import logo from "./logo.svg";
 import useTabState from "@/app/hooks/useTabState";
@@ -17,24 +16,34 @@ import ExperimentsTab from "./components/ExperimentsTab";
 import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
 import SettingsForm from "@/app/components/Settings";
-import {PiX, PiGearSix, PiUserBold, PiFlagBold, PiFlaskBold, PiListChecksBold} from "react-icons/pi";
 import useSdkData from "@/app/hooks/useSdkData";
+import {
+  PiX,
+  PiGearSix,
+  PiUserFill,
+  PiFlagFill,
+  PiFlaskFill,
+  PiListChecksBold,
+} from "react-icons/pi";
+
+export const MW = 900; // max-width
+export const NAV_H = 80;
 
 export const App = () => {
-  const [showSdkDebug, setShowSdkDebug] = useState(false);
+  const [showSdkDebug, setShowSdkDebug] = useTabState("showSdkDebug", false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
     "sdkFound",
     undefined,
   );
-  const [currentTab, setCurrentTab] = useTabState("currentTab", "attributes");
+  const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [features] = useTabState("features", {});
   const [experiments] = useTabState("experiments", []);
   const {canConnect, hasPayload} = useSdkData();
   const sdkStatusColor = canConnect ? "green" : hasPayload ? "orange" : "red"
   const refresh = () => {
-    chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
+    chrome.tabs.query({ currentWindow: true, active: true }, async (tabs) => {
       let activeTab = tabs[0];
       if (activeTab.id) {
         await chrome.tabs.sendMessage(activeTab.id, {
@@ -43,15 +52,6 @@ export const App = () => {
       }
     });
   };
-  useEffect(() => {
-    refresh();
-    const interval = window.setInterval(() => {
-      if (!Object.keys(features).length && !experiments.length) {
-        refresh();
-      }
-    }, 1000);
-    return () => window.clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     window.setTimeout(() => {
@@ -62,21 +62,24 @@ export const App = () => {
   return (
     <Theme
       accentColor="violet"
+      grayColor="slate"
       hasBackground={false}
       style={{ minHeight: "unset" }}
     >
-      <div id="main">
-        <div
-          className="shadow-sm fixed top-0 px-3 pt-2 w-full bg-zinc-50 z-front"
-        >
-          <Flex justify="between">
+      <div id="main" className="text-indigo-12">
+        <div className={`h-[${NAV_H}px] shadow-sm px-3 pt-2 w-full relative bg-zinc-50 z-front`}>
+          <Flex
+            justify="between"
+            className="mx-auto"
+            style={{ maxWidth: MW }}
+          >
             <h1 className="text-lg">
               <img
                 src={logo}
                 alt="GrowthBook"
                 className="w-[140px] inline-block mb-1 mr-2"
               />
-              <span className="text-gray-500 font-bold">DevTools</span>
+              <span className="font-bold text-slate-11">DevTools</span>
             </h1>
             <Flex>
               <Button
@@ -129,21 +132,25 @@ export const App = () => {
             <Tabs.Root
               value={currentTab}
               onValueChange={setCurrentTab}
-              className="-mx-4"
+              className="-mx-4 my-[-2px]"
             >
               <Tabs.List>
                 <div className="flex items-end mx-auto w-[930px]">
                   <div className="mx-2" />
-                  <Tabs.Trigger value="attributes">
-                    Attributes
-                  </Tabs.Trigger>
                   <Tabs.Trigger value="features">
+                    <PiFlagFill className="mr-1" />
                     Features
                   </Tabs.Trigger>
                   <Tabs.Trigger value="experiments">
+                    <PiFlaskFill className="mr-1" />
                     Experiments
                   </Tabs.Trigger>
+                  <Tabs.Trigger value="attributes">
+                    <PiUserFill className="mr-1" />
+                    Attributes
+                  </Tabs.Trigger>
                   <Tabs.Trigger value="logs">
+                    <PiListChecksBold className="mr-1" />
                     Event Logs
                   </Tabs.Trigger>
                   <div className="mx-2" />
@@ -153,7 +160,10 @@ export const App = () => {
           )}
         </div>
 
-        <div className="mt-[95px] mx-3">
+        <div
+          className={"overflow-y-auto"}
+          style={{ height: `calc(100vh - ${NAV_H}px)` }}
+        >
           {showSdkDebug ? (
             <SdkTab />
           ) : currentTab === "attributes" ? (

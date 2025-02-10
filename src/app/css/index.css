@@ -48,29 +48,96 @@
 .ModalBody {
   width: 400px;
 }
-
 .mono {
   font-family: monospace;
 }
 
 .box {
-  @apply px-3 py-2 border border-gray-200 rounded-lg bg-white;
+  @apply px-3 py-2 border border-slate-a3 rounded-md bg-white;
 }
 
 .featureCard {
-  @apply pl-3 pr-6 py-1 border-l-2 border-gray-300;
+  @apply pl-3 pr-6 py-1 border-t border-slate-a3 relative;
   cursor: pointer;
-  scroll-margin-top: 100px;
+  scroll-margin-top: 12px;
+}
+.featureCard:first-of-type {
+  @apply border-t-transparent;
+}
+.featureCard:last-of-type {
+  @apply border-b;
 }
 .featureCard:not(.selected):hover {
-  @apply border-violet-a8 bg-violet-a2;
+  @apply bg-violet-1;
 }
 .featureCard.selected {
-  @apply border-violet-8 bg-violet-2 sticky top-[100px] z-front;
+  @apply border-t-violet-2 bg-violet-2;
+}
+.featureCard .title {
+  @apply text-sm font-semibold;
+}
+.featureCard .value {
+  @apply text-indigo-12 text-xs line-clamp-1 mt-0 w-full text-right pl-[50%];
 }
 
 .featureDetail {
-  @apply px-4 py-2 mt-[7px] mb-3 min-h-[calc(100vh-120px)] bg-violet-2;
+  @apply bg-violet-2;
+}
+.featureDetail .header {
+  @apply w-full sticky top-0 z-center pt-3 bg-white shadow-sm;
+}
+.featureDetail .header .headerInner {
+  @apply px-5 py-3 bg-violet-2;
+}
+.featureDetail .content {
+  @apply px-5 py-2 mb-1;
+}
+
+.rule {
+  @apply pt-3 pb-2 pl-2.5 pr-4 my-3 text-2xs bg-white rounded-md border border-l-[3px] border-slate-a3;
+}
+.rule .inner {
+  @apply flex items-start pb-2;
+}
+.condition {
+  @apply leading-[1.15rem];
+}
+.conditionValue {
+  @apply px-1 border border-slate-a3 rounded-sm bg-gray-50 break-all;
+}
+.conditionOperator {
+  @apply text-gray-600 mx-1;
+}
+/*rule statuses*/
+.rule.skipped {
+  @apply border-l-[3px] border-l-violet-a6;
+  .status {
+    @apply text-violet-8;
+  }
+}
+.rule.gates {
+  @apply border-l-red-300;
+  .status {
+    @apply text-red-400;
+  }
+}
+.rule.unreachable {
+  @apply border-l-slate-200;
+  .status {
+    @apply text-slate-400;
+  }
+}
+.rule.matches {
+  @apply border-l-emerald-400;
+  .status {
+    @apply text-emerald-600;
+  }
+}
+.rule.overridden {
+  @apply border-l-amber-300;
+  .status {
+    @apply text-amber-600;
+  }
 }
 
 .accordion .trigger {
@@ -80,10 +147,30 @@
   @apply border border-violet-200 rounded-md bg-white shadow-sm;
   cursor: pointer;
 }
-@keyframes slideDown { from { height: 0; } to { height: var(--radix-accordion-content-height); } }
-@keyframes slideUp { from { height: var(--radix-accordion-content-height); } to { height: 0; } }
-.accordion .accordionInner[data-state="open"], .accordionCard .accordionInner[data-state="open"] { animation: slideDown 150ms cubic-bezier(0.87, 0, 0.13, 1) forwards; }
-.accordion .accordionInner[data-state="closed"], .accordionCard .accordionInner[data-state="closed"] { animation: slideUp 150ms cubic-bezier(0.87, 0, 0.13, 1) forwards; }
+@keyframes slideDown {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+@keyframes slideUp {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+.accordion .accordionInner[data-state="open"],
+.accordionCard .accordionInner[data-state="open"] {
+  animation: slideDown 150ms cubic-bezier(0.87, 0, 0.13, 1) forwards;
+}
+.accordion .accordionInner[data-state="closed"],
+.accordionCard .accordionInner[data-state="closed"] {
+  animation: slideUp 150ms cubic-bezier(0.87, 0, 0.13, 1) forwards;
+}
 .accordion .trigger .caret {
   display: inline-block;
   transition: 75ms transform;
@@ -99,6 +186,12 @@
   @apply border-orange-500 bg-orange-200 bg-opacity-50;
 }
 
+.searchBar {
+  border-style: solid;
+  @apply border-slate-a3 rounded-lg;
+  width: 150px;
+}
+
 .shadow-sm-up {
   --tw-shadow: 0 -1px 2px 0 rgb(0 0 0 / 0.05);
   --tw-shadow-colored: 0 -1px 2px 0 var(--tw-shadow-color);
@@ -111,7 +204,9 @@
   cursor: unset;
 }
 .rt-SwitchThumb {
-  transition: transform 50ms cubic-bezier(0.45, 0.05, 0.55, 0.95), box-shadow 50ms ease-in-out;
+  transition:
+    transform 50ms cubic-bezier(0.45, 0.05, 0.55, 0.95),
+    box-shadow 50ms ease-in-out;
 }
 
 /* Prevent modal jumping when inner content changes shape and weird scroll bar */

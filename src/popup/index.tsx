@@ -3,9 +3,7 @@ import React from "react";
 import * as ReactDOM from "react-dom/client";
 
 const Popup = () => {
-  return (
-    <App />
-  );
+  return <App />;
 };
 
 const container = document.getElementById("root");

@@ -19,6 +19,7 @@ import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
 import ArchetypesList from "./ArchetypesList";
 import { isMatch } from "lodash";
+import {MW} from "@/app";
 
 export default function AttributesTab() {
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
@@ -196,7 +197,7 @@ export default function AttributesTab() {
   useEffect(() => window.scrollTo({ top: 0 }), []);
 
   return (
-    <div className="max-w-[900px] mx-auto">
+    <div className={`max-w-[${MW}px] mx-auto`}>
       <div className="flex justify-between items-top">
         <div className="w-[50%] pr-2">
           <div className="">
@@ -250,10 +251,8 @@ export default function AttributesTab() {
       </div>
 
       {hasAttributes && (
-        <div
-          className="flex items-center justify-center shadow-sm-up fixed bottom-0 left-0 px-3 py-2 w-full h-[50px] z-front bg-zinc-50"
-        >
-          <div className="w-full max-w-[900px] mx-auto flex items-center">
+        <div className="flex items-center justify-center shadow-sm-up fixed bottom-0 left-0 px-3 py-2 w-full h-[50px] z-front bg-zinc-50">
+          <div className={`w-full max-w-[${MW}px] mx-auto flex items-center`}>
             <div className="w-[50%] pr-2 flex items-center">
               <Button
                 disabled={!selectedArchetype}
@@ -270,11 +269,11 @@ export default function AttributesTab() {
               >
                 <Popover.Trigger>
                   <Button variant="soft">
-                    <PiBookmark/>
+                    <PiBookmark />
                     Save...
                   </Button>
                 </Popover.Trigger>
-                <Popover.Content style={{width: 200}}>
+                <Popover.Content style={{ width: 200 }}>
                   <Form.Root
                     className="FormRoot small"
                     onSubmit={submitArchetypeForm}
@@ -320,7 +319,10 @@ export default function AttributesTab() {
                             saveArchetypeForm.setValue("id", v);
                           }}
                         >
-                          <Select.Trigger variant="surface" className="w-full"/>
+                          <Select.Trigger
+                            variant="surface"
+                            className="w-full"
+                          />
                           <Select.Content>
                             {archetypes.map((arch) => (
                               <Select.Item key={arch.id} value={arch.id}>
@@ -352,7 +354,7 @@ export default function AttributesTab() {
                   </Form.Root>
                 </Popover.Content>
               </Popover.Root>
-              <div className="flex-1"/>
+              <div className="flex-1" />
               {dirty && (
                 <>
                   <Link
