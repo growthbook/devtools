@@ -66,8 +66,11 @@ export const App = () => {
       hasBackground={false}
       style={{ minHeight: "unset" }}
     >
-      <div id="main" className="text-indigo-12">
-        <div className={`h-[${NAV_H}px] shadow-sm px-3 pt-2 w-full relative bg-zinc-50 z-front`}>
+      <div id="main" className="text-indigo-12 overflow-hidden">
+        <div
+          className={`shadow-sm px-3 pt-2 w-full relative bg-zinc-50 z-front`}
+          style={{ height: NAV_H }}
+        >
           <Flex
             justify="between"
             className="mx-auto"

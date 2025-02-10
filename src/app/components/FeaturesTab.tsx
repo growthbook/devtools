@@ -4,10 +4,10 @@ import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
-import { Button, Link } from "@radix-ui/themes";
+import { Button, IconButton, Link } from "@radix-ui/themes";
 import {
   PiArrowClockwise,
-  PiArrowSquareOutBold,
+  PiArrowSquareOutBold, PiCaretCircleLeft,
   PiCaretRightFill,
   PiCircleFill,
   PiFlaskFill,
@@ -54,6 +54,11 @@ export default function FeaturesTab() {
         forcedFeatures,
       })
     : undefined;
+
+  const debugLog = selectedFeature?.evaluatedFeature?.debug;
+  const defaultValueStatus = debugLog
+    ? (debugLog?.[debugLog.length - 1]?.[0]?.startsWith("Use default value") ? "matches" : "unreachable")
+    : "matches";
 
   const [overrideFeature, setOverrideFeature] = useState(false);
 
@@ -202,7 +207,17 @@ export default function FeaturesTab() {
               <div className="header">
                 <div className="headerInner">
                   <div className="flex items-start gap-2">
-                    <h2 className="font-bold flex-1">{selectedFid}</h2>
+                    <h2 className="font-bold flex-1">
+                      <IconButton
+                        variant="ghost"
+                        size="2"
+                        style={{ margin: "-1px 2px 0 -10px" }}
+                        onClick={() => setSelectedFid(undefined)}
+                      >
+                        <PiCaretCircleLeft />
+                      </IconButton>
+                      {selectedFid}
+                    </h2>
                     <Link
                       size="1"
                       className="flex-shrink-0"
@@ -319,12 +334,17 @@ export default function FeaturesTab() {
                   />
                 </div>
 
-                <hr className="my-4" />
-                <div className="text-md font-semibold">Rules and Values</div>
+                <div className="mt-6 mb-3 py-1 text-md font-semibold border-b border-slate-200">Rules and Values</div>
 
-                <div className="my-2">
-                  <div className="text-sm font-semibold mb-2">
+                <div
+                  className={`rule ${defaultValueStatus}`}
+                  style={{ padding: "12px 8px 8px 8px" }}
+                >
+                  <div className="text-sm font-semibold">
                     Default value
+                  </div>
+                  <div className="status uppercase text-2xs mt-1 mb-2 font-bold">
+                    {defaultValueStatus === "matches" ? "Active" : "Inactive"}
                   </div>
                   <ValueField
                     value={selectedFeature?.feature?.defaultValue}
@@ -352,7 +372,7 @@ export default function FeaturesTab() {
                 ) : null}
 
                 <div className="mt-3 mb-1">
-                  {selectedFeature?.evaluatedFeature?.debug ? (
+                  {debugLog ? (
                     <Accordion.Root
                       className="accordion mt-2"
                       type="single"
@@ -374,7 +394,7 @@ export default function FeaturesTab() {
                         </Accordion.Trigger>
                         <Accordion.Content className="accordionInner overflow-hidden w-full">
                           <ValueField
-                            value={selectedFeature.evaluatedFeature.debug}
+                            value={debugLog}
                             valueType="json"
                             maxHeight={200}
                           />
