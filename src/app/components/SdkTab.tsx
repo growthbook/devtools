@@ -1,10 +1,12 @@
 import React, { useEffect } from "react";
 import useTabState from "../hooks/useTabState";
 import { SDKHealthCheckResult } from "devtools";
-import { Flex, Grid, Text } from "@radix-ui/themes";
+import { Flex, Grid, Link, Text } from "@radix-ui/themes";
 import { Prism } from "react-syntax-highlighter";
 import {ghcolors as codeTheme} from "react-syntax-highlighter/dist/esm/styles/prism";
-import { max } from "node_modules/@types/lodash";
+import ValueField from "@/app/components/ValueField";
+import * as Accordion from "@radix-ui/react-accordion";
+import { PiCaretRightFill } from "react-icons/pi";
 
 export default function SdkTab() {
   const [sdkData] = useTabState<SDKHealthCheckResult | {}>("sdkData", {});
@@ -89,7 +91,6 @@ export default function SdkTab() {
     const trackingCallBackStatus = trackingCallbackParams?.length === 2 ? "Found" : !trackingCallbackParams ? "None Found" : `Callback has ${trackingCallbackParams.length} params instead of 2`;
     const TrackingCallbackStatusColor = trackingCallbackParams?.length === 2 ? "green" : !trackingCallbackParams ? "red" : "orange";
     return (
-      <Grid columns="2" gap="3">
       <div>
         {displayStatus({title: "Status", status: "Connected", statusColor: "green"})}
         {displayStatus({title: "Version", status: version, statusColor: "gray"})}
@@ -98,23 +99,39 @@ export default function SdkTab() {
         {displayStatus({title: "Payload Security", status: securityStatus, statusColor: "gray"})}
         {displayStatus({title: "Sticky Bucketing", status: usingStickyBucketing, statusColor: "gray"})}
         {displayStatus({title: "Streaming", status: streaming, statusColor: "gray"})}
-        </div>
-        <div>
-          <Text size="2" weight="medium">
-            Payload:
-          </Text>
-          <Prism
-            language="json"
-            style={codeTheme}
-            customStyle={{...customTheme}}
-            codeTagProps={{
-              className: "text-2xs-important !whitespace-pre-wrap",
-            }}
-          >
-            {jsonPretty}
-          </Prism>
+
+                  {payload ? (
+                    <Accordion.Root
+                      className="accordion mt-2"
+                      type="single"
+                      collapsible
+                    >
+                      <Accordion.Item value="Payload">
+                        <Accordion.Trigger className="trigger mb-0.5">
+                          <Link
+                            size="2"
+                            role="button"
+                            className="hover:underline"
+                          >
+                            <PiCaretRightFill
+                              className="caret mr-0.5"
+                              size={12}
+                            />
+                            Payload
+                          </Link>
+                        </Accordion.Trigger>
+                        <Accordion.Content className="accordionInner overflow-hidden w-full">
+                          <ValueField
+                            value={payload}
+                            valueType="json"
+                            maxHeight={200}
+                          />
+                        </Accordion.Content>
+                      </Accordion.Item>
+                    </Accordion.Root>
+                  ) : null}
+         
       </div>
-      </Grid>
     );
   }
 
