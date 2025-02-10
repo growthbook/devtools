@@ -87,10 +87,10 @@
   @apply w-full sticky top-0 z-center pt-3 bg-white shadow-sm;
 }
 .featureDetail .header .headerInner {
-  @apply px-6 py-3 bg-violet-2;
+  @apply px-5 py-3 bg-violet-2;
 }
 .featureDetail .content {
-  @apply px-6 py-2 mb-1;
+  @apply px-5 py-2 mb-1;
 }
 
 .rule {

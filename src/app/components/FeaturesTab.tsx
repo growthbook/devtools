@@ -323,9 +323,10 @@ export default function FeaturesTab() {
               </div>
 
               <hr className="my-4"/>
+              <div className="text-md font-semibold">Rules and Values</div>
 
               <div className="my-2">
-                <div className="label font-semibold">Default value</div>
+                <div className="text-sm font-semibold mb-2">Default value</div>
                 <ValueField
                   value={selectedFeature?.feature?.defaultValue}
                   valueType={selectedFeature?.valueType}
@@ -334,7 +335,7 @@ export default function FeaturesTab() {
 
               {(selectedFeature?.feature?.rules ?? []).length ? (
                 <>
-                  <h2 className="label font-semibold">Rules</h2>
+                  <div className="text-sm font-semibold -mb-2">Rules</div>
                   {selectedFeature?.feature?.rules?.map((rule, i) => {
                     return (
                       <Rule
@@ -609,12 +610,12 @@ function EditableValueField({
             setTextareaError(false);
             setDirty(true);
           }}
-          style={{ fontSize: "10px", lineHeight: "15px", padding: "2px 6px" }}
+          style={{ fontSize: "12px", lineHeight: "16px", padding: "6px 6px" }}
           maxRows={valueType === "json" ? 10 : 3}
         />
       )}
 
-      {valueType !== "boolean" && (
+      {valueType !== "boolean" && (dirty || valueType === "json") && (
         <div className="flex items-center justify-end gap-3">
           {(valueType === "json" || dirty) && (
             <Link

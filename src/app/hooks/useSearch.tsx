@@ -45,7 +45,7 @@ export function useSearch<T>({
   });
 
   const filtered = useMemo(() => {
-    return items.filter((item) => JSON.stringify(item).includes(value));
+    return items.filter((item) => JSON.stringify(item).toLowerCase().includes(value.toLowerCase()));
   }, [items, value]);
 
   const sorted = useMemo(() => {
