@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from "react";
+import React, { useMemo, useState } from "react";
 import {
   ConditionInterface,
   FeatureDefinition,
@@ -6,12 +6,12 @@ import {
   ParentConditionInterface,
 } from "@growthbook/growthbook";
 import { upperFirst } from "lodash";
-import { ValueField, ValueType } from "@/app/components/FeaturesTab";
+import ValueField, { ValueType } from "@/app/components/ValueField";
 import { Checkbox, Link, Progress } from "@radix-ui/themes";
 import useTabState from "@/app/hooks/useTabState";
-import {PiCaretRightFill, PiFlagFill, PiFlaskFill} from "react-icons/pi";
-import {EvaluatedFeature} from "@/app/hooks/useGBSandboxEval";
-import {DebugLogs} from "devtools";
+import { PiCaretRightFill, PiFlagFill, PiFlaskFill } from "react-icons/pi";
+import { EvaluatedFeature } from "@/app/hooks/useGBSandboxEval";
+import { DebugLogs } from "devtools";
 import * as Accordion from "@radix-ui/react-accordion";
 
 type RuleType = "force" | "rollout" | "experiment" | "prerequisite";
@@ -20,13 +20,8 @@ const RULE_MATCHED_LOGS = [
   "Force",
   "In experiment", // should also have `ctx.variation` set
 ];
-const RULE_GATES_LOGS = [
-  "Feature blocked",
-];
-const RULE_FORCED_LOGS = [
-  "Global override",
-  "Force variation",
-];
+const RULE_GATES_LOGS = ["Feature blocked"];
+const RULE_FORCED_LOGS = ["Global override", "Force variation"];
 const USE_PREVIOUS_LOG_IF_MATCH = "Use default value"; // last rule
 
 export default function Rule({
@@ -46,7 +41,7 @@ export default function Rule({
 }) {
   const [selectedEid, setSelectedEid] = useTabState<string | undefined>(
     "selectedEid",
-    undefined,
+    undefined
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [jsonMode, setJsonMode] = useState(false);
@@ -63,7 +58,12 @@ export default function Rule({
       }
       // Probably an experiment rule (no rule, has id, id doesn't match),
       // assume this log belongs to current feature's next rule.
-      if (!item?.[1]?.rule && item?.[1]?.id && item[1].id !== fid && itemNo > 0) {
+      if (
+        !item?.[1]?.rule &&
+        item?.[1]?.id &&
+        item[1].id !== fid &&
+        itemNo > 0
+      ) {
         r++;
       }
       if (r === i) {
@@ -73,7 +73,8 @@ export default function Rule({
     return d;
   }, [fid, i, debug]);
 
-  let status: "skipped" | "unreachable" | "matches" | "gates" | "overridden" = "skipped";
+  let status: "skipped" | "unreachable" | "matches" | "gates" | "overridden" =
+    "skipped";
   let lastDebugIndex = debugForRule.length - 1;
   if (debugForRule?.[lastDebugIndex]?.[0] === USE_PREVIOUS_LOG_IF_MATCH) {
     lastDebugIndex--;
@@ -165,7 +166,7 @@ export default function Rule({
                     parentConditions={rule.parentConditions}
                   />
                 </div>
-              ): null}
+              ) : null}
               {ruleType === "experiment" && (
                 <div className="condition">
                   <div className="mt-2 text-xs">
@@ -252,9 +253,12 @@ export default function Rule({
                           {w * (appliedCoverage ?? 1) >= 0.15 && (
                             <div
                               className="text-2xs font-bold relative top-[2px] left-[2px] z-center text-white"
-                              style={{ textShadow: "0 1px #0006, 0 0 1px #0006" }}
+                              style={{
+                                textShadow: "0 1px #0006, 0 0 1px #0006",
+                              }}
                             >
-                              {Math.round(w * (appliedCoverage ?? 1) * 1000) / 10}
+                              {Math.round(w * (appliedCoverage ?? 1) * 1000) /
+                                10}
                               %
                             </div>
                           )}
@@ -316,22 +320,11 @@ export default function Rule({
         />
       )}
       <div className="pt-1 border-t border-t-slate-200">
-        <Accordion.Root
-          className="accordion"
-          type="single"
-          collapsible
-        >
+        <Accordion.Root className="accordion" type="single" collapsible>
           <Accordion.Item value="debug-log">
             <Accordion.Trigger className="trigger mb-0.5">
-              <Link
-                size="2"
-                role="button"
-                className="hover:underline"
-              >
-                <PiCaretRightFill
-                  className="caret mr-0.5"
-                  size={12}
-                />
+              <Link size="2" role="button" className="hover:underline">
+                <PiCaretRightFill className="caret mr-0.5" size={12} />
                 Debug Log
               </Link>
             </Accordion.Trigger>
@@ -358,7 +351,7 @@ export function ConditionDisplay({
 }) {
   const [selectedFid, setSelectedFid] = useTabState<string | undefined>(
     "selectedFid",
-    undefined,
+    undefined
   );
 
   const conditionJson = condition ? JSON.stringify(condition) : undefined;
@@ -379,7 +372,10 @@ export function ConditionDisplay({
           value={parentConditions ? { condition, parentConditions } : condition}
           valueType="json"
           maxHeight={80}
-          customPrismOuterStyle={{ width: "calc(100% - 10px)", marginRight: -60 }}
+          customPrismOuterStyle={{
+            width: "calc(100% - 10px)",
+            marginRight: -60,
+          }}
         />
       </div>
     );

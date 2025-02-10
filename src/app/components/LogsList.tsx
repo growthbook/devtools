@@ -5,9 +5,9 @@ import useTabState from "../hooks/useTabState";
 import LogCard from "./LogCard";
 import { useSearch } from "../hooks/useSearch";
 import SearchBar from "./SearchBar";
+import { LogType, reshapeEventLog } from "../utils/logs";
 
-export type LogFilter = LogUnion["logType"];
-const filterCopy: Record<LogFilter, string> = {
+const filterCopy: Record<LogType, string> = {
   event: "Events",
   feature: "Features",
   experiment: "Experiments",
@@ -15,13 +15,13 @@ const filterCopy: Record<LogFilter, string> = {
 };
 
 export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
-  const [filters, setFilters] = useTabState<LogFilter[]>("logFilter", [
+  const [filters, setFilters] = useTabState<LogType[]>("logTypeFilter", [
     "event",
     "experiment",
     "feature",
   ]);
 
-  const toggleFilter = (filter: LogFilter) => {
+  const toggleFilter = (filter: LogType) => {
     if (filters.includes(filter)) {
       setFilters(filters.filter((existingFilter) => existingFilter !== filter));
     } else {
@@ -31,7 +31,12 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
 
   const filteredLogEvents = useMemo(
     () => logEvents.filter((evt) => filters.includes(evt.logType)),
-    [filters, logEvents],
+    [filters, logEvents]
+  );
+
+  const reshapedEvents = useMemo(
+    () => filteredLogEvents.map(reshapeEventLog),
+    [filteredLogEvents]
   );
 
   const {
@@ -39,12 +44,12 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
     searchInputProps,
     SortableTH,
   } = useSearch({
-    items: filteredLogEvents,
+    items: reshapedEvents,
     defaultSortField: "timestamp",
   });
 
   const logTypeCounts = useMemo(() => {
-    const counts: Record<LogFilter, number> = {
+    const counts: Record<LogType, number> = {
       debug: 0,
       event: 0,
       experiment: 0,
@@ -67,7 +72,7 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
             searchInputProps={searchInputProps}
           />
           <Flex justify="between">
-            {(Object.entries(filterCopy) as Array<[LogFilter, string]>).map(
+            {(Object.entries(filterCopy) as Array<[LogType, string]>).map(
               ([filter, copy]) => (
                 <Button
                   key={filter}
@@ -79,7 +84,7 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
                   {copy}
                   <Badge>{logTypeCounts[filter]}</Badge>
                 </Button>
-              ),
+              )
             )}
           </Flex>
         </Flex>
@@ -93,7 +98,11 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
             <SortableTH field="logType" className="font-normal">
               <Text wrap="nowrap">Log Type</Text>
             </SortableTH>
-            <th className="font-normal">Event</th>
+            <SortableTH field="eventInfo" className="font-normal">
+              <Text wrap="nowrap">Event Info</Text>
+              {/* TODO: tooltip */}
+            </SortableTH>
+            <th className="font-normal">Event Details</th>
           </tr>
         </thead>
         <tbody>
@@ -111,6 +120,9 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
                 </td>
                 <td>
                   <Text>{evt.logType}</Text>
+                </td>
+                <td>
+                  <Text>{evt.eventInfo}</Text>
                 </td>
                 <td>
                   <LogCard key={i} logEvent={evt} />

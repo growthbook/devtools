@@ -90,11 +90,11 @@
   @apply px-5 py-3 bg-violet-2;
 }
 .featureDetail .content {
-  @apply px-5 py-2 mb-1;
+  @apply px-5 py-2 mb-3;
 }
 
 .rule {
-  @apply pt-3 pb-2 pl-2.5 pr-4 my-3 text-2xs bg-white rounded-md border border-l-[3px] border-slate-a3;
+  @apply pt-3 pb-1 pl-2.5 pr-4 my-3 text-2xs bg-white rounded-md border border-l-[3px] border-slate-a3;
 }
 .rule .inner {
   @apply flex items-start pb-2;
@@ -112,7 +112,7 @@
 .rule.skipped {
   @apply border-l-[3px] border-l-violet-a6;
   .status {
-    @apply text-violet-8;
+    @apply text-violet-9;
   }
 }
 .rule.gates {
