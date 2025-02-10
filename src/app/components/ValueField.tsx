@@ -18,6 +18,7 @@ const customTheme = {
 export default function ValueField({
   value,
   valueType = "string",
+  jsonStringifySpaces = 2,
   maxHeight = 120,
   customPrismStyle,
   customPrismOuterStyle,
@@ -27,6 +28,7 @@ export default function ValueField({
 }: {
   value: any;
   valueType?: ValueType;
+  jsonStringifySpaces?: number;
   maxHeight?: number | null;
   customPrismStyle?: CSSProperties;
   customPrismOuterStyle?: CSSProperties;
@@ -35,7 +37,10 @@ export default function ValueField({
   formatDefaultTypeAsConditionValue?: boolean;
 }) {
   const formattedValue =
-    value !== undefined ? JSON.stringify(value, null, 2) : "null";
+    value !== undefined
+      ? JSON.stringify(value, null, jsonStringifySpaces)
+      : "null";
+
   return (
     <>
       {(stringAsCode ? ["json", "string"] : ["json"]).includes(valueType) ? (

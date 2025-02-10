@@ -24,7 +24,7 @@ export interface SearchReturn<T> {
     value: string;
     onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   };
-  SortableTH: FC<{
+  SortableHeader: FC<{
     field: keyof T;
     className?: string;
     children: ReactNode;
@@ -45,7 +45,9 @@ export function useSearch<T>({
   });
 
   const filtered = useMemo(() => {
-    return items.filter((item) => JSON.stringify(item).toLowerCase().includes(value.toLowerCase()));
+    return items.filter((item) =>
+      JSON.stringify(item).toLowerCase().includes(value.toLowerCase())
+    );
   }, [items, value]);
 
   const sorted = useMemo(() => {
@@ -69,15 +71,15 @@ export function useSearch<T>({
     return sorted;
   }, [sort.field, sort.dir, filtered]);
 
-  const SortableTH = useMemo(() => {
-    const th: FC<{
+  const SortableHeader = useMemo(() => {
+    const component: FC<{
       field: keyof T;
       className?: string;
       children: ReactNode;
       style?: React.CSSProperties;
     }> = ({ children, field, className = "", style }) => {
       return (
-        <th className={className} style={style}>
+        <div className={className} style={style}>
           <span
             className="cursor-pointer"
             onClick={(e) => {
@@ -106,10 +108,10 @@ export function useSearch<T>({
               </a>
             </Flex>
           </span>
-        </th>
+        </div>
       );
     };
-    return th;
+    return component;
   }, [sort.dir, sort.field]);
 
   const clear = useCallback(() => {
@@ -127,6 +129,6 @@ export function useSearch<T>({
       value,
       onChange,
     },
-    SortableTH,
+    SortableHeader,
   };
 }

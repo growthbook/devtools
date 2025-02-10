@@ -15,18 +15,14 @@ export function reshapeEventLog(evt: LogUnion): FlattenedLogEvent {
         timestamp: evt.timestamp,
         logType: evt.logType,
         eventInfo: evt.debug.msg,
-        details: {
-          context: evt.debug.ctx,
-        },
+        details: evt.debug.ctx || {},
       };
     case "event":
       return {
         timestamp: evt.timestamp,
         logType: evt.logType,
         eventInfo: evt.eventName,
-        details: {
-          properties: evt.properties,
-        },
+        details: evt.properties || {},
       };
     case "experiment":
       return {
