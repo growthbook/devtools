@@ -90,47 +90,47 @@ export default function SdkTab() {
     const securityStatus = payloadDecrypted ? "Decrypted" : isRemoteEval ? "Remote Eval" : "Plaintext";
     const trackingCallBackStatus = trackingCallbackParams?.length === 2 ? "Found" : !trackingCallbackParams ? "None Found" : `Callback has ${trackingCallbackParams.length} params instead of 2`;
     const TrackingCallbackStatusColor = trackingCallbackParams?.length === 2 ? "green" : !trackingCallbackParams ? "red" : "orange";
+    const canConnectStatus = canConnect ? "Connected" : "Not Connected";
+    const canConnectStatusColor = canConnect ? "green" : hasPayload? "orange" : "red";
     return (
       <div>
-        {displayStatus({title: "Status", status: "Connected", statusColor: "green"})}
+        {displayStatus({title: "Status", status: canConnectStatus, statusColor: canConnectStatusColor})}
         {displayStatus({title: "Version", status: version, statusColor: "gray"})}
         {displayStatus({title: "Tracking Callback", status: trackingCallBackStatus, statusColor: TrackingCallbackStatusColor})}
         {displayStatus({title: "Log Events Callback", status: usingLogEvents, statusColor: "gray"})}
         {displayStatus({title: "Payload Security", status: securityStatus, statusColor: "gray"})}
         {displayStatus({title: "Sticky Bucketing", status: usingStickyBucketing, statusColor: "gray"})}
         {displayStatus({title: "Streaming", status: streaming, statusColor: "gray"})}
-
-                  {payload ? (
-                    <Accordion.Root
-                      className="accordion mt-2"
-                      type="single"
-                      collapsible
-                    >
-                      <Accordion.Item value="Payload">
-                        <Accordion.Trigger className="trigger mb-0.5">
-                          <Link
-                            size="2"
-                            role="button"
-                            className="hover:underline"
-                          >
-                            <PiCaretRightFill
-                              className="caret mr-0.5"
-                              size={12}
-                            />
-                            Payload
-                          </Link>
-                        </Accordion.Trigger>
-                        <Accordion.Content className="accordionInner overflow-hidden w-full">
-                          <ValueField
-                            value={payload}
-                            valueType="json"
-                            maxHeight={200}
-                          />
-                        </Accordion.Content>
-                      </Accordion.Item>
-                    </Accordion.Root>
-                  ) : null}
-         
+        {payload ? (
+          <Accordion.Root
+            className="accordion mt-2"
+            type="single"
+            collapsible
+          >
+            <Accordion.Item value="Payload">
+              <Accordion.Trigger className="trigger mb-0.5">
+                <Link
+                  size="2"
+                  role="button"
+                  className="hover:underline"
+                >
+                  <PiCaretRightFill
+                    className="caret mr-0.5"
+                    size={12}
+                  />
+                  Payload
+                </Link>
+              </Accordion.Trigger>
+              <Accordion.Content className="accordionInner overflow-hidden w-full">
+                <ValueField
+                  value={payload}
+                  valueType="json"
+                  maxHeight={200}
+                />
+              </Accordion.Content>
+            </Accordion.Item>
+          </Accordion.Root>
+        ) : null}
       </div>
     );
   }

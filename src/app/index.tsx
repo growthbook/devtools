@@ -30,7 +30,6 @@ export const MW = 900; // max-width
 export const NAV_H = 80;
 
 export const App = () => {
-  const [showSdkDebug, setShowSdkDebug] = useTabState("showSdkDebug", false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
@@ -87,9 +86,9 @@ export const App = () => {
             <Flex>
               <Button
                 mr="2"
-                variant={showSdkDebug ? "solid" : "outline"}
+                variant={currentTab == "sdkDebug" ? "solid" : "outline"}
                 // TODO: where else do we want a way to return to the main tabs
-                onClick={() => setShowSdkDebug(!showSdkDebug)}
+                onClick={() => setCurrentTab("sdkDebug")}
               >
                 <span style={{
                   borderRadius:10,
@@ -130,44 +129,41 @@ export const App = () => {
               </Dialog.Root>
             </Flex>
           </Flex>
-
-          {!showSdkDebug && (
-            <Tabs.Root
-              value={currentTab}
-              onValueChange={setCurrentTab}
-              className="-mx-4 my-[-2px]"
-            >
-              <Tabs.List>
-                <div className="flex items-end mx-auto w-[930px]">
-                  <div className="mx-2" />
-                  <Tabs.Trigger value="features">
-                    <PiFlagFill className="mr-1" />
-                    Features
-                  </Tabs.Trigger>
-                  <Tabs.Trigger value="experiments">
-                    <PiFlaskFill className="mr-1" />
-                    Experiments
-                  </Tabs.Trigger>
-                  <Tabs.Trigger value="attributes">
-                    <PiUserFill className="mr-1" />
-                    Attributes
-                  </Tabs.Trigger>
-                  <Tabs.Trigger value="logs">
-                    <PiListChecksBold className="mr-1" />
-                    Event Logs
-                  </Tabs.Trigger>
-                  <div className="mx-2" />
-                </div>
-              </Tabs.List>
-            </Tabs.Root>
-          )}
+          <Tabs.Root
+            value={currentTab}
+            onValueChange={setCurrentTab}
+            className="-mx-4 my-[-2px]"
+          >
+            <Tabs.List>
+              <div className="flex items-end mx-auto w-[930px]">
+                <div className="mx-2" />
+                <Tabs.Trigger value="features">
+                  <PiFlagFill className="mr-1" />
+                  Features
+                </Tabs.Trigger>
+                <Tabs.Trigger value="experiments">
+                  <PiFlaskFill className="mr-1" />
+                  Experiments
+                </Tabs.Trigger>
+                <Tabs.Trigger value="attributes">
+                  <PiUserFill className="mr-1" />
+                  Attributes
+                </Tabs.Trigger>
+                <Tabs.Trigger value="logs">
+                  <PiListChecksBold className="mr-1" />
+                  Event Logs
+                </Tabs.Trigger>
+                <div className="mx-2" />
+              </div>
+            </Tabs.List>
+          </Tabs.Root>
         </div>
 
         <div
           className={"overflow-y-auto"}
           style={{ height: `calc(100vh - ${NAV_H}px)` }}
         >
-          {showSdkDebug ? (
+          {currentTab === "sdkDebug" ? (
             <SdkTab />
           ) : currentTab === "attributes" ? (
             <AttributesTab />
