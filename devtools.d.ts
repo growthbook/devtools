@@ -220,7 +220,7 @@ type SDKHealthCheckResult = {
   usingLogEvents?: boolean;
   isRemoteEval?: boolean;
   usingStickyBucketing?: boolean;
-  streamingHost?: string;
+  streaming?: boolean;
 };
 
 type BGSetSDKUsageData = {

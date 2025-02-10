@@ -354,7 +354,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   const hasDecryptionKey = !!gbContext.decryptionKey;
   const isRemoteEval = gb.isRemoteEval();
   const usingStickyBucketing = gbContext.stickyBucketService !== undefined;
-  const streamingHost = gbContext.streamingHost;
+  const streaming = !!gbContext.backgroundSync;
   // check if paylaod was decrypted
   let payloadDecrypted = true;
   try {
@@ -394,7 +394,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       usingLogEvents,
       isRemoteEval,
       usingStickyBucketing,
-      streamingHost,
+      streaming,
     };
   } else {
     const data = await res.json();
@@ -416,7 +416,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       usingLogEvents,
       isRemoteEval,
       usingStickyBucketing, 
-      streamingHost,
+      streaming,
     };
   }
 }
