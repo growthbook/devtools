@@ -51,7 +51,7 @@ export default function SdkTab() {
       status = status ? "Yes" : "No";
     }
     return (
-      <Flex gap="1">
+      <Flex gap="1" className="sdkDebugListItem" align="center" justify="between" px="3">
         <Text size="2" weight="medium">
           {title}:
         </Text>
@@ -93,17 +93,19 @@ export default function SdkTab() {
     const canConnectStatus = canConnect ? "Connected" : "Not Connected";
     const canConnectStatusColor = canConnect ? "green" : hasPayload? "orange" : "red";
     return (
-      <div>
-        {displayStatus({title: "Status", status: canConnectStatus, statusColor: canConnectStatusColor})}
-        {displayStatus({title: "Version", status: version, statusColor: "gray"})}
-        {displayStatus({title: "Tracking Callback", status: trackingCallBackStatus, statusColor: TrackingCallbackStatusColor})}
-        {displayStatus({title: "Log Events Callback", status: usingLogEvents, statusColor: "gray"})}
-        {displayStatus({title: "Payload Security", status: securityStatus, statusColor: "gray"})}
-        {displayStatus({title: "Sticky Bucketing", status: usingStickyBucketing, statusColor: "gray"})}
-        {displayStatus({title: "Streaming", status: streaming, statusColor: "gray"})}
+      <Grid gap="2" columns="2">
+        <Flex direction="column" gap="1">
+          {displayStatus({title: "Status", status: canConnectStatus, statusColor: canConnectStatusColor})}
+          {displayStatus({title: "Version", status: version, statusColor: "gray"})}
+          {displayStatus({title: "Tracking Callback", status: trackingCallBackStatus, statusColor: TrackingCallbackStatusColor})}
+          {displayStatus({title: "Log Events Callback", status: usingLogEvents, statusColor: "gray"})}
+          {displayStatus({title: "Payload Security", status: securityStatus, statusColor: "gray"})}
+          {displayStatus({title: "Sticky Bucketing", status: usingStickyBucketing, statusColor: "gray"})}
+          {displayStatus({title: "Streaming", status: streaming, statusColor: "gray"})}
+        </Flex>
         {payload ? (
           <Accordion.Root
-            className="accordion mt-2"
+            className="accordion"
             type="single"
             collapsible
           >
@@ -125,13 +127,13 @@ export default function SdkTab() {
                 <ValueField
                   value={payload}
                   valueType="json"
-                  maxHeight={200}
+                  maxHeight={276}
                 />
               </Accordion.Content>
             </Accordion.Item>
           </Accordion.Root>
         ) : null}
-      </div>
+      </Grid>
     );
   }
 

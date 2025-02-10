@@ -147,6 +147,13 @@
   @apply border border-violet-200 rounded-md bg-white shadow-sm;
   cursor: pointer;
 }
+
+.sdkDebugListItem {
+  @apply border border-slate-a3 rounded-sm bg-violet-2;
+  height: 40px;
+
+}
+
 @keyframes slideDown {
   from {
     height: 0;
