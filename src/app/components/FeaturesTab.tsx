@@ -7,6 +7,7 @@ import useGBSandboxEval, {
 import { Button, RadioGroup, Link } from "@radix-ui/themes";
 import {
   PiArrowClockwise,
+  PiArrowSquareOutBold,
   PiCaretRightFill,
   PiCircleFill,
   PiFlaskFill,
@@ -116,10 +117,16 @@ export default function FeaturesTab() {
 
   return (
     <>
-      <div className={`max-w-[${MW}px] mx-auto`}>
+      <div
+        className="mx-auto"
+        style={{ maxWidth: MW }}
+      >
         <div
-          className={`max-w-[${MW * leftPercent}px] pb-3`}
-          style={{ width: `${leftPercent * 100}%` }}
+          className="py-3"
+          style={{
+            width: `${leftPercent * 100}%`,
+            maxWidth: MW * leftPercent,
+        }}
         >
           {Object.keys(features).map((fid, i) => {
             const {
@@ -142,7 +149,7 @@ export default function FeaturesTab() {
               <div
                 id={`featuresTab_featureList_${fid}`}
                 key={fid}
-                className={clsx("featureCard ml-1", {
+                className={clsx("featureCard ml-3", {
                   selected: selectedFid === fid,
                 })}
                 onClick={() => clickFeature(fid)}
@@ -187,230 +194,172 @@ export default function FeaturesTab() {
 
         {!!selectedFid && !!selectedFeature && (
         <div
-          className={`max-w-[${MW * rightPercent}px] fixed overflow-y-auto pr-3 pb-2`}
+          className="fixed overflow-y-auto pr-3 pb-2"
           style={{
+            top: 80,
+            height: "calc(100vh - 80px)",
             width: `${rightPercent * 100}%`,
-            left: `${leftPercent * 100}%`,
+            maxWidth: MW * rightPercent,
+            right: `calc(max((100vw - ${MW}px)/2, 0px))`,
             zIndex: 1000,
-            top: 95,
-            height: "calc(100vh - 95px)",
           }}
         >
-            <div className="featureDetail" key={`selected_${selectedFid}`}>
-              <div className="header">
-                <div className="flex items-start gap-2">
-                  <h2 className="font-bold flex-1">{selectedFid}</h2>
+          <div className="featureDetail" key={`selected_${selectedFid}`}>
+            <div className="header">
+              <div className="headerInner">
+              <div className="flex items-start gap-2">
+                <h2 className="font-bold flex-1">{selectedFid}</h2>
+                <Link
+                  size="1"
+                  className="flex-shrink-0"
+                  href={`${appOrigin}/features/${selectedFid}`}
+                  target="_blank"
+                >
+                  <Button>
+                    GrowthBook <PiArrowSquareOutBold/>
+                  </Button>
+                </Link>
+              </div>
+              {(selectedFeature?.linkedExperiments || []).length ? (
+                <div className="mt-1 flex items-center gap-4">
                   <Link
-                    size="1"
-                    className="flex-shrink-0"
-                    href={`${appOrigin}/features/${selectedFid}`}
-                    target="_blank"
+                    size="2"
+                    role="button"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentTab("experiments");
+                      setSelectedEid(
+                        selectedFeature?.linkedExperiments?.[0].key,
+                      );
+                    }}
                   >
-                    <Button>
-                      View in GB
-                    </Button>
+                    <PiFlaskFill className="inline-block mr-0.5" size={14}/>
+                    {selectedFeature?.linkedExperiments?.[0].key}
                   </Link>
-                </div>
-                {(selectedFeature?.linkedExperiments || []).length ? (
-                  <div className="mt-1 flex items-center gap-4">
+                  {(selectedFeature?.linkedExperiments || []).length > 1 &&
+                  !expandLinks ? (
                     <Link
                       size="2"
                       role="button"
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
-                        setCurrentTab("experiments");
-                        setSelectedEid(
-                          selectedFeature?.linkedExperiments?.[0].key,
-                        );
+                        setExpandLinks(true);
                       }}
                     >
-                      <PiFlaskFill className="inline-block mr-0.5" size={14} />
-                      {selectedFeature?.linkedExperiments?.[0].key}
+                      <PiPlusBold className="mr-0.5 inline-block"/>
+                      {(selectedFeature?.linkedExperiments || []).length -
+                        1}{" "}
+                      more
                     </Link>
-                    {(selectedFeature?.linkedExperiments || []).length > 1 &&
-                    !expandLinks ? (
+                  ) : null}
+                </div>
+              ) : null}
+              {(selectedFeature?.linkedExperiments || []).length > 1 &&
+              expandLinks
+                ? selectedFeature.linkedExperiments.map((experiment, i) => {
+                  if (i === 0) return null;
+                  return (
+                    <div key={i}>
                       <Link
                         size="2"
                         role="button"
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
-                          setExpandLinks(true);
+                          setCurrentTab("experiments");
+                          setSelectedEid(experiment.key);
                         }}
                       >
-                        <PiPlusBold className="mr-0.5 inline-block" />
-                        {(selectedFeature?.linkedExperiments || []).length -
-                          1}{" "}
-                        more
+                        <PiFlaskFill
+                          className="inline-block mr-0.5"
+                          size={14}
+                        />
+                        {experiment.key}
                       </Link>
-                    ) : null}
+                    </div>
+                  );
+                })
+                : null}
+              </div>
+            </div>
+
+            <div className="content">
+              <div className="my-1">
+                <div className="flex items-center mb-1 gap-3">
+                  <div className="label font-semibold">Current value</div>
+                  {overrideFeature && (
+                    <div className="text-sm font-semibold text-amber-700 bg-amber-200 px-1.5 py-0.5 rounded-md">
+                      Override
+                    </div>
+                  )}
+                  <div className="flex flex-1 items-center justify-end">
+                    {overrideFeature && (
+                      <Link
+                        size="2"
+                        role="button"
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setOverrideFeature(false);
+                          unsetForcedFeature(selectedFid);
+                        }}
+                      >
+                        <PiArrowClockwise className="inline-block mr-0.5"/>
+                        Revert
+                      </Link>
+                    )}
                   </div>
-                ) : null}
-                {(selectedFeature?.linkedExperiments || []).length > 1 &&
-                expandLinks
-                  ? selectedFeature.linkedExperiments.map((experiment, i) => {
-                      if (i === 0) return null;
-                      return (
-                        <div key={i}>
-                          <Link
-                            size="2"
-                            role="button"
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setCurrentTab("experiments");
-                              setSelectedEid(experiment.key);
-                            }}
-                          >
-                            <PiFlaskFill
-                              className="inline-block mr-0.5"
-                              size={14}
-                            />
-                            {experiment.key}
-                          </Link>
-                        </div>
-                      );
-                    })
-                  : null}
+                </div>
+                <EditableValueField
+                  value={selectedFeature?.evaluatedFeature?.result?.value}
+                  setValue={(v) => {
+                    setForcedFeature(selectedFid, v);
+                    setOverrideFeature(true);
+                  }}
+                  valueType={selectedFeature?.valueType}
+                />
               </div>
 
-              <div className="content">
-                <div className="my-1">
-                  <div className="flex items-center mb-1 gap-3">
-                    <div className="label font-semibold">Current value</div>
-                    {overrideFeature && (
-                      <div className="text-sm font-semibold text-amber-700 bg-amber-200 px-1.5 py-0.5 rounded-md">
-                        Override
-                      </div>
-                    )}
-                    <div className="flex flex-1 items-center justify-end">
-                      {overrideFeature && (
-                        <Link
-                          size="2"
-                          role="button"
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setOverrideFeature(false);
-                            unsetForcedFeature(selectedFid);
-                          }}
-                        >
-                          <PiArrowClockwise className="inline-block mr-0.5"/>
-                          Revert
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                  <EditableValueField
-                    value={selectedFeature?.evaluatedFeature?.result?.value}
-                    setValue={(v) => {
-                      setForcedFeature(selectedFid, v);
-                      setOverrideFeature(true);
-                    }}
-                    valueType={selectedFeature?.valueType}
-                  />
+              <hr className="my-4"/>
 
-                  <div className={clsx({"-mt-4": selectedFeature?.valueType !== "boolean"})}>
-                    <Accordion.Root
-                      className="accordion"
-                      type="single"
-                      collapsible
-                    >
-                      <Accordion.Item value="debug-log">
-                        <Accordion.Trigger className="trigger mb-0.5">
-                          <Link
-                            size="2"
-                            role="button"
-                            className="hover:underline"
-                          >
-                            <PiCaretRightFill
-                              className="caret mr-0.5"
-                              size={12}
-                            />
-                            Evaluation Results
-                          </Link>
-                        </Accordion.Trigger>
-                        <Accordion.Content className="accordionInner overflow-hidden w-full">
-                          <ValueField
-                            value={selectedFeature?.evaluatedFeature?.result}
-                            valueType="json"
-                            maxHeight={200}
-                          />
-                        </Accordion.Content>
-                      </Accordion.Item>
-                    </Accordion.Root>
-                  </div>
-                </div>
+              <div className="my-2">
+                <div className="label font-semibold">Default value</div>
+                <ValueField
+                  value={selectedFeature?.feature?.defaultValue}
+                  valueType={selectedFeature?.valueType}
+                />
+              </div>
 
-                <hr className="my-4"/>
+              {(selectedFeature?.feature?.rules ?? []).length ? (
+                <>
+                  <h2 className="label font-semibold">Rules</h2>
+                  {selectedFeature?.feature?.rules?.map((rule, i) => {
+                    return (
+                      <Rule
+                        key={i}
+                        rule={rule}
+                        i={i}
+                        fid={selectedFid}
+                        feature={selectedFeature.feature}
+                        valueType={selectedFeature.valueType}
+                        evaluatedFeature={selectedFeature.evaluatedFeature}
+                      />
+                    );
+                  })}
+                </>
+              ) : null}
 
-                <div className="my-2">
-                  <div className="label font-semibold">Default value</div>
-                  <ValueField
-                    value={selectedFeature?.feature?.defaultValue}
-                    valueType={selectedFeature?.valueType}
-                  />
-                </div>
+              <div className="mt-3 mb-1">
 
-                {(selectedFeature?.feature?.rules ?? []).length ? (
-                  <>
-                    <h2 className="label font-semibold">Rules</h2>
-                    {selectedFeature?.feature?.rules?.map((rule, i) => {
-                      return (
-                        <Rule
-                          key={i}
-                          rule={rule}
-                          i={i}
-                          fid={selectedFid}
-                          feature={selectedFeature.feature}
-                          valueType={selectedFeature.valueType}
-                          evaluatedFeature={selectedFeature.evaluatedFeature}
-                        />
-                      );
-                    })}
-                  </>
-                ) : null}
-
-                <div className="mt-3 mb-1">
-
-                  {selectedFeature?.evaluatedFeature?.debug ? (
-                    <Accordion.Root
-                      className="accordion mt-2"
-                      type="single"
-                      collapsible
-                    >
-                      <Accordion.Item value="debug-log">
-                        <Accordion.Trigger className="trigger mb-0.5">
-                          <Link
-                            size="2"
-                            role="button"
-                            className="hover:underline"
-                          >
-                            <PiCaretRightFill
-                              className="caret mr-0.5"
-                              size={12}
-                            />
-                            Full debug log
-                          </Link>
-                        </Accordion.Trigger>
-                        <Accordion.Content className="accordionInner overflow-hidden w-full">
-                          <ValueField
-                            value={selectedFeature.evaluatedFeature.debug}
-                            valueType="json"
-                            maxHeight={200}
-                          />
-                        </Accordion.Content>
-                      </Accordion.Item>
-                    </Accordion.Root>
-                  ) : null}
-
+                {selectedFeature?.evaluatedFeature?.debug ? (
                   <Accordion.Root
                     className="accordion mt-2"
                     type="single"
                     collapsible
                   >
-                    <Accordion.Item value="feature-definition">
+                    <Accordion.Item value="debug-log">
                       <Accordion.Trigger className="trigger mb-0.5">
                         <Link
                           size="2"
@@ -421,23 +370,53 @@ export default function FeaturesTab() {
                             className="caret mr-0.5"
                             size={12}
                           />
-                          Full feature definition
+                          Full debug log
                         </Link>
                       </Accordion.Trigger>
                       <Accordion.Content className="accordionInner overflow-hidden w-full">
                         <ValueField
-                          value={selectedFeature.feature}
+                          value={selectedFeature.evaluatedFeature.debug}
                           valueType="json"
-                          maxHeight={null}
+                          maxHeight={200}
                         />
                       </Accordion.Content>
                     </Accordion.Item>
                   </Accordion.Root>
-                </div>
+                ) : null}
+
+                <Accordion.Root
+                  className="accordion mt-2"
+                  type="single"
+                  collapsible
+                >
+                  <Accordion.Item value="feature-definition">
+                    <Accordion.Trigger className="trigger mb-0.5">
+                      <Link
+                        size="2"
+                        role="button"
+                        className="hover:underline"
+                      >
+                        <PiCaretRightFill
+                          className="caret mr-0.5"
+                          size={12}
+                        />
+                        Full feature definition
+                      </Link>
+                    </Accordion.Trigger>
+                    <Accordion.Content className="accordionInner overflow-hidden w-full">
+                      <ValueField
+                        value={selectedFeature.feature}
+                        valueType="json"
+                        maxHeight={null}
+                      />
+                    </Accordion.Content>
+                  </Accordion.Item>
+                </Accordion.Root>
               </div>
             </div>
+          </div>
         </div>
-            )}
+        )}
       </div>
     </>
   );

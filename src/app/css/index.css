@@ -48,7 +48,6 @@
 .ModalBody {
   width: 400px;
 }
-
 .mono {
   font-family: monospace;
 }
@@ -58,15 +57,21 @@
 }
 
 .featureCard {
-  @apply pl-3 pr-6 py-1 border-b border-slate-a3 relative;
+  @apply pl-3 pr-6 py-1 border-t border-slate-a3 relative;
   cursor: pointer;
-  scroll-margin-top: 95px;
+  scroll-margin-top: 12px;
+}
+.featureCard:first-of-type {
+  @apply border-t-transparent;
+}
+.featureCard:last-of-type {
+  @apply border-b;
 }
 .featureCard:not(.selected):hover {
   @apply bg-violet-1;
 }
 .featureCard.selected {
-  @apply bg-violet-2;
+  @apply border-t-violet-2 bg-violet-2;
 }
 .featureCard .title {
   @apply text-sm font-semibold;
@@ -76,10 +81,13 @@
 }
 
 .featureDetail {
-  @apply mb-1 min-h-[calc(100vh-120px)] bg-violet-2;
+  @apply bg-violet-2;
 }
 .featureDetail .header {
-  @apply px-6 py-3 sticky top-0 z-center bg-violet-2 shadow-sm;
+  @apply w-full sticky top-0 z-center pt-3 bg-white shadow-sm;
+}
+.featureDetail .header .headerInner {
+  @apply px-6 py-3 bg-violet-2;
 }
 .featureDetail .content {
   @apply px-6 py-2 mb-1;

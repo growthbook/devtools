@@ -26,6 +26,7 @@ import {
 } from "react-icons/pi";
 
 export const MW = 900; // max-width
+export const NAV_H = 80;
 
 export const App = () => {
   const [showSdkDebug, setShowSdkDebug] = useTabState("showSdkDebug", false);
@@ -64,8 +65,12 @@ export const App = () => {
       style={{ minHeight: "unset" }}
     >
       <div id="main" className="text-indigo-12">
-        <div className="shadow-sm fixed top-0 px-3 pt-2 w-full bg-zinc-50 z-front">
-          <Flex justify="between">
+        <div className={`h-[${NAV_H}px] shadow-sm px-3 pt-2 w-full relative bg-zinc-50 z-front`}>
+          <Flex
+            justify="between"
+            className="mx-auto"
+            style={{ maxWidth: MW }}
+          >
             <h1 className="text-lg">
               <img
                 src={logo}
@@ -122,7 +127,7 @@ export const App = () => {
             <Tabs.Root
               value={currentTab}
               onValueChange={setCurrentTab}
-              className="-mx-4"
+              className="-mx-4 my-[-2px]"
             >
               <Tabs.List>
                 <div className="flex items-end mx-auto w-[930px]">
@@ -150,7 +155,10 @@ export const App = () => {
           )}
         </div>
 
-        <div className="mt-[95px] mx-3">
+        <div
+          className={"overflow-y-auto"}
+          style={{ height: `calc(100vh - ${NAV_H}px)` }}
+        >
           {showSdkDebug ? (
             <SdkTab />
           ) : currentTab === "attributes" ? (
