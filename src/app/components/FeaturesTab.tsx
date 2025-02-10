@@ -124,7 +124,7 @@ export default function FeaturesTab() {
         <div
           className="py-3"
           style={{
-            width: `${leftPercent * 100}%`,
+            width: `${leftPercent * 100}vw`,
             maxWidth: MW * leftPercent,
         }}
         >
@@ -194,11 +194,11 @@ export default function FeaturesTab() {
 
         {!!selectedFid && !!selectedFeature && (
         <div
-          className="fixed overflow-y-auto pr-3 pb-2"
+          className="fixed overflow-y-auto pb-2"
           style={{
             top: 80,
             height: "calc(100vh - 80px)",
-            width: `${rightPercent * 100}%`,
+            width: `${rightPercent * 100}vw`,
             maxWidth: MW * rightPercent,
             right: `calc(max((100vw - ${MW}px)/2, 0px))`,
             zIndex: 1000,
