@@ -108,7 +108,8 @@ export default function FeaturesTab() {
     }
   }, [selectedFid]);
 
-  const leftPercent = !selectedFid || !selectedFeature ? 1 : LEFT_PERCENT;
+  const fullWidthListView = !selectedFid || !selectedFeature;
+  const leftPercent = fullWidthListView ? 1 : LEFT_PERCENT;
   const rightPercent = 1 - leftPercent;
 
   return (
@@ -117,7 +118,7 @@ export default function FeaturesTab() {
         <div
           className="py-3"
           style={{
-            width: `${leftPercent * 100}vw`,
+            width: `${leftPercent * 100}${fullWidthListView ? "%" : "vw"}`,
             maxWidth: MW * leftPercent,
           }}
         >
@@ -187,7 +188,7 @@ export default function FeaturesTab() {
 
         {!!selectedFid && !!selectedFeature && (
           <div
-            className="fixed overflow-y-auto pb-2"
+            className="fixed overflow-y-auto bg-white"
             style={{
               top: 80,
               height: "calc(100vh - 80px)",

@@ -90,7 +90,7 @@
   @apply px-5 py-3 bg-violet-2;
 }
 .featureDetail .content {
-  @apply px-5 py-2 mb-1;
+  @apply px-5 py-2 mb-3;
 }
 
 .rule {
