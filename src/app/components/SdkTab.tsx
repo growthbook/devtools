@@ -36,7 +36,6 @@ export default function SdkTab() {
     lineHeight: "12px",
     maxHeight: 200,
   };
-  var jsonPretty = payload ? JSON.stringify(payload, null, 2) : "";
 
   useEffect(() => window.scrollTo({ top: 0 }), []);
 
@@ -53,7 +52,7 @@ export default function SdkTab() {
     return (
       <Flex gap="1" className="sdkDebugListItem" align="center" justify="between" px="3">
         <Text size="2" weight="medium">
-          {title}:
+          {title}
         </Text>
         <Text size="2" weight="light" color={statusColor}>
           {status}
