@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import useTabState from "../hooks/useTabState";
 import LogsList from "./LogsList";
 import { Link } from "@radix-ui/themes";
-import {MW} from "@/app";
+import { MW } from "@/app";
 
 export default function LogsTab() {
   const [_showSdkDebug, setShowSdkDebug] = useTabState("showSdkDebug", false);
@@ -11,11 +11,11 @@ export default function LogsTab() {
   useEffect(() => window.scrollTo({ top: 0 }), []);
   const [logEvents] = useTabState<LogUnion[] | undefined>(
     "logEvents",
-    undefined,
+    undefined
   );
 
   return (
-    <div className={`max-w-[${MW}px] mx-auto`}>
+    <div className={`max-w-[${MW}px] mx-3`}>
       {typeof logEvents === "undefined" ? (
         <>
           SDK logging not connected, see the{" "}

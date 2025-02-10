@@ -93,14 +93,14 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
           </Flex>
         </Flex>
       </Container>
-      <Flex className="w-full">
-        <SortableHeader field="timestamp" className="w-[20%] pl-1 pr-1">
+      <Flex className="w-full border-b border-b-slate-200">
+        <SortableHeader field="timestamp" className="w-[20%] px-1">
           Timestamp
         </SortableHeader>
-        <SortableHeader field="logType" className="w-[20%] pl-1 pr-1">
+        <SortableHeader field="logType" className="w-[20%] px-1">
           Log Type
         </SortableHeader>
-        <SortableHeader field="eventInfo" className="w-[20%] pl-1 pr-1">
+        <SortableHeader field="eventInfo" className="w-[20%] px-1">
           Event Info
           {/* TODO: tooltip? */}
         </SortableHeader>
@@ -126,17 +126,17 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
                 <Flex
                   className={clsx(
                     "w-full",
-                    "border-t border-t-slate-200",
+                    i > 0 ? "border-t border-t-slate-200" : "",
                     "py-1"
                   )}
                 >
-                  <div className="w-[20%] pr-2">
+                  <div className="w-[20%] px-1 text-left">
                     <PiCaretRightFill className="caret mr-0.5" size={12} />
                     {formattedDateTime}
                   </div>
-                  <div className="w-[20%] pr-2">{evt.logType}</div>
-                  <div className="w-[20%] pr-2">{evt.eventInfo}</div>
-                  <div className="w-[40%] pr-2">
+                  <div className="w-[20%] px-1 text-left">{evt.logType}</div>
+                  <div className="w-[20%] px-1 text-left">{evt.eventInfo}</div>
+                  <div className="w-[40%] px-1">
                     <ValueField
                       value={evt.details}
                       valueType="json"
