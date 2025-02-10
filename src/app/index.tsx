@@ -18,6 +18,7 @@ import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
 import SettingsForm from "@/app/components/Settings";
 import {PiX, PiGearSix, PiUserBold, PiFlagBold, PiFlaskBold, PiListChecksBold} from "react-icons/pi";
+import useSdkData from "@/app/hooks/useSdkData";
 
 export const App = () => {
   const [showSdkDebug, setShowSdkDebug] = useState(false);
@@ -30,7 +31,8 @@ export const App = () => {
   const [currentTab, setCurrentTab] = useTabState("currentTab", "attributes");
   const [features] = useTabState("features", {});
   const [experiments] = useTabState("experiments", []);
-
+  const {canConnect, hasPayload} = useSdkData();
+  const sdkStatusColor = canConnect ? "green" : hasPayload ? "orange" : "red"
   const refresh = () => {
     chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
       let activeTab = tabs[0];
@@ -80,12 +82,15 @@ export const App = () => {
               <Button
                 mr="2"
                 variant={showSdkDebug ? "solid" : "outline"}
-                // TODO: extend coloring/styling to other error and warning states
-                color={sdkFound ? undefined : "orange"}
                 // TODO: where else do we want a way to return to the main tabs
                 onClick={() => setShowSdkDebug(!showSdkDebug)}
               >
-                SDK
+                <span style={{
+                  borderRadius:10,
+                  height:10,
+                  width:10,
+                  backgroundColor: sdkStatusColor
+                }}></span>SDK
               </Button>
 
               <Dialog.Root

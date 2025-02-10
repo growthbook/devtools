@@ -213,6 +213,14 @@ type SDKHealthCheckResult = {
   isLoading?: boolean;
   payload?: Record<string, any>;
   devModeEnabled: boolean;
+  hasTrackingCallback?: boolean;
+  trackingCallbackParams?: string[];
+  hasDecryptionKey?: boolean;
+  payloadDecrypted?:boolean;
+  usingLogEvents?: boolean;
+  isRemoteEval?: boolean;
+  usingStickyBucketing?: boolean;
+  streamingHost?: string;
 };
 
 type BGSetSDKUsageData = {

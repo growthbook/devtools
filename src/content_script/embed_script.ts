@@ -9,6 +9,8 @@ import type {
 } from "@growthbook/growthbook";
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import { Attributes } from "@growthbook/growthbook";
+import { jsx } from "node_modules/@types/react/jsx-runtime";
+import { decrypt } from "node_modules/@growthbook/growthbook/dist/util";
 
 declare global {
   interface Window {
@@ -117,6 +119,7 @@ function setupListeners() {
         updateExperiments(message.data);
         break;
       case "GB_REQUEST_REFRESH":
+        console.log("GB_REQUEST_REFRESH embed_script.ts");
         pushAppUpdates();
         break;
       default:
@@ -222,6 +225,8 @@ function subscribeToSdkChanges(
   gb.setAttributeOverrides = async (attributes: Attributes) => {
     await _setAttributeOverrides.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
+    const sdkData = await SDKHealthCheck(gb);
+    updateTabState("sdkData", sdkData);
   };
 
   // // @ts-ignore Patching private method
@@ -329,6 +334,8 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       errorMessage: "SDK not found",
     };
   }
+    // @ts-expect-error
+  const gbContext =  gb.context;
   const [apiHost, clientKey] = gb.getApiInfo();
   const payload = gb.getDecryptedPayload?.() || {
     features: gb.getFeatures(),
@@ -338,8 +345,23 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     !!gb.getDecryptedPayload?.() ||
     (Object.keys(gb.getFeatures()).length > 0 &&
       gb.getExperiments().length > 0);
-  // @ts-expect-error
-  const devModeEnabled = gb.context.enableDevMode;
+  const devModeEnabled = gbContext.enableDevMode;
+  const _trackingCallback = gbContext.trackingCallback;
+  const hasTrackingCallback = typeof _trackingCallback  === "function";
+  const trackingCallbackParams = hasTrackingCallback ? _trackingCallback.toString().match(/\(([^)]+)\)/)[1].split(',').map((param: string) => param.trim()): undefined;
+  const usingLogEvents = typeof gbContext.eventLogger === "function";
+  const hasDecryptionKey = !!gbContext.decryptionKey;
+  const isRemoteEval = gb.isRemoteEval();
+  const usingStickyBucketing = gbContext.stickyBucketService !== undefined;
+  const streamingHost = gbContext.streamingHost;
+  // check if paylaod was decrypted
+  let payloadDecrypted = true;
+  try {
+      JSON.stringify(payload);
+  } catch (e) {
+    payloadDecrypted = false;
+  }
+
 
   if (!clientKey) {
     return {
@@ -363,6 +385,14 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       sdkFound: true,
       clientKey,
       payload,
+      hasTrackingCallback,
+      trackingCallbackParams,
+      hasDecryptionKey,
+      payloadDecrypted,
+      usingLogEvents,
+      isRemoteEval,
+      usingStickyBucketing,
+      streamingHost,
     };
   } else {
     const data = await res.json();
@@ -377,6 +407,14 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       sdkFound: true,
       clientKey,
       payload,
+      hasTrackingCallback,
+      trackingCallbackParams,
+      hasDecryptionKey,
+      payloadDecrypted,
+      usingLogEvents,
+      isRemoteEval,
+      usingStickyBucketing, 
+      streamingHost,
     };
   }
 }

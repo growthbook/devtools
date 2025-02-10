@@ -148,11 +148,14 @@ window.addEventListener(
 // Listen for messages from devtools, background, etc.
 // todo: remove 1 ore more?:
 chrome.runtime.onMessage.addListener(async (msg: Message) => {
+    console.log("Received message from popup", msg);
+
   switch (msg.type) {
     case "GB_SET_OVERRIDES":
-    case "GB_REQUEST_REFRESH":
-      // generic message pass through
       window.postMessage(msg, window.location.origin);
+      break;
+    case "GB_REQUEST_REFRESH":
+      refreshSDK();
       break;
     default:
       break;
