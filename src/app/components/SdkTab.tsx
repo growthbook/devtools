@@ -87,11 +87,13 @@ export default function SdkTab() {
 
   const displaySDKFoundStatusesAndPayload = () => {
 
-    const securityStatus = payloadDecrypted ? "Decrypted" : isRemoteEval ? "Remote Eval" : "Plaintext";
+    const decryptedStatus = payloadDecrypted ? "Decrypted" : "DecryptionError";
+    const securityStatus =  hasDecryptionKey ? decryptedStatus : isRemoteEval ? "Remote Eval" : "Plain Text";
     const trackingCallBackStatus = trackingCallbackParams?.length === 2 ? "Found" : !trackingCallbackParams ? "None Found" : `Callback has ${trackingCallbackParams.length} params instead of 2`;
     const TrackingCallbackStatusColor = trackingCallbackParams?.length === 2 ? "green" : !trackingCallbackParams ? "red" : "orange";
     const canConnectStatus = canConnect ? "Connected" : "Not Connected";
     const canConnectStatusColor = canConnect ? "green" : hasPayload? "orange" : "red";
+
     return (
       <Grid gap="2" columns="2">
         <Flex direction="column" gap="1">
