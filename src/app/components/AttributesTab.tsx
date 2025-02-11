@@ -359,6 +359,19 @@ export default function AttributesTab() {
                       </Form.Field>
                     )}
                     <div className="mt-2">
+                      <Form.Submit
+                        asChild
+                        disabled={
+                          (saveArchetypeForm.watch("type") === "new" &&
+                            !newArchetypeIsValid) ||
+                          (saveArchetypeForm.watch("type") === "existing" &&
+                            selectedArchetype?.source !== "local")
+                        }
+                      >
+                        <Button size="1" className="w-full">
+                          Save
+                        </Button>
+                      </Form.Submit>
                       {saveArchetypeForm.watch("type") === "existing" &&
                         selectedArchetype?.source === "growthbook" && (
                           <Text color="red" className="text-xs">
@@ -376,20 +389,6 @@ export default function AttributesTab() {
                             </Link>
                           </Text>
                         )}
-
-                      <Form.Submit
-                        asChild
-                        disabled={
-                          (saveArchetypeForm.watch("type") === "new" &&
-                            !newArchetypeIsValid) ||
-                          (saveArchetypeForm.watch("type") === "existing" &&
-                            selectedArchetype?.source !== "local")
-                        }
-                      >
-                        <Button size="1" className="w-full">
-                          Save
-                        </Button>
-                      </Form.Submit>
                     </div>
                   </Form.Root>
                 </Popover.Content>
