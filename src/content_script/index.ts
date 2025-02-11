@@ -148,7 +148,7 @@ window.addEventListener(
 // Listen for messages from devtools, background, etc.
 // todo: remove 1 ore more?:
 chrome.runtime.onMessage.addListener(async (msg: Message) => {
-    console.log("Received message from popup", msg);
+  console.log("Received message from popup", msg);
 
   switch (msg.type) {
     case "GB_SET_OVERRIDES":

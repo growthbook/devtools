@@ -19,12 +19,14 @@ import SettingsForm from "@/app/components/Settings";
 import useSdkData from "@/app/hooks/useSdkData";
 import {
   PiX,
-  PiGearSix,
   PiUserFill,
   PiFlagFill,
   PiFlaskFill,
   PiListChecksBold,
+  PiCircleFill,
+  PiGearSix,
 } from "react-icons/pi";
+import clsx from "clsx";
 
 export const MW = 900; // max-width
 export const NAV_H = 80;
@@ -39,8 +41,8 @@ export const App = () => {
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [features] = useTabState("features", {});
   const [experiments] = useTabState("experiments", []);
-  const {canConnect, hasPayload} = useSdkData();
-  const sdkStatusColor = canConnect ? "green" : hasPayload ? "orange" : "red"
+  const { canConnect, hasPayload } = useSdkData();
+  let sdkStatus = canConnect ? "green" : hasPayload ? "yellow" : "red";
   const refresh = () => {
     chrome.tabs.query({ currentWindow: true, active: true }, async (tabs) => {
       let activeTab = tabs[0];
@@ -70,11 +72,7 @@ export const App = () => {
           className={`shadow-sm px-3 pt-2 w-full relative bg-zinc-50 z-front`}
           style={{ height: NAV_H }}
         >
-          <Flex
-            justify="between"
-            className="mx-auto"
-            style={{ maxWidth: MW }}
-          >
+          <Flex justify="between" className="mx-auto" style={{ maxWidth: MW }}>
             <h1 className="text-lg">
               <img
                 src={logo}
@@ -84,27 +82,17 @@ export const App = () => {
               <span className="font-bold text-slate-11">DevTools</span>
             </h1>
             <Flex>
-              <Button
-                mr="2"
-                variant={currentTab == "sdkDebug" ? "solid" : "outline"}
-                // TODO: where else do we want a way to return to the main tabs
-                onClick={() => setCurrentTab("sdkDebug")}
-              >
-                <span style={{
-                  borderRadius:10,
-                  height:10,
-                  width:10,
-                  backgroundColor: sdkStatusColor
-                }}></span>SDK
-              </Button>
-
               <Dialog.Root
                 open={settingsOpen}
                 onOpenChange={(o) => setSettingsOpen(o)}
               >
                 <Dialog.Trigger>
-                  <Button>
-                    <div className="px-4">
+                  <Button
+                    variant="ghost"
+                    size="2"
+                    style={{ margin: "0 -6px 0 0" }}
+                  >
+                    <div className="px-1">
                       <PiGearSix size={20} />
                     </div>
                   </Button>
@@ -153,6 +141,18 @@ export const App = () => {
                   <PiListChecksBold className="mr-1" />
                   Event Logs
                 </Tabs.Trigger>
+                <Tabs.Trigger value="sdkDebug">
+                  <div
+                    className={clsx("inline-block mr-1", {
+                      "text-emerald-500": sdkStatus === "green",
+                      "text-amber-500": sdkStatus === "yellow",
+                      "text-red-500": sdkStatus === "red",
+                    })}
+                  >
+                    <PiCircleFill size={12} />
+                  </div>
+                  SDK
+                </Tabs.Trigger>
                 <div className="mx-2" />
               </div>
             </Tabs.List>
@@ -163,9 +163,7 @@ export const App = () => {
           className={"overflow-y-auto"}
           style={{ height: `calc(100vh - ${NAV_H}px)` }}
         >
-          {currentTab === "sdkDebug" ? (
-            <SdkTab />
-          ) : currentTab === "attributes" ? (
+          {currentTab === "attributes" ? (
             <AttributesTab />
           ) : currentTab === "features" ? (
             <FeaturesTab />
@@ -173,6 +171,8 @@ export const App = () => {
             <ExperimentsTab />
           ) : currentTab === "logs" ? (
             <LogsTab />
+          ) : currentTab === "sdkDebug" ? (
+            <SdkTab />
           ) : null}
         </div>
       </div>

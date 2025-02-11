@@ -57,9 +57,10 @@
 }
 
 .featureCard {
-  @apply pl-3 pr-6 py-1 border-t border-slate-a3 relative;
+  @apply py-1 border-t border-slate-a3 relative items-center;
   cursor: pointer;
-  scroll-margin-top: 12px;
+  min-height: 48px;
+  scroll-margin-top: 40px; /* should be synced with HEADER_H */
 }
 .featureCard:first-of-type {
   @apply border-t-transparent;
@@ -77,30 +78,27 @@
   @apply text-sm font-semibold;
 }
 .featureCard .value {
-  @apply text-indigo-12 text-xs line-clamp-1 mt-0 w-full text-right pl-[50%];
+  @apply text-indigo-12 text-xs break-all;
 }
 
 .featureDetail {
   @apply bg-violet-2;
 }
 .featureDetail .header {
-  @apply w-full sticky top-0 z-center pt-3 bg-white shadow-sm;
-}
-.featureDetail .header .headerInner {
-  @apply px-5 py-3 bg-violet-2;
+  @apply w-full sticky top-0 z-center pl-6 pr-4 py-3 bg-violet-2 shadow-sm;
 }
 .featureDetail .content {
-  @apply px-5 py-2 mb-3;
+  @apply pl-6 pr-4 py-2 mb-3;
 }
 
 .rule {
-  @apply pt-3 pb-1 pl-2.5 pr-4 my-3 text-2xs bg-white rounded-md border border-l-[3px] border-slate-a3;
+  @apply pt-4 pb-2 pl-2.5 pr-4 my-5 text-2xs bg-white rounded-md border border-l-[3px] border-slate-a3;
 }
 .rule .inner {
   @apply flex items-start pb-2;
 }
 .condition {
-  @apply leading-[1.15rem];
+  @apply leading-[1.3rem];
 }
 .conditionValue {
   @apply px-1 border border-slate-a3 rounded-sm bg-gray-50 break-all;
@@ -110,33 +108,33 @@
 }
 /*rule statuses*/
 .rule.skipped {
-  @apply border-l-[3px] border-l-violet-a6;
+  @apply border-l-red-200;
   .status {
-    @apply text-violet-9;
+    @apply text-red-500 bg-red-100;
   }
 }
 .rule.gates {
-  @apply border-l-red-300;
+  @apply border-l-pink-300;
   .status {
-    @apply text-red-400;
+    @apply text-pink-700 bg-pink-200;
   }
 }
 .rule.unreachable {
   @apply border-l-slate-200;
   .status {
-    @apply text-slate-400;
+    @apply text-slate-700 bg-slate-200;
   }
 }
 .rule.matches {
   @apply border-l-emerald-400;
   .status {
-    @apply text-emerald-600;
+    @apply text-emerald-700 bg-emerald-200;
   }
 }
 .rule.overridden {
   @apply border-l-amber-300;
   .status {
-    @apply text-amber-600;
+    @apply text-amber-700 bg-amber-200;
   }
 }
 
@@ -158,9 +156,10 @@
 .sdkDebugListItem {
   @apply border border-slate-a3 rounded-sm bg-violet-2;
   height: 40px;
-
 }
-
+.sdkDebugDetailedView {
+  @apply border border-slate-a3 rounded-sm bg-violet-2;
+}
 @keyframes slideDown {
   from {
     height: 0;
@@ -202,7 +201,7 @@
 
 .searchBar {
   border-style: solid;
-  @apply border-slate-a3 rounded-lg;
+  @apply border-slate-a3 rounded-md px-1 py-0.5;
   width: 150px;
 }
 

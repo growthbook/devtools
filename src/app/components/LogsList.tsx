@@ -1,11 +1,14 @@
 import { LogUnion } from "@growthbook/growthbook";
-import { Badge, Button, Container, Flex, Text } from "@radix-ui/themes";
-import React, { useMemo } from "react";
+import { Badge, Button, Container, Flex } from "@radix-ui/themes";
+import React, { useMemo, useState } from "react";
 import useTabState from "../hooks/useTabState";
-import LogCard from "./LogCard";
 import { useSearch } from "../hooks/useSearch";
 import SearchBar from "./SearchBar";
 import { LogType, reshapeEventLog } from "../utils/logs";
+import * as Accordion from "@radix-ui/react-accordion";
+import { PiCaretRightFill } from "react-icons/pi";
+import ValueField from "./ValueField";
+import clsx from "clsx";
 
 const filterCopy: Record<LogType, string> = {
   event: "Events",
@@ -20,6 +23,7 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
     "experiment",
     "feature",
   ]);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   const toggleFilter = (filter: LogType) => {
     if (filters.includes(filter)) {
@@ -31,18 +35,18 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
 
   const filteredLogEvents = useMemo(
     () => logEvents.filter((evt) => filters.includes(evt.logType)),
-    [filters, logEvents]
+    [filters, logEvents],
   );
 
   const reshapedEvents = useMemo(
     () => filteredLogEvents.map(reshapeEventLog),
-    [filteredLogEvents]
+    [filteredLogEvents],
   );
 
   const {
     items: events,
     searchInputProps,
-    SortableTH,
+    SortableHeader,
   } = useSearch({
     items: reshapedEvents,
     defaultSortField: "timestamp",
@@ -82,56 +86,74 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
                   size="1"
                 >
                   {copy}
-                  <Badge>{logTypeCounts[filter]}</Badge>
+                  <Badge variant="surface">{logTypeCounts[filter]}</Badge>
                 </Button>
-              )
+              ),
             )}
           </Flex>
         </Flex>
       </Container>
-      <table style={{ borderSpacing: "4px", borderCollapse: "separate" }}>
-        <thead>
-          <tr>
-            <SortableTH field="timestamp" className="font-normal">
-              <Text>Timestamp</Text>
-            </SortableTH>
-            <SortableTH field="logType" className="font-normal">
-              <Text wrap="nowrap">Log Type</Text>
-            </SortableTH>
-            <SortableTH field="eventInfo" className="font-normal">
-              <Text wrap="nowrap">Event Info</Text>
-              {/* TODO: tooltip */}
-            </SortableTH>
-            <th className="font-normal">Event Details</th>
-          </tr>
-        </thead>
-        <tbody>
-          {events.map((evt, i) => {
-            const timestamp = parseInt(evt.timestamp);
-            const date = new Date(timestamp);
-            const formattedDateTime =
-              date.toLocaleDateString() === new Date().toLocaleDateString()
-                ? date.toLocaleTimeString(undefined, { hourCycle: "h24" })
-                : date.toLocaleString(undefined, { hourCycle: "h24" });
-            return (
-              <tr className="text-xs" key={i}>
-                <td>
-                  <Text>{formattedDateTime}</Text>
-                </td>
-                <td>
-                  <Text>{evt.logType}</Text>
-                </td>
-                <td>
-                  <Text>{evt.eventInfo}</Text>
-                </td>
-                <td>
-                  <LogCard key={i} logEvent={evt} />
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <Flex className="w-full border-b border-b-slate-200">
+        <SortableHeader field="timestamp" className="w-[20%] px-1">
+          Timestamp
+        </SortableHeader>
+        <SortableHeader field="logType" className="w-[20%] px-1">
+          Log Type
+        </SortableHeader>
+        <SortableHeader field="eventInfo" className="w-[20%] px-1">
+          Event Info
+          {/* TODO: tooltip? */}
+        </SortableHeader>
+        <div className="w-[40%] pr-2">Event Details</div>
+      </Flex>
+      <Accordion.Root
+        className="accordion"
+        type="multiple"
+        value={[...expandedItems]}
+        onValueChange={(newValues) => setExpandedItems(new Set(newValues))}
+      >
+        {events.map((evt, i) => {
+          const timestamp = parseInt(evt.timestamp);
+          const date = new Date(timestamp);
+          const formattedDateTime =
+            date.toLocaleDateString() === new Date().toLocaleDateString()
+              ? date.toLocaleTimeString(undefined, { hourCycle: "h24" })
+              : date.toLocaleString(undefined, { hourCycle: "h24" });
+          const isExpanded = expandedItems.has(i.toString());
+          return (
+            <Accordion.Item key={i} value={i.toString()}>
+              <Accordion.Trigger className="trigger w-full mb-0.5">
+                <Flex
+                  className={clsx(
+                    "w-full",
+                    i > 0 ? "border-t border-t-slate-200" : "",
+                    "py-1",
+                  )}
+                >
+                  <div className="w-[20%] px-1 text-left">
+                    <PiCaretRightFill className="caret mr-0.5" size={12} />
+                    {formattedDateTime}
+                  </div>
+                  <div className="w-[20%] px-1 text-left">{evt.logType}</div>
+                  <div className="w-[20%] px-1 text-left">{evt.eventInfo}</div>
+                  <div className="w-[40%] px-1">
+                    <ValueField
+                      value={evt.details}
+                      valueType="json"
+                      jsonStringifySpaces={isExpanded ? 2 : 0}
+                      maxHeight={isExpanded ? 120 : 25}
+                      customPrismOuterStyle={{
+                        border: "none",
+                        borderRadius: "unset",
+                      }}
+                    />
+                  </div>
+                </Flex>
+              </Accordion.Trigger>
+            </Accordion.Item>
+          );
+        })}
+      </Accordion.Root>
     </div>
   );
 }
