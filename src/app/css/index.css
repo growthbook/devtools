@@ -193,7 +193,7 @@
 
 .searchBar {
   border-style: solid;
-  @apply border-slate-a3 rounded-lg;
+  @apply border-slate-a3 rounded-md px-1 py-0.5;
   width: 150px;
 }
 

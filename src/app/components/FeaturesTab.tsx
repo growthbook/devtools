@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {
   AutoExperiment,
   Experiment,
@@ -13,6 +13,10 @@ import clsx from "clsx";
 import { MW } from "@/app";
 import { ValueType } from "./ValueField";
 import FeatureDetail from "@/app/components/FeatureDetail";
+import {useSearch} from "@/app/hooks/useSearch";
+import SearchBar from "@/app/components/SearchBar";
+
+type FeatureDefinitionWithId = FeatureDefinition<any> & { id: string };
 
 export const LEFT_PERCENT = 0.4;
 export const HEADER_H = 40;
@@ -21,6 +25,23 @@ export default function FeaturesTab() {
   const [features, setFeatures] = useTabState<
     Record<string, FeatureDefinition>
   >("features", {});
+
+  const reshapedFeatures = useMemo(
+    () => Object.entries(features)
+      .map(([key, val]) => ({ ...val, id: key })) as FeatureDefinitionWithId[],
+    [features]
+  );
+
+  const {
+    items: filteredFeatures,
+    searchInputProps,
+    clear: clearSearch,
+  } = useSearch({
+    items: reshapedFeatures,
+    defaultSortField: "id",
+    useSort: false,
+  });
+
   const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
     {},
@@ -62,8 +83,8 @@ export default function FeaturesTab() {
   const leftPercent = fullWidthListView ? 1 : LEFT_PERCENT;
 
   const col1 = `${LEFT_PERCENT * 100}%`;
-  const col2 = `${(1-LEFT_PERCENT) * .3 * 100}%`;
-  const col3 = `${(1-LEFT_PERCENT) * .4 * 100}%`;
+  const col2 = `${(1-LEFT_PERCENT) * .2 * 100}%`;
+  const col3 = `${(1-LEFT_PERCENT) * .5 * 100}%`;
   const col4 = `${(1-LEFT_PERCENT) * .3 * 100}%`;
 
   return (
@@ -85,8 +106,15 @@ export default function FeaturesTab() {
         >
           <div style={{ width: col1 }}>
             <label className="uppercase text-slate-11 ml-6">
-              Feature{!fullWidthListView ? "s" : null}
+              Feature
             </label>
+            <SearchBar
+              flexGrow="0"
+              className="inline-block ml-3"
+              autoFocus
+              searchInputProps={searchInputProps}
+              clear={clearSearch}
+            />
           </div>
           {fullWidthListView ? (
             <>
@@ -114,7 +142,8 @@ export default function FeaturesTab() {
             paddingTop: HEADER_H,
           }}
         >
-          {Object.keys(features).map((fid, i) => {
+          {filteredFeatures.map((feature, i) => {
+            const fid = feature?.id;
             const {evaluatedFeature, isForced, linkedExperiments} = getFeatureDetails({
               fid,
               features,
@@ -140,7 +169,7 @@ export default function FeaturesTab() {
                   className={clsx("title", {
                     "text-amber-700": isForced,
                     "text-indigo-12": !isForced,
-                    "flex-shrink-0 pl-6": fullWidthListView,
+                    "flex-shrink-0 px-6": fullWidthListView,
                   })}
                   style={{ width: fullWidthListView ? col1 : undefined }}
                 >

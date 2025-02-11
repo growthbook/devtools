@@ -15,6 +15,7 @@ export interface SearchProps<T> {
   defaultSortField: keyof T;
   defaultSortDir?: number;
   undefinedLast?: boolean;
+  useSort?: boolean;
 }
 
 export interface SearchReturn<T> {
@@ -37,6 +38,7 @@ export function useSearch<T>({
   defaultSortField,
   defaultSortDir,
   undefinedLast,
+  useSort = true,
 }: SearchProps<T>): SearchReturn<T> {
   const [value, setValue] = useState("");
   const [sort, setSort] = useState({
@@ -123,7 +125,7 @@ export function useSearch<T>({
   }, []);
 
   return {
-    items: sorted,
+    items: useSort ? sorted : filtered,
     clear,
     searchInputProps: {
       value,
