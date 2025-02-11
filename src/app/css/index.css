@@ -192,9 +192,14 @@
 }
 
 .searchBar {
-  border-style: solid;
-  @apply border-slate-a3 rounded-md px-1 py-0.5;
-  width: 150px;
+  @apply border border-slate-a3 rounded-md flex items-center justify-between;
+}
+.searchBar input {
+  @apply border-0 px-1 py-0.5;
+  width: 130px;
+}
+.searchBar .clear {
+  margin: 0 2px;
 }
 
 .shadow-sm-up {

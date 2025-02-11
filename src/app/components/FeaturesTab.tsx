@@ -15,7 +15,7 @@ import { ValueType } from "./ValueField";
 import FeatureDetail from "@/app/components/FeatureDetail";
 import { useSearch } from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
-import { Button, IconButton } from "@radix-ui/themes";
+import { Button } from "@radix-ui/themes";
 
 type FeatureDefinitionWithId = FeatureDefinition<any> & { id: string };
 
@@ -112,7 +112,7 @@ export default function FeaturesTab() {
             <label className="uppercase text-slate-11 ml-6">Feature</label>
             <SearchBar
               flexGrow="0"
-              className="inline-block ml-3"
+              className="inline-block ml-4"
               autoFocus
               searchInputProps={searchInputProps}
               clear={clearSearch}
