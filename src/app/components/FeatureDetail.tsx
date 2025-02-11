@@ -5,8 +5,6 @@ import {
   PiArrowSquareOutBold,
   PiCaretLeftBold,
   PiCaretRightFill,
-  PiFlaskFill,
-  PiPlusBold,
 } from "react-icons/pi";
 import EditableValueField from "@/app/components/EditableValueField";
 import ValueField from "@/app/components/ValueField";
@@ -28,19 +26,13 @@ export default function FeatureDetail({
   selectedFeature: SelectedFeature;
 }) {
   const [appOrigin] = useGlobalState(APP_ORIGIN, CLOUD_APP_ORIGIN, true);
-
-  const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
-  const [selectedEid, setSelectedEid] = useTabState<string | undefined>(
-    "selectedEid",
-    undefined,
-  );
+  
   const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
     {},
   );
 
   const [overrideFeature, setOverrideFeature] = useState(false);
-  const [expandLinks, setExpandLinks] = useState(false);
 
   const setForcedFeature = (fid: string, value: any) => {
     const newForcedFeatures = { ...forcedFeatures };
@@ -62,10 +54,6 @@ export default function FeatureDetail({
       ? "matches"
       : "unreachable"
     : "matches";
-
-  useEffect(() => {
-    setExpandLinks(false);
-  }, [selectedFid, setExpandLinks]);
 
   useEffect(() => {
     if (selectedFid) {
@@ -127,60 +115,6 @@ export default function FeatureDetail({
               />
             </Link>
           </div>
-          {(selectedFeature?.linkedExperiments || []).length ? (
-            <div className="mt-1 flex items-center gap-4">
-              <Link
-                size="2"
-                role="button"
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setCurrentTab("experiments");
-                  setSelectedEid(selectedFeature?.linkedExperiments?.[0].key);
-                }}
-              >
-                <PiFlaskFill className="inline-block mr-0.5" size={14} />
-                {selectedFeature?.linkedExperiments?.[0].key}
-              </Link>
-              {(selectedFeature?.linkedExperiments || []).length > 1 &&
-              !expandLinks ? (
-                <Link
-                  size="2"
-                  role="button"
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setExpandLinks(true);
-                  }}
-                >
-                  <PiPlusBold className="mr-0.5 inline-block" />
-                  {(selectedFeature?.linkedExperiments || []).length - 1} more
-                </Link>
-              ) : null}
-            </div>
-          ) : null}
-          {(selectedFeature?.linkedExperiments || []).length > 1 && expandLinks
-            ? selectedFeature.linkedExperiments.map((experiment, i) => {
-                if (i === 0) return null;
-                return (
-                  <div key={i}>
-                    <Link
-                      size="2"
-                      role="button"
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCurrentTab("experiments");
-                        setSelectedEid(experiment.key);
-                      }}
-                    >
-                      <PiFlaskFill className="inline-block mr-0.5" size={14} />
-                      {experiment.key}
-                    </Link>
-                  </div>
-                );
-              })
-            : null}
         </div>
 
         <div className="content">
