@@ -94,13 +94,13 @@
 }
 
 .rule {
-  @apply pt-3 pb-1 pl-2.5 pr-4 my-3 text-2xs bg-white rounded-md border border-l-[3px] border-slate-a3;
+  @apply pt-4 pb-2 pl-2.5 pr-4 my-5 text-2xs bg-white rounded-md border border-l-[3px] border-slate-a3;
 }
 .rule .inner {
   @apply flex items-start pb-2;
 }
 .condition {
-  @apply leading-[1.15rem];
+  @apply leading-[1.3rem];
 }
 .conditionValue {
   @apply px-1 border border-slate-a3 rounded-sm bg-gray-50 break-all;
@@ -110,33 +110,33 @@
 }
 /*rule statuses*/
 .rule.skipped {
-  @apply border-l-[3px] border-l-violet-a6;
+  @apply border-l-red-200;
   .status {
-    @apply text-violet-9;
+    @apply text-red-500 bg-red-100;
   }
 }
 .rule.gates {
-  @apply border-l-red-300;
+  @apply border-l-pink-300;
   .status {
-    @apply text-red-400;
+    @apply text-pink-700 bg-pink-200;
   }
 }
 .rule.unreachable {
   @apply border-l-slate-200;
   .status {
-    @apply text-slate-400;
+    @apply text-slate-700 bg-slate-200;
   }
 }
 .rule.matches {
   @apply border-l-emerald-400;
   .status {
-    @apply text-emerald-600;
+    @apply text-emerald-700 bg-emerald-200;
   }
 }
 .rule.overridden {
   @apply border-l-amber-300;
   .status {
-    @apply text-amber-600;
+    @apply text-amber-700 bg-amber-200;
   }
 }
 

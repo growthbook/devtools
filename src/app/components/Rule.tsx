@@ -20,9 +20,10 @@ const RULE_MATCHED_LOGS = [
   "Force",
   "In experiment", // should also have `ctx.variation` set
 ];
-const RULE_GATES_LOGS = ["Feature blocked"];
-const RULE_FORCED_LOGS = ["Global override", "Force variation"];
-const USE_PREVIOUS_LOG_IF_MATCH = "Use default value"; // last rule
+export const RULE_GATES_LOGS = ["Feature blocked"];
+export const RULE_FORCED_LOGS = ["Global override", "Force variation"];
+export const USE_PREVIOUS_LOG_IF_MATCH = "Use default value"; // last rule
+export const GLOBAL_OVERRIDE = "Global override"; // FF override
 
 export default function Rule({
   rule,
@@ -79,6 +80,9 @@ export default function Rule({
   if (debugForRule?.[lastDebugIndex]?.[0] === USE_PREVIOUS_LOG_IF_MATCH) {
     lastDebugIndex--;
   }
+  if (debugForRule?.[lastDebugIndex]?.[0] === GLOBAL_OVERRIDE) {
+    lastDebugIndex--;
+  }
   const lastDebug = debugForRule?.[lastDebugIndex];
   if (!lastDebug?.[0]) {
     status = "unreachable";
@@ -126,15 +130,20 @@ export default function Rule({
         <div className="w-full">
           <div className="mb-3">
             <div className="flex items-start">
-              <div className="flex-1 text-sm font-bold">{ruleName}</div>
+              <div className="flex-1 text-sm font-bold">
+                {ruleName}
+                <div className="inline-block ml-3 status capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                  {status}
+                </div>
+              </div>
               <label className="flex-shrink-0 flex items-center text-2xs cursor-pointer select-none">
-                <Checkbox
-                  checked={jsonMode}
-                  onCheckedChange={(v) => setJsonMode(!jsonMode)}
-                  size="1"
-                  mr="1"
-                  className="cursor-pointer"
-                />
+              <Checkbox
+                checked={jsonMode}
+                onCheckedChange={(v) => setJsonMode(!jsonMode)}
+                size="1"
+                mr="1"
+                className="cursor-pointer"
+              />
                 <span>View JSON</span>
               </label>
             </div>
@@ -153,9 +162,6 @@ export default function Rule({
                 {key}
               </Link>
             )}
-            <div className="status uppercase text-2xs my-1 font-bold">
-              Rule {status}
-            </div>
           </div>
           {!jsonMode && (
             <>
@@ -164,6 +170,7 @@ export default function Rule({
                   <ConditionDisplay
                     condition={rule.condition}
                     parentConditions={rule.parentConditions}
+                    ruleType={ruleType}
                   />
                 </div>
               ) : null}
@@ -182,7 +189,7 @@ export default function Rule({
                       </>
                     )}
                   </div>
-                  <div className="mt-1 flex items-center gap-3 text-xs">
+                  <div className="mt-2 flex items-center gap-3 text-xs">
                     <span className="font-semibold flex-shrink-0">INCLUDE</span>
                     <Progress
                       size="3"
@@ -274,7 +281,7 @@ export default function Rule({
                     <span className="font-semibold">SAMPLE</span> users by{" "}
                     <span className="conditionValue">{hashAttribute}</span>
                   </div>
-                  <div className="mt-1 mb-2 flex items-center gap-3 text-xs">
+                  <div className="mt-2 flex items-center gap-3 text-xs">
                     <span className="font-semibold flex-shrink-0">ROLLOUT</span>
                     <Progress
                       size="3"
@@ -328,7 +335,7 @@ export default function Rule({
                 Debug Log
               </Link>
             </Accordion.Trigger>
-            <Accordion.Content className="accordionInner overflow-hidden w-full">
+            <Accordion.Content className="accordionInner overflow-hidden w-full py-2">
               <ValueField
                 value={debugForRule}
                 valueType="json"
@@ -345,9 +352,11 @@ export default function Rule({
 export function ConditionDisplay({
   condition,
   parentConditions,
+  ruleType,
 }: {
   condition?: ConditionInterface;
   parentConditions?: ParentConditionInterface[];
+  ruleType?: RuleType;
 }) {
   const [selectedFid, setSelectedFid] = useTabState<string | undefined>(
     "selectedFid",
@@ -411,6 +420,11 @@ export function ConditionDisplay({
           ) : null}
         </div>
       ))}
+      {ruleType === "prerequisite" && (
+        <div className="condition mt-2" key="continue">
+          <span className="mr-2 font-semibold">CONTINUE</span>
+        </div>
+      )}
     </>
   );
 }
