@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import uniqid from "uniqid";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
@@ -6,26 +6,33 @@ import useGlobalState from "../hooks/useGlobalState";
 import {
   Button,
   Checkbox,
+  Flex,
   Link,
   Popover,
   RadioGroup,
-  Select,
+  Text,
 } from "@radix-ui/themes";
 import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
-import { PiAsterisk, PiBookmark } from "react-icons/pi";
+import {
+  PiArrowClockwise,
+  PiArrowSquareOutBold,
+  PiAsterisk,
+} from "react-icons/pi";
 import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
 import ArchetypesList from "./ArchetypesList";
-import { isMatch } from "lodash";
 import { MW } from "@/app";
+import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
 
 export default function AttributesTab() {
+  const LABEL_H = 32;
+  const SUBHEAD_H = 32;
+  const CTAS_H = 50;
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
   const attributesForm = useForm<Attributes>({ defaultValues: attributes });
   const formAttributes = attributesForm.getValues();
-  const hasAttributes = Object.keys(formAttributes).length > 0;
   const formAttributesString = JSON.stringify(formAttributes, null, 2);
   const [textareaAttributes, setTextareaAttributes] =
     useState(formAttributesString);
@@ -33,13 +40,14 @@ export default function AttributesTab() {
   const [dirty, setDirty] = useState(false);
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
-    false,
+    false
   );
+  const [appOrigin] = useGlobalState(APP_ORIGIN, CLOUD_APP_ORIGIN, true);
 
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
     "allArchetypes",
     [],
-    true,
+    true
   );
   const {
     isLoading: archetypesLoading,
@@ -56,8 +64,8 @@ export default function AttributesTab() {
           (archetypesData.archetypes || []).map((arch) => ({
             ...arch,
             source: "growthbook",
-          })),
-        ),
+          }))
+        )
     );
   }, [archetypesLoading, archetypesError, archetypesData]);
 
@@ -78,8 +86,8 @@ export default function AttributesTab() {
         (attributesData.attributes || []).map((attr) => [
           attr.property,
           attr.datatype,
-        ]),
-      ),
+        ])
+      )
     );
   }, [attributesLoading, attributesError, attributesData]);
 
@@ -87,22 +95,24 @@ export default function AttributesTab() {
     string | undefined
   >("");
   const selectedArchetype = archetypes.find(
-    (arch) => arch.id === selectedArchetypeId,
+    (arch) => arch.id === selectedArchetypeId
   );
 
-  const currAttributes = attributesForm.watch();
-  const appliedArchetypeId = useMemo(() => {
-    // isMatch checks for a subset rather than full equality, so if all of the archetype's attributes
-    // are included in the attr form and unchanged then it's considered in-use
-    return archetypes.find((arch) => isMatch(currAttributes, arch.attributes))
-      ?.id;
-  }, [currAttributes, archetypes]);
+  const [appliedArchetypeId, setAppliedArchetypeId] = useState("");
+  const appliedArchetype = archetypes.find(
+    (arch) => arch.id === appliedArchetypeId
+  );
 
-  const applyArchetype = useCallback(() => {
-    if (!selectedArchetype) return;
-    attributesForm.reset({ ...attributes, ...selectedArchetype.attributes });
-    setDirty(true);
-  }, [selectedArchetype]);
+  const applyArchetype = useCallback(
+    (archetype: Archetype) => {
+      setAppliedArchetypeId(archetype.id);
+      const newAttributes = { ...attributes, ...archetype.attributes };
+      setAttributes(newAttributes);
+      attributesForm.reset(newAttributes);
+      setDirty(false);
+    },
+    [attributes]
+  );
 
   const [saveArchetypeOpen, setSaveArchetypeOpen] = useState(false);
   const saveArchetypeForm = useForm({
@@ -112,10 +122,9 @@ export default function AttributesTab() {
     },
   });
   const newArchetypeIsValid =
-    saveArchetypeForm.watch("type") === "new" &&
     saveArchetypeForm.watch("name").trim().length > 0 &&
     !archetypes.find(
-      (archetype) => archetype.name === saveArchetypeForm.watch("name"),
+      (archetype) => archetype.name === saveArchetypeForm.watch("name")
     );
   const submitArchetypeForm = (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -136,7 +145,7 @@ export default function AttributesTab() {
     } else {
       if (!selectedArchetype) return;
       const selectedArchIndex = archetypes.findIndex(
-        (arch) => arch.id === selectedArchetype.id,
+        (arch) => arch.id === selectedArchetype.id
       );
       const archetype = archetypes[selectedArchIndex];
       archetype.attributes = formAttributes;
@@ -166,12 +175,12 @@ export default function AttributesTab() {
     }
     setAttributes(newAttributes);
     attributesForm.reset(newAttributes);
-    setDirty?.(false);
+    setDirty(false);
   };
 
   const resetAttributes = () => {
     attributesForm.reset(attributes);
-    setDirty?.(false);
+    setDirty(false);
   };
 
   // listen to SDK changes to set attributes form
@@ -184,81 +193,116 @@ export default function AttributesTab() {
   useEffect(() => window.scrollTo({ top: 0 }), []);
 
   return (
-    <div className={`max-w-[${MW}px] mx-3`}>
-      <div className="flex justify-between items-top">
-        <div className="w-[50%] pr-2">
-          <div className="">
-            <div className="label lg mb-2">Archetypes</div>
+    <div
+      className="mx-auto px-3 h-[100%]"
+      style={{
+        maxWidth: MW,
+        overflowX: "hidden",
+      }}
+    >
+      <div className="flex justify-between items-top h-[100%]">
+        <div className="w-[50%] pr-2 h-[100%]">
+          <div>
+            <Flex style={{ height: LABEL_H }}>
+              <Text
+                my="2"
+                weight="medium"
+                color="gray"
+                size="1"
+                className="uppercase"
+              >
+                Archetypes
+              </Text>
+            </Flex>
             <ArchetypesList
               archetypes={archetypes}
               selectedArchetypeId={selectedArchetypeId}
               setSelectedArchetypeId={setSelectedArchetypeId}
               appliedArchetypeId={appliedArchetypeId}
+              applyArchetype={applyArchetype}
             />
           </div>
         </div>
-        <div className="w-[50%] pl-1">
-          <div className="flex items-end justify-between mb-2">
-            <div className="label lg">
+        <div className="w-[50%] pl-1 h-[100%]">
+          <Flex style={{ height: LABEL_H }} align="center">
+            <Text
+              my="2"
+              weight="medium"
+              color="gray"
+              size="1"
+              className="uppercase"
+            >
               User Attributes
-              {dirty && (
-                <PiAsterisk
-                  size={12}
-                  color="red"
-                  className="inline-block relative"
-                  style={{ top: -6 }}
-                />
-              )}
-            </div>
-            <div className="mb-1 mr-1">
-              <label className="flex items-center text-xs cursor-pointer select-none">
-                <Checkbox
-                  checked={jsonMode}
-                  onCheckedChange={(v) => setJsonMode(!jsonMode)}
-                  size="1"
-                  mr="1"
-                  className="cursor-pointer"
-                />
-                <span>JSON input</span>
-              </label>
-            </div>
-          </div>
-          <AttributesForm
-            form={attributesForm}
-            dirty={dirty}
-            setDirty={setDirty}
-            jsonMode={jsonMode}
-            textareaAttributes={textareaAttributes}
-            setTextareaAttributes={setTextareaAttributes}
-            textareaError={textareaError}
-            setTextareaError={setTextareaError}
-            schema={attributeSchema}
-          />
-        </div>
-      </div>
+            </Text>
+          </Flex>
+          <div
+            className="attributesForm"
+            style={{ height: `calc(100% - ${LABEL_H}px)` }}
+          >
+            <Flex
+              justify="between"
+              mb="2"
+              pb="1"
+              align="center"
+              className="border-b border-b-slate-200"
+              style={{ height: SUBHEAD_H }}
+            >
+              <Text size="1" weight="medium">
+                {appliedArchetype?.name || "SDK Attributes"}
+                {dirty && (
+                  <PiAsterisk
+                    size={12}
+                    color="red"
+                    className="inline-block relative"
+                    style={{ top: -6 }}
+                  />
+                )}
+              </Text>
 
-      {hasAttributes && (
-        <div className="flex items-center justify-center shadow-sm-up fixed bottom-0 left-0 px-3 py-2 w-full h-[50px] z-front bg-zinc-50">
-          <div className={`w-full max-w-[${MW}px] mx-auto flex items-center`}>
-            <div className="w-[50%] pr-2 flex items-center">
-              <Button
-                disabled={!selectedArchetype}
-                onClick={applyArchetype}
-                variant="soft"
-              >
-                Use Archetype
-              </Button>
-            </div>
-            <div className="w-[50%] pl-1 flex items-center gap-3">
+              <div className="mr-1">
+                <label className="flex items-center text-xs cursor-pointer select-none">
+                  <Checkbox
+                    checked={jsonMode}
+                    onCheckedChange={() => setJsonMode(!jsonMode)}
+                    size="1"
+                    mr="1"
+                    className="cursor-pointer"
+                  />
+                  <span>JSON input</span>
+                </label>
+              </div>
+            </Flex>
+
+            <Flex
+              style={{ height: `calc(100% - ${SUBHEAD_H}px - ${CTAS_H}px)` }}
+              overflowY="scroll"
+              overflowX="hidden"
+            >
+              <AttributesForm
+                form={attributesForm}
+                dirty={dirty}
+                setDirty={setDirty}
+                jsonMode={jsonMode}
+                textareaAttributes={textareaAttributes}
+                setTextareaAttributes={setTextareaAttributes}
+                textareaError={textareaError}
+                setTextareaError={setTextareaError}
+                schema={attributeSchema}
+              />
+            </Flex>
+            <Flex
+              align="center"
+              justify="between"
+              width="100%"
+              className="shadow-sm-up border-t border-t-slate-200"
+              style={{ height: CTAS_H }}
+            >
               <Popover.Root
                 open={saveArchetypeOpen}
                 onOpenChange={(o) => setSaveArchetypeOpen(o)}
               >
                 <Popover.Trigger>
-                  <Button variant="soft">
-                    <PiBookmark />
-                    Save...
-                  </Button>
+                  <Button variant="ghost">Save...</Button>
                 </Popover.Trigger>
                 <Popover.Content style={{ width: 200 }}>
                   <Form.Root
@@ -296,15 +340,32 @@ export default function AttributesTab() {
                         </Form.Control>
                       </Form.Field>
                     )}
+                    <div className="mt-2">
+                      {saveArchetypeForm.watch("type") === "existing" &&
+                        selectedArchetype?.source === "growthbook" && (
+                          <Text color="red" className="text-xs">
+                            <span>This Archetype is managed in</span>{" "}
+                            <Link
+                              color="red"
+                              href={`${appOrigin}/archetypes`}
+                              target="_blank"
+                            >
+                              <span>GrowthBook</span>
+                              <PiArrowSquareOutBold
+                                size={16}
+                                className="inline-block mb-1 ml-0.5"
+                              />
+                            </Link>
+                          </Text>
+                        )}
 
-                    <div className="mt-4">
                       <Form.Submit
                         asChild
                         disabled={
                           (saveArchetypeForm.watch("type") === "new" &&
                             !newArchetypeIsValid) ||
                           (saveArchetypeForm.watch("type") === "existing" &&
-                            !selectedArchetype)
+                            selectedArchetype?.source !== "local")
                         }
                       >
                         <Button size="1" className="w-full">
@@ -315,27 +376,27 @@ export default function AttributesTab() {
                   </Form.Root>
                 </Popover.Content>
               </Popover.Root>
-              <div className="flex-1" />
-              {dirty && (
-                <>
-                  <Link
-                    href="#"
-                    size="2"
-                    role="button"
-                    color="gray"
-                    onClick={resetAttributes}
-                  >
-                    Reset
-                  </Link>
-                  <Button type="button" size="2" onClick={applyAttributes}>
-                    Apply
-                  </Button>
-                </>
-              )}
-            </div>
+              <Flex px="1" align="center">
+                <Button
+                  disabled={!dirty}
+                  size="2"
+                  variant="ghost"
+                  role="button"
+                  color="gray"
+                  onClick={resetAttributes}
+                  mr="4"
+                >
+                  <PiArrowClockwise />
+                  Reset
+                </Button>
+                <Button disabled={!dirty} size="2" onClick={applyAttributes}>
+                  Apply
+                </Button>
+              </Flex>
+            </Flex>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

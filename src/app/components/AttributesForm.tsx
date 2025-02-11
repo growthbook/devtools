@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import * as Form from "@radix-ui/react-form";
-import { Button, Switch, Select } from "@radix-ui/themes";
+import { Button, Switch, Select, Flex } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
-import { PiCheckBold, PiPlusCircle, PiX, PiXCircle } from "react-icons/pi";
+import { PiCheckBold, PiPlusCircle, PiX, PiTrash } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import clsx from "clsx";
 
@@ -36,15 +36,8 @@ export default function AttributesForm({
   const [addCustomId, setAddCustomId] = useState("");
   const [addCustomType, setAddCustomType] = useState("string");
   const formAttributes = form.getValues();
-  const hasAttributes = Object.keys(formAttributes).length > 0;
   const formAttributesString = JSON.stringify(formAttributes, null, 2);
 
-  const addField = (key: string, type: string) => {
-    setDirty?.(true);
-    const newAttributes = form.getValues();
-    newAttributes[key] = undefined;
-    form.reset(newAttributes);
-  };
   const removeField = (key: string) => {
     setDirty?.(true);
     const newAttributes = form.getValues();
@@ -67,29 +60,6 @@ export default function AttributesForm({
     setAddCustomId("");
     setAddCustomType("string");
   };
-  const applyAttributes = () => {
-    if (!jsonMode) {
-      setAttributes(formAttributes);
-      form.reset(formAttributes);
-      setDirty?.(false);
-    } else {
-      try {
-        const newAttributes: Attributes = JSON.parse(textareaAttributes || "");
-        if (!newAttributes || typeof newAttributes !== "object") {
-          throw new Error("invalid type");
-        }
-        setAttributes(newAttributes);
-        form.reset(newAttributes);
-        setDirty?.(false);
-      } catch (e) {
-        setTextareaError?.(true);
-      }
-    }
-  };
-  const resetAttributes = () => {
-    form.reset(attributes);
-    setDirty?.(false);
-  };
 
   useEffect(() => {
     if (form.formState.isDirty && !dirty) {
@@ -109,70 +79,67 @@ export default function AttributesForm({
   }, [addCustomId]);
 
   return (
-    <div className={clsx({ "mb-[60px]": hasAttributes })}>
-      <Form.Root className="FormRoot small">
-        <div className="box">
-          {!jsonMode ? (
-            !Object.keys(formAttributes).length ? (
-              <em className="text-2xs">No attributes found</em>
-            ) : (
-              Object.keys(formAttributes).map((attributeKey, i) => {
-                return (
-                  <div key={attributeKey}>
-                    <Form.Field
-                      className="FormFieldInline my-1"
-                      name={attributeKey}
-                    >
-                      <Form.Label className="FormLabel mr-1 text-nowrap">
-                        {canAddRemoveFields && (
-                          <Button
-                            type="button"
-                            size="1"
-                            variant="ghost"
-                            color="red"
-                            className="px-1 mt-0.5 mr-0.5"
-                            onClick={() => removeField(attributeKey)}
-                          >
-                            <PiXCircle />
-                          </Button>
-                        )}
-                        <div
-                          className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
-                          style={{ minWidth: 80, maxWidth: 120 }}
-                        >
-                          {attributeKey}
-                        </div>
-                      </Form.Label>
-                      {renderInputField({
-                        attributeKey,
-                        form,
-                        schema,
-                        setDirty,
-                      })}
-                    </Form.Field>
-                  </div>
-                );
-              })
-            )
+    <Form.Root className="FormRoot m-0 small">
+      <div>
+        {!jsonMode ? (
+          !Object.keys(formAttributes).length ? (
+            <em className="text-2xs">No attributes found</em>
           ) : (
-            <textarea
-              className={clsx("Textarea mono mt-1", {
-                "border-red-700": textareaError,
-              })}
-              name={"__JSON_attributes__"}
-              value={textareaAttributes}
-              onChange={(e) => {
-                const v = e.target.value;
-                setTextareaAttributes?.(v);
-                setTextareaError?.(false);
-                setDirty?.(true);
-              }}
-              style={{ fontSize: "10px", lineHeight: "15px" }}
-              rows={15}
-            />
-          )}
-        </div>
-
+            Object.keys(formAttributes).map((attributeKey, i) => {
+              return (
+                <div key={attributeKey}>
+                  <Form.Field
+                    className="FormFieldInline my-1"
+                    name={attributeKey}
+                  >
+                    <Form.Label className="FormLabel mr-1 text-nowrap">
+                      <div
+                        className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
+                        style={{ minWidth: 80, maxWidth: 120 }}
+                      >
+                        {attributeKey}
+                      </div>
+                    </Form.Label>
+                    {renderInputField({
+                      attributeKey,
+                      form,
+                      schema,
+                      setDirty,
+                    })}
+                    {canAddRemoveFields && (
+                      <Button
+                        type="button"
+                        size="1"
+                        variant="ghost"
+                        color="red"
+                        className="ml-2 mr-1"
+                        onClick={() => removeField(attributeKey)}
+                      >
+                        <PiTrash />
+                      </Button>
+                    )}
+                  </Form.Field>
+                </div>
+              );
+            })
+          )
+        ) : (
+          <textarea
+            className={clsx("Textarea mono mt-1", {
+              "border-red-700": textareaError,
+            })}
+            name={"__JSON_attributes__"}
+            value={textareaAttributes}
+            onChange={(e) => {
+              const v = e.target.value;
+              setTextareaAttributes?.(v);
+              setTextareaError?.(false);
+              setDirty?.(true);
+            }}
+            style={{ fontSize: "10px", lineHeight: "15px" }}
+            rows={15}
+          />
+        )}
         {canAddRemoveFields && !jsonMode && (
           <div className="m-2">
             {!addingCustom ? (
@@ -220,8 +187,8 @@ export default function AttributesForm({
                         (key) =>
                           !Object.prototype.hasOwnProperty.call(
                             formAttributes,
-                            key,
-                          ),
+                            key
+                          )
                       )
                       .map((key) => (
                         <option key={key}>{key}</option>
@@ -276,8 +243,8 @@ export default function AttributesForm({
             )}
           </div>
         )}
-      </Form.Root>
-    </div>
+      </div>
+    </Form.Root>
   );
 }
 
@@ -295,32 +262,34 @@ function renderInputField({
   let attributeType = getAttributeType(
     attributeKey,
     form.watch(attributeKey),
-    schema,
+    schema
   );
   // todo: enum, number[], string[]
   // todo (maybe. or just use string): secureString, secureString[]
   return (
-    <Form.Control asChild>
-      {attributeType === "number" ? (
-        <input
-          className="Input"
-          type="number"
-          {...form.register(attributeKey)}
-        />
-      ) : attributeType === "boolean" ? (
-        <Switch
-          size="2"
-          className="Switch"
-          checked={form.watch(attributeKey)}
-          onCheckedChange={(v: boolean) => {
-            form.setValue(attributeKey, v);
-            setDirty?.(true);
-          }}
-        />
-      ) : (
-        <input className="Input" {...form.register(attributeKey)} />
-      )}
-    </Form.Control>
+    <div className="w-full">
+      <Form.Control asChild>
+        {attributeType === "number" ? (
+          <input
+            className="Input bg-white"
+            type="number"
+            {...form.register(attributeKey)}
+          />
+        ) : attributeType === "boolean" ? (
+          <Switch
+            size="1"
+            className="Switch"
+            checked={form.watch(attributeKey)}
+            onCheckedChange={(v: boolean) => {
+              form.setValue(attributeKey, v);
+              setDirty?.(true);
+            }}
+          />
+        ) : (
+          <input className="Input bg-white" {...form.register(attributeKey)} />
+        )}
+      </Form.Control>
+    </div>
   );
 }
 

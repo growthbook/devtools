@@ -1,5 +1,5 @@
 import { LogUnion } from "@growthbook/growthbook";
-import { Badge, Button, Container, Flex } from "@radix-ui/themes";
+import { Badge, Button, Container, Flex, Text } from "@radix-ui/themes";
 import React, { useMemo, useState } from "react";
 import useTabState from "../hooks/useTabState";
 import { useSearch } from "../hooks/useSearch";
@@ -35,12 +35,12 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
 
   const filteredLogEvents = useMemo(
     () => logEvents.filter((evt) => filters.includes(evt.logType)),
-    [filters, logEvents],
+    [filters, logEvents]
   );
 
   const reshapedEvents = useMemo(
     () => filteredLogEvents.map(reshapeEventLog),
-    [filteredLogEvents],
+    [filteredLogEvents]
   );
 
   const {
@@ -88,7 +88,7 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
                   {copy}
                   <Badge variant="surface">{logTypeCounts[filter]}</Badge>
                 </Button>
-              ),
+              )
             )}
           </Flex>
         </Flex>
@@ -128,14 +128,24 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
                     "w-full",
                     i > 0 ? "border-t border-t-slate-200" : "",
                     "py-1",
+                    "text-sm"
                   )}
                 >
                   <div className="w-[20%] px-1 text-left">
                     <PiCaretRightFill className="caret mr-0.5" size={12} />
-                    {formattedDateTime}
+                    <Text className="text-xs">{formattedDateTime}</Text>
                   </div>
                   <div className="w-[20%] px-1 text-left">{evt.logType}</div>
-                  <div className="w-[20%] px-1 text-left">{evt.eventInfo}</div>
+                  <div
+                    className={clsx(
+                      "w-[20%]",
+                      "px-1",
+                      "text-left",
+                      isExpanded ? "" : "line-clamp-1"
+                    )}
+                  >
+                    {evt.eventInfo}
+                  </div>
                   <div className="w-[40%] px-1">
                     <ValueField
                       value={evt.details}

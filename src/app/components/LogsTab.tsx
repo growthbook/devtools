@@ -11,11 +11,17 @@ export default function LogsTab() {
   useEffect(() => window.scrollTo({ top: 0 }), []);
   const [logEvents] = useTabState<LogUnion[] | undefined>(
     "logEvents",
-    undefined,
+    undefined
   );
 
   return (
-    <div className={`max-w-[${MW}px] mx-3`}>
+    <div
+      className="mx-auto"
+      style={{
+        maxWidth: MW,
+        overflowX: "hidden",
+      }}
+    >
       {typeof logEvents === "undefined" ? (
         <>
           SDK logging not connected, see the{" "}
