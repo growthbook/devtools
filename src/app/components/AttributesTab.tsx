@@ -20,6 +20,7 @@ import {
   PiArrowClockwise,
   PiArrowSquareOutBold,
   PiAsterisk,
+  PiTrash,
 } from "react-icons/pi";
 import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
@@ -260,7 +261,7 @@ export default function AttributesTab() {
                 )}
               </Text>
 
-              <div className="mr-1">
+              <Flex>
                 <label className="flex items-center text-xs cursor-pointer select-none">
                   <Checkbox
                     checked={jsonMode}
@@ -271,7 +272,23 @@ export default function AttributesTab() {
                   />
                   <span>JSON input</span>
                 </label>
-              </div>
+                <Button
+                  mx="2"
+                  size="1"
+                  variant="outline"
+                  color="red"
+                  onClick={() => {
+                    setDirty(true);
+                    // I'm not sure why, but this reset doesn't apply the first time it's called.
+                    // TODO: debug this and remove the extra call
+                    attributesForm.reset({});
+                    attributesForm.reset({});
+                  }}
+                >
+                  <PiTrash />
+                  Clear
+                </Button>
+              </Flex>
             </Flex>
 
             <Container
