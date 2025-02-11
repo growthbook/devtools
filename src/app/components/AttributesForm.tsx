@@ -95,7 +95,7 @@ export default function AttributesForm({
                     <Form.Label className="FormLabel mr-1 text-nowrap">
                       <div
                         className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
-                        style={{ minWidth: 80, maxWidth: 120 }}
+                        style={{ width: 100 }}
                       >
                         {attributeKey}
                       </div>

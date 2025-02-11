@@ -6,6 +6,7 @@ import useGlobalState from "../hooks/useGlobalState";
 import {
   Button,
   Checkbox,
+  Container,
   Flex,
   Link,
   Popover,
@@ -273,7 +274,7 @@ export default function AttributesTab() {
               </div>
             </Flex>
 
-            <Flex
+            <Container
               style={{ height: `calc(100% - ${SUBHEAD_H}px - ${CTAS_H}px)` }}
               overflowY="scroll"
               overflowX="hidden"
@@ -289,7 +290,7 @@ export default function AttributesTab() {
                 setTextareaError={setTextareaError}
                 schema={attributeSchema}
               />
-            </Flex>
+            </Container>
             <Flex
               align="center"
               justify="between"
