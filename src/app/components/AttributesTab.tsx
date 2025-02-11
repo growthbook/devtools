@@ -312,7 +312,7 @@ export default function AttributesTab() {
               align="center"
               justify="between"
               width="100%"
-              className="shadow-sm-up border-t border-t-slate-200"
+              className="shadow-sm-up border-t border-t-slate-200 px-3"
               style={{ height: CTAS_H }}
             >
               <Popover.Root
@@ -400,12 +400,11 @@ export default function AttributesTab() {
                   size="2"
                   variant="ghost"
                   role="button"
-                  color="gray"
                   onClick={resetAttributes}
                   mr="4"
                 >
                   <PiArrowClockwise />
-                  Reset
+                  Revert
                 </Button>
                 <Button disabled={!dirty} size="2" onClick={applyAttributes}>
                   Apply
