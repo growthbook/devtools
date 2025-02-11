@@ -42,7 +42,7 @@ export default function Rule({
 }) {
   const [selectedEid, setSelectedEid] = useTabState<string | undefined>(
     "selectedEid",
-    undefined
+    undefined,
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [jsonMode, setJsonMode] = useState(false);
@@ -137,13 +137,13 @@ export default function Rule({
                 </div>
               </div>
               <label className="flex-shrink-0 flex items-center text-2xs cursor-pointer select-none">
-              <Checkbox
-                checked={jsonMode}
-                onCheckedChange={(v) => setJsonMode(!jsonMode)}
-                size="1"
-                mr="1"
-                className="cursor-pointer"
-              />
+                <Checkbox
+                  checked={jsonMode}
+                  onCheckedChange={(v) => setJsonMode(!jsonMode)}
+                  size="1"
+                  mr="1"
+                  className="cursor-pointer"
+                />
                 <span>View JSON</span>
               </label>
             </div>
@@ -360,7 +360,7 @@ export function ConditionDisplay({
 }) {
   const [selectedFid, setSelectedFid] = useTabState<string | undefined>(
     "selectedFid",
-    undefined
+    undefined,
   );
 
   const conditionJson = condition ? JSON.stringify(condition) : undefined;

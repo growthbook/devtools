@@ -41,7 +41,7 @@ export const App = () => {
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [features] = useTabState("features", {});
   const [experiments] = useTabState("experiments", []);
-  const {canConnect, hasPayload} = useSdkData();
+  const { canConnect, hasPayload } = useSdkData();
   let sdkStatus = canConnect ? "green" : hasPayload ? "yellow" : "red";
   const refresh = () => {
     chrome.tabs.query({ currentWindow: true, active: true }, async (tabs) => {
@@ -72,11 +72,7 @@ export const App = () => {
           className={`shadow-sm px-3 pt-2 w-full relative bg-zinc-50 z-front`}
           style={{ height: NAV_H }}
         >
-          <Flex
-            justify="between"
-            className="mx-auto"
-            style={{ maxWidth: MW }}
-          >
+          <Flex justify="between" className="mx-auto" style={{ maxWidth: MW }}>
             <h1 className="text-lg">
               <img
                 src={logo}
@@ -91,7 +87,11 @@ export const App = () => {
                 onOpenChange={(o) => setSettingsOpen(o)}
               >
                 <Dialog.Trigger>
-                  <Button variant="ghost" size="2" style={{ margin: "0 -6px 0 0" }}>
+                  <Button
+                    variant="ghost"
+                    size="2"
+                    style={{ margin: "0 -6px 0 0" }}
+                  >
                     <div className="px-1">
                       <PiGearSix size={20} />
                     </div>
@@ -142,11 +142,13 @@ export const App = () => {
                   Event Logs
                 </Tabs.Trigger>
                 <Tabs.Trigger value="sdkDebug">
-                  <div className={clsx("inline-block mr-1", {
-                    "text-emerald-500": sdkStatus === "green",
-                    "text-amber-500": sdkStatus === "yellow",
-                    "text-red-500": sdkStatus === "red",
-                  })}>
+                  <div
+                    className={clsx("inline-block mr-1", {
+                      "text-emerald-500": sdkStatus === "green",
+                      "text-amber-500": sdkStatus === "yellow",
+                      "text-red-500": sdkStatus === "red",
+                    })}
+                  >
                     <PiCircleFill size={12} />
                   </div>
                   SDK
