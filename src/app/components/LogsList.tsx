@@ -35,12 +35,12 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
 
   const filteredLogEvents = useMemo(
     () => logEvents.filter((evt) => filters.includes(evt.logType)),
-    [filters, logEvents]
+    [filters, logEvents],
   );
 
   const reshapedEvents = useMemo(
     () => filteredLogEvents.map(reshapeEventLog),
-    [filteredLogEvents]
+    [filteredLogEvents],
   );
 
   const {
@@ -88,7 +88,7 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
                   {copy}
                   <Badge variant="surface">{logTypeCounts[filter]}</Badge>
                 </Button>
-              )
+              ),
             )}
           </Flex>
         </Flex>
@@ -127,7 +127,7 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
                   className={clsx(
                     "w-full",
                     i > 0 ? "border-t border-t-slate-200" : "",
-                    "py-1"
+                    "py-1",
                   )}
                 >
                   <div className="w-[20%] px-1 text-left">

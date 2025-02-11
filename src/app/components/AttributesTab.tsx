@@ -19,7 +19,7 @@ import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
 import ArchetypesList from "./ArchetypesList";
 import { isMatch } from "lodash";
-import {MW} from "@/app";
+import { MW } from "@/app";
 
 export default function AttributesTab() {
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});

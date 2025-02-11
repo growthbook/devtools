@@ -50,7 +50,7 @@ const SettingsForm = ({ close }: { close?: () => void }) => {
       form.setValue("apiKey", apiKey);
       form.setValue(
         "isCloud",
-        apiHost === CLOUD_API_HOST && appOrigin === CLOUD_APP_ORIGIN
+        apiHost === CLOUD_API_HOST && appOrigin === CLOUD_APP_ORIGIN,
       );
     }
   }, [ready]);

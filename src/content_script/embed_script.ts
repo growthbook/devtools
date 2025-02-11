@@ -335,8 +335,8 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       errorMessage: "SDK not found",
     };
   }
-    // @ts-expect-error
-  const gbContext =  gb.context;
+  // @ts-expect-error
+  const gbContext = gb.context;
   const [apiHost, clientKey] = gb.getApiInfo();
   const payload = gb.getDecryptedPayload?.() || {
     features: gb.getFeatures(),
@@ -348,8 +348,14 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       gb.getExperiments().length > 0);
   const devModeEnabled = gbContext.enableDevMode;
   const _trackingCallback = gbContext.trackingCallback;
-  const hasTrackingCallback = typeof _trackingCallback  === "function";
-  const trackingCallbackParams = hasTrackingCallback ? _trackingCallback.toString().match(/\(([^)]+)\)/)[1].split(',').map((param: string) => param.trim()): undefined;
+  const hasTrackingCallback = typeof _trackingCallback === "function";
+  const trackingCallbackParams = hasTrackingCallback
+    ? _trackingCallback
+        .toString()
+        .match(/\(([^)]+)\)/)[1]
+        .split(",")
+        .map((param: string) => param.trim())
+    : undefined;
   const usingLogEvents = typeof gbContext.eventLogger === "function";
   const hasDecryptionKey = !!gbContext.decryptionKey;
   const isRemoteEval = gb.isRemoteEval();
@@ -358,11 +364,10 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   // check if paylaod was decrypted
   let payloadDecrypted = true;
   try {
-      JSON.stringify(payload);
+    JSON.stringify(payload);
   } catch (e) {
     payloadDecrypted = false;
   }
-
 
   if (!clientKey) {
     return {
@@ -375,7 +380,8 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       errorMessage: "No API Client Key found",
     };
   }
-  const res = cachedHostRes ?? await fetch(`${apiHost}/api/features/${clientKey}`);
+  const res =
+    cachedHostRes ?? (await fetch(`${apiHost}/api/features/${clientKey}`));
   if (res.status === 200) {
     cachedHostRes = res;
     return {
@@ -415,7 +421,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       payloadDecrypted,
       usingLogEvents,
       isRemoteEval,
-      usingStickyBucketing, 
+      usingStickyBucketing,
       streaming,
     };
   }

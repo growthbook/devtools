@@ -48,10 +48,11 @@ export default function useGBSandboxEval() {
     const featureExperiments = getFeatureExperiments(features);
 
     // add extra info (index) for debugging:
-    const _features = {...features};
+    const _features = { ...features };
     for (const fid in _features) {
       _features[fid].rules = _features[fid]?.rules?.map((rule, i) => ({
-        ...rule, i,
+        ...rule,
+        i,
       }));
     }
 
