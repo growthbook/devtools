@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import uniqid from "uniqid";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
@@ -19,7 +19,7 @@ import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
 import ArchetypesList from "./ArchetypesList";
 import { isMatch } from "lodash";
-import {MW} from "@/app";
+import { MW } from "@/app";
 
 export default function AttributesTab() {
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
@@ -33,13 +33,13 @@ export default function AttributesTab() {
   const [dirty, setDirty] = useState(false);
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
-    false,
+    false
   );
 
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
     "allArchetypes",
     [],
-    true,
+    true
   );
   const {
     isLoading: archetypesLoading,
@@ -56,8 +56,8 @@ export default function AttributesTab() {
           (archetypesData.archetypes || []).map((arch) => ({
             ...arch,
             source: "growthbook",
-          })),
-        ),
+          }))
+        )
     );
   }, [archetypesLoading, archetypesError, archetypesData]);
 
@@ -78,8 +78,8 @@ export default function AttributesTab() {
         (attributesData.attributes || []).map((attr) => [
           attr.property,
           attr.datatype,
-        ]),
-      ),
+        ])
+      )
     );
   }, [attributesLoading, attributesError, attributesData]);
 
@@ -87,12 +87,16 @@ export default function AttributesTab() {
     string | undefined
   >("selectedArchetypeId");
   const selectedArchetype = archetypes.find(
-    (arch) => arch.id === selectedArchetypeId,
+    (arch) => arch.id === selectedArchetypeId
   );
 
-  const [appliedArchetypeId, setAppliedArchetypeId] = useTabState<
-    string | undefined
-  >("appliedArchetypeId", undefined);
+  const currAttributes = attributesForm.watch();
+  const appliedArchetypeId = useMemo(() => {
+    // isMatch checks for a subset rather than full equality, so if all of the archetype's attributes
+    // are included in the attr form and unchanged then it's considered in-use
+    return archetypes.find((arch) => isMatch(currAttributes, arch.attributes))
+      ?.id;
+  }, [currAttributes, archetypes]);
 
   const applyArchetype = useCallback(() => {
     if (!selectedArchetype) return;
@@ -112,12 +116,12 @@ export default function AttributesTab() {
     saveArchetypeForm.watch("type") === "new" &&
     saveArchetypeForm.watch("name").trim().length > 0 &&
     !archetypes.find(
-      (archetype) => archetype.name === saveArchetypeForm.watch("name"),
+      (archetype) => archetype.name === saveArchetypeForm.watch("name")
     );
   const existingArchetypeIsValid =
     saveArchetypeForm.watch("type") === "existing" &&
     !!archetypes.find(
-      (archetype) => archetype.id === saveArchetypeForm.watch("id"),
+      (archetype) => archetype.id === saveArchetypeForm.watch("id")
     );
   const submitArchetypeForm = (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -139,7 +143,7 @@ export default function AttributesTab() {
     } else {
       if (!existingArchetypeIsValid) return;
       const existingArchIndex = archetypes.findIndex(
-        (arch) => arch.id === values.id,
+        (arch) => arch.id === values.id
       );
       const archetype = archetypes[existingArchIndex];
       archetype.attributes = formAttributes;
@@ -168,16 +172,6 @@ export default function AttributesTab() {
       }
     }
     setAttributes(newAttributes);
-    // isMatch checks for a subset rather than full equality, so if all of the archetype's attributes
-    // are included in the attr form and unchanged then it's considered in-use
-    if (
-      selectedArchetype &&
-      isMatch(newAttributes, selectedArchetype.attributes)
-    ) {
-      setAppliedArchetypeId(selectedArchetypeId);
-    } else {
-      setAppliedArchetypeId(undefined);
-    }
     attributesForm.reset(newAttributes);
     setDirty?.(false);
   };
@@ -197,7 +191,7 @@ export default function AttributesTab() {
   useEffect(() => window.scrollTo({ top: 0 }), []);
 
   return (
-    <div className={`max-w-[${MW}px] mx-auto`}>
+    <div className={`max-w-[${MW}px] mx-3`}>
       <div className="flex justify-between items-top">
         <div className="w-[50%] pr-2">
           <div className="">
@@ -288,7 +282,9 @@ export default function AttributesTab() {
                           saveArchetypeForm.setValue("type", value);
                           saveArchetypeForm.setValue(
                             "id",
-                            value === "new" ? "" : selectedArchetype?.id || "",
+                            value === "new"
+                              ? ""
+                              : selectedArchetype?.id || archetypes[0]?.id || ""
                           );
                         }}
                       >
@@ -300,18 +296,21 @@ export default function AttributesTab() {
                         </RadioGroup.Item>
                       </RadioGroup.Root>
                     </Form.Field>
-                    <Form.Field className="FormField" name="name">
-                      <Form.Label className="FormLabel">
-                        Archetype Name
-                      </Form.Label>
-                      {saveArchetypeForm.watch("type") === "new" ? (
+                    {saveArchetypeForm.watch("type") === "new" ? (
+                      <Form.Field className="FormField" name="name">
+                        <Form.Label className="FormLabel">
+                          Archetype Name
+                        </Form.Label>
                         <Form.Control asChild>
                           <input
                             className="Input"
                             {...saveArchetypeForm.register("name")}
                           />
                         </Form.Control>
-                      ) : (
+                      </Form.Field>
+                    ) : (
+                      <Form.Field className="FormField" name="id">
+                        <Form.Label className="FormLabel">Archetype</Form.Label>
                         <Select.Root
                           size="1"
                           value={saveArchetypeForm.watch("id")}
@@ -331,8 +330,8 @@ export default function AttributesTab() {
                             ))}
                           </Select.Content>
                         </Select.Root>
-                      )}
-                    </Form.Field>
+                      </Form.Field>
+                    )}
 
                     <div className="mt-4">
                       <Form.Submit
