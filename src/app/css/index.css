@@ -148,6 +148,13 @@
   cursor: pointer;
 }
 
+.accordionChevron {
+  @apply text-violet-400 ;
+	transition: transform 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+.accordion .trigger[data-state="open"] .chevron {
+	transform: rotate(180deg);
+}
 .sdkDebugListItem {
   @apply border border-slate-a3 rounded-sm bg-violet-2;
   height: 40px;

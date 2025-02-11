@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import useTabState from "../hooks/useTabState";
 import { SDKHealthCheckResult } from "devtools";
-import { Flex, Grid, Link, Text } from "@radix-ui/themes";
+import { ChevronDownIcon, Flex, Grid, Link, Text } from "@radix-ui/themes";
 import { Prism } from "react-syntax-highlighter";
 import {ghcolors as codeTheme} from "react-syntax-highlighter/dist/esm/styles/prism";
 import ValueField from "@/app/components/ValueField";
@@ -43,9 +43,10 @@ export default function SdkTab() {
     title: string;
     status?: string | boolean;
     statusColor: "green" | "red" | "gray"| "orange";
+    chevron?: boolean;
   };
 
-  const displayStatus = ({title, status, statusColor} : displayStatusProps) => {
+  const displayStatus = ({title, status, statusColor, chevron = false} : displayStatusProps) => {
     if (typeof status === "boolean") {
       status = status ? "Yes" : "No";
     }
@@ -54,9 +55,13 @@ export default function SdkTab() {
         <Text size="2" weight="medium">
           {title}
         </Text>
-        <Text size="2" weight="light" color={statusColor}>
-          {status}
-        </Text>
+        <Flex gap="3" align="center">
+          <Text size="2" weight="light" color={statusColor}>
+            {status}
+          </Text>
+          {chevron && <ChevronDownIcon className="chevron" aria-hidden />}
+        </Flex>
+
       </Flex>
     );
   }
@@ -94,7 +99,6 @@ export default function SdkTab() {
     const canConnectStatusColor = canConnect ? "green" : hasPayload? "orange" : "red";
 
     return (
-      <Grid gap="2" columns="2">
         <Flex direction="column" gap="1">
           {displayStatus({title: "Status", status: canConnectStatus, statusColor: canConnectStatusColor})}
           {displayStatus({title: "Version", status: version, statusColor: "gray"})}
@@ -103,28 +107,17 @@ export default function SdkTab() {
           {displayStatus({title: "Payload Security", status: securityStatus, statusColor: "gray"})}
           {displayStatus({title: "Sticky Bucketing", status: usingStickyBucketing, statusColor: "gray"})}
           {displayStatus({title: "Streaming", status: streaming, statusColor: "gray"})}
-        </Flex>
         {payload ? (
           <Accordion.Root
-            className="accordion"
+            className="accordion w-full" 
             type="single"
             collapsible
           >
             <Accordion.Item value="Payload">
-              <Accordion.Trigger className="trigger mb-0.5">
-                <Link
-                  size="2"
-                  role="button"
-                  className="hover:underline"
-                >
-                  <PiCaretRightFill
-                    className="caret mr-0.5"
-                    size={12}
-                  />
-                  Payload
-                </Link>
+              <Accordion.Trigger className="trigger mb-0.5 w-full">
+                {displayStatus({title: "Payload", status: hasPayload, statusColor: "gray", chevron: true})}
               </Accordion.Trigger>
-              <Accordion.Content className="accordionInner overflow-hidden w-full">
+              <Accordion.Content className="accordionInner overflow-hidden w-full mb-3">
                 <ValueField
                   value={payload}
                   valueType="json"
@@ -134,14 +127,15 @@ export default function SdkTab() {
             </Accordion.Item>
           </Accordion.Root>
         ) : null}
-      </Grid>
+      </Flex>
+
     );
   }
 
 
   return (
-    <div className="box mb-3">
-      <Text weight="medium" size="4">
+    <div className="w-10/12 mx-auto">
+      <Text weight="medium" size="4" as="div" className="py-3">
         GrowthBook SDK
       </Text>
 
