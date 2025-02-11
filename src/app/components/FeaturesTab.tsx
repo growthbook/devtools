@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   AutoExperiment,
   Experiment,
@@ -8,13 +8,14 @@ import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
-import {PiCircleFill, PiFlaskFill} from "react-icons/pi";
+import { PiCircleFill, PiFlaskFill, PiListBold } from "react-icons/pi";
 import clsx from "clsx";
 import { MW } from "@/app";
 import { ValueType } from "./ValueField";
 import FeatureDetail from "@/app/components/FeatureDetail";
-import {useSearch} from "@/app/hooks/useSearch";
+import { useSearch } from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
+import { Button, IconButton } from "@radix-ui/themes";
 
 type FeatureDefinitionWithId = FeatureDefinition<any> & { id: string };
 
@@ -27,9 +28,12 @@ export default function FeaturesTab() {
   >("features", {});
 
   const reshapedFeatures = useMemo(
-    () => Object.entries(features)
-      .map(([key, val]) => ({ ...val, id: key })) as FeatureDefinitionWithId[],
-    [features]
+    () =>
+      Object.entries(features).map(([key, val]) => ({
+        ...val,
+        id: key,
+      })) as FeatureDefinitionWithId[],
+    [features],
   );
 
   const {
@@ -83,9 +87,9 @@ export default function FeaturesTab() {
   const leftPercent = fullWidthListView ? 1 : LEFT_PERCENT;
 
   const col1 = `${LEFT_PERCENT * 100}%`;
-  const col2 = `${(1-LEFT_PERCENT) * .2 * 100}%`;
-  const col3 = `${(1-LEFT_PERCENT) * .5 * 100}%`;
-  const col4 = `${(1-LEFT_PERCENT) * .3 * 100}%`;
+  const col2 = `${(1 - LEFT_PERCENT) * 0.2 * 100}%`;
+  const col3 = `${(1 - LEFT_PERCENT) * 0.5 * 100}%`;
+  const col4 = `${(1 - LEFT_PERCENT) * 0.3 * 100}%`;
 
   return (
     <>
@@ -101,13 +105,11 @@ export default function FeaturesTab() {
           style={{
             maxWidth: MW,
             height: HEADER_H,
-            zIndex: 2000
+            zIndex: 2000,
           }}
         >
           <div style={{ width: col1 }}>
-            <label className="uppercase text-slate-11 ml-6">
-              Feature
-            </label>
+            <label className="uppercase text-slate-11 ml-6">Feature</label>
             <SearchBar
               flexGrow="0"
               className="inline-block ml-3"
@@ -129,9 +131,21 @@ export default function FeaturesTab() {
               </div>
             </>
           ) : (
-            <label className="uppercase text-slate-11">
-              Feature Details
-            </label>
+            <>
+              <label className="uppercase text-slate-11 ml-6">
+                Feature Details
+              </label>
+              <Button
+                className="absolute right-3"
+                style={{ marginRight: 0 }}
+                variant="ghost"
+                size="1"
+                onClick={() => setSelectedFid(undefined)}
+              >
+                <PiListBold className="inline-block mr-1" />
+                List view
+              </Button>
+            </>
           )}
         </div>
 
@@ -144,12 +158,13 @@ export default function FeaturesTab() {
         >
           {filteredFeatures.map((feature, i) => {
             const fid = feature?.id;
-            const {evaluatedFeature, isForced, linkedExperiments} = getFeatureDetails({
-              fid,
-              features,
-              evaluatedFeatures,
-              forcedFeatures,
-            });
+            const { evaluatedFeature, isForced, linkedExperiments } =
+              getFeatureDetails({
+                fid,
+                features,
+                evaluatedFeatures,
+                forcedFeatures,
+              });
             const valueStr = evaluatedFeature?.result
               ? JSON.stringify(evaluatedFeature.result?.value)
               : "null";
@@ -174,21 +189,23 @@ export default function FeaturesTab() {
                   style={{ width: fullWidthListView ? col1 : undefined }}
                 >
                   {isForced && !fullWidthListView && (
-                    <div
-                      className="absolute"
-                      style={{ left: 6, top: 10 }}
-                    >
+                    <div className="absolute" style={{ left: 6, top: 10 }}>
                       <PiCircleFill size={10} className="text-amber-600" />
                     </div>
                   )}
                   {fid}
                 </div>
                 {fullWidthListView && (
-                  <div className="flex-shrink-0 text-sm" style={{ width: col2 }}>
+                  <div
+                    className="flex-shrink-0 text-sm"
+                    style={{ width: col2 }}
+                  >
                     {linkedExperiments?.length ? (
                       <>
                         <PiFlaskFill className="inline-block mr-1" />
-                        <span className="text-indigo-12">({linkedExperiments.length})</span>
+                        <span className="text-indigo-12">
+                          ({linkedExperiments.length})
+                        </span>
                       </>
                     ) : null}
                   </div>
@@ -196,7 +213,8 @@ export default function FeaturesTab() {
                 <div
                   className={clsx("value flex-shrink-0", {
                     uppercase: isBoolean,
-                    "w-full text-right pl-[50%] line-clamp-1": !fullWidthListView,
+                    "w-full text-right pl-[50%] line-clamp-1":
+                      !fullWidthListView,
                     "line-clamp-3": fullWidthListView,
                   })}
                   style={{ width: fullWidthListView ? col3 : undefined }}

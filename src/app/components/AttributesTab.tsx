@@ -33,13 +33,13 @@ export default function AttributesTab() {
   const [dirty, setDirty] = useState(false);
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
-    false
+    false,
   );
 
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
     "allArchetypes",
     [],
-    true
+    true,
   );
   const {
     isLoading: archetypesLoading,
@@ -56,8 +56,8 @@ export default function AttributesTab() {
           (archetypesData.archetypes || []).map((arch) => ({
             ...arch,
             source: "growthbook",
-          }))
-        )
+          })),
+        ),
     );
   }, [archetypesLoading, archetypesError, archetypesData]);
 
@@ -78,8 +78,8 @@ export default function AttributesTab() {
         (attributesData.attributes || []).map((attr) => [
           attr.property,
           attr.datatype,
-        ])
-      )
+        ]),
+      ),
     );
   }, [attributesLoading, attributesError, attributesData]);
 
@@ -87,7 +87,7 @@ export default function AttributesTab() {
     string | undefined
   >("");
   const selectedArchetype = archetypes.find(
-    (arch) => arch.id === selectedArchetypeId
+    (arch) => arch.id === selectedArchetypeId,
   );
 
   const currAttributes = attributesForm.watch();
@@ -115,7 +115,7 @@ export default function AttributesTab() {
     saveArchetypeForm.watch("type") === "new" &&
     saveArchetypeForm.watch("name").trim().length > 0 &&
     !archetypes.find(
-      (archetype) => archetype.name === saveArchetypeForm.watch("name")
+      (archetype) => archetype.name === saveArchetypeForm.watch("name"),
     );
   const submitArchetypeForm = (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -136,7 +136,7 @@ export default function AttributesTab() {
     } else {
       if (!selectedArchetype) return;
       const selectedArchIndex = archetypes.findIndex(
-        (arch) => arch.id === selectedArchetype.id
+        (arch) => arch.id === selectedArchetype.id,
       );
       const archetype = archetypes[selectedArchIndex];
       archetype.attributes = formAttributes;

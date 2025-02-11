@@ -1,6 +1,6 @@
-import {Container, ContainerProps, IconButton} from "@radix-ui/themes";
+import { Container, ContainerProps, IconButton } from "@radix-ui/themes";
 import React, { ChangeEvent } from "react";
-import {PiXBold, PiXCircle} from "react-icons/pi";
+import { PiXBold, PiXCircle } from "react-icons/pi";
 
 type SearchBarProps = ContainerProps & {
   searchInputProps: {
@@ -41,7 +41,7 @@ export default function SearchBar({
         >
           <PiXBold />
         </IconButton>
-      ): null}
+      ) : null}
     </Container>
   );
 }

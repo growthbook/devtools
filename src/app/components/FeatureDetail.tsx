@@ -1,5 +1,5 @@
-import {MW, NAV_H} from "@/app";
-import {IconButton, Link} from "@radix-ui/themes";
+import { MW, NAV_H } from "@/app";
+import { IconButton, Link } from "@radix-ui/themes";
 import {
   PiArrowClockwise,
   PiArrowSquareOutBold,
@@ -13,7 +13,7 @@ import ValueField from "@/app/components/ValueField";
 import Rule, { USE_PREVIOUS_LOG_IF_MATCH } from "@/app/components/Rule";
 import * as Accordion from "@radix-ui/react-accordion";
 import React, { useEffect, useState } from "react";
-import {HEADER_H, LEFT_PERCENT, SelectedFeature} from "./FeaturesTab";
+import { HEADER_H, LEFT_PERCENT, SelectedFeature } from "./FeaturesTab";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
 import useTabState from "@/app/hooks/useTabState";
@@ -159,8 +159,7 @@ export default function FeatureDetail({
               ) : null}
             </div>
           ) : null}
-          {(selectedFeature?.linkedExperiments || []).length > 1 &&
-          expandLinks
+          {(selectedFeature?.linkedExperiments || []).length > 1 && expandLinks
             ? selectedFeature.linkedExperiments.map((experiment, i) => {
                 if (i === 0) return null;
                 return (
@@ -175,10 +174,7 @@ export default function FeatureDetail({
                         setSelectedEid(experiment.key);
                       }}
                     >
-                      <PiFlaskFill
-                        className="inline-block mr-0.5"
-                        size={14}
-                      />
+                      <PiFlaskFill className="inline-block mr-0.5" size={14} />
                       {experiment.key}
                     </Link>
                   </div>
