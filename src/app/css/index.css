@@ -57,9 +57,10 @@
 }
 
 .featureCard {
-  @apply pl-3 pr-6 py-1 border-t border-slate-a3 relative;
+  @apply py-1 border-t border-slate-a3 relative items-center;
   cursor: pointer;
-  scroll-margin-top: 12px;
+  min-height: 48px;
+  scroll-margin-top: 40px; /* should be synced with HEADER_H */
 }
 .featureCard:first-of-type {
   @apply border-t-transparent;
@@ -77,20 +78,17 @@
   @apply text-sm font-semibold;
 }
 .featureCard .value {
-  @apply text-indigo-12 text-xs line-clamp-1 mt-0 w-full text-right pl-[50%];
+  @apply text-indigo-12 text-xs break-all;
 }
 
 .featureDetail {
   @apply bg-violet-2;
 }
 .featureDetail .header {
-  @apply w-full sticky top-0 z-center pt-3 bg-white shadow-sm;
-}
-.featureDetail .header .headerInner {
-  @apply px-5 py-3 bg-violet-2;
+  @apply w-full sticky top-0 z-center pl-6 pr-4 py-3 bg-violet-2 shadow-sm;
 }
 .featureDetail .content {
-  @apply px-5 py-2 mb-3;
+  @apply pl-6 pr-4 py-2 mb-3;
 }
 
 .rule {

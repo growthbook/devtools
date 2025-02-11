@@ -1,5 +1,5 @@
-import { MW } from "@/app";
-import { Link } from "@radix-ui/themes";
+import {MW, NAV_H} from "@/app";
+import {IconButton, Link} from "@radix-ui/themes";
 import {
   PiArrowClockwise,
   PiArrowSquareOutBold,
@@ -13,7 +13,7 @@ import ValueField from "@/app/components/ValueField";
 import Rule, { USE_PREVIOUS_LOG_IF_MATCH } from "@/app/components/Rule";
 import * as Accordion from "@radix-ui/react-accordion";
 import React, { useEffect, useState } from "react";
-import { LEFT_PERCENT, SelectedFeature } from "./FeaturesTab";
+import {HEADER_H, LEFT_PERCENT, SelectedFeature} from "./FeaturesTab";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
 import useTabState from "@/app/hooks/useTabState";
@@ -85,8 +85,8 @@ export default function FeatureDetail({
     <div
       className="fixed overflow-y-auto bg-white"
       style={{
-        top: 80,
-        height: "calc(100vh - 80px)",
+        top: NAV_H + HEADER_H,
+        height: `calc(100vh - ${NAV_H + HEADER_H}px)`,
         width: `${rightPercent * 100}vw`,
         maxWidth: MW * rightPercent,
         right: `calc(max((100vw - ${MW}px)/2, 0px))`,
@@ -95,96 +95,96 @@ export default function FeatureDetail({
     >
       <div className="featureDetail" key={`selected_${selectedFid}`}>
         <div className="header">
-          <div className="headerInner">
-            <Link
-              role="button"
-              className="absolute"
-              style={{
-                top: 28,
-                left: 0,
-                zIndex: 1001,
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                setSelectedFid(undefined);
-              }}
-            >
+          <Link
+            role="button"
+            className="absolute"
+            style={{
+              top: 16,
+              left: 4,
+              zIndex: 1001,
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              setSelectedFid(undefined);
+            }}
+          >
+            <IconButton size="1" variant="ghost" radius="full">
               <PiCaretLeftBold />
+            </IconButton>
+          </Link>
+          <div className="flex items-start gap-2">
+            <h2 className="font-bold flex-1">{selectedFid}</h2>
+            <Link
+              size="2"
+              className="flex-shrink-0 font-semibold mt-0.5 -mr-1 ml-2"
+              href={`${appOrigin}/features/${selectedFid}`}
+              target="_blank"
+            >
+              GrowthBook
+              <PiArrowSquareOutBold
+                size={16}
+                className="inline-block mb-1 ml-0.5"
+              />
             </Link>
-            <div className="flex items-start gap-2">
-              <h2 className="font-bold flex-1">{selectedFid}</h2>
+          </div>
+          {(selectedFeature?.linkedExperiments || []).length ? (
+            <div className="mt-1 flex items-center gap-4">
               <Link
                 size="2"
-                className="flex-shrink-0 font-semibold mt-0.5 -mr-1 ml-2"
-                href={`${appOrigin}/features/${selectedFid}`}
-                target="_blank"
+                role="button"
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentTab("experiments");
+                  setSelectedEid(selectedFeature?.linkedExperiments?.[0].key);
+                }}
               >
-                GrowthBook
-                <PiArrowSquareOutBold
-                  size={16}
-                  className="inline-block mb-1 ml-0.5"
-                />
+                <PiFlaskFill className="inline-block mr-0.5" size={14} />
+                {selectedFeature?.linkedExperiments?.[0].key}
               </Link>
-            </div>
-            {(selectedFeature?.linkedExperiments || []).length ? (
-              <div className="mt-1 flex items-center gap-4">
+              {(selectedFeature?.linkedExperiments || []).length > 1 &&
+              !expandLinks ? (
                 <Link
                   size="2"
                   role="button"
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    setCurrentTab("experiments");
-                    setSelectedEid(selectedFeature?.linkedExperiments?.[0].key);
+                    setExpandLinks(true);
                   }}
                 >
-                  <PiFlaskFill className="inline-block mr-0.5" size={14} />
-                  {selectedFeature?.linkedExperiments?.[0].key}
+                  <PiPlusBold className="mr-0.5 inline-block" />
+                  {(selectedFeature?.linkedExperiments || []).length - 1} more
                 </Link>
-                {(selectedFeature?.linkedExperiments || []).length > 1 &&
-                !expandLinks ? (
-                  <Link
-                    size="2"
-                    role="button"
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setExpandLinks(true);
-                    }}
-                  >
-                    <PiPlusBold className="mr-0.5 inline-block" />
-                    {(selectedFeature?.linkedExperiments || []).length - 1} more
-                  </Link>
-                ) : null}
-              </div>
-            ) : null}
-            {(selectedFeature?.linkedExperiments || []).length > 1 &&
-            expandLinks
-              ? selectedFeature.linkedExperiments.map((experiment, i) => {
-                  if (i === 0) return null;
-                  return (
-                    <div key={i}>
-                      <Link
-                        size="2"
-                        role="button"
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentTab("experiments");
-                          setSelectedEid(experiment.key);
-                        }}
-                      >
-                        <PiFlaskFill
-                          className="inline-block mr-0.5"
-                          size={14}
-                        />
-                        {experiment.key}
-                      </Link>
-                    </div>
-                  );
-                })
-              : null}
-          </div>
+              ) : null}
+            </div>
+          ) : null}
+          {(selectedFeature?.linkedExperiments || []).length > 1 &&
+          expandLinks
+            ? selectedFeature.linkedExperiments.map((experiment, i) => {
+                if (i === 0) return null;
+                return (
+                  <div key={i}>
+                    <Link
+                      size="2"
+                      role="button"
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentTab("experiments");
+                        setSelectedEid(experiment.key);
+                      }}
+                    >
+                      <PiFlaskFill
+                        className="inline-block mr-0.5"
+                        size={14}
+                      />
+                      {experiment.key}
+                    </Link>
+                  </div>
+                );
+              })
+            : null}
         </div>
 
         <div className="content">
