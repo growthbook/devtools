@@ -215,7 +215,7 @@ export default function FeaturesTab() {
                 {fullWidthListView && (
                   <div className="flex justify-center" style={{ width: col4 }}>
                     {isForced && (
-                      <PiCircleFill size={14} className="text-amber-600" />
+                      <PiCircleFill size={10} className="text-amber-600" />
                     )}
                   </div>
                 )}
