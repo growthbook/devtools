@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AutoExperiment,
   Experiment,
@@ -8,26 +8,19 @@ import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedExperiment,
 } from "@/app/hooks/useGBSandboxEval";
-import { Avatar, Select, Switch } from "@radix-ui/themes";
+import { Button } from "@radix-ui/themes";
 import {
-  PiFlaskFill,
-  PiWarningBold,
-  PiWarningCircle,
-  PiWarningCircleBold,
+  PiCircleFill,
+  PiListBold,
 } from "react-icons/pi";
 import clsx from "clsx";
-import { Prism } from "react-syntax-highlighter";
-import { ghcolors as codeTheme } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { FaBucket } from "react-icons/fa6";
 import { MW } from "@/app";
-const customTheme = {
-  padding: "5px",
-  margin: 0,
-  border: "0px none",
-  backgroundColor: "transparent",
-  whiteSpace: "pre-wrap",
-  lineHeight: "12px",
-};
+import {useSearch} from "@/app/hooks/useSearch";
+import SearchBar from "@/app/components/SearchBar";
+import ExperimentDetail from "@/app/components/ExperimentDetail";
+
+export const LEFT_PERCENT = 0.4;
+export const HEADER_H = 40;
 
 export default function ExperimentsTab() {
   const [experiments, setExperiments] = useTabState<AutoExperiment[]>(
@@ -37,15 +30,19 @@ export default function ExperimentsTab() {
   const [features, setFeatures] = useTabState<
     Record<string, FeatureDefinition>
   >("features", {});
-
-  // todo: remove this line:
+  // todo: dedupe?
   const featureExperiments = getFeatureExperiments(features);
+  const allExperiments = [...experiments, ...featureExperiments];
 
-  // dedupe, merge FF + auto experiments
-  const processedExperiments = getConsolidatedExperiments(
-    experiments,
-    features,
-  );
+  const {
+    items: filteredExperiments,
+    searchInputProps,
+    clear: clearSearch,
+  } = useSearch({
+    items: allExperiments,
+    defaultSortField: "key",
+    useSort: false,
+  });
 
   const [forcedVariations, setForcedVariations] = useTabState<
     Record<string, any>
@@ -66,32 +63,8 @@ export default function ExperimentsTab() {
       })
     : undefined;
 
-  const [overrideExperiment, setOverrideExperiment] = useState(false);
-
   const clickExperiment = (eid: string) =>
     setSelectedEid(selectedEid !== eid ? eid : undefined);
-
-  const setForcedVariation = (eid: string, value: any) => {
-    const newForcedVariations = { ...forcedVariations };
-    newForcedVariations[eid] = value;
-    setForcedVariations(newForcedVariations);
-  };
-  const unsetForcedVariation = (eid: string) => {
-    const newForcedVariations = { ...forcedVariations };
-    delete newForcedVariations[eid];
-    setForcedVariations(newForcedVariations);
-    setOverrideExperiment(false);
-  };
-
-  useEffect(() => {
-    if (selectedEid) {
-      if (selectedEid in forcedVariations) {
-        setOverrideExperiment(true);
-      } else {
-        setOverrideExperiment(false);
-      }
-    }
-  }, [selectedEid, JSON.stringify(forcedVariations)]);
 
   // load & scroll animations
   const [firstLoad, setFirstLoad] = useState(true);
@@ -107,14 +80,82 @@ export default function ExperimentsTab() {
     }
   }, [selectedEid]);
 
+  const fullWidthListView = !selectedEid || !selectedExperiment;
+  const leftPercent = fullWidthListView ? 1 : LEFT_PERCENT;
+
+  const col1 = `${LEFT_PERCENT * 100}%`;
+  const col2 = `${(1 - LEFT_PERCENT) * 0.3 * 100}%`;
+  const col3 = `${(1 - LEFT_PERCENT) * 0.4 * 100}%`;
+  const col4 = `${(1 - LEFT_PERCENT) * 0.3 * 100}%`;
+
   return (
     <>
-      <div className={`max-w-[${MW}px] mx-auto`}>
-        <div className={`w-[50%] max-w-[${MW / 2}px] pr-2`}>
-          <div className="label lg mb-2">Experiments</div>
-          {experiments.map((experiment, i) => {
-            const eid = experiment.key;
-            const { meta, evaluatedExperiment, isForced } =
+      <div
+        className="mx-auto"
+        style={{
+          maxWidth: MW,
+          overflowX: "hidden",
+        }}
+      >
+        <div
+          className="fixed flex items-center w-full border-b border-b-slate-4 bg-white text-xs font-semibold"
+          style={{
+            maxWidth: MW,
+            height: HEADER_H,
+            zIndex: 2000,
+          }}
+        >
+          <div style={{width: col1}}>
+            <label className="uppercase text-slate-11 ml-6">Experiment</label>
+            <SearchBar
+              flexGrow="0"
+              className="inline-block ml-2"
+              autoFocus
+              searchInputProps={searchInputProps}
+              clear={clearSearch}
+            />
+          </div>
+          {fullWidthListView ? (
+            <>
+              <div style={{width: col2}}>
+                <label className="uppercase text-slate-11">Links</label>
+              </div>
+              <div style={{width: col3}}>
+                <label className="uppercase text-slate-11">Value</label>
+              </div>
+              <div className="flex justify-center" style={{width: col4}}>
+                <label className="uppercase text-slate-11">Override</label>
+              </div>
+            </>
+          ) : (
+            <>
+              <label className="uppercase text-slate-11 ml-6">
+                Experiment Details
+              </label>
+              <Button
+                className="absolute right-3"
+                style={{marginRight: 0}}
+                variant="ghost"
+                size="1"
+                onClick={() => setSelectedEid(undefined)}
+              >
+                <PiListBold className="inline-block mr-1"/>
+                List view
+              </Button>
+            </>
+          )}
+        </div>
+
+        <div
+          style={{
+            width: `${leftPercent * 100}vw`,
+            maxWidth: MW * leftPercent,
+            paddingTop: HEADER_H,
+          }}
+        >
+          {filteredExperiments.map((experiment, i) => {
+            const eid = experiment?.key;
+            const {evaluatedExperiment, isForced} =
               getExperimentDetails({
                 eid,
                 experiments,
@@ -127,263 +168,85 @@ export default function ExperimentsTab() {
               <div
                 id={`experimentsTab_experimentList_${eid}`}
                 key={eid}
-                className={clsx("featureCard relative mb-2", {
+                className={clsx("featureCard", {
                   selected: selectedEid === eid,
+                  flex: fullWidthListView,
+                  "px-6": !fullWidthListView,
                 })}
                 onClick={() => clickExperiment(eid)}
               >
-                <div className="flex gap-2 items-center">
-                  <Avatar
-                    color={isForced ? "amber" : undefined}
-                    variant={isForced ? "solid" : "soft"}
-                    size="1"
-                    radius="full"
-                    fallback={
-                      <span className={isForced ? "text-amber-800" : undefined}>
-                        <PiFlaskFill />
-                      </span>
-                    }
-                  />
-                  <code className="text-xs text-gray-800">{eid}</code>
-                  <div className="flex-1" />
-                  <div className="flex items-center gap-1 text-sm mr-1">
-                    <FaBucket size={9} />
-                    {value}
-                  </div>
+                <div
+                  className={clsx("title", {
+                    "text-amber-700": isForced,
+                    "text-indigo-12": !isForced,
+                    "flex-shrink-0 px-6": fullWidthListView,
+                  })}
+                  style={{width: fullWidthListView ? col1 : undefined}}
+                >
+                  {isForced && !fullWidthListView && (
+                    <div className="absolute" style={{left: 6, top: 10}}>
+                      <PiCircleFill size={10} className="text-amber-600"/>
+                    </div>
+                  )}
+                  {eid}
                 </div>
-                {isForced && (
-                  <div className="pointer-events-none absolute top-[-6px] right-[-12px] px-1 bg-white shadow-sm rounded-md text-2xs mr-1 font-bold uppercase text-amber-600">
-                    Override
+                {fullWidthListView && (
+                  <div
+                    className="flex-shrink-0 text-sm"
+                    style={{width: col2}}
+                  >
+                    {/*{linkedExperiments?.length ? (*/}
+                    {/*  <>*/}
+                    {/*    <PiFlaskFill className="inline-block mr-1"/>*/}
+                    {/*    <span className="text-indigo-12">*/}
+                    {/*      ({linkedExperiments.length})*/}
+                    {/*    </span>*/}
+                    {/*  </>*/}
+                    {/*) : null}*/}
                   </div>
                 )}
-              </div>
-            );
-          })}
-
-          <div className="label lg mb-2">Feature Flag Experiments</div>
-          {featureExperiments.map((experiment, i) => {
-            const eid = experiment.key;
-            const { meta, evaluatedExperiment, isForced } =
-              getExperimentDetails({
-                eid,
-                experiments: featureExperiments,
-                evaluatedExperiments,
-                forcedVariations,
-              });
-            const value = evaluatedExperiment?.result?.variationId ?? 0;
-
-            return (
-              <div
-                id={`experimentsTab_experimentList_${eid}`}
-                key={eid}
-                className={clsx("featureCard relative mb-2", {
-                  selected: selectedEid === eid,
-                })}
-                onClick={() => clickExperiment(eid)}
-              >
-                <div className="flex gap-2 items-center">
-                  <Avatar
-                    color={isForced ? "amber" : undefined}
-                    variant={isForced ? "solid" : "soft"}
-                    size="1"
-                    radius="full"
-                    fallback={
-                      <span className={isForced ? "text-amber-800" : undefined}>
-                        <PiFlaskFill />
-                      </span>
-                    }
-                  />
-                  <code className="text-xs text-gray-800">{eid}</code>
-                  <div className="flex-1" />
-                  <div className="flex items-center gap-1 text-sm mr-1">
-                    <FaBucket size={9} />
-                    {value}
-                  </div>
+                <div
+                  className={clsx("value flex-shrink-0", {
+                    "w-full text-right pl-[50%] line-clamp-1":
+                      !fullWidthListView,
+                    "line-clamp-3": fullWidthListView,
+                  })}
+                  style={{width: fullWidthListView ? col3 : undefined}}
+                >
+                  {value}
                 </div>
-                {isForced && (
-                  <div className="pointer-events-none absolute top-[-6px] right-[-12px] px-1 bg-white shadow-sm rounded-md text-2xs mr-1 font-bold uppercase text-amber-600">
-                    Override
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        <div
-          className={`w-[50%] max-w-[${MW / 2}px] fixed left-[50%] overflow-y-auto pl-1 pr-3 py-2`}
-          style={{
-            zIndex: 1000,
-            top: 85,
-            height: "calc(100vh - 85px)",
-          }}
-        >
-          {!!selectedEid && !!selectedExperiment && (
-            <div key={`selected_${selectedEid}`}>
-              <div className="flex items-center gap-2 mb-1">
-                <Avatar size="2" radius="full" fallback={<PiFlaskFill />} />
-                <h2 className="font-bold">{selectedEid}</h2>
-              </div>
-
-              <div className="box">
-                <div className="my-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="label">Current value</div>
-                    {overrideExperiment && (
-                      <label className="flex items-center cursor-pointer select-none">
-                        <span
-                          className={clsx("text-xs mr-1 font-bold uppercase", {
-                            "text-amber-600": overrideExperiment,
-                            "text-gray-600": !overrideExperiment,
-                          })}
-                        >
-                          Override
-                        </span>
-                        <Switch
-                          radius="small"
-                          color="amber"
-                          checked={overrideExperiment}
-                          onCheckedChange={(v) => {
-                            setOverrideExperiment(v);
-                            if (!v) unsetForcedVariation(selectedEid);
-                          }}
-                        />
-                      </label>
+                {fullWidthListView && (
+                  <div className="flex justify-center" style={{width: col4}}>
+                    {isForced && (
+                      <PiCircleFill size={10} className="text-amber-600"/>
                     )}
                   </div>
-                  {selectedExperiment.experiment ? (
-                    <EditableValueField
-                      experiment={selectedExperiment.experiment}
-                      value={forcedVariations?.[selectedEid] || 0}
-                      evaluatedValue={
-                        selectedExperiment?.evaluatedExperiment?.result
-                          ?.variationId
-                      }
-                      setValue={(v) => {
-                        setForcedVariation(selectedEid, v);
-                        setOverrideExperiment(true);
-                      }}
-                    />
-                  ) : (
-                    <ValueField
-                      value={
-                        selectedExperiment?.evaluatedExperiment?.result
-                          ?.variationId ?? ""
-                      }
-                      valueType={selectedExperiment?.valueType}
-                    />
-                  )}
-                </div>
-
-                <div className="my-2">
-                  <div className="label mb-1">Definition</div>
-                  <Prism
-                    language="json"
-                    style={codeTheme}
-                    customStyle={{ ...customTheme, maxHeight: 120 }}
-                    codeTagProps={{
-                      className: "text-2xs-important !whitespace-pre-wrap",
-                    }}
-                  >
-                    {JSON.stringify(selectedExperiment.experiment, null, 2)}
-                  </Prism>
-                </div>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })}
         </div>
+
+        {!!selectedEid && !!selectedExperiment && (
+          <ExperimentDetail
+            selectedEid={selectedEid}
+            setSelectedEid={setSelectedEid}
+            selectedExperiment={selectedExperiment}
+          />
+        )}
       </div>
     </>
   );
 }
 
-function ValueField({
-  value,
-  valueType = "number",
-}: {
-  value: string | number;
-  valueType?: ValueType;
-}) {
-  const formattedValue =
-    value !== undefined ? JSON.stringify(value, null, 2) : "null";
-  return (
-    <>
-      {["json", "string"].includes(valueType) ? (
-        <div className="border border-gray-200 rounded-md bg-gray-50">
-          <Prism
-            language="json"
-            style={codeTheme}
-            customStyle={{ ...customTheme, maxHeight: 120 }}
-            codeTagProps={{
-              className: "text-2xs-important !whitespace-pre-wrap",
-            }}
-          >
-            {formattedValue}
-          </Prism>
-        </div>
-      ) : (
-        <code
-          className={clsx("text-slate-800 text-sm whitespace-pre-wrap mono", {
-            "inline-block px-1 bg-rose-100 rounded-md text-rose-900":
-              formattedValue === "false",
-            "inline-block px-1 bg-blue-100 rounded-md text-blue-900":
-              formattedValue === "true",
-            "inline-block px-1 bg-gray-100 rounded-md text-gray-900":
-              formattedValue === "null",
-          })}
-        >
-          {formattedValue}
-        </code>
-      )}
-    </>
-  );
-}
-
-function EditableValueField({
-  experiment,
-  value,
-  evaluatedValue,
-  setValue,
-}: {
-  experiment: AutoExperiment;
-  value?: number;
-  evaluatedValue?: number;
-  setValue: (v: any) => void;
-}) {
-  let variationsMeta: { key?: string; name?: string }[] =
-    experiment.meta ??
-    experiment.variations.map((variation, i) => ({
-      key: i + "",
-    }));
-
-  return (
-    <div className="FormRoot">
-      <Select.Root
-        size="2"
-        value={value + ""}
-        onValueChange={(s: string) => setValue(parseInt(s))}
-      >
-        <Select.Trigger variant="surface" className="w-full">
-          <div className="flex gap-2 items-center">
-            {value}
-            {value !== evaluatedValue && (
-              <PiWarningBold className="text-orange-700" />
-            )}
-          </div>
-        </Select.Trigger>
-        <Select.Content>
-          {variationsMeta.map((meta, i) => (
-            <Select.Item key={meta.key} value={i + ""}>
-              {i} {meta?.name}
-            </Select.Item>
-          ))}
-        </Select.Content>
-      </Select.Root>
-    </div>
-  );
-}
-
-type ValueType = "string" | "number" | "boolean" | "json";
+export type SelectedExperiment = {
+  eid: string;
+  experiment: (AutoExperiment | Experiment<any>);
+  meta?: any;
+  // linkedExperiments: (Experiment<any> | AutoExperiment)[];
+  evaluatedExperiment?: EvaluatedExperiment;
+  isForced: boolean;
+};
 
 function getExperimentDetails({
   eid,
@@ -397,20 +260,17 @@ function getExperimentDetails({
   experimentsMeta?: Record<string, any>;
   evaluatedExperiments?: EvaluatedExperiment[];
   forcedVariations?: Record<string, number>;
-}) {
-  const experiment = experiments.find((experiment) => experiment.key === eid);
+}): SelectedExperiment {
+  const experiment = experiments.find((experiment) => experiment.key === eid) as (AutoExperiment | Experiment<any>);
   const meta = experimentsMeta?.[eid];
   const evaluatedExperiment = evaluatedExperiments?.find(
     (experiment) => experiment.key === eid,
   );
   const isForced = forcedVariations ? eid in forcedVariations : false;
-  // todo: needed?
-  let valueType: ValueType = "number";
 
   return {
     eid,
     experiment,
-    valueType,
     meta,
     evaluatedExperiment,
     isForced,
@@ -434,14 +294,4 @@ export function getFeatureExperiments(
     }
   }
   return experiments;
-}
-
-export function getConsolidatedExperiments(
-  experiments: AutoExperiment[],
-  features: Record<string, FeatureDefinition>,
-) {
-  const featureExperiments = getFeatureExperiments(features);
-  const allExperiments = [...experiments, ...featureExperiments];
-
-  const result: Record<string, Experiment<any>> = {};
 }
