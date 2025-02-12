@@ -31,12 +31,14 @@ export default function Rule({
   fid,
   valueType = "string",
   evaluatedFeature,
+  hideInactive = false,
 }: {
   rule: FeatureRule;
   i: number;
   fid: string;
   valueType?: ValueType;
   evaluatedFeature?: EvaluatedFeature;
+  hideInactive?: boolean;
 }) {
   const [selectedEid, setSelectedEid] = useTabState<string | undefined>(
     "selectedEid",
@@ -74,6 +76,7 @@ export default function Rule({
 
   let status: "skipped" | "unreachable" | "matches" | "gates" | "overridden" =
     "skipped";
+
   let lastDebugIndex = debugForRule.length - 1;
   if (debugForRule?.[lastDebugIndex]?.[0] === USE_PREVIOUS_LOG_IF_MATCH) {
     lastDebugIndex--;
@@ -90,6 +93,10 @@ export default function Rule({
     status = "gates";
   } else if (RULE_FORCED_LOGS.some((log) => lastDebug[0].startsWith(log))) {
     status = "overridden";
+  }
+
+  if (hideInactive && !(status === "matches" || status === "overridden" || status === "gates")) {
+    return null;
   }
 
   const {

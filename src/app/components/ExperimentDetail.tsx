@@ -140,7 +140,7 @@ export default function ExperimentDetail({
         <div className="content">
           <div className="my-1">
             <div className="flex items-center mb-1 gap-3">
-              <div className="label font-semibold">Current value</div>
+              <div className="label font-semibold">{overrideExperiment ? "Forced variation" : "Current variation"}</div>
               {overrideExperiment && (
                 <div className="text-xs font-semibold text-amber-700 bg-amber-200 px-1.5 py-0.5 rounded-md">
                   Override
@@ -181,13 +181,7 @@ export default function ExperimentDetail({
             {selectedVariation !== selectedExperiment?.evaluatedExperiment?.result?.variationId ? (
               <div className="mt-2 ml-1 mb-3 text-sm text-red-900">
                 <PiWarningBold className="inline-block"/>{" "}
-                Cannot apply variation{" "}
-                <VariationIcon
-                  i={selectedVariation}
-                  size={16}
-                  skipColors={true}
-                  style={{position: "relative", top: -1, color: "#7f1d1d", borderColor: "#7f1d1d"}}
-                />
+                Cannot apply this variation
               </div>
             ) : null}
 
@@ -439,7 +433,7 @@ function EditableVariationField({
 
 export function VariationIcon({
   i = 0,
-  size = 20,
+  size = 16,
   style = {},
   skipColors,
 }: {
