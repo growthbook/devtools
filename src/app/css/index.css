@@ -204,7 +204,7 @@
 }
 
 .searchBar {
-  @apply border border-slate-a3 rounded-md flex items-center justify-between;
+  @apply border border-slate-a4 rounded-md flex items-center justify-between;
 }
 .searchBar input {
   @apply border-0 px-1 py-0.5;

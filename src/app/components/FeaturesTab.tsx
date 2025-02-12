@@ -88,8 +88,8 @@ export default function FeaturesTab() {
 
   const col1 = `${LEFT_PERCENT * 100}%`;
   const col2 = `${(1 - LEFT_PERCENT) * 0.2 * 100}%`;
-  const col3 = `${(1 - LEFT_PERCENT) * 0.5 * 100}%`;
-  const col4 = `${(1 - LEFT_PERCENT) * 0.3 * 100}%`;
+  const col3 = `${(1 - LEFT_PERCENT) * 0.55 * 100}%`;
+  const col4 = `${(1 - LEFT_PERCENT) * 0.25 * 100}%`;
 
   return (
     <>
@@ -101,7 +101,7 @@ export default function FeaturesTab() {
         }}
       >
         <div
-          className="fixed flex items-center w-full border-b border-b-slate-4 bg-white text-xs font-semibold"
+          className="fixed flex items-center w-full border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm"
           style={{
             maxWidth: MW,
             height: HEADER_H,
@@ -132,9 +132,9 @@ export default function FeaturesTab() {
             </>
           ) : (
             <>
-              <label className="uppercase text-slate-11 ml-6">
-                Feature Details
-              </label>
+              {/*<label className="uppercase text-slate-11 ml-6">*/}
+              {/*  Feature Details*/}
+              {/*</label>*/}
               <Button
                 className="absolute right-3"
                 style={{ marginRight: 0 }}

@@ -17,7 +17,7 @@ import clsx from "clsx";
 import { MW } from "@/app";
 import {useSearch} from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
-import ExperimentDetail, {VariationIcon} from "@/app/components/ExperimentDetail";
+import ExperimentDetail, {VariationIcon, VariationSummary} from "@/app/components/ExperimentDetail";
 import {getFeatureDetails} from "@/app/components/FeaturesTab";
 import {ValueType} from "@/app/components/ValueField";
 
@@ -88,9 +88,9 @@ export default function ExperimentsTab() {
   const leftPercent = fullWidthListView ? 1 : LEFT_PERCENT;
 
   const col1 = `${LEFT_PERCENT * 100}%`;
-  const col2 = `${(1 - LEFT_PERCENT) * 0.3 * 100}%`;
-  const col3 = `${(1 - LEFT_PERCENT) * 0.4 * 100}%`;
-  const col4 = `${(1 - LEFT_PERCENT) * 0.3 * 100}%`;
+  const col2 = `${(1 - LEFT_PERCENT) * 0.2 * 100}%`;
+  const col3 = `${(1 - LEFT_PERCENT) * 0.55 * 100}%`;
+  const col4 = `${(1 - LEFT_PERCENT) * 0.25 * 100}%`;
 
   return (
     <>
@@ -102,7 +102,7 @@ export default function ExperimentsTab() {
         }}
       >
         <div
-          className="fixed flex items-center w-full border-b border-b-slate-4 bg-white text-xs font-semibold"
+          className="fixed flex items-center w-full border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm"
           style={{
             maxWidth: MW,
             height: HEADER_H,
@@ -125,7 +125,7 @@ export default function ExperimentsTab() {
                 <label className="uppercase text-slate-11">Type</label>
               </div>
               <div style={{width: col3}}>
-                <label className="uppercase text-slate-11">Value</label>
+                <label className="uppercase text-slate-11">Variation</label>
               </div>
               <div className="flex justify-center" style={{width: col4}}>
                 <label className="uppercase text-slate-11">Override</label>
@@ -133,9 +133,9 @@ export default function ExperimentsTab() {
             </>
           ) : (
             <>
-              <label className="uppercase text-slate-11 ml-6">
-                Experiment Details
-              </label>
+              {/*<label className="uppercase text-slate-11 ml-6">*/}
+              {/*  Experiment Details*/}
+              {/*</label>*/}
               <Button
                 className="absolute right-3"
                 style={{marginRight: 0}}
@@ -231,11 +231,16 @@ export default function ExperimentsTab() {
                   className={clsx("value flex-shrink-0", {
                     "w-full text-right pl-[50%] relative top-[-2px]":
                       !fullWidthListView,
-                    "line-clamp-3": fullWidthListView,
+                    "flex gap-2 items-center": fullWidthListView,
                   })}
                   style={{width: fullWidthListView ? col3 : undefined}}
                 >
                   <VariationIcon i={value} size={16} />
+                  {fullWidthListView && (
+                    <div className="line-clamp-3">
+                      <VariationSummary experiment={experiment} i={value || 0} />
+                    </div>
+                  )}
                 </div>
                 {fullWidthListView && (
                   <div className="flex justify-center" style={{width: col4}}>
