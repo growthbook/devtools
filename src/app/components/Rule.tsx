@@ -29,14 +29,12 @@ export default function Rule({
   rule,
   i,
   fid,
-  feature,
   valueType = "string",
   evaluatedFeature,
 }: {
   rule: FeatureRule;
   i: number;
   fid: string;
-  feature: FeatureDefinition;
   valueType?: ValueType;
   evaluatedFeature?: EvaluatedFeature;
 }) {
@@ -114,12 +112,6 @@ export default function Rule({
         ? "prerequisite"
         : "force";
   const ruleName = upperFirst(ruleType) + " rule";
-  let appliedCoverage = coverage;
-  let nsRange: number | undefined;
-  if (namespace) {
-    nsRange = (namespace[2] ?? 0) - (namespace[1] ?? 0);
-    appliedCoverage = (coverage ?? 1) * nsRange;
-  }
 
   return (
     <div className={`rule ${status}`}>
@@ -175,105 +167,14 @@ export default function Rule({
                 </div>
               ) : null}
               {ruleType === "experiment" && (
-                <div className="condition">
-                  <div className="mt-2 text-xs">
-                    <span className="font-semibold">SPLIT</span> users by{" "}
-                    <span className="conditionValue">{hashAttribute}</span>
-                    {namespace && (
-                      <>
-                        {" "}
-                        in namespace{" "}
-                        <span className="conditionValue inline-block flex-shrink-0 whitespace-nowrap overflow-hidden overflow-ellipsis max-w-[70px] leading-4 align-middle">
-                          {namespace[0]}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                  <div className="mt-2 flex items-center gap-3 text-xs">
-                    <span className="font-semibold flex-shrink-0">INCLUDE</span>
-                    <Progress
-                      size="3"
-                      radius="small"
-                      value={(appliedCoverage || 0) * 100}
-                    />
-                    <span className="conditionValue flex-shrink-0">
-                      {Math.round((appliedCoverage || 0) * 1000) / 10}%
-                    </span>
-                  </div>
-                  {nsRange ? (
-                    <div className="leading-3">
-                      ({nsRange * 100}% namespace, {(coverage ?? 1) * 100}%
-                      exposure)
-                    </div>
-                  ) : null}
-                  <div className="my-2 text-xs">
-                    <div className="font-semibold mb-1">SERVE</div>
-                    <table className="leading-3">
-                      <tbody>
-                        {rule?.variations?.map?.((variation, i) => (
-                          <tr key={i} className="">
-                            <td className="pr-2 py-0.5">
-                              <div
-                                className="px-0.5 rounded-full border font-semibold"
-                                style={{
-                                  fontSize: "11px",
-                                  color: getVariationColor(i),
-                                  borderColor: getVariationColor(i),
-                                }}
-                              >
-                                {i}
-                              </div>
-                            </td>
-                            <td width="100%" className="py-0.5">
-                              <ValueField
-                                value={variation}
-                                valueType={valueType}
-                                stringAsCode
-                                maxHeight={50}
-                              />
-                            </td>
-                            <td className="pl-2 py-0.5">
-                              {rule?.weights?.[i] !== undefined
-                                ? rule?.weights?.[i] * 100 + "%"
-                                : null}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <div
-                      className="mt-1 rt-ProgressRoot rt-r-size-3 rt-variant-surface flex overflow-hidden h-[15px]"
-                      data-radius="small"
-                    >
-                      {rule?.weights?.map((w, i) => (
-                        <div
-                          key={i}
-                          className="rt-ProgressIndicator relative"
-                          style={{
-                            // @ts-expect-error css var
-                            "--progress-value": 100,
-                            "--accent-track": getVariationColor(i),
-                            width: w * (appliedCoverage ?? 1) * 100 + "%",
-                            filter: "saturate(.85)",
-                          }}
-                        >
-                          {w * (appliedCoverage ?? 1) >= 0.15 && (
-                            <div
-                              className="text-2xs font-bold relative top-[2px] left-[2px] z-center text-white"
-                              style={{
-                                textShadow: "0 1px #0006, 0 0 1px #0006",
-                              }}
-                            >
-                              {Math.round(w * (appliedCoverage ?? 1) * 1000) /
-                                10}
-                              %
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <ExperimentRule
+                  variations={variations}
+                  weights={weights}
+                  hashAttribute={hashAttribute}
+                  coverage={coverage}
+                  namespace={namespace}
+                  valueType={valueType}
+                />
               )}
               {ruleType === "rollout" && (
                 <>
@@ -349,6 +250,132 @@ export default function Rule({
   );
 }
 
+export function ExperimentRule({
+  variations,
+  weights,
+  hashAttribute,
+  coverage,
+  namespace,
+  valueType = "number",
+}: {
+  variations?: any[];
+  weights?: number[];
+  hashAttribute?: string;
+  coverage?: number;
+  namespace?: [string, number, number] | undefined;
+  valueType?: ValueType;
+}) {
+  let appliedCoverage = coverage;
+  let nsRange: number | undefined;
+  if (namespace) {
+    nsRange = (namespace[2] ?? 0) - (namespace[1] ?? 0);
+    appliedCoverage = (coverage ?? 1) * nsRange;
+  }
+
+  return (
+    <div className="condition">
+      <div className="mt-2 text-xs">
+        <span className="font-semibold">SPLIT</span> users by{" "}
+        <span className="conditionValue">{hashAttribute}</span>
+        {namespace && (
+          <>
+            {" "}
+            in namespace{" "}
+            <span
+              className="conditionValue inline-block flex-shrink-0 whitespace-nowrap overflow-hidden overflow-ellipsis max-w-[70px] leading-4 align-middle">
+                          {namespace[0]}
+                        </span>
+          </>
+        )}
+      </div>
+      <div className="mt-2 flex items-center gap-3 text-xs">
+        <span className="font-semibold flex-shrink-0">INCLUDE</span>
+        <Progress
+          size="3"
+          radius="small"
+          value={(appliedCoverage || 0) * 100}
+        />
+        <span className="conditionValue flex-shrink-0">
+                      {Math.round((appliedCoverage || 0) * 1000) / 10}%
+                    </span>
+      </div>
+      {nsRange ? (
+        <div className="leading-3">
+          ({nsRange * 100}% namespace, {(coverage ?? 1) * 100}%
+          exposure)
+        </div>
+      ) : null}
+      <div className="my-2 text-xs">
+        <div className="font-semibold mb-1">SERVE</div>
+        <table className="leading-3">
+          <tbody>
+          {variations?.map?.((variation, i) => (
+            <tr key={i} className="">
+              <td className="pr-2 py-0.5">
+                <div
+                  className="px-0.5 rounded-full border font-semibold"
+                  style={{
+                    fontSize: "11px",
+                    color: getVariationColor(i),
+                    borderColor: getVariationColor(i),
+                  }}
+                >
+                  {i}
+                </div>
+              </td>
+              <td width="100%" className="py-0.5">
+                <ValueField
+                  value={variation}
+                  valueType={valueType}
+                  stringAsCode
+                  maxHeight={50}
+                />
+              </td>
+              <td className="pl-2 py-0.5">
+                {weights?.[i] !== undefined
+                  ? weights[i] * 100 + "%"
+                  : null}
+              </td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
+        <div
+          className="mt-1 rt-ProgressRoot rt-r-size-3 rt-variant-surface flex overflow-hidden h-[15px]"
+          data-radius="small"
+        >
+          {weights?.map((w, i) => (
+            <div
+              key={i}
+              className="rt-ProgressIndicator relative"
+              style={{
+                // @ts-expect-error css var
+                "--progress-value": 100,
+                "--accent-track": getVariationColor(i),
+                width: w * (appliedCoverage ?? 1) * 100 + "%",
+                filter: "saturate(.85)",
+              }}
+            >
+              {w * (appliedCoverage ?? 1) >= 0.15 && (
+                <div
+                  className="text-2xs font-bold relative top-[2px] left-[2px] z-center text-white"
+                  style={{
+                    textShadow: "0 1px #0006, 0 0 1px #0006",
+                  }}
+                >
+                  {Math.round(w * (appliedCoverage ?? 1) * 1000) /
+                    10}
+                  %
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ConditionDisplay({
   condition,
   parentConditions,
@@ -371,14 +398,14 @@ export function ConditionDisplay({
       : undefined;
     let pConds = (pConditionJson ? jsonToConds(pConditionJson) : []) ?? [];
     if (!pConds.length) return;
-    conds.push(...pConds.map((pc) => ({ ...pc, field: p.id, prereq: true })));
+    conds.push(...pConds.map((pc) => ({...pc, field: p.id, prereq: true})));
   });
   if (!conds.length)
     return (
       <div>
         <div className="mr-2 font-semibold mb-0.5">IF</div>
         <ValueField
-          value={parentConditions ? { condition, parentConditions } : condition}
+          value={parentConditions ? {condition, parentConditions} : condition}
           valueType="json"
           maxHeight={80}
           customPrismOuterStyle={{
@@ -405,7 +432,7 @@ export function ConditionDisplay({
                   setSelectedFid(cond.field);
                 }}
               >
-                <PiFlagFill className="inline-block mr-0.5" size={12} />
+                <PiFlagFill className="inline-block mr-0.5" size={12}/>
                 {cond.field}
               </Link>
             ) : (
@@ -682,7 +709,7 @@ function operatorToText(operator: string, isPrerequisite?: boolean): string {
   return operator;
 }
 
-function getVariationColor(i: number) {
+export function getVariationColor(i: number) {
   const colors = [
     "#4f69ff",
     "#03d1ca",

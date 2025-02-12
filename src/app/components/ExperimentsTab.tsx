@@ -10,14 +10,18 @@ import useGBSandboxEval, {
 } from "@/app/hooks/useGBSandboxEval";
 import { Button } from "@radix-ui/themes";
 import {
-  PiCircleFill,
-  PiListBold,
+  PiCircleFill, PiFlagFill, PiLinkBold,
+  PiListBold, PiMonitorBold,
 } from "react-icons/pi";
 import clsx from "clsx";
 import { MW } from "@/app";
 import {useSearch} from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
-import ExperimentDetail from "@/app/components/ExperimentDetail";
+import ExperimentDetail, {VariationIcon} from "@/app/components/ExperimentDetail";
+import {getFeatureDetails} from "@/app/components/FeaturesTab";
+import {ValueType} from "@/app/components/ValueField";
+
+export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & { features?: string[]; featureTypes?: Record<string, ValueType>; };
 
 export const LEFT_PERCENT = 0.4;
 export const HEADER_H = 40;
@@ -57,7 +61,7 @@ export default function ExperimentsTab() {
   const selectedExperiment = selectedEid
     ? getExperimentDetails({
         eid: selectedEid,
-        experiments: [...experiments, ...featureExperiments],
+        experiments: allExperiments,
         evaluatedExperiments,
         forcedVariations,
       })
@@ -118,7 +122,7 @@ export default function ExperimentsTab() {
           {fullWidthListView ? (
             <>
               <div style={{width: col2}}>
-                <label className="uppercase text-slate-11">Links</label>
+                <label className="uppercase text-slate-11">Type</label>
               </div>
               <div style={{width: col3}}>
                 <label className="uppercase text-slate-11">Value</label>
@@ -155,10 +159,10 @@ export default function ExperimentsTab() {
         >
           {filteredExperiments.map((experiment, i) => {
             const eid = experiment?.key;
-            const {evaluatedExperiment, isForced} =
+            const { evaluatedExperiment, isForced, types } =
               getExperimentDetails({
                 eid,
-                experiments,
+                experiments: allExperiments,
                 evaluatedExperiments,
                 forcedVariations,
               });
@@ -195,25 +199,43 @@ export default function ExperimentsTab() {
                     className="flex-shrink-0 text-sm"
                     style={{width: col2}}
                   >
-                    {/*{linkedExperiments?.length ? (*/}
-                    {/*  <>*/}
-                    {/*    <PiFlaskFill className="inline-block mr-1"/>*/}
-                    {/*    <span className="text-indigo-12">*/}
-                    {/*      ({linkedExperiments.length})*/}
-                    {/*    </span>*/}
-                    {/*  </>*/}
-                    {/*) : null}*/}
+                    {types ? (
+                      <div className="flex items-center gap-2">
+                        {types.redirect ? (
+                          <PiLinkBold />
+                        ): null}
+                        {types.visual ? (
+                          <PiMonitorBold />
+                        ): null}
+                        {types.features ? (
+                          <PiFlagFill />
+                        ): null}
+                      </div>
+                    ) : null}
                   </div>
                 )}
+                {!fullWidthListView && types ? (
+                  <div className="absolute flex items-center gap-2 h-[18px]">
+                    {types.redirect ? (
+                      <PiLinkBold size={11} />
+                    ): null}
+                    {types.visual ? (
+                      <PiMonitorBold size={11} />
+                    ): null}
+                    {types.features ? (
+                      <PiFlagFill size={11} />
+                    ): null}
+                  </div>
+                ) : null}
                 <div
                   className={clsx("value flex-shrink-0", {
-                    "w-full text-right pl-[50%] line-clamp-1":
+                    "w-full text-right pl-[50%] relative top-[-2px]":
                       !fullWidthListView,
                     "line-clamp-3": fullWidthListView,
                   })}
                   style={{width: fullWidthListView ? col3 : undefined}}
                 >
-                  {value}
+                  <VariationIcon i={value} size={16} />
                 </div>
                 {fullWidthListView && (
                   <div className="flex justify-center" style={{width: col4}}>
@@ -241,9 +263,9 @@ export default function ExperimentsTab() {
 
 export type SelectedExperiment = {
   eid: string;
-  experiment: (AutoExperiment | Experiment<any>);
+  experiment: ExperimentWithFeatures;
   meta?: any;
-  // linkedExperiments: (Experiment<any> | AutoExperiment)[];
+  types: { features?: string[]; redirect?: boolean; visual?: boolean; };
   evaluatedExperiment?: EvaluatedExperiment;
   isForced: boolean;
 };
@@ -256,13 +278,20 @@ function getExperimentDetails({
   forcedVariations,
 }: {
   eid: string;
-  experiments: (AutoExperiment | Experiment<any>)[];
+  experiments: ExperimentWithFeatures[];
   experimentsMeta?: Record<string, any>;
   evaluatedExperiments?: EvaluatedExperiment[];
   forcedVariations?: Record<string, number>;
 }): SelectedExperiment {
-  const experiment = experiments.find((experiment) => experiment.key === eid) as (AutoExperiment | Experiment<any>);
+  const experiment = experiments.find((experiment) => experiment.key === eid) as ExperimentWithFeatures;
   const meta = experimentsMeta?.[eid];
+
+  const types = {
+    features: experiment?.features,
+    redirect: experiment.variations.some((v) => v.urlRedirect),
+    visual: experiment.variations.some((v) => (v.domMutations?.length || v?.css || v?.js)),
+  };
+
   const evaluatedExperiment = evaluatedExperiments?.find(
     (experiment) => experiment.key === eid,
   );
@@ -272,6 +301,7 @@ function getExperimentDetails({
     eid,
     experiment,
     meta,
+    types,
     evaluatedExperiment,
     isForced,
   };
@@ -280,14 +310,17 @@ function getExperimentDetails({
 export function getFeatureExperiments(
   features: Record<string, FeatureDefinition>,
 ) {
-  const experiments: Experiment<any>[] = [];
+  const experiments: ExperimentWithFeatures[] = [];
   for (const fid in features) {
     const feature = features[fid];
+    const details = getFeatureDetails({ fid, features });
     for (const rule of feature.rules || []) {
       if (rule.variations) {
         // @ts-ignore
         experiments.push({
           key: rule.key ?? fid,
+          features: [fid],
+          featureTypes: {[fid]: details.valueType},
           ...rule,
         });
       }

@@ -26,7 +26,7 @@ export default function FeatureDetail({
   selectedFeature: SelectedFeature;
 }) {
   const [appOrigin] = useGlobalState(APP_ORIGIN, CLOUD_APP_ORIGIN, true);
-  
+
   const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
     {},
@@ -184,7 +184,6 @@ export default function FeatureDetail({
                     rule={rule}
                     i={i}
                     fid={selectedFid}
-                    feature={selectedFeature.feature}
                     valueType={selectedFeature.valueType}
                     evaluatedFeature={selectedFeature.evaluatedFeature}
                   />

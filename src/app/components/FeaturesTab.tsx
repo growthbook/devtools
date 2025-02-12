@@ -264,7 +264,7 @@ export type SelectedFeature = {
   isForced: boolean;
 };
 
-function getFeatureDetails({
+export function getFeatureDetails({
   fid,
   features,
   featuresMeta,
