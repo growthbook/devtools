@@ -56,7 +56,7 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
       clearTimeout(timer);
       getValidGrowthBookInstance(cb);
     },
-    false,
+    false
   );
 }
 
@@ -146,7 +146,7 @@ function updateFeatures(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (data) {
       gb.setForcedFeatures(
-        new Map(Object.entries(data as Record<string, any>)),
+        new Map(Object.entries(data as Record<string, any>))
       );
     } else {
       // todo: do something with these messages or remove them
@@ -178,7 +178,7 @@ async function updateBackgroundSDK(data: SDKHealthCheckResult) {
       type: "GB_SDK_UPDATED",
       data,
     },
-    window.location.origin,
+    window.location.origin
   );
 }
 
@@ -193,13 +193,13 @@ function updateTabState(property: string, value: unknown, append = false) {
       },
       append,
     },
-    window.location.origin,
+    window.location.origin
   );
 }
 
 // add a proxy to the SDKs methods so we know when anything important has been changed programmatically
 function subscribeToSdkChanges(
-  gb: GrowthBook & { patchedMethods?: boolean; logs?: LogUnion[] },
+  gb: GrowthBook & { patchedMethods?: boolean; logs?: LogUnion[] }
 ) {
   if (gb.patchedMethods) return;
   gb.patchedMethods = true;
@@ -263,7 +263,7 @@ function subscribeToSdkChanges(
     const _logEvent = gb.logEvent;
     gb.logEvent = async (
       eventName: string,
-      properties?: Record<string, unknown>,
+      properties?: Record<string, unknown>
     ) => {
       gb.logs!.push({
         eventName,
@@ -280,7 +280,7 @@ function subscribeToSdkChanges(
     gb.setTrackingCallback = (callback: TrackingCallback) => {
       const patchedCallBack = (
         experiment: Experiment<any>,
-        result: Result<any>,
+        result: Result<any>
       ) => {
         gb.logs!.push({
           experiment,
@@ -290,7 +290,15 @@ function subscribeToSdkChanges(
         });
         callback(experiment, result);
       };
-      _setTrackingCallback.call(gb, patchedCallBack);
+      try {
+        _setTrackingCallback.call(gb, patchedCallBack);
+      } catch (e) {
+        const msg: ErrorMessage = {
+          type: "GB_ERROR",
+          error: "Error setting tracking callback",
+        };
+        window.postMessage(msg, window.location.origin);
+      }
     };
     // Apply the patch helper above to the existing callback
     if (typeof trackingCallback === "function")
@@ -325,6 +333,7 @@ function subscribeToSdkChanges(
 }
 
 let cachedHostRes: any = undefined;
+let cachedStreamingHostRes: any = undefined;
 async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   if (!gb) {
     return {
@@ -370,27 +379,48 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     payloadDecrypted = false;
   }
 
-  if (!clientKey) {
-    return {
-      canConnect: false,
-      hasClientKey: false,
-      hasPayload,
-      devModeEnabled,
-      sdkFound: true,
-      version: gb?.version,
-      errorMessage: "No API Client Key found",
-    };
-  }
+  // if (!clientKey) {
+  //   return {
+  //     canConnect: false,
+  //     hasClientKey: false,
+  //     hasPayload,
+  //     devModeEnabled,
+  //     sdkFound: true,
+  //     version: gb?.version,
+  //     errorMessage: "No API Client Key found",
+  //   };
+  // }
   const apiRequestHeaders = gbContext.apiRequestHeaders;
-  const streamingHostRequestHeaders = gbContext.streamingHostRequestHeaders;
-  //add request headers to the request
-  const res =
-    cachedHostRes ?? (await fetch(`${apiHost}/api/features/${clientKey}`, {headers: apiRequestHeaders} ));
-  if (res.status === 200) {
-    cachedHostRes = res;
+  let res;
+  try {
+   res =
+    cachedHostRes ??
+    (await fetch(`${apiHost}/api/features/${clientKey}`, {
+      headers: apiRequestHeaders,
+    }));
+    if (res.status === 200) {
+      cachedHostRes = res;
+    }
+  } catch (e) {
+    // ignore
+  }
+  
+    const streamingHostRequestHeaders = gbContext.streamingHostRequestHeaders;
+  let streamingRes = undefined;
+  if (streaming) {
+    const options = {
+      method: "POST",
+      headers: { "Content-Type": "application/json", headers: streamingHostRequestHeaders },
+      body: JSON.stringify(payload),
+    };
+    streamingRes = cachedHostRes  ?? await fetch(`${streamingHost}/api/eval/${clientKey}`, options);
+    if (streamingRes.status === 200) {
+      cachedStreamingHostRes = streamingRes;
+    }
+  }
     return {
-      canConnect: true,
-      hasClientKey: true,
+      canConnect: res?.status === 200,
+      hasClientKey: !!clientKey,
       hasPayload,
       devModeEnabled,
       version: gb?.version,
@@ -409,36 +439,8 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       streamingHost,
       apiRequestHeaders,
       streamingHostRequestHeaders,
-
-      
+      errorMessage:  res?.error || !!clientKey ?  undefined : "No Client Key was found",
     };
-  } else {
-    const data = await res.json();
-
-    return {
-      canConnect: false,
-      hasPayload,
-      devModeEnabled,
-      hasClientKey: true,
-      errorMessage: data.error,
-      version: gb?.version,
-      sdkFound: true,
-      clientKey,
-      payload,
-      hasTrackingCallback,
-      trackingCallbackParams,
-      hasDecryptionKey,
-      payloadDecrypted,
-      usingLogEvents,
-      isRemoteEval,
-      usingStickyBucketing,
-      streaming,
-      apiHost,
-      streamingHost,
-      apiRequestHeaders,
-      streamingHostRequestHeaders
-    };
-  }
 }
 
 // start running

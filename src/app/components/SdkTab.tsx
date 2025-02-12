@@ -27,6 +27,7 @@ export default function SdkTab() {
     apiHost,
     clientKey,
     streamingHost,
+    streamingHostRequestHeaders,
   } = sdkData as SDKHealthCheckResult;
 
   const customTheme = {
@@ -211,6 +212,15 @@ export default function SdkTab() {
               {streaming
                 ? "The SDK is using streaming."
                 : "The SDK is not using streaming. Streaming is optional and used to update the SDK with the latest data without refreshing the page."}
+            </Text>
+            <Text as="div" size="2" weight="regular">
+              <strong>Host </strong> {streamingHost ?? "None"}
+            </Text>
+            <Text as="div" size="2" weight="regular">
+              <strong>Client Key </strong> {clientKey ?? "None"}
+            </Text>
+            <Text as="div" size="2" weight="regular">
+              <strong>Streaming host request headers </strong> {JSON.stringify(streamingHostRequestHeaders) ?? "None"}
             </Text>
           </div>
         );  
