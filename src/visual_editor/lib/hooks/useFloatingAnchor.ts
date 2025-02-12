@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { throttle } from "lodash";
-import getSelector from "../getSelector";
+import getSelector from "@/visual_editor/lib/getSelector";
 
 export default function useFloatingAnchor(parentElement: Element | null) {
   const [domRect, setDomRect] = useState<DOMRect | null>(null);

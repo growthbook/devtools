@@ -1,5 +1,5 @@
 chrome.devtools.panels.create(
   "GrowthBook",
-  "logo192.png",
+  "logo128.png",
   "devtools_panel.html",
 );

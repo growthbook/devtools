@@ -53,6 +53,12 @@ module.exports = {
       96: "384px",
     },
     extend: {
+      // radix colors
+      colors: {
+        violet: generateRadixScale("violet"),
+        indigo: generateRadixScale("indigo"),
+        slate: generateRadixScale("slate"),
+      },
       zIndex: {
         max: "2147483647",
         front: "2147483646",
@@ -63,3 +69,15 @@ module.exports = {
   },
   plugins: [],
 };
+
+function generateRadixScale(name) {
+  let scale = Array.from({ length: 12 }, (_, i) => {
+    let id = i + 1;
+    return [
+      [id, `var(--${name}-${id})`],
+      [`a${id}`, `var(--${name}-a${id})`],
+    ];
+  }).flat();
+
+  return Object.fromEntries(scale);
+}
