@@ -10,7 +10,7 @@ import useGBSandboxEval, {
 } from "@/app/hooks/useGBSandboxEval";
 import { Button } from "@radix-ui/themes";
 import {
-  PiCircleFill, PiFlagFill, PiLinkBold,
+  PiCircleFill, PiDesktopFill, PiFlagFill, PiLinkBold,
   PiListBold, PiMonitorBold,
 } from "react-icons/pi";
 import clsx from "clsx";
@@ -202,31 +202,18 @@ export default function ExperimentsTab() {
                     {types ? (
                       <div className="flex items-center gap-2">
                         {types.redirect ? (
-                          <PiLinkBold />
+                          <PiLinkBold size={12} />
                         ): null}
                         {types.visual ? (
-                          <PiMonitorBold />
+                          <PiDesktopFill size={12} />
                         ): null}
                         {types.features ? (
-                          <PiFlagFill />
+                          <PiFlagFill size={12} />
                         ): null}
                       </div>
                     ) : null}
                   </div>
                 )}
-                {!fullWidthListView && types ? (
-                  <div className="absolute flex items-center gap-2 h-[18px]">
-                    {types.redirect ? (
-                      <PiLinkBold size={11} />
-                    ): null}
-                    {types.visual ? (
-                      <PiMonitorBold size={11} />
-                    ): null}
-                    {types.features ? (
-                      <PiFlagFill size={11} />
-                    ): null}
-                  </div>
-                ) : null}
                 <div
                   className={clsx("value flex-shrink-0", {
                     "w-full text-right pl-[50%] relative top-[-2px]":
@@ -235,7 +222,20 @@ export default function ExperimentsTab() {
                   })}
                   style={{width: fullWidthListView ? col3 : undefined}}
                 >
-                  <VariationIcon i={value} size={16} />
+                  {!fullWidthListView && types ? (
+                    <div className="inline-block mr-3 relative" style={{ top: 2 }}>
+                      {types.redirect ? (
+                        <PiLinkBold size={12} />
+                      ): null}
+                      {types.visual ? (
+                        <PiDesktopFill size={12} />
+                      ): null}
+                      {types.features ? (
+                        <PiFlagFill size={12} />
+                      ): null}
+                    </div>
+                  ) : null}
+                  <VariationIcon i={value} size={14} />
                   {fullWidthListView && (
                     <div className="line-clamp-3">
                       <VariationSummary experiment={experiment} i={value || 0} />

@@ -1,5 +1,5 @@
 import { MW, NAV_H } from "@/app";
-import { IconButton, Link } from "@radix-ui/themes";
+import {IconButton, Link, Switch} from "@radix-ui/themes";
 import {
   PiArrowClockwise,
   PiArrowSquareOutBold,
@@ -32,6 +32,7 @@ export default function FeatureDetail({
     {},
   );
 
+  const [hideInactiveRules, setHideInactiveRules] = useTabState<boolean>("hideInactiveRules", true);
   const [overrideFeature, setOverrideFeature] = useState(false);
 
   const setForcedFeature = (fid: string, value: any) => {
@@ -154,29 +155,34 @@ export default function FeatureDetail({
             />
           </div>
 
-          <div className="mt-6 mb-2 py-1 text-md font-semibold border-b border-slate-200">
-            Rules and Values
+          <div className="flex justify-between items-end mt-6 mb-2 py-1 text-md font-semibold border-b border-slate-200">
+            <span>Rules and Values</span>
+            <label className="flex gap-1 text-xs items-center font-normal cursor-pointer">
+              <span>Hide inactive</span>
+              <Switch size="1" checked={hideInactiveRules} onCheckedChange={(b) => setHideInactiveRules(b)} />
+            </label>
           </div>
 
-          <div
-            className={`rule ${defaultValueStatus}`}
-            style={{ padding: "12px 8px 12px 12px" }}
-          >
-            <div className="text-sm font-semibold mb-2">
-              Default value
-              <div className="inline-block ml-3 status capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
-                {defaultValueStatus === "matches" ? "Active" : "Inactive"}
+          {!hideInactiveRules || defaultValueStatus === "matches" ? (
+            <div
+              className={`rule ${defaultValueStatus}`}
+              style={{ padding: "12px 8px 12px 12px" }}
+            >
+              <div className="text-sm font-semibold mb-2">
+                Default value
+                <div className="inline-block ml-3 status capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                  {defaultValueStatus === "matches" ? "Active" : "Inactive"}
+                </div>
               </div>
+              <ValueField
+                value={selectedFeature?.feature?.defaultValue}
+                valueType={selectedFeature?.valueType}
+              />
             </div>
-            <ValueField
-              value={selectedFeature?.feature?.defaultValue}
-              valueType={selectedFeature?.valueType}
-            />
-          </div>
+          ) : null}
 
           {(selectedFeature?.feature?.rules ?? []).length ? (
             <>
-              <div className="text-sm font-semibold -mb-3">Rules</div>
               {selectedFeature?.feature?.rules?.map((rule, i) => {
                 return (
                   <Rule
@@ -186,6 +192,7 @@ export default function FeatureDetail({
                     fid={selectedFid}
                     valueType={selectedFeature.valueType}
                     evaluatedFeature={selectedFeature.evaluatedFeature}
+                    hideInactive={hideInactiveRules}
                   />
                 );
               })}
