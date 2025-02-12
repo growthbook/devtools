@@ -131,7 +131,8 @@ function setupListeners() {
 function updateAttributes(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (typeof data === "object" && data !== null) {
-      gb.setAttributes(data as Attributes);
+      gb.setAttributeOverrides(data as Attributes);
+      updateTabState("attributes", gb.getAttributes()); // so that when we reset it will reset back to the original attributes
     } else {
       // todo: do something with these messages or remove them
       const msg: ErrorMessage = {

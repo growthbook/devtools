@@ -27,6 +27,7 @@ import useApi from "../hooks/useApi";
 import ArchetypesList from "./ArchetypesList";
 import { MW } from "@/app";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
+import { at } from "node_modules/@types/lodash";
 
 export default function AttributesTab() {
   const LABEL_H = 32;
@@ -214,6 +215,11 @@ export default function AttributesTab() {
     attributesForm.reset(attributes);
     setDirty(false);
   };
+
+  const resetAttributesOverride = () => {
+    setAttributes({});
+    attributesForm.reset(attributes);
+  }
 
   // listen to SDK changes to set attributes form
   useEffect(() => {
