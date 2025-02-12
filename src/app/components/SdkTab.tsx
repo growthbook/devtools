@@ -17,7 +17,6 @@ export default function SdkTab() {
     canConnect,
     hasPayload,
     payload,
-    hasTrackingCallback,
     trackingCallbackParams,
     hasDecryptionKey,
     payloadDecrypted,
@@ -27,6 +26,7 @@ export default function SdkTab() {
     streaming,
     apiHost,
     clientKey,
+    streamingHost,
   } = sdkData as SDKHealthCheckResult;
 
   const customTheme = {
@@ -231,7 +231,7 @@ export default function SdkTab() {
         ? "Found"
         : !trackingCallbackParams
           ? "None Found"
-          : `Callback has ${trackingCallbackParams.length} params instead of 2`;
+          : `Callback has Incorrect Amount of Params`;
     const TrackingCallbackStatusColor =
       trackingCallbackParams?.length === 2
         ? "green"

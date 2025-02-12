@@ -361,6 +361,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   const isRemoteEval = gb.isRemoteEval();
   const usingStickyBucketing = gbContext.stickyBucketService !== undefined;
   const streaming = !!gbContext.backgroundSync;
+  const streamingHost = gbContext.streamingHost || apiHost;
   // check if paylaod was decrypted
   let payloadDecrypted = true;
   try {
@@ -380,8 +381,11 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       errorMessage: "No API Client Key found",
     };
   }
+  const apiRequestHeaders = gbContext.apiRequestHeaders;
+  const streamingHostRequestHeaders = gbContext.streamingHostRequestHeaders;
+  //add request headers to the request
   const res =
-    cachedHostRes ?? (await fetch(`${apiHost}/api/features/${clientKey}`));
+    cachedHostRes ?? (await fetch(`${apiHost}/api/features/${clientKey}`, {headers: apiRequestHeaders} ));
   if (res.status === 200) {
     cachedHostRes = res;
     return {
@@ -402,6 +406,10 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       usingStickyBucketing,
       streaming,
       apiHost,
+      streamingHost,
+      apiRequestHeaders,
+      streamingHostRequestHeaders,
+
       
     };
   } else {
@@ -425,6 +433,10 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       isRemoteEval,
       usingStickyBucketing,
       streaming,
+      apiHost,
+      streamingHost,
+      apiRequestHeaders,
+      streamingHostRequestHeaders
     };
   }
 }

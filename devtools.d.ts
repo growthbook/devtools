@@ -222,6 +222,9 @@ type SDKHealthCheckResult = {
   usingStickyBucketing?: boolean;
   streaming?: boolean;
   apiHost?: string;
+  streamingHost?: string;
+  apiRequestHeaders?: Record<string, string>;
+  streamingHostRequestHeaders?: Record<string, string>;
 };
 
 type BGSetSDKUsageData = {
