@@ -1,19 +1,28 @@
 import * as Accordion from "@radix-ui/react-accordion";
-import React from "react";
+import React, { useState } from "react";
 import { Archetype } from "../tempGbExports";
 import { Avatar, Button, Container, Flex, Link, Text } from "@radix-ui/themes";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import clsx from "clsx";
-import { PiUserBold } from "react-icons/pi";
+import { PiDotsThreeVerticalBold, PiUserBold } from "react-icons/pi";
+import EditableValueField from "./EditableValueField";
 
 function ArchetypeLabel({
   archetype,
   applied,
   applyArchetype,
+  deleteArchetype,
+  renameArchetype,
 }: {
   archetype: Archetype;
   applied: boolean;
   applyArchetype: () => void;
+  deleteArchetype: () => void;
+  renameArchetype: (newName: string) => void;
 }) {
+  const [editingName, setEditingName] = useState(false);
+  const [localName, setLocalName] = useState(archetype.name);
+
   return (
     <div className="flex gap-2 items-center">
       <Avatar
@@ -29,7 +38,15 @@ function ArchetypeLabel({
       />
       <Flex direction="column" align="start" justify="start" flexGrow="1">
         <Text size="2" weight="medium" className="text-gray-800 line-clamp-1">
-          {archetype.name}
+          {editingName ? (
+            <EditableValueField
+              value={localName}
+              setValue={setLocalName}
+              valueType="string"
+            />
+          ) : (
+            archetype.name
+          )}
         </Text>
         <Link role="button" color="gray" size="1">
           View details
@@ -44,6 +61,48 @@ function ArchetypeLabel({
       >
         Use
       </Button>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger asChild>
+          <div>
+            <Button variant="ghost">
+              <PiDotsThreeVerticalBold />
+            </Button>
+          </div>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content
+            align="end"
+            className="bg-violet-2"
+            style={{
+              minWidth: "100px",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <DropdownMenu.Item>
+              <Button
+                disabled={archetype.source !== "local"}
+                variant="ghost"
+                onClick={(e) => {
+                  setEditingName(true);
+                }}
+              >
+                Rename
+              </Button>
+            </DropdownMenu.Item>
+            <DropdownMenu.Item>
+              <Button
+                disabled={archetype.source !== "local"}
+                color="red"
+                variant="ghost"
+                onClick={deleteArchetype}
+              >
+                Delete
+              </Button>
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
     </div>
   );
 }
@@ -54,12 +113,16 @@ export default function ArchetypesList({
   setSelectedArchetypeId,
   appliedArchetypeId,
   applyArchetype,
+  deleteArchetype,
+  renameArchetype,
 }: {
   archetypes: Archetype[];
   selectedArchetypeId: string | undefined;
   setSelectedArchetypeId: (value: string | undefined) => void;
   appliedArchetypeId: string | undefined;
   applyArchetype: (arch: Archetype) => void;
+  deleteArchetype: (archId: string) => void;
+  renameArchetype: (archId: string, name: string) => void;
 }) {
   return (
     <Container width="100%">
@@ -82,6 +145,8 @@ export default function ArchetypesList({
                   archetype={arch}
                   applied={appliedArchetypeId === arch.id}
                   applyArchetype={() => applyArchetype(arch)}
+                  deleteArchetype={() => deleteArchetype(arch.id)}
+                  renameArchetype={(name) => renameArchetype(arch.id, name)}
                 />
               </div>
             </Accordion.Trigger>

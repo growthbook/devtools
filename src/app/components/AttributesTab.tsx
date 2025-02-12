@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import uniqid from "uniqid";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
@@ -96,14 +96,6 @@ export default function AttributesTab() {
   const [selectedArchetypeId, setSelectedArchetypeId] = useState<
     string | undefined
   >("");
-  const selectedArchetype = archetypes.find(
-    (arch) => arch.id === selectedArchetypeId
-  );
-
-  const [appliedArchetypeId, setAppliedArchetypeId] = useState("");
-  const appliedArchetype = archetypes.find(
-    (arch) => arch.id === appliedArchetypeId
-  );
 
   const applyArchetype = useCallback(
     (archetype: Archetype) => {
@@ -114,6 +106,32 @@ export default function AttributesTab() {
       setDirty(false);
     },
     [attributes]
+  );
+
+  const deleteArchetype = useCallback(
+    (archId: string) => {
+      const deleteIndex = archetypes.findIndex((arch) => arch.id === archId);
+      if (archetypes[deleteIndex]?.source !== "local") return;
+      setArchetypes([
+        ...archetypes.slice(0, deleteIndex),
+        ...archetypes.slice(deleteIndex + 1),
+      ]);
+    },
+    [archetypes, setArchetypes]
+  );
+
+  const renameArchetype = useCallback(
+    (archId: string, newName: string) => {
+      const editIndex = archetypes.findIndex((arch) => arch.id === archId);
+      if (archetypes[editIndex]?.source !== "local") return;
+      archetypes[editIndex].name = newName;
+      setArchetypes([
+        ...archetypes.slice(0, editIndex),
+        archetypes[editIndex],
+        ...archetypes.slice(editIndex + 1),
+      ]);
+    },
+    [archetypes, setArchetypes]
   );
 
   const [saveArchetypeOpen, setSaveArchetypeOpen] = useState(false);
@@ -128,6 +146,18 @@ export default function AttributesTab() {
     !archetypes.find(
       (archetype) => archetype.name === saveArchetypeForm.watch("name")
     );
+
+  const [appliedArchetypeId, setAppliedArchetypeId] = useState("");
+  const appliedArchetype = useMemo(() => {
+    const arch = archetypes.find((arch) => arch.id === appliedArchetypeId);
+    if (arch?.source !== "local") {
+      saveArchetypeForm.setValue("type", "new");
+    }
+    return arch;
+  }, [appliedArchetypeId]);
+
+  const canSaveToExistingArchetype = appliedArchetype?.source === "local";
+
   const submitArchetypeForm = (e: React.SyntheticEvent) => {
     e.preventDefault();
     const values = saveArchetypeForm.getValues();
@@ -145,16 +175,16 @@ export default function AttributesTab() {
         name: archetype.name,
       });
     } else {
-      if (!selectedArchetype) return;
-      const selectedArchIndex = archetypes.findIndex(
-        (arch) => arch.id === selectedArchetype.id
+      if (!appliedArchetype) return;
+      const appliedArchIndex = archetypes.findIndex(
+        (arch) => arch.id === appliedArchetype.id
       );
-      const archetype = archetypes[selectedArchIndex];
+      const archetype = archetypes[appliedArchIndex];
       archetype.attributes = formAttributes;
       setArchetypes([
-        ...archetypes.slice(0, selectedArchIndex),
+        ...archetypes.slice(0, appliedArchIndex),
         archetype,
-        ...archetypes.slice(selectedArchIndex + 1),
+        ...archetypes.slice(appliedArchIndex + 1),
       ]);
     }
     setSaveArchetypeOpen(false);
@@ -222,6 +252,8 @@ export default function AttributesTab() {
               setSelectedArchetypeId={setSelectedArchetypeId}
               appliedArchetypeId={appliedArchetypeId}
               applyArchetype={applyArchetype}
+              deleteArchetype={deleteArchetype}
+              renameArchetype={renameArchetype}
             />
           </div>
         </div>
@@ -327,24 +359,26 @@ export default function AttributesTab() {
                     className="FormRoot small"
                     onSubmit={submitArchetypeForm}
                   >
-                    <Form.Field className="FormField" name="type">
-                      <Form.Label className="FormLabel">
-                        Save User Attributes as...
-                      </Form.Label>
-                      <RadioGroup.Root
-                        value={saveArchetypeForm.watch("type")}
-                        onValueChange={(value) => {
-                          saveArchetypeForm.setValue("type", value);
-                        }}
-                      >
-                        <RadioGroup.Item value="new">
-                          New Archetype
-                        </RadioGroup.Item>
-                        <RadioGroup.Item value="existing">
-                          Update Selected Archetype
-                        </RadioGroup.Item>
-                      </RadioGroup.Root>
-                    </Form.Field>
+                    {canSaveToExistingArchetype && (
+                      <Form.Field className="FormField" name="type">
+                        <Form.Label className="FormLabel">
+                          Save User Attributes as...
+                        </Form.Label>
+                        <RadioGroup.Root
+                          value={saveArchetypeForm.watch("type")}
+                          onValueChange={(value) => {
+                            saveArchetypeForm.setValue("type", value);
+                          }}
+                        >
+                          <RadioGroup.Item value="new">
+                            New Archetype
+                          </RadioGroup.Item>
+                          <RadioGroup.Item value="existing">
+                            Update "{appliedArchetype.name}"
+                          </RadioGroup.Item>
+                        </RadioGroup.Root>
+                      </Form.Field>
+                    )}
                     {saveArchetypeForm.watch("type") === "new" && (
                       <Form.Field className="FormField" name="name">
                         <Form.Label className="FormLabel">
@@ -365,30 +399,13 @@ export default function AttributesTab() {
                           (saveArchetypeForm.watch("type") === "new" &&
                             !newArchetypeIsValid) ||
                           (saveArchetypeForm.watch("type") === "existing" &&
-                            selectedArchetype?.source !== "local")
+                            !canSaveToExistingArchetype)
                         }
                       >
                         <Button size="1" className="w-full">
                           Save
                         </Button>
                       </Form.Submit>
-                      {saveArchetypeForm.watch("type") === "existing" &&
-                        selectedArchetype?.source === "growthbook" && (
-                          <Text color="red" className="text-xs">
-                            <span>This Archetype is managed in</span>{" "}
-                            <Link
-                              color="red"
-                              href={`${appOrigin}/archetypes`}
-                              target="_blank"
-                            >
-                              <span>GrowthBook</span>
-                              <PiArrowSquareOutBold
-                                size={16}
-                                className="inline-block mb-1 ml-0.5"
-                              />
-                            </Link>
-                          </Text>
-                        )}
                     </div>
                   </Form.Root>
                 </Popover.Content>
