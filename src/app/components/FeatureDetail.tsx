@@ -16,10 +16,12 @@ import useTabState from "@/app/hooks/useTabState";
 
 export default function FeatureDetail({
   selectedFid,
+  setSelectedFid,
   selectedFeature,
   open,
 }: {
   selectedFid?: string;
+  setSelectedFid: (s: string | undefined) => void;
   selectedFeature?: SelectedFeature;
   open: boolean;
 }) {
@@ -84,21 +86,35 @@ export default function FeatureDetail({
       <div className="featureDetail" key={`selected_${selectedFid}`}>
         <div className="header">
           {selectedFid && (
+            <>
             <div className="flex items-start gap-2">
               <h2 className="font-bold flex-1">{selectedFid}</h2>
-                <Link
-                  size="2"
-                  className="flex-shrink-0 font-semibold mt-0.5 -mr-1 ml-2"
-                  href={`${appOrigin}/features/${selectedFid}`}
-                  target="_blank"
-                >
-                  GrowthBook
-                  <PiArrowSquareOutBold
-                    size={16}
-                    className="inline-block mb-1 ml-0.5"
-                  />
-                </Link>
+              <IconButton
+                size="3"
+                variant="ghost"
+                radius="full"
+                style={{ margin: "0 -8px 0 0" }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setSelectedFid(undefined);
+                }}
+              >
+                <PiXBold />
+              </IconButton>
             </div>
+            <Link
+              size="2"
+              className="font-semibold"
+              href={`${appOrigin}/features/${selectedFid}`}
+              target="_blank"
+            >
+              GrowthBook
+              <PiArrowSquareOutBold
+                size={16}
+                className="inline-block mb-1 ml-0.5"
+              />
+            </Link>
+            </>
           )}
         </div>
 
@@ -165,7 +181,7 @@ export default function FeatureDetail({
             </div>
           ) : null}
 
-          {selectedFid && (selectedFeature?.feature?.rules ?? []).length ? (
+          {selectedFid && selectedFeature && (selectedFeature?.feature?.rules ?? []).length ? (
             <>
               {selectedFeature?.feature?.rules?.map((rule, i) => {
                 return (

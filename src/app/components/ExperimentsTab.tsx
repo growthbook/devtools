@@ -234,6 +234,7 @@ export default function ExperimentsTab() {
 
         <ExperimentDetail
           selectedEid={selectedEid}
+          setSelectedEid={setSelectedEid}
           selectedExperiment={selectedExperiment}
           open={!!selectedEid && !!selectedExperiment}
         />
@@ -269,12 +270,12 @@ function getExperimentDetails({
 
   const types = {
     features: experiment?.features,
-    redirect: experiment.variations.some((v) => v.urlRedirect),
-    visual: experiment.variations.some((v) => (v.domMutations?.length || v?.css || v?.js)),
+    redirect: experiment?.variations?.some((v) => v.urlRedirect),
+    visual: experiment?.variations?.some((v) => (v.domMutations?.length || v?.css || v?.js)),
   };
 
   const evaluatedExperiment = evaluatedExperiments?.find(
-    (experiment) => experiment.key === eid,
+    (exp) => exp.key === eid,
   );
   const isForced = forcedVariations ? eid in forcedVariations : false;
 

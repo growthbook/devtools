@@ -246,6 +246,7 @@ export default function FeaturesTab() {
 
         <FeatureDetail
           selectedFid={selectedFid}
+          setSelectedFid={setSelectedFid}
           selectedFeature={selectedFeature}
           open={!!selectedFid && !!selectedFeature}
         />

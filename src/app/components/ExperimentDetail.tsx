@@ -18,10 +18,12 @@ import clsx from "clsx";
 
 export default function ExperimentDetail({
   selectedEid,
+  setSelectedEid,
   selectedExperiment,
   open,
 }: {
   selectedEid?: string;
+  setSelectedEid: (s: string | undefined) => void;
   selectedExperiment?: SelectedExperiment;
   open: boolean;
 }) {
@@ -106,11 +108,25 @@ export default function ExperimentDetail({
       <div className="featureDetail" key={`selected_${selectedEid}`}>
         <div className="header">
           {selectedEid && (
-            <div className="flex items-start gap-2">
-              <h2 className="font-bold flex-1">{selectedExperiment?.experiment?.name || selectedEid}</h2>
+            <>
+              <div className="flex items-start gap-2">
+                <h2 className="font-bold flex-1">{selectedExperiment?.experiment?.name || selectedEid}</h2>
+                <IconButton
+                  size="3"
+                  variant="ghost"
+                  radius="full"
+                  style={{ margin: "0 -8px 0 0" }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedEid(undefined);
+                  }}
+                >
+                  <PiXBold />
+                </IconButton>
+              </div>
               <Link
                 size="2"
-                className="flex-shrink-0 font-semibold mt-0.5 -mr-1 ml-2"
+                className="font-semibold"
                 href={`${appOrigin}/experiments/lookup/?trackingKey=${selectedEid}`}
                 target="_blank"
               >
@@ -120,7 +136,7 @@ export default function ExperimentDetail({
                   className="inline-block mb-1 ml-0.5"
                 />
               </Link>
-            </div>
+            </>
           )}
         </div>
 
@@ -140,7 +156,7 @@ export default function ExperimentDetail({
                     onClick={(e) => {
                       e.preventDefault();
                       setOverrideExperiment(false);
-                      selectedFid && unsetForcedVariation(selectedFid);
+                      selectedEid && unsetForcedVariation(selectedEid);
                     }}
                   >
                     <PiXBold/>
@@ -183,11 +199,11 @@ export default function ExperimentDetail({
                   </div>
                 </div>
                 <ul className="list-disc ml-4">
-                  <li className="text-sm">
+                  <li className="text-sm" key={"1"}>
                     <label className="inline-block" style={{width: 80}}>Variation:</label>
                     <span>{result.variationId ?? "null"}</span>
                   </li>
-                  <li className="text-sm">
+                  <li className="text-sm" key={"2"}>
                     <label className="inline-block" style={{width: 80}}>Debug log:</label>
                     <code className="text-pink-900 text-xs">{lastDebugLog}</code>
                   </li>
@@ -264,8 +280,8 @@ export default function ExperimentDetail({
                 URL Targeting
               </div>
               <ul className="list-disc ml-4 my-2">
-                {urlPatterns.map((pattern) => (
-                  <li className="text-sm leading-5">
+                {urlPatterns.map((pattern, i) => (
+                  <li className="text-sm leading-5" key={i}>
                     <div className="break-all">{pattern.pattern}</div>
                     {pattern.type !== "simple" && (
                       <div className="text-xs mt-1">
@@ -374,16 +390,18 @@ function EditableVariationField({
   evaluatedValue,
   setValue,
 }: {
-  experiment: ExperimentWithFeatures;
+  experiment?: ExperimentWithFeatures;
   value?: number;
   evaluatedValue?: number;
   setValue: (v: any) => void;
 }) {
-  let variationsMeta: { key?: string; name?: string }[] =
-    experiment.meta ??
-    experiment.variations.map((variation, i) => ({
+  let variationsMeta: { key?: string; name?: string }[] | undefined =
+    experiment?.meta ??
+    experiment?.variations?.map((variation, i) => ({
       key: i + "",
     }));
+
+  if (!variationsMeta || !experiment) return null;
 
   return (
     <div className="FormRoot">
@@ -393,7 +411,11 @@ function EditableVariationField({
         gap="2"
       >
         {variationsMeta.map((meta, i) => (
-          <RadioCards.Item key={meta.key} value={i + ""} className="px-2.5 py-2.5">
+          <RadioCards.Item
+            key={meta.key} value={i + ""}
+            className="px-3 py-2.5 justify-start"
+            style={{ minHeight: 50 }}
+          >
             <div className="flex gap-2 items-center cursor-pointer">
               <VariationIcon i={i} />
               <div className="text-xs line-clamp-2 leading-4">
