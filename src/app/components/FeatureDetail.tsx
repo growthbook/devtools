@@ -70,7 +70,7 @@ export default function FeatureDetail({
 
   return (
     <div
-      className="featureDetailWrapper fixed overflow-y-auto bg-white"
+      className="featureDetailWrapper fixed overflow-y-auto"
       style={{
         top: NAV_H + HEADER_H,
         height: `calc(100vh - ${NAV_H + HEADER_H}px)`,

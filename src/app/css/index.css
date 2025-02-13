@@ -82,10 +82,8 @@
 }
 
 .featureDetailWrapper {
-  transition: 150ms all;
-}
-.featureDetail {
   @apply bg-violet-2;
+  transition: 150ms all;
 }
 .featureDetail .header {
   @apply w-full sticky top-0 z-center pl-6 pr-4 py-3 bg-violet-2 shadow-sm;
