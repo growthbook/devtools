@@ -39,11 +39,14 @@ export default function ExperimentDetail({
   >("forcedVariations", {});
 
   const [overrideExperiment, setOverrideExperiment] = useState(false);
+  const [delayStatus, setDelayStatus] = useState(false);
 
   const setForcedVariation = (eid: string, value: any) => {
     const newForcedVariations = { ...forcedVariations };
     newForcedVariations[eid] = value;
     setForcedVariations(newForcedVariations);
+    setDelayStatus(true);
+    window.setTimeout(() => setDelayStatus(false), 100);
   };
   const unsetForcedVariation = (eid: string) => {
     const newForcedVariations = { ...forcedVariations };
@@ -161,7 +164,7 @@ export default function ExperimentDetail({
               />
             ) : null}
 
-            {selectedVariation !== selectedExperiment?.evaluatedExperiment?.result?.variationId ? (
+            {selectedVariation !== selectedExperiment?.evaluatedExperiment?.result?.variationId && !delayStatus? (
               <div className="mt-2 ml-1 mb-3 text-sm text-red-900">
                 <PiWarningBold className="inline-block"/>{" "}
                 Cannot apply this variation
