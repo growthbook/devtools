@@ -130,7 +130,7 @@ function setupListeners() {
 function updateAttributes(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (typeof data === "object" && data !== null) {
-      gb.setAttributeOverrides(data as Attributes);
+      gb.setAttributeOverrides(data as Attributes); // {} to reset
       updateTabState("attributes", gb.getAttributes()); // so that when we reset it will reset back to the original attributes
     } else {
       // todo: do something with these messages or remove them
@@ -225,8 +225,6 @@ function subscribeToSdkChanges(
   gb.setAttributeOverrides = async (attributes: Attributes) => {
     await _setAttributeOverrides.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
-    // const sdkData = await SDKHealthCheck(gb);
-    // updateTabState("sdkData", sdkData);
   };
 
   // // @ts-ignore Patching private method
@@ -275,7 +273,7 @@ function subscribeToSdkChanges(
     };
 
     // Experiment tracking callbacks
-    const _setTrackingCallback = gb.setTrackingCallback;
+    const _setTrackingCallback = gb.setTrackingCallback || (() => {});
     // Create a helper to automatically patch any callbacks the user sets
     gb.setTrackingCallback = (callback: TrackingCallback) => {
       const patchedCallBack = (
@@ -290,15 +288,7 @@ function subscribeToSdkChanges(
         });
         callback(experiment, result);
       };
-      try {
-        _setTrackingCallback.call(gb, patchedCallBack);
-      } catch (e) {
-        const msg: ErrorMessage = {
-          type: "GB_ERROR",
-          error: "Error setting tracking callback",
-        };
-        window.postMessage(msg, window.location.origin);
-      }
+        _setTrackingCallback?.call(gb, patchedCallBack);
     };
     // Apply the patch helper above to the existing callback
     if (typeof trackingCallback === "function")

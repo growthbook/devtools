@@ -20,7 +20,7 @@ import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
 import { MW } from "@/app";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
-import { over } from "node_modules/@types/lodash";
+import { over, set } from "node_modules/@types/lodash";
 
 export default function AttributesTab() {
   const LABEL_H = 32;
@@ -38,10 +38,14 @@ export default function AttributesTab() {
     "attributesForm_useJsonMode",
     false
   );
-  const [forcedAttributes, setForcedAttributes] = useTabState<Attributes>(
+  const [forcedAttributes, setForcedAttributes] = useTabState<boolean>(
     "forcedAttributes",
-    {}
+    false
   );
+  const [newAppliedAttributeIds, setNewAppliedAttributeIds] = useTabState<
+    string[]
+  >("newAppliedAttributeIds", []);
+
   const [appOrigin] = useGlobalState(APP_ORIGIN, CLOUD_APP_ORIGIN, true);
 
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
@@ -205,25 +209,41 @@ export default function AttributesTab() {
         return;
       }
     }
-
-    // get all the attributes that are different from the original and return them as an object
+    console.log("newAttributes", newAttributes);
     const newOverriddenAttributes = Object.fromEntries(
       Object.keys(newAttributes)
-        .filter((key: string) => newAttributes[key] !== attributes[key])
-        .map((key: string) => [key, newAttributes[key]])
+        .filter((key: string) => {
+          return (
+            JSON.stringify(newAttributes[key]) !==
+            JSON.stringify(attributes[key])
+          );
+        })
+        .map((key: string) => {
+          console.log("key", key, !attributes.hasOwnProperty(key));
+          if (!attributes.hasOwnProperty(key)) {
+            setNewAppliedAttributeIds([...newAppliedAttributeIds, key]);
+          }
+          return [key, newAttributes[key]];
+        })
     );
-    console.log(
-      "newOverriddenAttributes",
-      newOverriddenAttributes,
-      newOverriddenAttributes.length
-    );
+    // check if newAttributes has any keys that are removed from attributes
+    Object.keys(attributes).forEach((key) => {
+      (key: string) => {
+        if (!newAttributes.hasOwnProperty(key)) {
+          setNewAppliedAttributeIds(
+            newAppliedAttributeIds.filter((id) => id !== key)
+          );
+        }
+      };
+    });
+
     if (Object.keys(newOverriddenAttributes).length > 0) {
-      setForcedAttributes({ ...forcedAttributes, ...newOverriddenAttributes });
-      setAttributes(newAttributes);
-    }
-    if (Object.keys(newAttributes).length === 0) {
+      console.log("setting forced attributes");
+      setForcedAttributes(true);
+      setAttributes(newOverriddenAttributes);
+    } else if (Object.keys(newAttributes).length === 0) {
       // reset overridden if the user reverts to the original attributes
-      setForcedAttributes({});
+      setForcedAttributes(false);
     }
     attributesForm.reset(newAttributes);
     setDirty(false);
@@ -235,8 +255,9 @@ export default function AttributesTab() {
   };
 
   const resetAttributesOverride = () => {
+    setForcedAttributes(false);
+    setNewAppliedAttributeIds([]);
     setAttributes({});
-    // attributesForm.reset({});
     setDirty(false); // we want to wait for the next render to reset with the initial attributes
   };
 

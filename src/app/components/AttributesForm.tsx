@@ -6,6 +6,7 @@ import { UseFormReturn } from "react-hook-form";
 import { PiCheckBold, PiPlusCircle, PiX, PiTrash } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import clsx from "clsx";
+import { set } from "node_modules/@types/lodash";
 
 export default function AttributesForm({
   form,
@@ -33,7 +34,9 @@ export default function AttributesForm({
   canAddRemoveFields?: boolean;
 }) {
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
-
+  const [newAppliedAttributeIds, setNewAppliedAttributeIds] = useTabState<
+    string[]
+  >("newAppliedAttributeIds", []);
   const [addingCustom, setAddingCustom] = useState(false);
   const [addCustomId, setAddCustomId] = useState("");
   const [addCustomType, setAddCustomType] = useState("string");
@@ -41,6 +44,10 @@ export default function AttributesForm({
   const formAttributesString = JSON.stringify(formAttributes, null, 2);
 
   const removeField = (key: string) => {
+    if (!newAppliedAttributeIds.includes(key)) {
+      return;
+    }
+    setNewAppliedAttributeIds(newAppliedAttributeIds.filter((k) => k !== key));
     setDirty?.(true);
     const newAttributes = form.getValues();
     delete newAttributes?.[key];
@@ -52,6 +59,7 @@ export default function AttributesForm({
     newAttributes[addCustomId] =
       addCustomType === "number" ? 0 : addCustomType === "boolean" ? false : "";
     // todo: number[], string[]
+    setNewAppliedAttributeIds([...newAppliedAttributeIds, addCustomId]);
     form.reset(newAttributes);
     setAddingCustom(false);
     setAddCustomId("");
@@ -88,12 +96,15 @@ export default function AttributesForm({
             <em className="text-2xs">No attributes found</em>
           ) : (
             Object.keys(formAttributes).map((attributeKey, i) => {
+              console.log(newAppliedAttributeIds);
               return (
                 <div key={attributeKey}>
                   <Form.Field
                     className="FormFieldInline my-1"
                     name={attributeKey}
-                    onBlur={() => {saveOnBlur?.()}}
+                    onBlur={() => {
+                      saveOnBlur?.();
+                    }}
                   >
                     <Form.Label className="FormLabel mr-1 text-nowrap">
                       <div
@@ -109,7 +120,7 @@ export default function AttributesForm({
                       schema,
                       setDirty,
                     })}
-                    {canAddRemoveFields && (
+                    {newAppliedAttributeIds.includes(attributeKey) && (
                       <Button
                         type="button"
                         size="1"
@@ -118,7 +129,7 @@ export default function AttributesForm({
                         className="ml-2 mr-1"
                         onClick={() => removeField(attributeKey)}
                       >
-                        <PiTrash />
+                        <PiX />
                       </Button>
                     )}
                   </Form.Field>
@@ -133,6 +144,9 @@ export default function AttributesForm({
             })}
             name={"__JSON_attributes__"}
             value={textareaAttributes}
+            onBlur={() => {
+              saveOnBlur?.();
+            }}
             onChange={(e) => {
               const v = e.target.value;
               setTextareaAttributes?.(v);

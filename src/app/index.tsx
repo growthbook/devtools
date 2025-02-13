@@ -154,13 +154,11 @@ export const App = () => {
                 </Tabs.Trigger>
                 <Tabs.Trigger value="attributes">
                   <span> Attributes</span>
-                  {Object.keys(forcedAttributes).length ? (
+                  {forcedAttributes? (
                     <div
                       className="inline-flex items-center justify-center text-xs font-semibold text-amber-700 bg-amber-200 rounded-full ml-1"
-                      style={{ minWidth: 20, height: 20 }}
-                    >
-                      {Object.keys(forcedAttributes).length}
-                    </div>
+                      style={{ minWidth: 10, height: 10 }}
+                     />     
                   ) : null}
                 </Tabs.Trigger>
                 <Tabs.Trigger value="logs">Event Logs</Tabs.Trigger>
