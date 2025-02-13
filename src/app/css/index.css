@@ -111,28 +111,16 @@
   @apply text-gray-600 mx-1;
 }
 /*rule statuses*/
-.rule.skipped {
-  @apply border-l-red-200;
-  .status {
-    @apply text-red-500 bg-red-100;
-  }
-}
-.rule.gates {
-  @apply border-l-pink-300;
-  .status {
-    @apply text-pink-700 bg-pink-200;
-  }
-}
-.rule.unreachable {
-  @apply border-l-slate-200;
+.rule.skipped, .rule.unreachable {
+  @apply border-l-slate-300;
   .status {
     @apply text-slate-700 bg-slate-200;
   }
 }
-.rule.matches {
-  @apply border-l-emerald-400;
+.rule.matches, .rule.gates {
+  @apply border-l-green-600;
   .status {
-    @apply text-emerald-700 bg-emerald-200;
+    @apply text-green-900 bg-green-200;
   }
 }
 .rule.overridden {
@@ -216,6 +204,11 @@
 }
 .searchBar .clear {
   margin: 0 2px;
+}
+
+.shadow-sm {
+  --tw-shadow: 0 2px 2px -1px rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 2px 2px -1px var(--tw-shadow-color);
 }
 
 .shadow-sm-up {

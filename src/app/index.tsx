@@ -19,10 +19,6 @@ import SettingsForm from "@/app/components/Settings";
 import useSdkData from "@/app/hooks/useSdkData";
 import {
   PiX,
-  PiUserFill,
-  PiFlagFill,
-  PiFlaskFill,
-  PiListChecksBold,
   PiCircleFill,
   PiGearSix,
 } from "react-icons/pi";
@@ -123,22 +119,21 @@ export const App = () => {
             className="-mx-4 my-[-2px]"
           >
             <Tabs.List>
-              <div className="flex items-end mx-auto w-[930px]">
+              <div
+                className="flex items-end mx-auto w-full"
+                style={{ maxWidth: MW }}
+              >
                 <div className="mx-2" />
                 <Tabs.Trigger value="features">
-                  <PiFlagFill className="mr-1" />
                   Features
                 </Tabs.Trigger>
                 <Tabs.Trigger value="experiments">
-                  <PiFlaskFill className="mr-1" />
                   Experiments
                 </Tabs.Trigger>
                 <Tabs.Trigger value="attributes">
-                  <PiUserFill className="mr-1" />
                   Attributes
                 </Tabs.Trigger>
                 <Tabs.Trigger value="logs">
-                  <PiListChecksBold className="mr-1" />
                   Event Logs
                 </Tabs.Trigger>
                 <Tabs.Trigger value="sdkDebug">

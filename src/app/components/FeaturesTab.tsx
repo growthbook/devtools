@@ -171,7 +171,7 @@ export default function FeaturesTab() {
               <div
                 id={`featuresTab_featureList_${fid}`}
                 key={fid}
-                className={clsx("featureCard flex pl-6", {
+                className={clsx("featureCard flex", {
                   selected: selectedFid === fid,
                 })}
                 onClick={() => clickFeature(fid)}
@@ -188,7 +188,7 @@ export default function FeaturesTab() {
                     </div>
                   )}
                   <div
-                    className={clsx("title absolute line-clamp-1 pr-6", {
+                    className={clsx("title absolute line-clamp-1 pl-6 pr-6", {
                       "top-1": !fullWidthListView,
                       "top-[25%]": fullWidthListView,
                     })}
@@ -246,7 +246,6 @@ export default function FeaturesTab() {
 
         <FeatureDetail
           selectedFid={selectedFid}
-          setSelectedFid={setSelectedFid}
           selectedFeature={selectedFeature}
           open={!!selectedFid && !!selectedFeature}
         />

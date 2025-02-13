@@ -1,9 +1,8 @@
 import { MW, NAV_H } from "@/app";
-import {Link, Switch} from "@radix-ui/themes";
+import {IconButton, Link, Switch} from "@radix-ui/themes";
 import {
-  PiArrowClockwise,
   PiArrowSquareOutBold,
-  PiCaretRightFill,
+  PiCaretRightFill, PiXBold,
 } from "react-icons/pi";
 import EditableValueField from "@/app/components/EditableValueField";
 import ValueField from "@/app/components/ValueField";
@@ -17,12 +16,10 @@ import useTabState from "@/app/hooks/useTabState";
 
 export default function FeatureDetail({
   selectedFid,
-  setSelectedFid,
   selectedFeature,
   open,
 }: {
   selectedFid?: string;
-  setSelectedFid: (f: string | undefined) => void;
   selectedFeature?: SelectedFeature;
   open: boolean;
 }) {
@@ -108,30 +105,28 @@ export default function FeatureDetail({
         <div className="content">
 
           <div className="my-1">
-            <div className="flex items-center mb-1 gap-3">
+            <div className="flex items-center justify-between mb-1 mt-2">
               <div className="label font-semibold">Current value</div>
               {overrideFeature && (
-                <div className="text-xs font-semibold text-amber-700 bg-amber-200 px-1.5 py-0.5 rounded-md">
-                  Override
-                </div>
-              )}
-              <div className="flex flex-1 items-center justify-end">
-                {selectedFid && overrideFeature ? (
-                  <Link
+                <div
+                  className="flex items-center text-xs font-semibold text-amber-700 bg-amber-200 -mt-2 pl-3 rounded-full">
+                  <span>Override</span>
+                  <IconButton
                     size="2"
-                    role="button"
-                    href="#"
+                    color="red"
+                    variant="ghost"
+                    radius="full"
+                    style={{margin: "-2px -2px -2px 4px"}}
                     onClick={(e) => {
                       e.preventDefault();
                       setOverrideFeature(false);
-                      unsetForcedFeature(selectedFid);
+                      selectedFid && unsetForcedFeature(selectedFid);
                     }}
                   >
-                    <PiArrowClockwise className="inline-block mr-0.5" />
-                    Revert
-                  </Link>
-                ) : null}
-              </div>
+                    <PiXBold/>
+                  </IconButton>
+                </div>
+              )}
             </div>
             {selectedFeature && selectedFid ? (
               <EditableValueField

@@ -1,9 +1,8 @@
 import { MW, NAV_H } from "@/app";
 import { IconButton, Link, RadioCards } from "@radix-ui/themes";
 import {
-  PiArrowClockwise,
   PiArrowSquareOutBold,
-  PiCaretRightFill, PiFlagFill, PiLinkBold, PiMonitorBold, PiWarningBold,
+  PiCaretRightFill, PiFlagFill, PiLinkBold, PiMonitorBold, PiWarningBold, PiXBold,
 } from "react-icons/pi";
 import ValueField from "@/app/components/ValueField";
 import {ConditionDisplay, ExperimentRule, getVariationColor} from "@/app/components/Rule";
@@ -19,12 +18,10 @@ import clsx from "clsx";
 
 export default function ExperimentDetail({
   selectedEid,
-  setSelectedEid,
   selectedExperiment,
   open,
 }: {
   selectedEid?: string;
-  setSelectedEid: (f: string | undefined) => void;
   selectedExperiment?: SelectedExperiment;
   open: boolean;
 }) {
@@ -107,11 +104,11 @@ export default function ExperimentDetail({
         <div className="header">
           {selectedEid && (
             <div className="flex items-start gap-2">
-              <h2 className="font-bold flex-1">{selectedEid}</h2>
+              <h2 className="font-bold flex-1">{selectedExperiment?.experiment?.name || selectedEid}</h2>
               <Link
                 size="2"
                 className="flex-shrink-0 font-semibold mt-0.5 -mr-1 ml-2"
-                href={`${appOrigin}/experiment/${selectedEid}`}
+                href={`${appOrigin}/experiments/lookup/?trackingKey=${selectedEid}`}
                 target="_blank"
               >
                 GrowthBook
@@ -126,30 +123,27 @@ export default function ExperimentDetail({
 
         <div className="content">
           <div className="my-1">
-            <div className="flex items-center mb-1 gap-3">
+            <div className="flex items-center justify-between mb-1 mt-2">
               <div className="label font-semibold">{overrideExperiment ? "Forced variation" : "Current variation"}</div>
               {overrideExperiment && (
-                <div className="text-xs font-semibold text-amber-700 bg-amber-200 px-1.5 py-0.5 rounded-md">
-                  Override
-                </div>
-              )}
-              <div className="flex flex-1 items-center justify-end">
-                {selectedEid && overrideExperiment ? (
-                  <Link
+                <div className="flex items-center text-xs font-semibold text-amber-700 bg-amber-200 -mt-2 pl-3 rounded-full">
+                  <span>Override</span>
+                  <IconButton
                     size="2"
-                    role="button"
-                    href="#"
+                    color="red"
+                    variant="ghost"
+                    radius="full"
+                    style={{margin: "0 0 0 4px"}}
                     onClick={(e) => {
                       e.preventDefault();
                       setOverrideExperiment(false);
-                      unsetForcedVariation(selectedEid);
+                      selectedFid && unsetForcedVariation(selectedFid);
                     }}
                   >
-                    <PiArrowClockwise className="inline-block mr-0.5"/>
-                    Revert
-                  </Link>
-                ) : null}
-              </div>
+                    <PiXBold/>
+                  </IconButton>
+                </div>
+              )}
             </div>
 
             {selectedExperiment && selectedEid ? (
@@ -179,7 +173,7 @@ export default function ExperimentDetail({
                 <div className="flex items-center text-md font-semibold mb-1">
                   <span>Status</span>
                   <div className={clsx("inline-block ml-3 capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md", {
-                    "text-emerald-700 bg-emerald-200": status,
+                    "text-green-900 bg-green-200": status,
                     "text-red-500 bg-red-100": !status,
                   })}>
                     {status ? "In experiment" : "Not in experiment"}
@@ -278,7 +272,7 @@ export default function ExperimentDetail({
                     <div>
                       {isURLTargeted(url, [pattern]) ? (
                         <div
-                          className="text-emerald-700 bg-emerald-200 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                          className="text-green-900 bg-green-200 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
                           Current URL targeted
                         </div>
                       ) : (
@@ -393,10 +387,10 @@ function EditableVariationField({
       <RadioCards.Root
         value={value + ""}
         onValueChange={(s: string) => setValue(parseInt(s))}
-        gap="1"
+        gap="2"
       >
         {variationsMeta.map((meta, i) => (
-          <RadioCards.Item key={meta.key} value={i + ""} className="px-2.5 py-2">
+          <RadioCards.Item key={meta.key} value={i + ""} className="px-2.5 py-2.5">
             <div className="flex gap-2 items-center cursor-pointer">
               <VariationIcon i={i} />
               <div className="text-xs line-clamp-2 leading-4">

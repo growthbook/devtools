@@ -169,13 +169,13 @@ export default function ExperimentsTab() {
               <div
                 id={`experimentsTab_experimentList_${eid}`}
                 key={eid}
-                className={clsx("featureCard flex pl-6", {
+                className={clsx("featureCard flex", {
                   selected: selectedEid === eid,
                 })}
                 onClick={() => clickExperiment(eid)}
               >
                 <div
-                  className="title line-clamp-1 pr-6"
+                  className="title line-clamp-1 pl-6 pr-6"
                   style={{width: fullWidthListView ? col1 : undefined}}
                 >
                   {isForced && !fullWidthListView && (
@@ -234,7 +234,6 @@ export default function ExperimentsTab() {
 
         <ExperimentDetail
           selectedEid={selectedEid}
-          setSelectedEid={setSelectedEid}
           selectedExperiment={selectedExperiment}
           open={!!selectedEid && !!selectedExperiment}
         />
