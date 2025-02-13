@@ -108,15 +108,14 @@ export default function FeatureDetail({
             <div className="flex items-center justify-between mb-1 mt-2">
               <div className="label font-semibold">Current value</div>
               {overrideFeature && (
-                <div
-                  className="flex items-center text-xs font-semibold text-amber-700 bg-amber-200 -mt-2 pl-3 rounded-full">
+                <div className="flex items-center text-xs font-semibold text-amber-700 bg-amber-200 -mt-2 pl-3 rounded-full">
                   <span>Override</span>
                   <IconButton
                     size="2"
                     color="red"
                     variant="ghost"
                     radius="full"
-                    style={{margin: "-2px -2px -2px 4px"}}
+                    style={{margin: "0 0 0 4px"}}
                     onClick={(e) => {
                       e.preventDefault();
                       setOverrideFeature(false);

@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-export type DebugLogs = [string, any][];
+export type DebugLog = [string, any];
 
 export type CopyMode = "energetic" | "concise" | "humorous";
 

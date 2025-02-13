@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import {
   ConditionInterface,
-  FeatureDefinition,
   FeatureRule,
   ParentConditionInterface,
 } from "@growthbook/growthbook";
@@ -11,8 +10,9 @@ import { Checkbox, Link, Progress } from "@radix-ui/themes";
 import useTabState from "@/app/hooks/useTabState";
 import { PiCaretRightFill, PiFlagFill, PiFlaskFill } from "react-icons/pi";
 import { EvaluatedFeature } from "@/app/hooks/useGBSandboxEval";
-import { DebugLogs } from "devtools";
+import { DebugLog } from "devtools";
 import * as Accordion from "@radix-ui/react-accordion";
+import DebugLogger from "@/app/components/DebugLogger";
 
 type RuleType = "force" | "rollout" | "experiment" | "prerequisite";
 
@@ -49,7 +49,7 @@ export default function Rule({
 
   const debug = evaluatedFeature?.debug || [];
   const debugForRule = useMemo(() => {
-    const d: DebugLogs = [];
+    const d: DebugLog[] = [];
     let r = 0; // current parent rule number
     debug.forEach((item, itemNo) => {
       // If the log id matches our feature's id, assume we can rely on the log's
@@ -235,23 +235,7 @@ export default function Rule({
         />
       )}
       <div className="pt-1 border-t border-t-slate-200">
-        <Accordion.Root className="accordion" type="single" collapsible>
-          <Accordion.Item value="debug-log">
-            <Accordion.Trigger className="trigger mb-0.5">
-              <Link size="2" role="button" className="hover:underline">
-                <PiCaretRightFill className="caret mr-0.5" size={12} />
-                Debug Log
-              </Link>
-            </Accordion.Trigger>
-            <Accordion.Content className="accordionInner overflow-hidden w-full py-2">
-              <ValueField
-                value={debugForRule}
-                valueType="json"
-                maxHeight={200}
-              />
-            </Accordion.Content>
-          </Accordion.Item>
-        </Accordion.Root>
+        <DebugLogger startCollapsed={true} logs={debugForRule} />
       </div>
     </div>
   );

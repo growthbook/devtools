@@ -35,8 +35,14 @@ export const App = () => {
     undefined,
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
-  const [features] = useTabState("features", {});
-  const [experiments] = useTabState("experiments", []);
+  const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
+    "forcedFeatures",
+    {},
+  );
+  const [forcedVariations, setForcedVariations] = useTabState<
+    Record<string, any>
+  >("forcedVariations", {});
+
   const { canConnect, hasPayload } = useSdkData();
   let sdkStatus = canConnect ? "green" : hasPayload ? "yellow" : "red";
   const refresh = () => {
@@ -125,10 +131,26 @@ export const App = () => {
               >
                 <div className="mx-2" />
                 <Tabs.Trigger value="features">
-                  Features
+                  <span>Features</span>
+                  {Object.keys(forcedFeatures).length ? (
+                    <div
+                      className="inline-flex items-center justify-center text-xs font-semibold text-amber-700 bg-amber-200 rounded-full ml-1"
+                      style={{ minWidth: 20, height: 20 }}
+                    >
+                      {Object.keys(forcedFeatures).length}
+                    </div>
+                  ) : null}
                 </Tabs.Trigger>
                 <Tabs.Trigger value="experiments">
-                  Experiments
+                  <span>Experiments</span>
+                  {Object.keys(forcedVariations).length ? (
+                    <div
+                      className="inline-flex items-center justify-center text-xs font-semibold text-amber-700 bg-amber-200 rounded-full ml-1"
+                      style={{ minWidth: 20, height: 20 }}
+                    >
+                      {Object.keys(forcedVariations).length}
+                    </div>
+                  ) : null}
                 </Tabs.Trigger>
                 <Tabs.Trigger value="attributes">
                   Attributes

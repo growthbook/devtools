@@ -8,19 +8,19 @@ import {
   Result,
 } from "@growthbook/growthbook";
 import useTabState from "@/app/hooks/useTabState";
-import { DebugLogs } from "devtools";
+import { DebugLog } from "devtools";
 import { getFeatureExperiments } from "@/app/components/ExperimentsTab";
 import useSdkData from "./useSdkData";
 
 export type EvaluatedFeature = {
   result: FeatureResult;
-  debug: DebugLogs;
+  debug: DebugLog[];
 };
 
 export type EvaluatedExperiment = {
   key: string;
   result: Result<any>;
-  debug: DebugLogs;
+  debug: DebugLog[];
 };
 
 export default function useGBSandboxEval() {
@@ -43,7 +43,7 @@ export default function useGBSandboxEval() {
   const forcedFeaturesMap = new Map(Object.entries(forcedFeatures));
 
   return useMemo(() => {
-    let log: DebugLogs = [];
+    let log: DebugLog[] = [];
 
     const featureExperiments = getFeatureExperiments(features);
 
