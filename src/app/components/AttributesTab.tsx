@@ -218,7 +218,9 @@ export default function AttributesTab() {
 
   const resetAttributesOverride = () => {
     setAttributes({});
-    attributesForm.reset(attributes);
+    // attributesForm.reset({});
+    setDirty(false); // we want to wait for the next render to reset with the initial attributes
+
   }
 
   // listen to SDK changes to set attributes form
@@ -239,30 +241,6 @@ export default function AttributesTab() {
       }}
     >
       <div className="flex justify-between items-top h-[100%]">
-        <div className="w-[50%] pr-2 h-[100%]">
-          <div>
-            <Flex style={{ height: LABEL_H }}>
-              <Text
-                my="2"
-                weight="medium"
-                color="gray"
-                size="1"
-                className="uppercase"
-              >
-                Archetypes
-              </Text>
-            </Flex>
-            <ArchetypesList
-              archetypes={archetypes}
-              selectedArchetypeId={selectedArchetypeId}
-              setSelectedArchetypeId={setSelectedArchetypeId}
-              appliedArchetypeId={appliedArchetypeId}
-              applyArchetype={applyArchetype}
-              deleteArchetype={deleteArchetype}
-              renameArchetype={renameArchetype}
-            />
-          </div>
-        </div>
         <div className="w-[50%] pl-1 h-[100%]">
           <Flex style={{ height: LABEL_H }} align="center">
             <Text
@@ -319,12 +297,11 @@ export default function AttributesTab() {
                     setDirty(true);
                     // I'm not sure why, but this reset doesn't apply the first time it's called.
                     // TODO: debug this and remove the extra call
-                    attributesForm.reset({});
-                    attributesForm.reset({});
+                    resetAttributesOverride();
                   }}
                 >
                   <PiTrash />
-                  Clear
+                  Reset Attributes
                 </Button>
               </Flex>
             </Flex>
