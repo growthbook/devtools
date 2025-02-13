@@ -7,7 +7,7 @@ import {
   Dialog,
   Tabs,
 } from "@radix-ui/themes";
-import React, { useEffect, useState } from "react";
+import React, { Attributes, useEffect, useState } from "react";
 import logo from "./logo.svg";
 import useTabState from "@/app/hooks/useTabState";
 import SdkTab from "./components/SdkTab";
@@ -17,11 +17,7 @@ import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
 import SettingsForm from "@/app/components/Settings";
 import useSdkData from "@/app/hooks/useSdkData";
-import {
-  PiX,
-  PiCircleFill,
-  PiGearSix,
-} from "react-icons/pi";
+import { PiX, PiCircleFill, PiGearSix } from "react-icons/pi";
 import clsx from "clsx";
 
 export const MW = 1200; // max-width
@@ -32,17 +28,21 @@ export const App = () => {
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
     "sdkFound",
-    undefined,
+    undefined
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
-    {},
+    {}
   );
   const [forcedVariations, setForcedVariations] = useTabState<
     Record<string, any>
   >("forcedVariations", {});
 
+  const [forcedAttributes, _setForcedAttributes] = useTabState<Attributes>(
+    "forcedAttributes",
+    {}
+  );
   const { canConnect, hasPayload } = useSdkData();
   let sdkStatus = canConnect ? "green" : hasPayload ? "yellow" : "red";
   const refresh = () => {
@@ -153,11 +153,17 @@ export const App = () => {
                   ) : null}
                 </Tabs.Trigger>
                 <Tabs.Trigger value="attributes">
-                  Attributes
+                  <span> Attributes</span>
+                  {Object.keys(forcedAttributes).length ? (
+                    <div
+                      className="inline-flex items-center justify-center text-xs font-semibold text-amber-700 bg-amber-200 rounded-full ml-1"
+                      style={{ minWidth: 20, height: 20 }}
+                    >
+                      {Object.keys(forcedAttributes).length}
+                    </div>
+                  ) : null}
                 </Tabs.Trigger>
-                <Tabs.Trigger value="logs">
-                  Event Logs
-                </Tabs.Trigger>
+                <Tabs.Trigger value="logs">Event Logs</Tabs.Trigger>
                 <Tabs.Trigger value="sdkDebug">
                   <div
                     className={clsx("inline-block mr-1", {

@@ -8,7 +8,6 @@ import {
   Checkbox,
   Container,
   Flex,
-  Link,
   Popover,
   RadioGroup,
   Text,
@@ -16,18 +15,12 @@ import {
 import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
-import {
-  PiArrowClockwise,
-  PiArrowSquareOutBold,
-  PiAsterisk,
-  PiTrash,
-} from "react-icons/pi";
+import { PiArrowClockwise, PiAsterisk, PiTrash } from "react-icons/pi";
 import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
-import ArchetypesList from "./ArchetypesList";
 import { MW } from "@/app";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
-import { at } from "node_modules/@types/lodash";
+import { over } from "node_modules/@types/lodash";
 
 export default function AttributesTab() {
   const LABEL_H = 32;
@@ -44,6 +37,10 @@ export default function AttributesTab() {
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
     false
+  );
+  const [forcedAttributes, setForcedAttributes] = useTabState<Attributes>(
+    "forcedAttributes",
+    {}
   );
   const [appOrigin] = useGlobalState(APP_ORIGIN, CLOUD_APP_ORIGIN, true);
 
@@ -148,7 +145,9 @@ export default function AttributesTab() {
       (archetype) => archetype.name === saveArchetypeForm.watch("name")
     );
 
-  const [appliedArchetypeId, setAppliedArchetypeId] = useState("");
+  const [appliedArchetypeId, setAppliedArchetypeId] = useTabState<
+    string | undefined
+  >("appliedArchetypeId", undefined);
   const appliedArchetype = useMemo(() => {
     const arch = archetypes.find((arch) => arch.id === appliedArchetypeId);
     if (arch?.source !== "local") {
@@ -156,7 +155,6 @@ export default function AttributesTab() {
     }
     return arch;
   }, [appliedArchetypeId]);
-
   const canSaveToExistingArchetype = appliedArchetype?.source === "local";
 
   const submitArchetypeForm = (e: React.SyntheticEvent) => {
@@ -194,6 +192,7 @@ export default function AttributesTab() {
   const applyAttributes = () => {
     let newAttributes: Attributes;
     if (!jsonMode) {
+      // check to see if the two objects are the same to avoid unnecessary updates
       newAttributes = formAttributes;
     } else {
       try {
@@ -206,7 +205,26 @@ export default function AttributesTab() {
         return;
       }
     }
-    setAttributes(newAttributes);
+
+    // get all the attributes that are different from the original and return them as an object
+    const newOverriddenAttributes = Object.fromEntries(
+      Object.keys(newAttributes)
+        .filter((key: string) => newAttributes[key] !== attributes[key])
+        .map((key: string) => [key, newAttributes[key]])
+    );
+    console.log(
+      "newOverriddenAttributes",
+      newOverriddenAttributes,
+      newOverriddenAttributes.length
+    );
+    if (Object.keys(newOverriddenAttributes).length > 0) {
+      setForcedAttributes({ ...forcedAttributes, ...newOverriddenAttributes });
+      setAttributes(newAttributes);
+    }
+    if (Object.keys(newAttributes).length === 0) {
+      // reset overridden if the user reverts to the original attributes
+      setForcedAttributes({});
+    }
     attributesForm.reset(newAttributes);
     setDirty(false);
   };
@@ -220,8 +238,7 @@ export default function AttributesTab() {
     setAttributes({});
     // attributesForm.reset({});
     setDirty(false); // we want to wait for the next render to reset with the initial attributes
-
-  }
+  };
 
   // listen to SDK changes to set attributes form
   useEffect(() => {
@@ -241,7 +258,7 @@ export default function AttributesTab() {
       }}
     >
       <div className="flex justify-between items-top h-[100%]">
-        <div className="w-[50%] pl-1 h-[100%]">
+        <div className="w-[100%] pl-1 h-[100%]">
           <Flex style={{ height: LABEL_H }} align="center">
             <Text
               my="2"
@@ -250,7 +267,9 @@ export default function AttributesTab() {
               size="1"
               className="uppercase"
             >
-              User Attributes
+              {Object.keys(forcedAttributes).length > 0
+                ? appliedArchetype?.name || "Custom Attributes"
+                : "User Attributes"}
             </Text>
           </Flex>
           <div
@@ -289,9 +308,9 @@ export default function AttributesTab() {
                   <span>JSON input</span>
                 </label>
                 <Button
-                  mx="2"
+                  mx="3"
                   size="1"
-                  variant="outline"
+                  variant="ghost"
                   color="red"
                   onClick={() => {
                     setDirty(true);
@@ -300,8 +319,7 @@ export default function AttributesTab() {
                     resetAttributesOverride();
                   }}
                 >
-                  <PiTrash />
-                  Reset Attributes
+                  Reset
                 </Button>
               </Flex>
             </Flex>
@@ -321,6 +339,7 @@ export default function AttributesTab() {
                 textareaError={textareaError}
                 setTextareaError={setTextareaError}
                 schema={attributeSchema}
+                saveOnBlur={applyAttributes}
               />
             </Container>
             <Flex
@@ -393,22 +412,6 @@ export default function AttributesTab() {
                   </Form.Root>
                 </Popover.Content>
               </Popover.Root>
-              <Flex px="1" align="center">
-                <Button
-                  disabled={!dirty}
-                  size="2"
-                  variant="ghost"
-                  role="button"
-                  onClick={resetAttributes}
-                  mr="4"
-                >
-                  <PiArrowClockwise />
-                  Revert
-                </Button>
-                <Button disabled={!dirty} size="2" onClick={applyAttributes}>
-                  Apply
-                </Button>
-              </Flex>
             </Flex>
           </div>
         </div>

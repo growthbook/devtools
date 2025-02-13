@@ -17,6 +17,7 @@ export default function AttributesForm({
   textareaError,
   setTextareaError,
   schema,
+  saveOnBlur,
   canAddRemoveFields = true,
 }: {
   form: UseFormReturn<Attributes>;
@@ -28,6 +29,7 @@ export default function AttributesForm({
   textareaError?: boolean;
   setTextareaError?: (v: boolean) => void;
   schema?: Record<string, string>;
+  saveOnBlur?: () => void;
   canAddRemoveFields?: boolean;
 }) {
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
@@ -91,6 +93,7 @@ export default function AttributesForm({
                   <Form.Field
                     className="FormFieldInline my-1"
                     name={attributeKey}
+                    onBlur={() => {saveOnBlur?.()}}
                   >
                     <Form.Label className="FormLabel mr-1 text-nowrap">
                       <div
