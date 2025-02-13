@@ -17,7 +17,7 @@ import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
 import SettingsForm from "@/app/components/Settings";
 import useSdkData from "@/app/hooks/useSdkData";
-import { PiX, PiCircleFill, PiGearSix } from "react-icons/pi";
+import {PiX, PiCircleFill, PiGearSix, PiExclamationMarkBold} from "react-icons/pi";
 import clsx from "clsx";
 
 export const MW = 1200; // max-width
@@ -157,8 +157,10 @@ export const App = () => {
                   {forcedAttributes? (
                     <div
                       className="inline-flex items-center justify-center text-xs font-semibold text-amber-700 bg-amber-200 rounded-full ml-1"
-                      style={{ minWidth: 10, height: 10 }}
-                     />     
+                      style={{ minWidth: 20, height: 20 }}
+                    >
+                      <PiExclamationMarkBold />
+                    </div>
                   ) : null}
                 </Tabs.Trigger>
                 <Tabs.Trigger value="logs">Event Logs</Tabs.Trigger>
