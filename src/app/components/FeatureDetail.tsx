@@ -1,9 +1,8 @@
 import { MW, NAV_H } from "@/app";
-import {IconButton, Link, Switch} from "@radix-ui/themes";
+import {Link, Switch} from "@radix-ui/themes";
 import {
   PiArrowClockwise,
   PiArrowSquareOutBold,
-  PiCaretLeftBold,
   PiCaretRightFill,
 } from "react-icons/pi";
 import EditableValueField from "@/app/components/EditableValueField";
@@ -20,10 +19,12 @@ export default function FeatureDetail({
   selectedFid,
   setSelectedFid,
   selectedFeature,
+  open,
 }: {
-  selectedFid: string;
+  selectedFid?: string;
   setSelectedFid: (f: string | undefined) => void;
-  selectedFeature: SelectedFeature;
+  selectedFeature?: SelectedFeature;
+  open: boolean;
 }) {
   const [appOrigin] = useGlobalState(APP_ORIGIN, CLOUD_APP_ORIGIN, true);
 
@@ -66,59 +67,46 @@ export default function FeatureDetail({
     }
   }, [selectedFid, JSON.stringify(forcedFeatures)]);
 
-  const fullWidthListView = !selectedFid || !selectedFeature;
-  const leftPercent = fullWidthListView ? 1 : LEFT_PERCENT;
-  const rightPercent = 1 - leftPercent;
+  const rightPercent = 1 - LEFT_PERCENT;
 
   return (
     <div
-      className="fixed overflow-y-auto bg-white"
+      className="featureDetailWrapper fixed overflow-y-auto bg-white"
       style={{
         top: NAV_H + HEADER_H,
         height: `calc(100vh - ${NAV_H + HEADER_H}px)`,
         width: `${rightPercent * 100}vw`,
         maxWidth: MW * rightPercent,
-        right: `calc(max((100vw - ${MW}px)/2, 0px))`,
+        right: open
+          ? `calc(max((100vw - ${MW}px)/2 + 8px, 0px))`
+          : `-${rightPercent * 100}vw`,
         zIndex: 1000,
+        pointerEvents: !open ? "none" : undefined,
       }}
     >
       <div className="featureDetail" key={`selected_${selectedFid}`}>
         <div className="header">
-          <Link
-            role="button"
-            className="absolute"
-            style={{
-              top: 16,
-              left: 4,
-              zIndex: 1001,
-            }}
-            onClick={(e) => {
-              e.preventDefault();
-              setSelectedFid(undefined);
-            }}
-          >
-            <IconButton size="1" variant="ghost" radius="full">
-              <PiCaretLeftBold />
-            </IconButton>
-          </Link>
-          <div className="flex items-start gap-2">
-            <h2 className="font-bold flex-1">{selectedFid}</h2>
-            <Link
-              size="2"
-              className="flex-shrink-0 font-semibold mt-0.5 -mr-1 ml-2"
-              href={`${appOrigin}/features/${selectedFid}`}
-              target="_blank"
-            >
-              GrowthBook
-              <PiArrowSquareOutBold
-                size={16}
-                className="inline-block mb-1 ml-0.5"
-              />
-            </Link>
-          </div>
+          {selectedFid && (
+            <div className="flex items-start gap-2">
+              <h2 className="font-bold flex-1">{selectedFid}</h2>
+                <Link
+                  size="2"
+                  className="flex-shrink-0 font-semibold mt-0.5 -mr-1 ml-2"
+                  href={`${appOrigin}/features/${selectedFid}`}
+                  target="_blank"
+                >
+                  GrowthBook
+                  <PiArrowSquareOutBold
+                    size={16}
+                    className="inline-block mb-1 ml-0.5"
+                  />
+                </Link>
+            </div>
+          )}
         </div>
 
         <div className="content">
+
           <div className="my-1">
             <div className="flex items-center mb-1 gap-3">
               <div className="label font-semibold">Current value</div>
@@ -128,7 +116,7 @@ export default function FeatureDetail({
                 </div>
               )}
               <div className="flex flex-1 items-center justify-end">
-                {overrideFeature && (
+                {selectedFid && overrideFeature ? (
                   <Link
                     size="2"
                     role="button"
@@ -142,17 +130,19 @@ export default function FeatureDetail({
                     <PiArrowClockwise className="inline-block mr-0.5" />
                     Revert
                   </Link>
-                )}
+                ) : null}
               </div>
             </div>
-            <EditableValueField
-              value={selectedFeature?.evaluatedFeature?.result?.value}
-              setValue={(v) => {
-                setForcedFeature(selectedFid, v);
-                setOverrideFeature(true);
-              }}
-              valueType={selectedFeature?.valueType}
-            />
+            {selectedFeature && selectedFid ? (
+              <EditableValueField
+                value={selectedFeature?.evaluatedFeature?.result?.value}
+                setValue={(v) => {
+                  setForcedFeature(selectedFid, v);
+                  setOverrideFeature(true);
+                }}
+                valueType={selectedFeature?.valueType}
+              />
+            ) : null}
           </div>
 
           <div className="flex justify-between items-end mt-6 mb-2 py-1 text-md font-semibold border-b border-slate-200">
@@ -181,7 +171,7 @@ export default function FeatureDetail({
             </div>
           ) : null}
 
-          {(selectedFeature?.feature?.rules ?? []).length ? (
+          {selectedFid && (selectedFeature?.feature?.rules ?? []).length ? (
             <>
               {selectedFeature?.feature?.rules?.map((rule, i) => {
                 return (
@@ -199,53 +189,55 @@ export default function FeatureDetail({
             </>
           ) : null}
 
-          <div className="mt-3 mb-1">
-            {debugLog ? (
+          {selectedFeature ? (
+            <div className="mt-3 mb-1">
+              {debugLog ? (
+                <Accordion.Root
+                  className="accordion mt-2"
+                  type="single"
+                  collapsible
+                >
+                  <Accordion.Item value="debug-log">
+                    <Accordion.Trigger className="trigger mb-0.5">
+                      <Link size="2" role="button" className="hover:underline">
+                        <PiCaretRightFill className="caret mr-0.5" size={12} />
+                        Full debug log
+                      </Link>
+                    </Accordion.Trigger>
+                    <Accordion.Content className="accordionInner overflow-hidden w-full">
+                      <ValueField
+                        value={debugLog}
+                        valueType="json"
+                        maxHeight={200}
+                      />
+                    </Accordion.Content>
+                  </Accordion.Item>
+                </Accordion.Root>
+              ) : null}
+
               <Accordion.Root
                 className="accordion mt-2"
                 type="single"
                 collapsible
               >
-                <Accordion.Item value="debug-log">
+                <Accordion.Item value="feature-definition">
                   <Accordion.Trigger className="trigger mb-0.5">
                     <Link size="2" role="button" className="hover:underline">
                       <PiCaretRightFill className="caret mr-0.5" size={12} />
-                      Full debug log
+                      Full feature definition
                     </Link>
                   </Accordion.Trigger>
                   <Accordion.Content className="accordionInner overflow-hidden w-full">
                     <ValueField
-                      value={debugLog}
+                      value={selectedFeature.feature}
                       valueType="json"
-                      maxHeight={200}
+                      maxHeight={null}
                     />
                   </Accordion.Content>
                 </Accordion.Item>
               </Accordion.Root>
-            ) : null}
-
-            <Accordion.Root
-              className="accordion mt-2"
-              type="single"
-              collapsible
-            >
-              <Accordion.Item value="feature-definition">
-                <Accordion.Trigger className="trigger mb-0.5">
-                  <Link size="2" role="button" className="hover:underline">
-                    <PiCaretRightFill className="caret mr-0.5" size={12} />
-                    Full feature definition
-                  </Link>
-                </Accordion.Trigger>
-                <Accordion.Content className="accordionInner overflow-hidden w-full">
-                  <ValueField
-                    value={selectedFeature.feature}
-                    valueType="json"
-                    maxHeight={null}
-                  />
-                </Accordion.Content>
-              </Accordion.Item>
-            </Accordion.Root>
-          </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

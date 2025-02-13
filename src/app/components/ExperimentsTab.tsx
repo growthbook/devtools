@@ -11,13 +11,13 @@ import useGBSandboxEval, {
 import { Button } from "@radix-ui/themes";
 import {
   PiCircleFill, PiDesktopFill, PiFlagFill, PiLinkBold,
-  PiListBold, PiMonitorBold,
+  PiListBold,
 } from "react-icons/pi";
 import clsx from "clsx";
 import { MW } from "@/app";
 import {useSearch} from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
-import ExperimentDetail, {VariationIcon, VariationSummary} from "@/app/components/ExperimentDetail";
+import ExperimentDetail, {VariationIcon, getVariationSummary} from "@/app/components/ExperimentDetail";
 import {getFeatureDetails} from "@/app/components/FeaturesTab";
 import {ValueType} from "@/app/components/ValueField";
 
@@ -133,9 +133,6 @@ export default function ExperimentsTab() {
             </>
           ) : (
             <>
-              {/*<label className="uppercase text-slate-11 ml-6">*/}
-              {/*  Experiment Details*/}
-              {/*</label>*/}
               <Button
                 className="absolute right-3"
                 style={{marginRight: 0}}
@@ -172,25 +169,21 @@ export default function ExperimentsTab() {
               <div
                 id={`experimentsTab_experimentList_${eid}`}
                 key={eid}
-                className={clsx("featureCard", {
+                className={clsx("featureCard flex pl-6", {
                   selected: selectedEid === eid,
-                  flex: fullWidthListView,
-                  "px-6": !fullWidthListView,
                 })}
                 onClick={() => clickExperiment(eid)}
               >
                 <div
-                  className={clsx("title", {
-                    "text-amber-700": isForced,
-                    "text-indigo-12": !isForced,
-                    "flex-shrink-0 px-6": fullWidthListView,
-                  })}
+                  className="title line-clamp-1 pr-6"
                   style={{width: fullWidthListView ? col1 : undefined}}
                 >
                   {isForced && !fullWidthListView && (
-                    <div className="absolute" style={{left: 6, top: 10}}>
-                      <PiCircleFill size={10} className="text-amber-600"/>
-                    </div>
+                    <PiCircleFill
+                      size={10}
+                      className="absolute text-amber-600"
+                      style={{top: "50%", left: 6, marginTop: -4}}
+                    />
                   )}
                   {eid}
                 </div>
@@ -202,46 +195,31 @@ export default function ExperimentsTab() {
                     {types ? (
                       <div className="flex items-center gap-2">
                         {types.redirect ? (
-                          <PiLinkBold size={12} />
-                        ): null}
+                          <PiLinkBold size={12}/>
+                        ) : null}
                         {types.visual ? (
-                          <PiDesktopFill size={12} />
-                        ): null}
+                          <PiDesktopFill size={12}/>
+                        ) : null}
                         {types.features ? (
-                          <PiFlagFill size={12} />
-                        ): null}
+                          <PiFlagFill size={12}/>
+                        ) : null}
                       </div>
                     ) : null}
                   </div>
                 )}
-                <div
-                  className={clsx("value flex-shrink-0", {
-                    "w-full text-right pl-[50%] relative top-[-2px]":
-                      !fullWidthListView,
-                    "flex gap-2 items-center": fullWidthListView,
-                  })}
-                  style={{width: fullWidthListView ? col3 : undefined}}
-                >
-                  {!fullWidthListView && types ? (
-                    <div className="inline-block mr-3 relative" style={{ top: 2 }}>
-                      {types.redirect ? (
-                        <PiLinkBold size={12} />
-                      ): null}
-                      {types.visual ? (
-                        <PiDesktopFill size={12} />
-                      ): null}
-                      {types.features ? (
-                        <PiFlagFill size={12} />
-                      ): null}
+
+                {fullWidthListView && (
+                  <div
+                    className="value flex-shrink-0 flex gap-2 items-center"
+                    style={{ width: col3 }}
+                  >
+                    <div className="line-clamp-1">
+                      <VariationIcon i={value} size={14} className="mr-1" />
+                      {getVariationSummary({experiment, i})}
                     </div>
-                  ) : null}
-                  <VariationIcon i={value} size={14} />
-                  {fullWidthListView && (
-                    <div className="line-clamp-3">
-                      <VariationSummary experiment={experiment} i={value || 0} />
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
+
                 {fullWidthListView && (
                   <div className="flex justify-center" style={{width: col4}}>
                     {isForced && (
@@ -254,13 +232,12 @@ export default function ExperimentsTab() {
           })}
         </div>
 
-        {!!selectedEid && !!selectedExperiment && (
-          <ExperimentDetail
-            selectedEid={selectedEid}
-            setSelectedEid={setSelectedEid}
-            selectedExperiment={selectedExperiment}
-          />
-        )}
+        <ExperimentDetail
+          selectedEid={selectedEid}
+          setSelectedEid={setSelectedEid}
+          selectedExperiment={selectedExperiment}
+          open={!!selectedEid && !!selectedExperiment}
+        />
       </div>
     </>
   );

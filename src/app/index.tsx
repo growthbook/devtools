@@ -28,7 +28,7 @@ import {
 } from "react-icons/pi";
 import clsx from "clsx";
 
-export const MW = 900; // max-width
+export const MW = 1200; // max-width
 export const NAV_H = 80;
 
 export const App = () => {

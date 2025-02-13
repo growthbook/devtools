@@ -132,9 +132,6 @@ export default function FeaturesTab() {
             </>
           ) : (
             <>
-              {/*<label className="uppercase text-slate-11 ml-6">*/}
-              {/*  Feature Details*/}
-              {/*</label>*/}
               <Button
                 className="absolute right-3"
                 style={{ marginRight: 0 }}
@@ -169,22 +166,19 @@ export default function FeaturesTab() {
               ? JSON.stringify(evaluatedFeature.result?.value)
               : "null";
             const isBoolean = valueStr === "true" || valueStr === "false";
+
             return (
               <div
                 id={`featuresTab_featureList_${fid}`}
                 key={fid}
-                className={clsx("featureCard", {
+                className={clsx("featureCard flex pl-6", {
                   selected: selectedFid === fid,
-                  flex: fullWidthListView,
-                  "px-6": !fullWidthListView,
                 })}
                 onClick={() => clickFeature(fid)}
               >
                 <div
-                  className={clsx("title", {
-                    "text-amber-700": isForced,
-                    "text-indigo-12": !isForced,
-                    "flex-shrink-0 px-6": fullWidthListView,
+                  className={clsx({
+                    "flex-shrink-0": fullWidthListView,
                   })}
                   style={{ width: fullWidthListView ? col1 : undefined }}
                 >
@@ -193,7 +187,15 @@ export default function FeaturesTab() {
                       <PiCircleFill size={10} className="text-amber-600" />
                     </div>
                   )}
-                  {fid}
+                  <div
+                    className={clsx("title absolute line-clamp-1 pr-6", {
+                      "top-1": !fullWidthListView,
+                      "top-[25%]": fullWidthListView,
+                    })}
+                    style={{ width: fullWidthListView ? col1 : undefined }}
+                  >
+                    {fid}
+                  </div>
                 </div>
                 {fullWidthListView && (
                   <div
@@ -213,9 +215,9 @@ export default function FeaturesTab() {
                 <div
                   className={clsx("value flex-shrink-0", {
                     uppercase: isBoolean,
-                    "w-full text-right pl-[50%] line-clamp-1":
+                    "absolute bottom-1 right-6 line-clamp-1 max-w-[40%]":
                       !fullWidthListView,
-                    "line-clamp-3": fullWidthListView,
+                    "line-clamp-2": fullWidthListView,
                   })}
                   style={{ width: fullWidthListView ? col3 : undefined }}
                 >
@@ -242,13 +244,12 @@ export default function FeaturesTab() {
           })}
         </div>
 
-        {!!selectedFid && !!selectedFeature && (
-          <FeatureDetail
-            selectedFid={selectedFid}
-            setSelectedFid={setSelectedFid}
-            selectedFeature={selectedFeature}
-          />
-        )}
+        <FeatureDetail
+          selectedFid={selectedFid}
+          setSelectedFid={setSelectedFid}
+          selectedFeature={selectedFeature}
+          open={!!selectedFid && !!selectedFeature}
+        />
       </div>
     </>
   );

@@ -76,11 +76,15 @@
 }
 .featureCard .title {
   @apply text-sm font-semibold;
+  transition: 100ms all;
 }
 .featureCard .value {
   @apply text-indigo-12 text-xs break-all;
 }
 
+.featureDetailWrapper {
+  transition: 150ms all;
+}
 .featureDetail {
   @apply bg-violet-2;
 }
