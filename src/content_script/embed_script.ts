@@ -119,7 +119,6 @@ function setupListeners() {
         updateExperiments(message.data);
         break;
       case "GB_REQUEST_REFRESH":
-        console.log("GB_REQUEST_REFRESH embed_script.ts");
         pushAppUpdates();
         break;
       default:
@@ -226,8 +225,8 @@ function subscribeToSdkChanges(
   gb.setAttributeOverrides = async (attributes: Attributes) => {
     await _setAttributeOverrides.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
-    const sdkData = await SDKHealthCheck(gb);
-    updateTabState("sdkData", sdkData);
+    // const sdkData = await SDKHealthCheck(gb);
+    // updateTabState("sdkData", sdkData);
   };
 
   // // @ts-ignore Patching private method
@@ -372,7 +371,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   const usingStickyBucketing = gbContext.stickyBucketService !== undefined;
   const streaming = !!gbContext.backgroundSync;
   const streamingHost = gbContext.streamingHost || apiHost;
-  // check if paylaod was decrypted
+  // check if payload was decrypted
   let payloadDecrypted = true;
   try {
     JSON.stringify(payload);
@@ -405,8 +404,8 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   } catch (e) {
     // ignore
   }
-  
-    const streamingHostRequestHeaders = gbContext.streamingHostRequestHeaders;
+
+  const streamingHostRequestHeaders = gbContext.streamingHostRequestHeaders;
   let streamingRes = undefined;
   if (streaming) {
     const options = {
@@ -419,29 +418,30 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       cachedStreamingHostRes = streamingRes;
     }
   }
-    return {
-      canConnect: res?.status === 200,
-      hasClientKey: !!clientKey,
-      hasPayload,
-      devModeEnabled,
-      version: gb?.version,
-      sdkFound: true,
-      clientKey,
-      payload,
-      hasTrackingCallback,
-      trackingCallbackParams,
-      hasDecryptionKey,
-      payloadDecrypted,
-      usingLogEvents,
-      isRemoteEval,
-      usingStickyBucketing,
-      streaming,
-      apiHost,
-      streamingHost,
-      apiRequestHeaders,
-      streamingHostRequestHeaders,
-      errorMessage:  res?.error || !!clientKey ?  undefined : "No Client Key was found",
-    };
+
+  return {
+    canConnect: res?.status === 200,
+    hasClientKey: !!clientKey,
+    hasPayload,
+    devModeEnabled,
+    version: gb?.version,
+    sdkFound: true,
+    clientKey,
+    payload,
+    hasTrackingCallback,
+    trackingCallbackParams,
+    hasDecryptionKey,
+    payloadDecrypted,
+    usingLogEvents,
+    isRemoteEval,
+    usingStickyBucketing,
+    streaming,
+    apiHost,
+    streamingHost,
+    apiRequestHeaders,
+    streamingHostRequestHeaders,
+    errorMessage:  res?.error || !!clientKey ?  undefined : "No Client Key was found",
+  };
 }
 
 // start running
