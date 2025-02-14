@@ -14,7 +14,7 @@ import {
   PiListBold,
 } from "react-icons/pi";
 import clsx from "clsx";
-import { MW } from "@/app";
+import {MW, NAV_H} from "@/app";
 import {useSearch} from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
 import ExperimentDetail, {VariationIcon, getVariationSummary} from "@/app/components/ExperimentDetail";
@@ -77,10 +77,12 @@ export default function ExperimentsTab() {
   }, []);
   useEffect(() => {
     if (selectedEid) {
+      const container = document.querySelector("#pageBody");
       const el = document.querySelector(
         `#experimentsTab_experimentList_${selectedEid}`,
       );
-      el?.scrollIntoView({ behavior: firstLoad ? "instant" : "smooth" });
+      const y = (el?.getBoundingClientRect()?.top || 0) + (container?.scrollTop || 0);
+      container?.scroll?.({ top: y - (NAV_H + HEADER_H) , behavior: firstLoad ? "instant" : "smooth" });
     }
   }, [selectedEid]);
 

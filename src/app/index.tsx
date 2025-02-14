@@ -135,7 +135,7 @@ export const App = () => {
                   {Object.keys(forcedFeatures).length ? (
                     <div
                       className="inline-flex items-center justify-center text-xs font-semibold text-amber-700 bg-amber-200 rounded-full ml-1"
-                      style={{ minWidth: 20, height: 20 }}
+                      style={{ minWidth: 18, height: 18 }}
                     >
                       {Object.keys(forcedFeatures).length}
                     </div>
@@ -146,7 +146,7 @@ export const App = () => {
                   {Object.keys(forcedVariations).length ? (
                     <div
                       className="inline-flex items-center justify-center text-xs font-semibold text-amber-700 bg-amber-200 rounded-full ml-1"
-                      style={{ minWidth: 20, height: 20 }}
+                      style={{ minWidth: 18, height: 18 }}
                     >
                       {Object.keys(forcedVariations).length}
                     </div>
@@ -157,7 +157,7 @@ export const App = () => {
                   {forcedAttributes? (
                     <div
                       className="inline-flex items-center justify-center text-xs font-semibold text-amber-700 bg-amber-200 rounded-full ml-1"
-                      style={{ minWidth: 20, height: 20 }}
+                      style={{ minWidth: 18, height: 18 }}
                     >
                       <PiExclamationMarkBold />
                     </div>
@@ -183,7 +183,8 @@ export const App = () => {
         </div>
 
         <div
-          className={"overflow-y-auto"}
+          id="pageBody"
+          className="overflow-y-auto"
           style={{ height: `calc(100vh - ${NAV_H}px)` }}
         >
           {currentTab === "attributes" ? (

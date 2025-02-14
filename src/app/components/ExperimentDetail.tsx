@@ -1,5 +1,5 @@
 import { MW, NAV_H } from "@/app";
-import { IconButton, Link, RadioCards } from "@radix-ui/themes";
+import {Button, IconButton, Link, RadioCards} from "@radix-ui/themes";
 import {
   PiArrowSquareOutBold,
   PiCaretRightFill, PiFlagFill, PiLinkBold, PiMonitorBold, PiWarningBold, PiXBold,
@@ -142,26 +142,24 @@ export default function ExperimentDetail({
 
         <div className="content">
           <div className="my-1">
-            <div className="flex items-center justify-between mb-1 mt-2">
+            <div className="flex items-center justify-between my-2">
               <div className="label font-semibold">{overrideExperiment ? "Forced variation" : "Current variation"}</div>
               {overrideExperiment && (
-                <div className="flex items-center text-xs font-semibold text-amber-700 bg-amber-200 -mt-2 pl-3 rounded-full">
-                  <span>Override</span>
-                  <IconButton
-                    size="2"
-                    color="red"
-                    variant="ghost"
-                    radius="full"
-                    style={{margin: "0 0 0 4px"}}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setOverrideExperiment(false);
-                      selectedEid && unsetForcedVariation(selectedEid);
-                    }}
-                  >
-                    <PiXBold/>
-                  </IconButton>
-                </div>
+                <Button
+                  color="amber"
+                  variant="solid"
+                  radius="full"
+                  size="1"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOverrideExperiment(false);
+                    selectedEid && unsetForcedVariation(selectedEid);
+                  }}
+                  className="flex gap-1 items-center bg-amber-200 text-amber-700 hover:bg-amber-300"
+                >
+                  Clear override
+                  <PiXBold/>
+                </Button>
               )}
             </div>
 
