@@ -97,7 +97,7 @@ export default function FeatureDetail({
                   size="3"
                   variant="ghost"
                   radius="full"
-                  style={{ margin: "0 -8px 0 0" }}
+                  style={{ margin: "0 -8px -10px 0" }}
                   onClick={(e) => {
                     e.preventDefault();
                     setSelectedFid(undefined);

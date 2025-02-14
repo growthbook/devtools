@@ -136,7 +136,7 @@ export default function ExperimentDetail({
                   size="3"
                   variant="ghost"
                   radius="full"
-                  style={{ margin: "0 -8px 0 0" }}
+                  style={{ margin: "0 -8px -10px 0" }}
                   onClick={(e) => {
                     e.preventDefault();
                     setSelectedEid(undefined);
@@ -163,6 +163,21 @@ export default function ExperimentDetail({
 
         <div className="content">
           <div className="my-1">
+            <div className="mt-2 mb-3">
+              <div className="label font-semibold">
+                Enrollment Status
+              </div>
+              {selectedExperiment?.evaluatedExperiment?.result?.inExperiment ? (
+                <div className="text-green-700 font-semibold text-sm">
+                  In experiment
+                </div>
+              ) : (
+                <div className="text-slate-9 text-sm">
+                  Inactive
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center justify-between my-2">
               <div className="label font-semibold">
                 {overrideExperiment ? "Forced variation" : "Current variation"}

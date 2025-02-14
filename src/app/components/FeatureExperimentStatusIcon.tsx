@@ -19,7 +19,7 @@ export default function FeatureExperimentStatusIcon({
             <>
               {type === "feature"
                 ? "This feature has been evaluated on this page."
-                : "This experiment has enrolled on this page."
+                : "This experiment is active on this page."
               }
               <br />
               This {type} has an override applied.
@@ -35,7 +35,7 @@ export default function FeatureExperimentStatusIcon({
       return (
         <Tooltip content={type === "feature"
           ? "This feature has been evaluated on this page."
-          : "This experiment has enrolled on this page."
+          : "This experiment is active on this page."
         }>
           <button>
             <PiCheckCircleBold className="inline-block mr-1.5 mb-0.5 text-violet-8" />

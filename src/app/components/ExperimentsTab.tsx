@@ -37,7 +37,7 @@ export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
 };
 
 export const LEFT_PERCENT = 0.4;
-export const HEADER_H = 70;
+export const HEADER_H = 35;
 
 export default function ExperimentsTab() {
   const [experiments, setExperiments] = useTabState<AutoExperiment[]>(
@@ -127,9 +127,8 @@ export default function ExperimentsTab() {
   const leftPercent = fullWidthListView ? 1 : LEFT_PERCENT;
 
   const col1 = `${LEFT_PERCENT * 100}%`;
-  const col2 = `${(1 - LEFT_PERCENT) * 0.2 * 100}%`;
-  const col3 = `${(1 - LEFT_PERCENT) * 0.55 * 100}%`;
-  const col4 = `${(1 - LEFT_PERCENT) * 0.25 * 100}%`;
+  const col2 = `${(1 - LEFT_PERCENT) * 0.3 * 100}%`;
+  const col3 = `${(1 - LEFT_PERCENT) * 0.7 * 100}%`;
 
   return (
     <>
@@ -141,68 +140,47 @@ export default function ExperimentsTab() {
         }}
       >
         <div
-          className="fixed w-full border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm"
+          className="fixed w-full flex items-center gap-4 px-3 border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm"
           style={{
             maxWidth: MW,
             height: HEADER_H,
             zIndex: 2000,
           }}
         >
-          <div className="flex items-center gap-4 mx-3" style={{height: 35}}>
-            <SearchBar
-              flexGrow="0"
-              className="inline-block"
-              style={{width: 200}}
-              autoFocus
-              placeholder="Search Experiments"
-              searchInputProps={searchInputProps}
-              clear={clearSearch}
+          <SearchBar
+            flexGrow="0"
+            className="inline-block"
+            style={{width: 200}}
+            autoFocus
+            placeholder="Search Experiments"
+            searchInputProps={searchInputProps}
+            clear={clearSearch}
+          />
+          <div className="flex-1"/>
+          {Object.keys(forcedVariations).length ? (
+            <Link
+              href="#"
+              role="button"
+              color="amber"
+              size="1"
+              onClick={(e) => {
+                e.preventDefault();
+                setForcedVariations({});
+              }}
+              className="flex gap-1 items-center font-normal"
+            >
+              Clear all overrides
+              <PiXBold/>
+            </Link>
+          ) : null}
+          <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer">
+            <span>Hide inactive</span>
+            <Switch
+              size="1"
+              checked={hideInactiveExperiments}
+              onCheckedChange={(b) => setHideInactiveExperiments(b)}
             />
-            <div className="flex-1"/>
-            {Object.keys(forcedVariations).length ? (
-              <Link
-                href="#"
-                role="button"
-                color="amber"
-                size="1"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setForcedVariations({});
-                }}
-                className="flex gap-1 items-center"
-              >
-                Clear all overrides
-                <PiXBold/>
-              </Link>
-            ) : null}
-            <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer">
-              <span>Hide inactive</span>
-              <Switch
-                size="1"
-                checked={hideInactiveExperiments}
-                onCheckedChange={(b) => setHideInactiveExperiments(b)}
-              />
-            </label>
-          </div>
-
-          <div className="flex items-center bg-slate-a2 rounded-t-md" style={{height: 35}}>
-            <div style={{width: col1}}>
-              <label className="uppercase text-slate-11 ml-7">Experiment</label>
-            </div>
-            {fullWidthListView && (
-              <>
-                <div style={{width: col2}}>
-                <label className="flex justify-center uppercase text-slate-11">Type</label>
-                </div>
-                <div style={{ width: col3 }}>
-                  <label className="uppercase text-slate-11">Variation</label>
-                </div>
-                <div className="flex justify-center" style={{ width: col4 }}>
-                  <label className="uppercase text-slate-11">Override</label>
-                </div>
-              </>
-            )}
-          </div>
+          </label>
         </div>
 
         <div
@@ -247,7 +225,7 @@ export default function ExperimentsTab() {
                 </div>
                 {fullWidthListView && (
                   <div
-                    className="flex justify-center flex-shrink-0 text-sm"
+                    className="flex items-center flex-shrink-0 text-sm pl-4"
                     style={{ width: col2 }}
                   >
                     {types ? (
@@ -265,17 +243,15 @@ export default function ExperimentsTab() {
                     className="value flex-shrink-0 flex gap-2 items-center"
                     style={{ width: col3 }}
                   >
-                    <div className="line-clamp-1">
-                      <VariationIcon i={value} size={14} className="mr-1" />
-                      {getVariationSummary({ experiment, i })}
-                    </div>
-                  </div>
-                )}
-
-                {fullWidthListView && (
-                  <div className="flex justify-center" style={{ width: col4 }}>
-                    {isForced && (
-                      <PiCircleFill size={10} className="text-amber-600" />
+                    {evaluatedExperiment?.result?.inExperiment ? (
+                      <div className="line-clamp-1">
+                        <VariationIcon i={value} size={14} className="mr-1" />
+                        {getVariationSummary({ experiment, i })}
+                      </div>
+                    ) : (
+                      <div className="text-slate-9">
+                        Inactive
+                      </div>
                     )}
                   </div>
                 )}
