@@ -6,6 +6,7 @@ import {
   IconButton,
   Dialog,
   Tabs,
+  Select,
 } from "@radix-ui/themes";
 import React, { Attributes, useEffect, useState } from "react";
 import logo from "./logo.svg";
@@ -17,8 +18,14 @@ import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
 import SettingsForm from "@/app/components/Settings";
 import useSdkData from "@/app/hooks/useSdkData";
-import {PiX, PiCircleFill, PiGearSix, PiExclamationMarkBold} from "react-icons/pi";
+import {
+  PiX,
+  PiCircleFill,
+  PiGearSix,
+  PiExclamationMarkBold,
+} from "react-icons/pi";
 import clsx from "clsx";
+import ArchetypesList from "@/app/components/ArchetypesList";
 
 export const MW = 1200; // max-width
 export const NAV_H = 80;
@@ -83,7 +90,8 @@ export const App = () => {
               />
               <span className="font-bold text-slate-11">DevTools</span>
             </h1>
-            <Flex>
+            <Flex align="center" gap="4">
+            <ArchetypesList />
               <Dialog.Root
                 open={settingsOpen}
                 onOpenChange={(o) => setSettingsOpen(o)}
@@ -154,7 +162,7 @@ export const App = () => {
                 </Tabs.Trigger>
                 <Tabs.Trigger value="attributes">
                   <span> Attributes</span>
-                  {forcedAttributes? (
+                  {forcedAttributes ? (
                     <div
                       className="inline-flex items-center justify-center text-xs font-semibold text-amber-700 bg-amber-200 rounded-full ml-1"
                       style={{ minWidth: 18, height: 18 }}

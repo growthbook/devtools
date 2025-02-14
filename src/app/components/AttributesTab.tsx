@@ -96,103 +96,9 @@ export default function AttributesTab() {
     );
   }, [attributesLoading, attributesError, attributesData]);
 
-  const [selectedArchetypeId, setSelectedArchetypeId] = useState<
-    string | undefined
-  >("");
-
-  const applyArchetype = useCallback(
-    (archetype: Archetype) => {
-      setAppliedArchetypeId(archetype.id);
-      const newAttributes = { ...attributes, ...archetype.attributes };
-      setAttributes(newAttributes);
-      attributesForm.reset(newAttributes);
-      setDirty(false);
-    },
-    [attributes]
-  );
-
-  const deleteArchetype = useCallback(
-    (archId: string) => {
-      const deleteIndex = archetypes.findIndex((arch) => arch.id === archId);
-      if (archetypes[deleteIndex]?.source !== "local") return;
-      setArchetypes([
-        ...archetypes.slice(0, deleteIndex),
-        ...archetypes.slice(deleteIndex + 1),
-      ]);
-    },
-    [archetypes, setArchetypes]
-  );
-
-  const renameArchetype = useCallback(
-    (archId: string, newName: string) => {
-      const editIndex = archetypes.findIndex((arch) => arch.id === archId);
-      if (archetypes[editIndex]?.source !== "local") return;
-      archetypes[editIndex].name = newName;
-      setArchetypes([
-        ...archetypes.slice(0, editIndex),
-        archetypes[editIndex],
-        ...archetypes.slice(editIndex + 1),
-      ]);
-    },
-    [archetypes, setArchetypes]
-  );
-
-  const [saveArchetypeOpen, setSaveArchetypeOpen] = useState(false);
-  const saveArchetypeForm = useForm({
-    defaultValues: {
-      type: "new", // "new" | "existing"
-      name: "",
-    },
-  });
-  const newArchetypeIsValid =
-    saveArchetypeForm.watch("name").trim().length > 0 &&
-    !archetypes.find(
-      (archetype) => archetype.name === saveArchetypeForm.watch("name")
-    );
-
-  const [appliedArchetypeId, setAppliedArchetypeId] = useTabState<
-    string | undefined
-  >("appliedArchetypeId", undefined);
-  const appliedArchetype = useMemo(() => {
-    const arch = archetypes.find((arch) => arch.id === appliedArchetypeId);
-    if (arch?.source !== "local") {
-      saveArchetypeForm.setValue("type", "new");
-    }
-    return arch;
-  }, [appliedArchetypeId]);
-  const canSaveToExistingArchetype = appliedArchetype?.source === "local";
-
-  const submitArchetypeForm = (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    const values = saveArchetypeForm.getValues();
-    if (values.type === "new") {
-      if (!newArchetypeIsValid) return;
-      const archetype: Archetype = {
-        id: uniqid("sam_"),
-        name: values.name,
-        attributes: formAttributes,
-        source: "local",
-      };
-      setArchetypes([...archetypes, archetype]);
-      saveArchetypeForm.reset({
-        type: "existing",
-        name: archetype.name,
-      });
-    } else {
-      if (!appliedArchetype) return;
-      const appliedArchIndex = archetypes.findIndex(
-        (arch) => arch.id === appliedArchetype.id
-      );
-      const archetype = archetypes[appliedArchIndex];
-      archetype.attributes = formAttributes;
-      setArchetypes([
-        ...archetypes.slice(0, appliedArchIndex),
-        archetype,
-        ...archetypes.slice(appliedArchIndex + 1),
-      ]);
-    }
-    setSaveArchetypeOpen(false);
-  };
+  const [selectedArchetype, setSelectedArchetype] = useTabState<
+    Archetype | undefined
+  >("selectedArchetype",undefined);
 
   const applyAttributes = () => {
     let newAttributes: Attributes;
@@ -237,25 +143,21 @@ export default function AttributesTab() {
       };
     });
     if (Object.keys(newOverriddenAttributes).length > 0) {
-      console.log("setting forced attributes");
       setForcedAttributes(true);
+      setSelectedArchetype(undefined);
       setAttributes({ ...attributes, ...newOverriddenAttributes });
     } else if (Object.keys(newAttributes).length === 0) {
-      // reset overridden if the user reverts to the original attributes
+      setSelectedArchetype(undefined);
       setForcedAttributes(false);
     }
     attributesForm.reset({ ...attributes, ...newAttributes });
     setDirty(false);
   };
 
-  const resetAttributes = () => {
-    attributesForm.reset(attributes);
-    setDirty(false);
-  };
-
   const resetAttributesOverride = () => {
     setForcedAttributes(false);
     setNewAppliedAttributeIds([]);
+    setSelectedArchetype(undefined);
     setAttributes({});
     setDirty(false); // we want to wait for the next render to reset with the initial attributes
   };
@@ -273,11 +175,11 @@ export default function AttributesTab() {
     <div
       className="mx-auto px-3 h-[100%]"
       style={{
-        maxWidth: 600,
+        maxWidth: MW,
         overflowX: "hidden",
       }}
     >
-      <div className="flex justify-between items-top h-[100%]">
+      <div className="flex justify-between items-top h-[100%] mx-auto" style={{maxWidth: 600}}>
         <div className="w-[100%] pl-1 h-[100%]">
           <Flex style={{ height: LABEL_H }} align="center">
             <Text
@@ -299,41 +201,39 @@ export default function AttributesTab() {
               className="border-b border-b-slate-200"
               style={{ height: SUBHEAD_H }}
             >
-              <Flex gap="2">
+              <Flex gap="2" align="center">
                 <Text size="1" weight="medium">
                   {forcedAttributes
-                    ? appliedArchetype?.name || "Custom Attributes"
+                    ? selectedArchetype?.name || "Custom Attributes"
                     : "User Attributes"}
                 </Text>
                 {forcedAttributes && (
-                  <div className="flex items-center text-xs font-semibold text-amber-700 bg-amber-200 -mt-2 pl-3 rounded-full alig">
-                    <span>Override</span>
-                    <IconButton
-                      size="1"
-                      color="red"
-                      variant="ghost"
-                      radius="full"
-                      style={{ margin: "0 0 0 4px" }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        resetAttributesOverride();
-                      }}
-                    >
-                      <PiXBold />
-                    </IconButton>
-                  </div>
+                  <Button
+                    color="amber"
+                    variant="solid"
+                    radius="full"
+                    size="1"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      resetAttributesOverride();
+                    }}
+                    className="flex gap-1 items-center bg-amber-200 text-amber-700 hover:bg-amber-300"
+                  >
+                    Clear override
+                    <PiXBold />
+                  </Button>
                 )}
               </Flex>
-                <label className="flex items-center text-xs cursor-pointer select-none">
-                  <Checkbox
-                    checked={jsonMode}
-                    onCheckedChange={() => setJsonMode(!jsonMode)}
-                    size="1"
-                    mr="1"
-                    className="cursor-pointer"
-                  />
-                  <span>JSON input</span>
-                </label>
+              <label className="flex items-center text-xs cursor-pointer select-none">
+                <Checkbox
+                  checked={jsonMode}
+                  onCheckedChange={() => setJsonMode(!jsonMode)}
+                  size="1"
+                  mr="1"
+                  className="cursor-pointer"
+                />
+                <span>JSON input</span>
+              </label>
             </Flex>
 
             <Container className="p-3" overflowX="hidden">

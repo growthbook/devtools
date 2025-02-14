@@ -1,170 +1,109 @@
 import * as Accordion from "@radix-ui/react-accordion";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Archetype } from "../tempGbExports";
-import { Avatar, Button, Container, Flex, Link, Text } from "@radix-ui/themes";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import clsx from "clsx";
-import { PiDotsThreeVerticalBold, PiUserBold } from "react-icons/pi";
-import EditableValueField from "./EditableValueField";
+import {
+  Avatar,
+  Button,
+  Container,
+  Flex,
+  Text,
+  DropdownMenu,
+} from "@radix-ui/themes";
+import { PiUser } from "react-icons/pi";
+import useApi from "@/app/hooks/useApi";
+import useGlobalState from "@/app/hooks/useGlobalState";
+import useTabState from "@/app/hooks/useTabState";
+import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
 
-function ArchetypeLabel({
-  archetype,
-  applied,
-  applyArchetype,
-  deleteArchetype,
-  renameArchetype,
-}: {
-  archetype: Archetype;
-  applied: boolean;
-  applyArchetype: () => void;
-  deleteArchetype: () => void;
-  renameArchetype: (newName: string) => void;
-}) {
-  const [editingName, setEditingName] = useState(false);
-  const [localName, setLocalName] = useState(archetype.name);
-
-  return (
-    <div className="flex gap-2 items-center">
-      <Avatar
-        size="1"
-        radius="full"
-        fallback={
-          archetype.source === "growthbook" ? (
-            <img src="logo128.png" alt="GrowthBook" width="16px" />
-          ) : (
-            <PiUserBold />
-          )
-        }
-      />
-      <Flex direction="column" align="start" justify="start" flexGrow="1">
-        <Text size="2" weight="medium" className="text-gray-800 line-clamp-1">
-          {editingName ? (
-            <EditableValueField
-              value={localName}
-              setValue={setLocalName}
-              valueType="string"
-            />
-          ) : (
-            archetype.name
-          )}
-        </Text>
-        <Link role="button" color="gray" size="1">
-          View details
-        </Link>
-      </Flex>
-      <Button
-        disabled={applied}
-        mx="2"
-        onClick={() => {
-          applyArchetype();
-        }}
-      >
-        Use
-      </Button>
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger asChild>
-          <div>
-            <Button variant="ghost">
-              <PiDotsThreeVerticalBold />
-            </Button>
-          </div>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Portal>
-          <DropdownMenu.Content
-            align="end"
-            className="bg-violet-2"
-            style={{
-              minWidth: "100px",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <DropdownMenu.Item>
-              <Button
-                disabled={archetype.source !== "local"}
-                variant="ghost"
-                onClick={(e) => {
-                  setEditingName(true);
-                }}
-              >
-                Rename
-              </Button>
-            </DropdownMenu.Item>
-            <DropdownMenu.Item>
-              <Button
-                disabled={archetype.source !== "local"}
-                color="red"
-                variant="ghost"
-                onClick={deleteArchetype}
-              >
-                Delete
-              </Button>
-            </DropdownMenu.Item>
-          </DropdownMenu.Content>
-        </DropdownMenu.Portal>
-      </DropdownMenu.Root>
-    </div>
+export default function ArchetypesList() {
+  const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
+    "allArchetypes",
+    [],
+    true
   );
-}
+    const [appOrigin, _setAppOrigin, _appOriginReady] = useGlobalState(
+      APP_ORIGIN,
+      CLOUD_APP_ORIGIN,
+      true,
+    );
+    
+  const {
+    isLoading: archetypesLoading,
+    error: archetypesError,
+    data: archetypesData,
+  } = useApi<{ archetypes: Archetype[] }>("/api/v1/archetypes");
 
-export default function ArchetypesList({
-  archetypes,
-  selectedArchetypeId,
-  setSelectedArchetypeId,
-  appliedArchetypeId,
-  applyArchetype,
-  deleteArchetype,
-  renameArchetype,
-}: {
-  archetypes: Archetype[];
-  selectedArchetypeId: string | undefined;
-  setSelectedArchetypeId: (value: string | undefined) => void;
-  appliedArchetypeId: string | undefined;
-  applyArchetype: (arch: Archetype) => void;
-  deleteArchetype: (archId: string) => void;
-  renameArchetype: (archId: string, name: string) => void;
-}) {
+  const [attributes, setAttributes] = useTabState<Record<string, any>>(
+    "attributes",
+    {}
+  );
+  const [forcedAttributes, setForcedAttributes] = useTabState<
+  boolean>("forcedAttributes",false)
+
+  const [selectedArchetype, setSelectedArchetype] = useTabState<
+    Archetype | undefined
+  >("selectedArchetype", undefined);
+
+  const updateArchetype = (arch: Archetype) => {
+    setAttributes({ archetypes, ...arch.attributes });
+    setForcedAttributes(true);
+    setSelectedArchetype(arch);
+  };
+  useEffect(() => {
+    if (archetypesLoading || archetypesError || !archetypesData) return;
+    setArchetypes(
+      archetypes
+        .filter((arch) => arch.source === "local")
+        .concat(
+          (archetypesData.archetypes || []).map((arch) => ({
+            ...arch,
+            source: "growthbook",
+          }))
+        )
+    );
+  }, [archetypesLoading, archetypesError, archetypesData]);
   return (
     <Container width="100%">
-      {archetypes.map((arch) => (
-        <Accordion.Root
-          key={arch.id}
-          collapsible
-          type="single"
-          value={selectedArchetypeId}
-          onValueChange={setSelectedArchetypeId}
-          className={clsx("accordionCard w-full mb-2", {
-            selected: selectedArchetypeId === arch.id,
-            active: appliedArchetypeId === arch.id,
-          })}
-        >
-          <Accordion.Item value={arch.id} className="w-full">
-            <Accordion.Trigger asChild className="w-full p-1.5">
-              <div>
-                <ArchetypeLabel
-                  archetype={arch}
-                  applied={appliedArchetypeId === arch.id}
-                  applyArchetype={() => applyArchetype(arch)}
-                  deleteArchetype={() => deleteArchetype(arch.id)}
-                  renameArchetype={(name) => renameArchetype(arch.id, name)}
-                />
-              </div>
-            </Accordion.Trigger>
-            <Accordion.Content className="accordionInner overflow-hidden w-full">
-              <div className="flex flex-col gap-0.5 box mx-2 mb-2 overflow-auto w-100 max-h-[100px] text-xs">
-                {Object.keys(arch.attributes).map((key, i) => (
-                  <div key={key}>
-                    {key}:{" "}
-                    <Text truncate>
-                      <code>{JSON.stringify(arch.attributes[key])}</code>
-                    </Text>
-                  </div>
-                ))}
-              </div>
-            </Accordion.Content>
-          </Accordion.Item>
-        </Accordion.Root>
-      ))}
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger>
+          <Button variant="ghost" size="2">
+            <Flex gap="1" align="center">
+              <PiUser />
+              {selectedArchetype?.name || "Current User"}
+            </Flex>
+          </Button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content>
+          <DropdownMenu.Label>Archetypes</DropdownMenu.Label>
+          {archetypes.map((arch) => (
+            <DropdownMenu.Item
+              key={arch.id}
+              onSelect={() => updateArchetype(arch)}
+            >
+              <Text>{arch.name}</Text>
+            </DropdownMenu.Item>
+          ))}
+
+          <DropdownMenu.Separator />
+          <DropdownMenu.Item
+            onSelect={() => {
+              setAttributes({});
+              setForcedAttributes(false);
+              setSelectedArchetype(undefined);
+            }}
+            color="red"
+            disabled={!selectedArchetype}
+          >
+            Clear Override
+          </DropdownMenu.Item>
+          <DropdownMenu.Item onSelect={
+            // go to GrowthBook and add a new archetype
+            () => {
+              window.open(`${appOrigin}/archetypes`, "_blank", "noopener,noreferrer");
+            }
+          }> Add Archetype</DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
     </Container>
   );
 }
