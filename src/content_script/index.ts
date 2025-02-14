@@ -113,7 +113,6 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
     console.error("Error resolving tab state", error);
     sendResponse({ success: false, error: (error as Error).message });
   }
-  return true;
 });
 
 // Listen for messages from the page
@@ -158,7 +157,6 @@ chrome.runtime.onMessage.addListener(async (msg: Message) => {
     default:
       break;
   }
-  return true;
 });
 
 // Inject devtools content script

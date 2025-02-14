@@ -3,21 +3,27 @@ import {
   AutoExperiment,
   Experiment,
   FeatureDefinition,
+  LogUnion,
 } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
-import { PiCircleFill, PiFlaskFill, PiListBold } from "react-icons/pi";
+import {
+  PiCircleFill,
+  PiFlaskFill,
+  PiListBold,
+} from "react-icons/pi";
 import clsx from "clsx";
-import {MW, NAV_H} from "@/app";
+import { MW, NAV_H } from "@/app";
 import { ValueType } from "./ValueField";
 import FeatureDetail from "@/app/components/FeatureDetail";
 import { useSearch } from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
 import { Button } from "@radix-ui/themes";
+import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
 
-type FeatureDefinitionWithId = FeatureDefinition<any> & { id: string };
+type FeatureDefinitionWithId = FeatureDefinition & { id: string };
 
 export const LEFT_PERCENT = 0.4;
 export const HEADER_H = 40;
@@ -51,6 +57,18 @@ export default function FeaturesTab() {
     {},
   );
 
+  const [logEvents] = useTabState<LogUnion[] | undefined>(
+    "logEvents",
+    undefined,
+  );
+  const pageEvaluatedFeatures = useMemo(() => {
+    return new Set(
+      (logEvents || [])
+        .filter((log) => log.logType === "feature")
+        .map((log) => log?.featureKey),
+    );
+  }, [logEvents]);
+
   const { evaluatedFeatures } = useGBSandboxEval();
 
   const [selectedFid, setSelectedFid] = useTabState<string | undefined>(
@@ -80,8 +98,12 @@ export default function FeaturesTab() {
       const el = document.querySelector(
         `#featuresTab_featureList_${selectedFid}`,
       );
-      const y = (el?.getBoundingClientRect()?.top || 0) + (container?.scrollTop || 0);
-      container?.scroll?.({ top: y - (NAV_H + HEADER_H) , behavior: firstLoad ? "instant" : "smooth" });
+      const y =
+        (el?.getBoundingClientRect()?.top || 0) + (container?.scrollTop || 0);
+      container?.scroll?.({
+        top: y - (NAV_H + HEADER_H),
+        behavior: firstLoad ? "instant" : "smooth",
+      });
     }
   }, [selectedFid]);
 
@@ -123,7 +145,9 @@ export default function FeaturesTab() {
           {fullWidthListView ? (
             <>
               <div style={{ width: col2 }}>
-                <label className="uppercase text-slate-11">Links</label>
+                <label className="uppercase text-slate-11">
+                  <PiFlaskFill />
+                </label>
               </div>
               <div style={{ width: col3 }}>
                 <label className="uppercase text-slate-11">Value</label>
@@ -184,18 +208,18 @@ export default function FeaturesTab() {
                   })}
                   style={{ width: fullWidthListView ? col1 : undefined }}
                 >
-                  {isForced && !fullWidthListView && (
-                    <div className="absolute" style={{ left: 6, top: 10 }}>
-                      <PiCircleFill size={10} className="text-amber-600" />
-                    </div>
-                  )}
                   <div
-                    className={clsx("title absolute line-clamp-1 pl-6 pr-6", {
+                    className={clsx("title absolute line-clamp-1 pl-3 pr-3", {
                       "top-1": !fullWidthListView,
                       "top-[25%]": fullWidthListView,
                     })}
                     style={{ width: fullWidthListView ? col1 : undefined }}
                   >
+                    <FeatureExperimentStatusIcon
+                      evaluated={pageEvaluatedFeatures.has(fid)}
+                      forced={isForced}
+                      type="feature"
+                    />
                     {fid}
                   </div>
                 </div>
@@ -204,14 +228,7 @@ export default function FeaturesTab() {
                     className="flex-shrink-0 text-sm"
                     style={{ width: col2 }}
                   >
-                    {linkedExperiments?.length ? (
-                      <>
-                        <PiFlaskFill className="inline-block mr-1" />
-                        <span className="text-indigo-12">
-                          ({linkedExperiments.length})
-                        </span>
-                      </>
-                    ) : null}
+                    {linkedExperiments?.length ? linkedExperiments.length : null}
                   </div>
                 )}
                 <div

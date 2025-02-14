@@ -1,8 +1,9 @@
 import { MW, NAV_H } from "@/app";
-import {Button, IconButton, Link, Switch} from "@radix-ui/themes";
+import { Button, IconButton, Link, Switch } from "@radix-ui/themes";
 import {
   PiArrowSquareOutBold,
-  PiCaretRightFill, PiXBold,
+  PiCaretRightFill,
+  PiXBold,
 } from "react-icons/pi";
 import EditableValueField from "@/app/components/EditableValueField";
 import ValueField from "@/app/components/ValueField";
@@ -32,7 +33,10 @@ export default function FeatureDetail({
     {},
   );
 
-  const [hideInactiveRules, setHideInactiveRules] = useTabState<boolean>("hideInactiveRules", true);
+  const [hideInactiveRules, setHideInactiveRules] = useTabState<boolean>(
+    "hideInactiveRules",
+    true,
+  );
   const [overrideFeature, setOverrideFeature] = useState(false);
 
   const setForcedFeature = (fid: string, value: any) => {
@@ -87,39 +91,38 @@ export default function FeatureDetail({
         <div className="header">
           {selectedFid && (
             <>
-            <div className="flex items-start gap-2">
-              <h2 className="font-bold flex-1">{selectedFid}</h2>
-              <IconButton
-                size="3"
-                variant="ghost"
-                radius="full"
-                style={{ margin: "0 -8px 0 0" }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedFid(undefined);
-                }}
+              <div className="flex items-start gap-2">
+                <h2 className="font-bold flex-1">{selectedFid}</h2>
+                <IconButton
+                  size="3"
+                  variant="ghost"
+                  radius="full"
+                  style={{ margin: "0 -8px 0 0" }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedFid(undefined);
+                  }}
+                >
+                  <PiXBold />
+                </IconButton>
+              </div>
+              <Link
+                size="2"
+                className="font-semibold"
+                href={`${appOrigin}/features/${selectedFid}`}
+                target="_blank"
               >
-                <PiXBold />
-              </IconButton>
-            </div>
-            <Link
-              size="2"
-              className="font-semibold"
-              href={`${appOrigin}/features/${selectedFid}`}
-              target="_blank"
-            >
-              GrowthBook
-              <PiArrowSquareOutBold
-                size={16}
-                className="inline-block mb-1 ml-0.5"
-              />
-            </Link>
+                GrowthBook
+                <PiArrowSquareOutBold
+                  size={16}
+                  className="inline-block mb-1 ml-0.5"
+                />
+              </Link>
             </>
           )}
         </div>
 
         <div className="content">
-
           <div className="my-1">
             <div className="flex items-center justify-between my-2">
               <div className="label font-semibold">Current value</div>
@@ -137,7 +140,7 @@ export default function FeatureDetail({
                   className="flex gap-1 items-center bg-amber-200 text-amber-700 hover:bg-amber-300"
                 >
                   Clear override
-                  <PiXBold/>
+                  <PiXBold />
                 </Button>
               )}
             </div>
@@ -157,7 +160,11 @@ export default function FeatureDetail({
             <span>Rules and Values</span>
             <label className="flex gap-1 text-xs items-center font-normal cursor-pointer">
               <span>Hide inactive</span>
-              <Switch size="1" checked={hideInactiveRules} onCheckedChange={(b) => setHideInactiveRules(b)} />
+              <Switch
+                size="1"
+                checked={hideInactiveRules}
+                onCheckedChange={(b) => setHideInactiveRules(b)}
+              />
             </label>
           </div>
 
@@ -179,7 +186,9 @@ export default function FeatureDetail({
             </div>
           ) : null}
 
-          {selectedFid && selectedFeature && (selectedFeature?.feature?.rules ?? []).length ? (
+          {selectedFid &&
+          selectedFeature &&
+          (selectedFeature?.feature?.rules ?? []).length ? (
             <>
               {selectedFeature?.feature?.rules?.map((rule, i) => {
                 return (

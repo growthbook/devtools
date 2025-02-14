@@ -1,5 +1,6 @@
 import type {
   Experiment,
+  FeatureApiResponse,
   FeatureResult,
   GrowthBook,
   LogUnion,
@@ -56,7 +57,7 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
       clearTimeout(timer);
       getValidGrowthBookInstance(cb);
     },
-    false
+    false,
   );
 }
 
@@ -146,7 +147,7 @@ function updateFeatures(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (data) {
       gb.setForcedFeatures(
-        new Map(Object.entries(data as Record<string, any>))
+        new Map(Object.entries(data as Record<string, any>)),
       );
     } else {
       // todo: do something with these messages or remove them
@@ -178,7 +179,7 @@ async function updateBackgroundSDK(data: SDKHealthCheckResult) {
       type: "GB_SDK_UPDATED",
       data,
     },
-    window.location.origin
+    window.location.origin,
   );
 }
 
@@ -193,13 +194,13 @@ function updateTabState(property: string, value: unknown, append = false) {
       },
       append,
     },
-    window.location.origin
+    window.location.origin,
   );
 }
 
 // add a proxy to the SDKs methods so we know when anything important has been changed programmatically
 function subscribeToSdkChanges(
-  gb: GrowthBook & { patchedMethods?: boolean; logs?: LogUnion[] }
+  gb: GrowthBook & { patchedMethods?: boolean; logs?: LogUnion[] },
 ) {
   if (gb.patchedMethods) return;
   gb.patchedMethods = true;
@@ -227,14 +228,19 @@ function subscribeToSdkChanges(
     updateTabState("attributes", gb.getAttributes());
   };
 
-  // // @ts-ignore Patching private method
-  // const __refresh = gb._refresh;
-  // // @ts-ignore Patching private method
-  // gb._refresh = async (props) => {
-  //   await __refresh.call(gb, props);
-  //   updateTabState("features", gb.getFeatures());
-  //   updateTabState("experiments", gb.getExperiments());
-  // }
+  const _setPayload = gb.setPayload;
+  if (!_setPayload) {
+    // legacy SDK, start polling
+    window.setInterval(() => {
+      pushAppUpdates();
+    }, 5000);
+  } else {
+    // patch for immediate updates
+    gb.setPayload = async (incomingPayload: FeatureApiResponse) => {
+      await _setPayload.call(gb, incomingPayload);
+      pushAppUpdates();
+    };
+  }
 
   const {
     trackingCallback,
@@ -261,7 +267,7 @@ function subscribeToSdkChanges(
     const _logEvent = gb.logEvent;
     gb.logEvent = async (
       eventName: string,
-      properties?: Record<string, unknown>
+      properties?: Record<string, unknown>,
     ) => {
       gb.logs!.push({
         eventName,
@@ -278,7 +284,7 @@ function subscribeToSdkChanges(
     gb.setTrackingCallback = (callback: TrackingCallback) => {
       const patchedCallBack = (
         experiment: Experiment<any>,
-        result: Result<any>
+        result: Result<any>,
       ) => {
         gb.logs!.push({
           experiment,
@@ -288,7 +294,7 @@ function subscribeToSdkChanges(
         });
         callback(experiment, result);
       };
-        _setTrackingCallback?.call(gb, patchedCallBack);
+      _setTrackingCallback?.call(gb, patchedCallBack);
     };
     // Apply the patch helper above to the existing callback
     if (typeof trackingCallback === "function")
@@ -383,11 +389,11 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   const apiRequestHeaders = gbContext.apiRequestHeaders;
   let res;
   try {
-   res =
-    cachedHostRes ??
-    (await fetch(`${apiHost}/api/features/${clientKey}`, {
-      headers: apiRequestHeaders,
-    }));
+    res =
+      cachedHostRes ??
+      (await fetch(`${apiHost}/api/features/${clientKey}`, {
+        headers: apiRequestHeaders,
+      }));
     if (res.status === 200) {
       cachedHostRes = res;
     }
@@ -400,10 +406,15 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   if (streaming) {
     const options = {
       method: "POST",
-      headers: { "Content-Type": "application/json", headers: streamingHostRequestHeaders },
+      headers: {
+        "Content-Type": "application/json",
+        headers: streamingHostRequestHeaders,
+      },
       body: JSON.stringify(payload),
     };
-    streamingRes = cachedHostRes  ?? await fetch(`${streamingHost}/api/eval/${clientKey}`, options);
+    streamingRes =
+      cachedHostRes ??
+      (await fetch(`${streamingHost}/api/eval/${clientKey}`, options));
     if (streamingRes.status === 200) {
       cachedStreamingHostRes = streamingRes;
     }
@@ -430,7 +441,8 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     streamingHost,
     apiRequestHeaders,
     streamingHostRequestHeaders,
-    errorMessage:  res?.error || !!clientKey ?  undefined : "No Client Key was found",
+    errorMessage:
+      res?.error || !!clientKey ? undefined : "No Client Key was found",
   };
 }
 

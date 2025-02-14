@@ -95,7 +95,10 @@ export default function Rule({
     status = "overridden";
   }
 
-  if (hideInactive && !(status === "matches" || status === "overridden" || status === "gates")) {
+  if (
+    hideInactive &&
+    !(status === "matches" || status === "overridden" || status === "gates")
+  ) {
     return null;
   }
 
@@ -272,10 +275,9 @@ export function ExperimentRule({
           <>
             {" "}
             in namespace{" "}
-            <span
-              className="conditionValue inline-block flex-shrink-0 whitespace-nowrap overflow-hidden overflow-ellipsis max-w-[70px] leading-4 align-middle">
-                          {namespace[0]}
-                        </span>
+            <span className="conditionValue inline-block flex-shrink-0 whitespace-nowrap overflow-hidden overflow-ellipsis max-w-[70px] leading-4 align-middle">
+              {namespace[0]}
+            </span>
           </>
         )}
       </div>
@@ -287,48 +289,45 @@ export function ExperimentRule({
           value={(appliedCoverage || 0) * 100}
         />
         <span className="conditionValue flex-shrink-0">
-                      {Math.round((appliedCoverage || 0) * 1000) / 10}%
-                    </span>
+          {Math.round((appliedCoverage || 0) * 1000) / 10}%
+        </span>
       </div>
       {nsRange ? (
         <div className="leading-3">
-          ({nsRange * 100}% namespace, {(coverage ?? 1) * 100}%
-          exposure)
+          ({nsRange * 100}% namespace, {(coverage ?? 1) * 100}% exposure)
         </div>
       ) : null}
       <div className="my-2 text-xs">
         <div className="font-semibold mb-1">SERVE</div>
         <table className="leading-3">
           <tbody>
-          {variations?.map?.((variation, i) => (
-            <tr key={i} className="">
-              <td className="pr-2 py-0.5">
-                <div
-                  className="px-0.5 rounded-full border font-semibold"
-                  style={{
-                    fontSize: "11px",
-                    color: getVariationColor(i),
-                    borderColor: getVariationColor(i),
-                  }}
-                >
-                  {i}
-                </div>
-              </td>
-              <td width="100%" className="py-0.5">
-                <ValueField
-                  value={variation}
-                  valueType={valueType}
-                  stringAsCode
-                  maxHeight={50}
-                />
-              </td>
-              <td className="pl-2 py-0.5">
-                {weights?.[i] !== undefined
-                  ? weights[i] * 100 + "%"
-                  : null}
-              </td>
-            </tr>
-          ))}
+            {variations?.map?.((variation, i) => (
+              <tr key={i} className="">
+                <td className="pr-2 py-0.5">
+                  <div
+                    className="px-0.5 rounded-full border font-semibold"
+                    style={{
+                      fontSize: "11px",
+                      color: getVariationColor(i),
+                      borderColor: getVariationColor(i),
+                    }}
+                  >
+                    {i}
+                  </div>
+                </td>
+                <td width="100%" className="py-0.5">
+                  <ValueField
+                    value={variation}
+                    valueType={valueType}
+                    stringAsCode
+                    maxHeight={50}
+                  />
+                </td>
+                <td className="pl-2 py-0.5">
+                  {weights?.[i] !== undefined ? weights[i] * 100 + "%" : null}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
         <div
@@ -354,9 +353,7 @@ export function ExperimentRule({
                     textShadow: "0 1px #0006, 0 0 1px #0006",
                   }}
                 >
-                  {Math.round(w * (appliedCoverage ?? 1) * 1000) /
-                    10}
-                  %
+                  {Math.round(w * (appliedCoverage ?? 1) * 1000) / 10}%
                 </div>
               )}
             </div>
@@ -389,14 +386,14 @@ export function ConditionDisplay({
       : undefined;
     let pConds = (pConditionJson ? jsonToConds(pConditionJson) : []) ?? [];
     if (!pConds.length) return;
-    conds.push(...pConds.map((pc) => ({...pc, field: p.id, prereq: true})));
+    conds.push(...pConds.map((pc) => ({ ...pc, field: p.id, prereq: true })));
   });
   if (!conds.length)
     return (
       <div>
         <div className="mr-2 font-semibold mb-0.5">IF</div>
         <ValueField
-          value={parentConditions ? {condition, parentConditions} : condition}
+          value={parentConditions ? { condition, parentConditions } : condition}
           valueType="json"
           maxHeight={80}
           customPrismOuterStyle={{
@@ -423,7 +420,7 @@ export function ConditionDisplay({
                   setSelectedFid(cond.field);
                 }}
               >
-                <PiFlagFill className="inline-block mr-0.5" size={12}/>
+                <PiFlagFill className="inline-block mr-0.5" size={12} />
                 {cond.field}
               </Link>
             ) : (

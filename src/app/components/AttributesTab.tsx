@@ -37,11 +37,11 @@ export default function AttributesTab() {
   const [dirty, setDirty] = useState(false);
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
-    false
+    false,
   );
   const [forcedAttributes, setForcedAttributes] = useTabState<boolean>(
     "forcedAttributes",
-    false
+    false,
   );
   const [newAppliedAttributeIds, setNewAppliedAttributeIds] = useTabState<
     string[]
@@ -52,7 +52,7 @@ export default function AttributesTab() {
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
     "allArchetypes",
     [],
-    true
+    true,
   );
   const {
     isLoading: archetypesLoading,
@@ -69,8 +69,8 @@ export default function AttributesTab() {
           (archetypesData.archetypes || []).map((arch) => ({
             ...arch,
             source: "growthbook",
-          }))
-        )
+          })),
+        ),
     );
   }, [archetypesLoading, archetypesError, archetypesData]);
 
@@ -91,8 +91,8 @@ export default function AttributesTab() {
         (attributesData.attributes || []).map((attr) => [
           attr.property,
           attr.datatype,
-        ])
-      )
+        ]),
+      ),
     );
   }, [attributesLoading, attributesError, attributesData]);
 
@@ -108,7 +108,7 @@ export default function AttributesTab() {
       attributesForm.reset(newAttributes);
       setDirty(false);
     },
-    [attributes]
+    [attributes],
   );
 
   const deleteArchetype = useCallback(
@@ -120,7 +120,7 @@ export default function AttributesTab() {
         ...archetypes.slice(deleteIndex + 1),
       ]);
     },
-    [archetypes, setArchetypes]
+    [archetypes, setArchetypes],
   );
 
   const renameArchetype = useCallback(
@@ -134,7 +134,7 @@ export default function AttributesTab() {
         ...archetypes.slice(editIndex + 1),
       ]);
     },
-    [archetypes, setArchetypes]
+    [archetypes, setArchetypes],
   );
 
   const [saveArchetypeOpen, setSaveArchetypeOpen] = useState(false);
@@ -147,7 +147,7 @@ export default function AttributesTab() {
   const newArchetypeIsValid =
     saveArchetypeForm.watch("name").trim().length > 0 &&
     !archetypes.find(
-      (archetype) => archetype.name === saveArchetypeForm.watch("name")
+      (archetype) => archetype.name === saveArchetypeForm.watch("name"),
     );
 
   const [appliedArchetypeId, setAppliedArchetypeId] = useTabState<
@@ -181,7 +181,7 @@ export default function AttributesTab() {
     } else {
       if (!appliedArchetype) return;
       const appliedArchIndex = archetypes.findIndex(
-        (arch) => arch.id === appliedArchetype.id
+        (arch) => arch.id === appliedArchetype.id,
       );
       const archetype = archetypes[appliedArchIndex];
       archetype.attributes = formAttributes;
@@ -224,14 +224,14 @@ export default function AttributesTab() {
             setNewAppliedAttributeIds([...newAppliedAttributeIds, key]);
           }
           return [key, newAttributes[key]];
-        })
+        }),
     );
     // check if newAttributes has any keys that are removed from attributes
     Object.keys(attributes).forEach((key) => {
       (key: string) => {
         if (!newAttributes.hasOwnProperty(key)) {
           setNewAppliedAttributeIds(
-            newAppliedAttributeIds.filter((id) => id !== key)
+            newAppliedAttributeIds.filter((id) => id !== key),
           );
         }
       };
@@ -324,16 +324,16 @@ export default function AttributesTab() {
                   </div>
                 )}
               </Flex>
-                <label className="flex items-center text-xs cursor-pointer select-none">
-                  <Checkbox
-                    checked={jsonMode}
-                    onCheckedChange={() => setJsonMode(!jsonMode)}
-                    size="1"
-                    mr="1"
-                    className="cursor-pointer"
-                  />
-                  <span>JSON input</span>
-                </label>
+              <label className="flex items-center text-xs cursor-pointer select-none">
+                <Checkbox
+                  checked={jsonMode}
+                  onCheckedChange={() => setJsonMode(!jsonMode)}
+                  size="1"
+                  mr="1"
+                  className="cursor-pointer"
+                />
+                <span>JSON input</span>
+              </label>
             </Flex>
 
             <Container className="p-3" overflowX="hidden">

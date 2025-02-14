@@ -17,7 +17,12 @@ import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
 import SettingsForm from "@/app/components/Settings";
 import useSdkData from "@/app/hooks/useSdkData";
-import {PiX, PiCircleFill, PiGearSix, PiExclamationMarkBold} from "react-icons/pi";
+import {
+  PiX,
+  PiCircleFill,
+  PiGearSix,
+  PiExclamationMarkBold,
+} from "react-icons/pi";
 import clsx from "clsx";
 
 export const MW = 1200; // max-width
@@ -28,12 +33,12 @@ export const App = () => {
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
     "sdkFound",
-    undefined
+    undefined,
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
-    {}
+    {},
   );
   const [forcedVariations, setForcedVariations] = useTabState<
     Record<string, any>
@@ -41,7 +46,7 @@ export const App = () => {
 
   const [forcedAttributes, _setForcedAttributes] = useTabState<Attributes>(
     "forcedAttributes",
-    {}
+    {},
   );
   const { canConnect, hasPayload } = useSdkData();
   let sdkStatus = canConnect ? "green" : hasPayload ? "yellow" : "red";
@@ -154,7 +159,7 @@ export const App = () => {
                 </Tabs.Trigger>
                 <Tabs.Trigger value="attributes">
                   <span> Attributes</span>
-                  {forcedAttributes? (
+                  {forcedAttributes ? (
                     <div
                       className="inline-flex items-center justify-center text-xs font-semibold text-amber-700 bg-amber-200 rounded-full ml-1"
                       style={{ minWidth: 18, height: 18 }}

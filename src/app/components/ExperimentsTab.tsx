@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   AutoExperiment,
   Experiment,
   FeatureDefinition,
+  LogUnion,
 } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
@@ -10,18 +11,30 @@ import useGBSandboxEval, {
 } from "@/app/hooks/useGBSandboxEval";
 import { Button } from "@radix-ui/themes";
 import {
-  PiCircleFill, PiDesktopFill, PiFlagFill, PiLinkBold,
+  PiCircleFill,
+  PiDesktopFill,
+  PiFlagFill,
+  PiLinkBold,
   PiListBold,
+  PiCheckFatFill,
+  PiCheckCircleBold,
 } from "react-icons/pi";
 import clsx from "clsx";
-import {MW, NAV_H} from "@/app";
-import {useSearch} from "@/app/hooks/useSearch";
+import { MW, NAV_H } from "@/app";
+import { useSearch } from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
-import ExperimentDetail, {VariationIcon, getVariationSummary} from "@/app/components/ExperimentDetail";
-import {getFeatureDetails} from "@/app/components/FeaturesTab";
-import {ValueType} from "@/app/components/ValueField";
+import ExperimentDetail, {
+  VariationIcon,
+  getVariationSummary,
+} from "@/app/components/ExperimentDetail";
+import { getFeatureDetails } from "@/app/components/FeaturesTab";
+import { ValueType } from "@/app/components/ValueField";
+import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
 
-export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & { features?: string[]; featureTypes?: Record<string, ValueType>; };
+export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
+  features?: string[];
+  featureTypes?: Record<string, ValueType>;
+};
 
 export const LEFT_PERCENT = 0.4;
 export const HEADER_H = 40;
@@ -54,6 +67,18 @@ export default function ExperimentsTab() {
 
   const { evaluatedExperiments } = useGBSandboxEval();
 
+  const [logEvents] = useTabState<LogUnion[] | undefined>(
+    "logEvents",
+    undefined,
+  );
+  const pageEvaluatedExperiments = useMemo(() => {
+    return new Set(
+      (logEvents || [])
+        .filter((log) => log.logType === "experiment")
+        .map((log) => log?.experiment?.key),
+    );
+  }, [logEvents]);
+
   const [selectedEid, setSelectedEid] = useTabState<string | undefined>(
     "selectedEid",
     undefined,
@@ -81,8 +106,12 @@ export default function ExperimentsTab() {
       const el = document.querySelector(
         `#experimentsTab_experimentList_${selectedEid}`,
       );
-      const y = (el?.getBoundingClientRect()?.top || 0) + (container?.scrollTop || 0);
-      container?.scroll?.({ top: y - (NAV_H + HEADER_H) , behavior: firstLoad ? "instant" : "smooth" });
+      const y =
+        (el?.getBoundingClientRect()?.top || 0) + (container?.scrollTop || 0);
+      container?.scroll?.({
+        top: y - (NAV_H + HEADER_H),
+        behavior: firstLoad ? "instant" : "smooth",
+      });
     }
   }, [selectedEid]);
 
@@ -111,7 +140,7 @@ export default function ExperimentsTab() {
             zIndex: 2000,
           }}
         >
-          <div style={{width: col1}}>
+          <div style={{ width: col1 }}>
             <label className="uppercase text-slate-11 ml-6">Experiment</label>
             <SearchBar
               flexGrow="0"
@@ -123,13 +152,13 @@ export default function ExperimentsTab() {
           </div>
           {fullWidthListView ? (
             <>
-              <div style={{width: col2}}>
+              <div style={{ width: col2 }}>
                 <label className="uppercase text-slate-11">Type</label>
               </div>
-              <div style={{width: col3}}>
+              <div style={{ width: col3 }}>
                 <label className="uppercase text-slate-11">Variation</label>
               </div>
-              <div className="flex justify-center" style={{width: col4}}>
+              <div className="flex justify-center" style={{ width: col4 }}>
                 <label className="uppercase text-slate-11">Override</label>
               </div>
             </>
@@ -137,12 +166,12 @@ export default function ExperimentsTab() {
             <>
               <Button
                 className="absolute right-3"
-                style={{marginRight: 0}}
+                style={{ marginRight: 0 }}
                 variant="ghost"
                 size="1"
                 onClick={() => setSelectedEid(undefined)}
               >
-                <PiListBold className="inline-block mr-1"/>
+                <PiListBold className="inline-block mr-1" />
                 List view
               </Button>
             </>
@@ -177,34 +206,26 @@ export default function ExperimentsTab() {
                 onClick={() => clickExperiment(eid)}
               >
                 <div
-                  className="title line-clamp-1 pl-6 pr-6"
-                  style={{width: fullWidthListView ? col1 : undefined}}
+                  className="title line-clamp-1 pl-3 pr-3"
+                  style={{ width: fullWidthListView ? col1 : undefined }}
                 >
-                  {isForced && !fullWidthListView && (
-                    <PiCircleFill
-                      size={10}
-                      className="absolute text-amber-600"
-                      style={{top: "50%", left: 6, marginTop: -4}}
-                    />
-                  )}
+                  <FeatureExperimentStatusIcon
+                    evaluated={pageEvaluatedExperiments.has(eid)}
+                    forced={isForced}
+                    type="experiment"
+                  />
                   {eid}
                 </div>
                 {fullWidthListView && (
                   <div
                     className="flex-shrink-0 text-sm"
-                    style={{width: col2}}
+                    style={{ width: col2 }}
                   >
                     {types ? (
                       <div className="flex items-center gap-2">
-                        {types.redirect ? (
-                          <PiLinkBold size={12}/>
-                        ) : null}
-                        {types.visual ? (
-                          <PiDesktopFill size={12}/>
-                        ) : null}
-                        {types.features ? (
-                          <PiFlagFill size={12}/>
-                        ) : null}
+                        {types.redirect ? <PiLinkBold size={12} /> : null}
+                        {types.visual ? <PiDesktopFill size={12} /> : null}
+                        {types.features ? <PiFlagFill size={12} /> : null}
                       </div>
                     ) : null}
                   </div>
@@ -217,15 +238,15 @@ export default function ExperimentsTab() {
                   >
                     <div className="line-clamp-1">
                       <VariationIcon i={value} size={14} className="mr-1" />
-                      {getVariationSummary({experiment, i})}
+                      {getVariationSummary({ experiment, i })}
                     </div>
                   </div>
                 )}
 
                 {fullWidthListView && (
-                  <div className="flex justify-center" style={{width: col4}}>
+                  <div className="flex justify-center" style={{ width: col4 }}>
                     {isForced && (
-                      <PiCircleFill size={10} className="text-amber-600"/>
+                      <PiCircleFill size={10} className="text-amber-600" />
                     )}
                   </div>
                 )}
@@ -249,7 +270,7 @@ export type SelectedExperiment = {
   eid: string;
   experiment: ExperimentWithFeatures;
   meta?: any;
-  types: { features?: string[]; redirect?: boolean; visual?: boolean; };
+  types: { features?: string[]; redirect?: boolean; visual?: boolean };
   evaluatedExperiment?: EvaluatedExperiment;
   isForced: boolean;
 };
@@ -267,13 +288,17 @@ function getExperimentDetails({
   evaluatedExperiments?: EvaluatedExperiment[];
   forcedVariations?: Record<string, number>;
 }): SelectedExperiment {
-  const experiment = experiments.find((experiment) => experiment.key === eid) as ExperimentWithFeatures;
+  const experiment = experiments.find(
+    (experiment) => experiment.key === eid,
+  ) as ExperimentWithFeatures;
   const meta = experimentsMeta?.[eid];
 
   const types = {
     features: experiment?.features,
     redirect: experiment?.variations?.some((v) => v.urlRedirect),
-    visual: experiment?.variations?.some((v) => (v.domMutations?.length || v?.css || v?.js)),
+    visual: experiment?.variations?.some(
+      (v) => v.domMutations?.length || v?.css || v?.js,
+    ),
   };
 
   const evaluatedExperiment = evaluatedExperiments?.find(
@@ -304,7 +329,7 @@ export function getFeatureExperiments(
         experiments.push({
           key: rule.key ?? fid,
           features: [fid],
-          featureTypes: {[fid]: details.valueType},
+          featureTypes: { [fid]: details.valueType },
           ...rule,
         });
       }
