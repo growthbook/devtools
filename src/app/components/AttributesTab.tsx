@@ -8,6 +8,7 @@ import {
   Checkbox,
   Container,
   Flex,
+  IconButton,
   Popover,
   RadioGroup,
   Text,
@@ -15,7 +16,7 @@ import {
 import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
-import { PiArrowClockwise, PiAsterisk, PiTrash } from "react-icons/pi";
+import { PiArrowClockwise, PiAsterisk, PiTrash, PiXBold } from "react-icons/pi";
 import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
 import { MW } from "@/app";
@@ -209,7 +210,6 @@ export default function AttributesTab() {
         return;
       }
     }
-    console.log("newAttributes", newAttributes);
     const newOverriddenAttributes = Object.fromEntries(
       Object.keys(newAttributes)
         .filter((key: string) => {
@@ -236,16 +236,15 @@ export default function AttributesTab() {
         }
       };
     });
-
     if (Object.keys(newOverriddenAttributes).length > 0) {
       console.log("setting forced attributes");
       setForcedAttributes(true);
-      setAttributes(newOverriddenAttributes);
+      setAttributes({ ...attributes, ...newOverriddenAttributes });
     } else if (Object.keys(newAttributes).length === 0) {
       // reset overridden if the user reverts to the original attributes
       setForcedAttributes(false);
     }
-    attributesForm.reset(newAttributes);
+    attributesForm.reset({ ...attributes, ...newAttributes });
     setDirty(false);
   };
 
@@ -274,7 +273,7 @@ export default function AttributesTab() {
     <div
       className="mx-auto px-3 h-[100%]"
       style={{
-        maxWidth: MW,
+        maxWidth: 600,
         overflowX: "hidden",
       }}
     >
@@ -288,15 +287,10 @@ export default function AttributesTab() {
               size="1"
               className="uppercase"
             >
-              {Object.keys(forcedAttributes).length > 0
-                ? appliedArchetype?.name || "Custom Attributes"
-                : "User Attributes"}
+              User Attributes
             </Text>
           </Flex>
-          <div
-            className="attributesForm"
-            style={{ height: `calc(100% - ${LABEL_H}px)` }}
-          >
+          <div className="attributesForm">
             <Flex
               justify="between"
               mb="2"
@@ -305,19 +299,31 @@ export default function AttributesTab() {
               className="border-b border-b-slate-200"
               style={{ height: SUBHEAD_H }}
             >
-              <Text size="1" weight="medium">
-                {appliedArchetype?.name || "SDK Attributes"}
-                {dirty && (
-                  <PiAsterisk
-                    size={12}
-                    color="red"
-                    className="inline-block relative"
-                    style={{ top: -6 }}
-                  />
+              <Flex gap="2">
+                <Text size="1" weight="medium">
+                  {forcedAttributes
+                    ? appliedArchetype?.name || "Custom Attributes"
+                    : "User Attributes"}
+                </Text>
+                {forcedAttributes && (
+                  <div className="flex items-center text-xs font-semibold text-amber-700 bg-amber-200 -mt-2 pl-3 rounded-full alig">
+                    <span>Override</span>
+                    <IconButton
+                      size="1"
+                      color="red"
+                      variant="ghost"
+                      radius="full"
+                      style={{ margin: "0 0 0 4px" }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        resetAttributesOverride();
+                      }}
+                    >
+                      <PiXBold />
+                    </IconButton>
+                  </div>
                 )}
-              </Text>
-
-              <Flex>
+              </Flex>
                 <label className="flex items-center text-xs cursor-pointer select-none">
                   <Checkbox
                     checked={jsonMode}
@@ -328,28 +334,9 @@ export default function AttributesTab() {
                   />
                   <span>JSON input</span>
                 </label>
-                <Button
-                  mx="3"
-                  size="1"
-                  variant="ghost"
-                  color="red"
-                  onClick={() => {
-                    setDirty(true);
-                    // I'm not sure why, but this reset doesn't apply the first time it's called.
-                    // TODO: debug this and remove the extra call
-                    resetAttributesOverride();
-                  }}
-                >
-                  Reset
-                </Button>
-              </Flex>
             </Flex>
 
-            <Container
-              style={{ height: `calc(100% - ${SUBHEAD_H}px - ${CTAS_H}px)` }}
-              overflowY="scroll"
-              overflowX="hidden"
-            >
+            <Container className="p-3" overflowX="hidden">
               <AttributesForm
                 form={attributesForm}
                 dirty={dirty}
@@ -363,7 +350,7 @@ export default function AttributesTab() {
                 saveOnBlur={applyAttributes}
               />
             </Container>
-            <Flex
+            {/* <Flex
               align="center"
               justify="between"
               width="100%"
@@ -433,7 +420,7 @@ export default function AttributesTab() {
                   </Form.Root>
                 </Popover.Content>
               </Popover.Root>
-            </Flex>
+            </Flex> */}
           </div>
         </div>
       </div>

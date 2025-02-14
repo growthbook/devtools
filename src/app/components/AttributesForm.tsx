@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import * as Form from "@radix-ui/react-form";
-import { Button, Switch, Select, Flex } from "@radix-ui/themes";
+import { Button, Switch, Select, Flex, TextField } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
 import { PiCheckBold, PiPlusCircle, PiX, PiTrash } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import clsx from "clsx";
-import { set } from "node_modules/@types/lodash";
 
 export default function AttributesForm({
   form,
@@ -95,67 +94,77 @@ export default function AttributesForm({
           !Object.keys(formAttributes).length ? (
             <em className="text-2xs">No attributes found</em>
           ) : (
-            Object.keys(formAttributes).map((attributeKey, i) => {
-              console.log(newAppliedAttributeIds);
-              return (
-                <div key={attributeKey}>
-                  <Form.Field
-                    className="FormFieldInline my-1"
-                    name={attributeKey}
-                    onBlur={() => {
-                      saveOnBlur?.();
-                    }}
-                  >
-                    <Form.Label className="FormLabel mr-1 text-nowrap">
-                      <div
-                        className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
-                        style={{ width: 100 }}
-                      >
-                        {attributeKey}
-                      </div>
-                    </Form.Label>
-                    {renderInputField({
-                      attributeKey,
-                      form,
-                      schema,
-                      setDirty,
-                    })}
-                    {newAppliedAttributeIds.includes(attributeKey) && (
-                      <Button
-                        type="button"
-                        size="1"
-                        variant="ghost"
-                        color="red"
-                        className="ml-2 mr-1"
-                        onClick={() => removeField(attributeKey)}
-                      >
-                        <PiX />
-                      </Button>
-                    )}
-                  </Form.Field>
-                </div>
-              );
-            })
+            <Flex direction="column" gap="1">
+              {Object.keys(formAttributes).map((attributeKey, i) => {
+                console.log(newAppliedAttributeIds);
+                return (
+                  <div key={attributeKey}>
+                    <Form.Field
+                      className="FormFieldInline my-1"
+                      name={attributeKey}
+                      onBlur={() => {
+                        saveOnBlur?.();
+                      }}
+                    >
+                      <Form.Label className="FormLabel mr-1 text-nowrap">
+                        <div
+                          className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
+                          style={{ width: 100 }}
+                        >
+                          {attributeKey}
+                        </div>
+                      </Form.Label>
+                      {renderInputField({
+                        attributeKey,
+                        form,
+                        schema,
+                        setDirty,
+                        saveOnBlur,
+                      })}
+                      {(
+                        <Button
+                          type="button"
+                          size="1"
+                          variant="ghost"
+                          disabled={!newAppliedAttributeIds.includes(attributeKey)}
+                          color="red"
+                          className="ml-2 mr-1"
+                          onClick={() => removeField(attributeKey)}
+                        >
+                          <PiX />
+                        </Button>
+                      )}
+                    </Form.Field>
+                  </div>
+                );
+              })}
+            </Flex>
           )
         ) : (
-          <textarea
-            className={clsx("Textarea mono mt-1", {
-              "border-red-700": textareaError,
-            })}
-            name={"__JSON_attributes__"}
-            value={textareaAttributes}
-            onBlur={() => {
-              saveOnBlur?.();
-            }}
-            onChange={(e) => {
-              const v = e.target.value;
-              setTextareaAttributes?.(v);
-              setTextareaError?.(false);
-              setDirty?.(true);
-            }}
-            style={{ fontSize: "10px", lineHeight: "15px" }}
-            rows={15}
-          />
+          <>
+            <textarea
+              className={clsx("Textarea mono mt-1", {
+                "border-red-700": textareaError,
+              })}
+              name={"__JSON_attributes__"}
+              value={textareaAttributes}
+              onChange={(e) => {
+                const v = e.target.value;
+                setTextareaAttributes?.(v);
+                setTextareaError?.(false);
+                setDirty?.(true);
+              }}
+              style={{ fontSize: "10px", lineHeight: "15px" }}
+              rows={15}
+            />
+            <Button
+              type="button"
+              className="mt-2 float-right"
+              onClick={saveOnBlur}
+            >
+              Apply
+            </Button>
+          </>
         )}
         {canAddRemoveFields && !jsonMode && (
           <div className="m-2">
@@ -270,11 +279,13 @@ function renderInputField({
   form,
   schema,
   setDirty,
+  saveOnBlur,
 }: {
   attributeKey: string;
   form: UseFormReturn<Attributes>;
   schema?: Record<string, string>;
   setDirty?: (b: boolean) => void;
+  saveOnBlur?: () => void;
 }) {
   let attributeType = getAttributeType(
     attributeKey,
@@ -287,11 +298,7 @@ function renderInputField({
     <div className="w-full">
       <Form.Control asChild>
         {attributeType === "number" ? (
-          <input
-            className="Input bg-white"
-            type="number"
-            {...form.register(attributeKey)}
-          />
+          <TextField.Root type="number" {...form.register(attributeKey)} />
         ) : attributeType === "boolean" ? (
           <Switch
             size="1"
@@ -300,10 +307,11 @@ function renderInputField({
             onCheckedChange={(v: boolean) => {
               form.setValue(attributeKey, v);
               setDirty?.(true);
+              // saveOnBlur?.();
             }}
           />
         ) : (
-          <input className="Input bg-white" {...form.register(attributeKey)} />
+          <TextField.Root {...form.register(attributeKey)} />
         )}
       </Form.Control>
     </div>

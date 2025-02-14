@@ -252,3 +252,6 @@
     animation: rt-dialog-content-hide 100ms cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
 }
+.textInput {
+  @apply border border-slate-a4 rounded-md;
+}
