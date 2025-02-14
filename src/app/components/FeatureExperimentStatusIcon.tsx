@@ -27,7 +27,7 @@ export default function FeatureExperimentStatusIcon({
           }
         >
           <button>
-            <PiCheckCircleFill className="inline-block mr-1 mb-0.5 text-amber-600" />
+            <PiCheckCircleFill className="inline-block mr-1.5 mb-0.5 text-amber-600" />
           </button>
         </Tooltip>
       )
@@ -38,7 +38,7 @@ export default function FeatureExperimentStatusIcon({
           : "This experiment has enrolled on this page."
         }>
           <button>
-            <PiCheckCircleBold className="inline-block mr-1 mb-0.5 text-violet-8" />
+            <PiCheckCircleBold className="inline-block mr-1.5 mb-0.5 text-violet-8" />
           </button>
         </Tooltip>
       );
@@ -50,13 +50,13 @@ export default function FeatureExperimentStatusIcon({
       <Tooltip
         content={`This ${type} has an override applied.`}>
         <button>
-          <PiCircleDuotone className="inline-block mr-1 mb-0.5 text-amber-600" />
+          <PiCircleDuotone className="inline-block mr-1.5 mb-0.5 text-amber-600" />
         </button>
       </Tooltip>
     )
   } else {
     return (
-      <PiCheckCircleThin className="inline-block mr-1 mb-0.5 text-slate-a5" />
+      <PiCheckCircleThin className="inline-block mr-1.5 mb-0.5 text-slate-a5" />
     );
   }
 }

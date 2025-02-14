@@ -158,7 +158,7 @@ export default function FeatureDetail({
 
           <div className="flex justify-between items-end mt-6 mb-2 py-1 text-md font-semibold border-b border-slate-200">
             <span>Rules and Values</span>
-            <label className="flex gap-1 text-xs items-center font-normal cursor-pointer">
+            <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer">
               <span>Hide inactive</span>
               <Switch
                 size="1"

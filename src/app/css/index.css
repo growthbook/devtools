@@ -59,7 +59,6 @@
 .featureCard {
   @apply py-1 border-t border-slate-a3 relative items-center cursor-pointer overflow-hidden select-none;
   height: 48px;
-  scroll-margin-top: 100px; /* should be synced with HEADER_H */
 }
 .featureCard:first-of-type {
   @apply border-t-transparent;
@@ -193,11 +192,10 @@
 }
 
 .searchBar {
-  @apply border border-slate-a4 rounded-md flex items-center justify-between;
+  @apply border-b border-b-slate-a4 flex items-center justify-between;
 }
 .searchBar input {
-  @apply border-0 px-1 py-0.5;
-  width: 130px;
+  @apply border-0 px-1 py-0.5 w-full;
 }
 .searchBar .clear {
   margin: 0 2px;
