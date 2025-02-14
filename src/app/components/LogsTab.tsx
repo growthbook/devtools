@@ -11,7 +11,7 @@ export default function LogsTab() {
   useEffect(() => window.scrollTo({ top: 0 }), []);
   const [logEvents] = useTabState<LogUnion[] | undefined>(
     "logEvents",
-    undefined,
+    undefined
   );
 
   return (
@@ -20,6 +20,7 @@ export default function LogsTab() {
       style={{
         maxWidth: MW,
         overflowX: "hidden",
+        height: "100%",
       }}
     >
       {typeof logEvents === "undefined" ? (

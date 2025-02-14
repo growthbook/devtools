@@ -1,5 +1,13 @@
 import { LogUnion } from "@growthbook/growthbook";
-import { Badge, Button, Container, Flex, Text } from "@radix-ui/themes";
+import {
+  Badge,
+  Box,
+  Button,
+  Checkbox,
+  Container,
+  Flex,
+  Text,
+} from "@radix-ui/themes";
 import React, { useMemo, useState } from "react";
 import useTabState from "../hooks/useTabState";
 import { useSearch } from "../hooks/useSearch";
@@ -35,12 +43,12 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
 
   const filteredLogEvents = useMemo(
     () => logEvents.filter((evt) => filters.includes(evt.logType)),
-    [filters, logEvents],
+    [filters, logEvents]
   );
 
   const reshapedEvents = useMemo(
     () => filteredLogEvents.map(reshapeEventLog),
-    [filteredLogEvents],
+    [filteredLogEvents]
   );
 
   const {
@@ -52,48 +60,44 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
     defaultSortField: "timestamp",
   });
 
-  const logTypeCounts = useMemo(() => {
-    const counts: Record<LogType, number> = {
-      debug: 0,
-      event: 0,
-      experiment: 0,
-      feature: 0,
-    };
-    logEvents.forEach((evt) => {
-      counts[evt.logType] += 1;
-    });
-    return counts;
-  }, [logEvents]);
-
   return (
-    <div>
-      <Container mb="1">
-        <div className="label md mb-2">Filter logs</div>
-        <Flex align="center">
-          <SearchBar
-            flexGrow="0"
-            autoFocus
-            searchInputProps={searchInputProps}
-          />
-          <Flex justify="between">
-            {(Object.entries(filterCopy) as Array<[LogType, string]>).map(
-              ([filter, copy]) => (
-                <Button
-                  key={filter}
-                  variant={filters.includes(filter) ? "solid" : "outline"}
-                  onClick={() => toggleFilter(filter)}
-                  mx="1"
-                  size="1"
-                >
+    <Flex direction="column" className="w-full" style={{ height: "100%" }}>
+      <Flex
+        align="center"
+        mt="2"
+        px="4"
+        className="border-b border-b-slate-200"
+      >
+        <SearchBar flexGrow="0" autoFocus searchInputProps={searchInputProps} />
+        <Flex
+          ml="auto"
+          gapX="4"
+          gapY="1"
+          wrap={{
+            initial: "wrap",
+            md: "nowrap",
+          }}
+        >
+          {(Object.entries(filterCopy) as Array<[LogType, string]>).map(
+            ([filter, copy]) => (
+              <Text as="label" size="2" key={filter}>
+                <Flex gap="1">
+                  <Checkbox
+                    checked={filters.includes(filter)}
+                    onCheckedChange={() => toggleFilter(filter)}
+                  />
                   {copy}
-                  <Badge variant="surface">{logTypeCounts[filter]}</Badge>
-                </Button>
-              ),
-            )}
-          </Flex>
+                </Flex>
+              </Text>
+            )
+          )}
         </Flex>
-      </Container>
-      <Flex className="w-full border-b border-b-slate-200">
+      </Flex>
+      <Flex
+        className="w-full items-center bg-slate-a2 shadow-sm uppercase text-slate-11  text-xs font-semibold "
+        style={{ height: 35 }}
+        px="4"
+      >
         <SortableHeader field="timestamp" className="w-[20%] px-1">
           Timestamp
         </SortableHeader>
@@ -106,64 +110,81 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
         </SortableHeader>
         <div className="w-[40%] pr-2">Event Details</div>
       </Flex>
-      <Accordion.Root
-        className="accordion"
-        type="multiple"
-        value={[...expandedItems]}
-        onValueChange={(newValues) => setExpandedItems(new Set(newValues))}
-      >
-        {events.map((evt, i) => {
-          const timestamp = parseInt(evt.timestamp);
-          const date = new Date(timestamp);
-          const formattedDateTime =
-            date.toLocaleDateString() === new Date().toLocaleDateString()
-              ? date.toLocaleTimeString(undefined, { hourCycle: "h24" })
-              : date.toLocaleString(undefined, { hourCycle: "h24" });
-          const isExpanded = expandedItems.has(i.toString());
-          return (
-            <Accordion.Item key={i} value={i.toString()}>
-              <Accordion.Trigger className="trigger w-full mb-0.5">
-                <Flex
-                  className={clsx(
-                    "w-full",
-                    i > 0 ? "border-t border-t-slate-200" : "",
-                    "py-1",
-                    "text-sm",
-                  )}
-                >
-                  <div className="w-[20%] px-1 text-left">
-                    <PiCaretRightFill className="caret mr-0.5" size={12} />
-                    <Text className="text-xs">{formattedDateTime}</Text>
-                  </div>
-                  <div className="w-[20%] px-1 text-left">{evt.logType}</div>
-                  <div
+      <Box px="4" flexGrow={"1"} overflowY="auto">
+        {!events.length && (
+          <Box py="3">
+            <em>No logs to display</em>
+          </Box>
+        )}
+        <Accordion.Root
+          className="accordion"
+          type="multiple"
+          value={[...expandedItems]}
+          onValueChange={(newValues) => setExpandedItems(new Set(newValues))}
+        >
+          {events.map((evt, i) => {
+            const timestamp = parseInt(evt.timestamp);
+            const date = new Date(timestamp);
+            const formattedDateTime =
+              date.toLocaleDateString() === new Date().toLocaleDateString()
+                ? date.toLocaleTimeString(undefined, { hourCycle: "h24" })
+                : date.toLocaleString(undefined, { hourCycle: "h24" });
+            const isExpanded = expandedItems.has(i.toString());
+            return (
+              <Accordion.Item key={i} value={i.toString()}>
+                <Accordion.Trigger className="trigger w-full mb-0.5">
+                  <Flex
                     className={clsx(
-                      "w-[20%]",
-                      "px-1",
-                      "text-left",
-                      isExpanded ? "" : "line-clamp-1",
+                      "w-full",
+                      i > 0 ? "border-t border-t-slate-200" : "",
+                      "py-1",
+                      "text-sm"
                     )}
                   >
-                    {evt.eventInfo}
-                  </div>
-                  <div className="w-[40%] px-1">
-                    <ValueField
-                      value={evt.details}
-                      valueType="json"
-                      jsonStringifySpaces={isExpanded ? 2 : 0}
-                      maxHeight={isExpanded ? 120 : 25}
-                      customPrismOuterStyle={{
-                        border: "none",
-                        borderRadius: "unset",
-                      }}
-                    />
-                  </div>
-                </Flex>
-              </Accordion.Trigger>
-            </Accordion.Item>
-          );
-        })}
-      </Accordion.Root>
-    </div>
+                    <div className="w-[20%] px-1 text-left">
+                      <PiCaretRightFill className="caret mr-0.5" size={12} />
+                      <Text className="text-xs">{formattedDateTime}</Text>
+                    </div>
+                    <div className="w-[20%] px-1 text-left">{evt.logType}</div>
+                    <div
+                      className={clsx(
+                        "w-[20%]",
+                        "px-1",
+                        "text-left",
+                        isExpanded ? "" : "line-clamp-1"
+                      )}
+                    >
+                      {evt.eventInfo}
+                    </div>
+                    <div className="w-[40%] px-2 text-left">
+                      {isExpanded ? (
+                        <ValueField
+                          value={evt.details}
+                          valueType="json"
+                          jsonStringifySpaces={2}
+                          maxHeight={120}
+                          customPrismOuterStyle={{
+                            border: "none",
+                            borderRadius: "unset",
+                            background: "transparent",
+                          }}
+                        />
+                      ) : (
+                        <Text
+                          size="2"
+                          className="text-ellipsis line-clamp-1 overflow-hidden text-slate-9"
+                        >
+                          {JSON.stringify(evt.details)}
+                        </Text>
+                      )}
+                    </div>
+                  </Flex>
+                </Accordion.Trigger>
+              </Accordion.Item>
+            );
+          })}
+        </Accordion.Root>
+      </Box>
+    </Flex>
   );
 }

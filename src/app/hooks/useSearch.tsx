@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import { Flex } from "@radix-ui/themes";
+import { PiArrowDownLight, PiArrowUpLight } from "react-icons/pi";
 
 export interface SearchProps<T> {
   items: T[];
@@ -48,7 +49,7 @@ export function useSearch<T>({
 
   const filtered = useMemo(() => {
     return items.filter((item) =>
-      JSON.stringify(item).toLowerCase().includes(value.toLowerCase()),
+      JSON.stringify(item).toLowerCase().includes(value.toLowerCase())
     );
   }, [items, value]);
 
@@ -100,13 +101,11 @@ export function useSearch<T>({
               >
                 {sort.field === field ? (
                   sort.dir < 0 ? (
-                    <FaSortDown />
+                    <PiArrowDownLight />
                   ) : (
-                    <FaSortUp />
+                    <PiArrowUpLight />
                   )
-                ) : (
-                  <FaSort />
-                )}
+                ) : null}
               </a>
             </Flex>
           </span>
