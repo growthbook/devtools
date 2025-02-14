@@ -121,19 +121,21 @@ export default function AttributesForm({
                         setDirty,
                         saveOnBlur,
                       })}
-                      {(
+                      {
                         <Button
                           type="button"
                           size="1"
                           variant="ghost"
-                          disabled={!newAppliedAttributeIds.includes(attributeKey)}
+                          disabled={
+                            !newAppliedAttributeIds.includes(attributeKey)
+                          }
                           color="red"
                           className="ml-2 mr-1"
                           onClick={() => removeField(attributeKey)}
                         >
                           <PiX />
                         </Button>
-                      )}
+                      }
                     </Form.Field>
                   </div>
                 );
@@ -213,8 +215,8 @@ export default function AttributesForm({
                         (key) =>
                           !Object.prototype.hasOwnProperty.call(
                             formAttributes,
-                            key
-                          )
+                            key,
+                          ),
                       )
                       .map((key) => (
                         <option key={key}>{key}</option>
@@ -290,7 +292,7 @@ function renderInputField({
   let attributeType = getAttributeType(
     attributeKey,
     form.watch(attributeKey),
-    schema
+    schema,
   );
   // todo: enum, number[], string[]
   // todo (maybe. or just use string): secureString, secureString[]

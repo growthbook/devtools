@@ -28,19 +28,19 @@ import clsx from "clsx";
 import ArchetypesList from "@/app/components/ArchetypesList";
 
 export const MW = 1200; // max-width
-export const NAV_H = 80;
+export const NAV_H = 75;
 
 export const App = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
     "sdkFound",
-    undefined
+    undefined,
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
-    {}
+    {},
   );
   const [forcedVariations, setForcedVariations] = useTabState<
     Record<string, any>
@@ -48,7 +48,7 @@ export const App = () => {
 
   const [forcedAttributes, _setForcedAttributes] = useTabState<Attributes>(
     "forcedAttributes",
-    {}
+    {},
   );
   const { canConnect, hasPayload } = useSdkData();
   let sdkStatus = canConnect ? "green" : hasPayload ? "yellow" : "red";
@@ -78,15 +78,15 @@ export const App = () => {
     >
       <div id="main" className="text-indigo-12 overflow-hidden">
         <div
-          className={`shadow-sm px-3 pt-2 w-full relative bg-white z-front`}
+          className={`shadow-sm px-3 pt-1 w-full relative bg-white z-front`}
           style={{ height: NAV_H }}
         >
-          <Flex justify="between" className="mx-auto" style={{ maxWidth: MW }}>
-            <h1 className="text-lg">
+          <Flex justify="between" className="mx-auto" style={{ maxWidth: MW, height: 30 }}>
+            <h1 className="text-md select-none">
               <img
                 src={logo}
                 alt="GrowthBook"
-                className="w-[140px] inline-block mb-1 mr-2"
+                className="w-[120px] inline-block mb-1 mr-2"
               />
               <span className="font-bold text-slate-11">DevTools</span>
             </h1>
@@ -100,7 +100,7 @@ export const App = () => {
                   <Button
                     variant="ghost"
                     size="2"
-                    style={{ margin: "0 -6px 0 0" }}
+                    style={{ margin: "0 -6px -20px 0" }}
                   >
                     <div className="px-1">
                       <PiGearSix size={20} />
@@ -130,7 +130,7 @@ export const App = () => {
           <Tabs.Root
             value={currentTab}
             onValueChange={setCurrentTab}
-            className="-mx-4 my-[-2px]"
+            className="-mx-4 mt-[1px]"
           >
             <Tabs.List>
               <div

@@ -7,7 +7,7 @@ import { MW } from "@/app";
 
 export default function SdkTab() {
   const [selectedItem, setSelectedItem] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   const [sdkData] = useTabState<SDKHealthCheckResult | {}>("sdkData", {});
   const {
@@ -114,7 +114,9 @@ export default function SdkTab() {
       case "status":
         return (
           <div className="sdkDebugDetailedView">
-            <Text as="div" weight="medium">Status</Text>
+            <Text as="div" weight="medium">
+              Status
+            </Text>
             <Text as="div" size="2" weight="regular" mb="2">
               {canConnect
                 ? "The SDK is connected to the GrowthBook API."
@@ -126,11 +128,11 @@ export default function SdkTab() {
             <Text as="div" size="2" weight="regular">
               <strong>Client Key </strong> {clientKey ?? "None"}
             </Text>
-            {
-            errorMessage && <Text as="div" size="2" weight="light">
-              error: {errorMessage ?? "None"}
-            </Text>
-            }
+            {errorMessage && (
+              <Text as="div" size="2" weight="light">
+                error: {errorMessage ?? "None"}
+              </Text>
+            )}
           </div>
         );
       case "version":
@@ -140,7 +142,18 @@ export default function SdkTab() {
               Version
             </Text>
             <Text as="div" size="2" weight="regular">
-              {!version ? <Text>"unable to find your sdk version this might be because your on a old version of the SDK and consider updating to the lastest"</Text> : <Text> you are on <strong>{version}</strong> version make sure that you have all the features you require</Text>}
+              {!version ? (
+                <Text>
+                  "unable to find your sdk version this might be because your on
+                  a old version of the SDK and consider updating to the lastest"
+                </Text>
+              ) : (
+                <Text>
+                  {" "}
+                  you are on <strong>{version}</strong> version make sure that
+                  you have all the features you require
+                </Text>
+              )}
             </Text>
           </div>
         );
@@ -198,7 +211,7 @@ export default function SdkTab() {
             <Text as="div" size="2" weight="regular">
               {usingStickyBucketing
                 ? "The SDK is using sticky bucketing."
-                : "The SDK is not using sticky bucketing. Sticky bucketing is optional and used to ensure that users are consistently bucketed into the same experiment."}  
+                : "The SDK is not using sticky bucketing. Sticky bucketing is optional and used to ensure that users are consistently bucketed into the same experiment."}
             </Text>
           </div>
         );
@@ -220,10 +233,11 @@ export default function SdkTab() {
               <strong>Client Key </strong> {clientKey ?? "None"}
             </Text>
             <Text as="div" size="2" weight="regular">
-              <strong>Streaming host request headers </strong> {JSON.stringify(streamingHostRequestHeaders) ?? "None"}
+              <strong>Streaming host request headers </strong>{" "}
+              {JSON.stringify(streamingHostRequestHeaders) ?? "None"}
             </Text>
           </div>
-        );  
+        );
       default:
         return null;
     }

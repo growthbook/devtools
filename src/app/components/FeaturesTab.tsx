@@ -3,24 +3,30 @@ import {
   AutoExperiment,
   Experiment,
   FeatureDefinition,
+  LogUnion,
 } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
-import { PiCircleFill, PiFlaskFill, PiListBold } from "react-icons/pi";
+import {
+  PiCircleFill,
+  PiFlaskFill,
+  PiListBold, PiXBold,
+} from "react-icons/pi";
 import clsx from "clsx";
-import {MW, NAV_H} from "@/app";
+import { MW, NAV_H } from "@/app";
 import { ValueType } from "./ValueField";
 import FeatureDetail from "@/app/components/FeatureDetail";
 import { useSearch } from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
-import { Button } from "@radix-ui/themes";
+import {Button, Link, Switch} from "@radix-ui/themes";
+import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
 
-type FeatureDefinitionWithId = FeatureDefinition<any> & { id: string };
+type FeatureDefinitionWithId = FeatureDefinition & { id: string };
 
 export const LEFT_PERCENT = 0.4;
-export const HEADER_H = 40;
+export const HEADER_H = 70;
 
 export default function FeaturesTab() {
   const [features, setFeatures] = useTabState<
@@ -36,6 +42,29 @@ export default function FeaturesTab() {
     [features],
   );
 
+  const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
+    "forcedFeatures",
+    {},
+  );
+
+  const { evaluatedFeatures } = useGBSandboxEval();
+
+  const [logEvents] = useTabState<LogUnion[] | undefined>(
+    "logEvents",
+    undefined,
+  );
+  const pageEvaluatedFeatures = useMemo(() => {
+    return new Set(
+      (logEvents || [])
+        .filter((log) => log.logType === "feature")
+        .map((log) => log?.featureKey),
+    );
+  }, [logEvents]);
+  const [hideInactiveFeatures, setHideInactiveFeatures] = useTabState<boolean>(
+    "hideInactiveFeatures",
+    false,
+  );
+
   const {
     items: filteredFeatures,
     searchInputProps,
@@ -45,13 +74,10 @@ export default function FeaturesTab() {
     defaultSortField: "id",
     useSort: false,
   });
-
-  const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
-    "forcedFeatures",
-    {},
+  const sortedFilteredFeatures = useMemo(() => [...filteredFeatures]
+      .sort((feature) => pageEvaluatedFeatures.has(feature.id) ? -1 : 1),
+    [filteredFeatures, pageEvaluatedFeatures]
   );
-
-  const { evaluatedFeatures } = useGBSandboxEval();
 
   const [selectedFid, setSelectedFid] = useTabState<string | undefined>(
     "selectedFid",
@@ -80,8 +106,12 @@ export default function FeaturesTab() {
       const el = document.querySelector(
         `#featuresTab_featureList_${selectedFid}`,
       );
-      const y = (el?.getBoundingClientRect()?.top || 0) + (container?.scrollTop || 0);
-      container?.scroll?.({ top: y - (NAV_H + HEADER_H) , behavior: firstLoad ? "instant" : "smooth" });
+      const y =
+        (el?.getBoundingClientRect()?.top || 0) + (container?.scrollTop || 0);
+      container?.scroll?.({
+        top: y - (NAV_H + HEADER_H),
+        behavior: firstLoad ? "instant" : "smooth",
+      });
     }
   }, [selectedFid]);
 
@@ -103,49 +133,70 @@ export default function FeaturesTab() {
         }}
       >
         <div
-          className="fixed flex items-center w-full border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm"
+          className="fixed w-full border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm"
           style={{
             maxWidth: MW,
             height: HEADER_H,
             zIndex: 2000,
           }}
         >
-          <div style={{ width: col1 }}>
-            <label className="uppercase text-slate-11 ml-6">Feature</label>
+          <div className="flex items-center gap-4 mx-3" style={{height: 35}}>
             <SearchBar
               flexGrow="0"
-              className="inline-block ml-4"
+              className="inline-block"
+              style={{width: 200}}
               autoFocus
+              placeholder="Search Features"
               searchInputProps={searchInputProps}
               clear={clearSearch}
             />
-          </div>
-          {fullWidthListView ? (
-            <>
-              <div style={{ width: col2 }}>
-                <label className="uppercase text-slate-11">Links</label>
-              </div>
-              <div style={{ width: col3 }}>
-                <label className="uppercase text-slate-11">Value</label>
-              </div>
-              <div className="flex justify-center" style={{ width: col4 }}>
-                <label className="uppercase text-slate-11">Override</label>
-              </div>
-            </>
-          ) : (
-            <>
-              <Button
-                className="absolute right-3"
-                style={{ marginRight: 0 }}
-                variant="ghost"
+            <div className="flex-1"/>
+            {Object.keys(forcedFeatures).length ? (
+              <Link
+                href="#"
+                role="button"
+                color="amber"
                 size="1"
-                onClick={() => setSelectedFid(undefined)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setForcedFeatures({});
+                }}
+                className="flex gap-1 items-center"
               >
-                <PiListBold className="inline-block mr-1" />
-                List view
-              </Button>
-            </>
-          )}
+                Clear all overrides
+                <PiXBold/>
+              </Link>
+            ) : null}
+            <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer">
+              <span>Hide inactive</span>
+              <Switch
+                size="1"
+                checked={hideInactiveFeatures}
+                onCheckedChange={(b) => setHideInactiveFeatures(b)}
+              />
+            </label>
+          </div>
+
+          <div className="flex items-center bg-slate-a2 rounded-t-md" style={{height: 35}}>
+            <div style={{width: col1}}>
+              <label className="uppercase text-slate-11 ml-7">Feature</label>
+            </div>
+            {fullWidthListView && (
+              <>
+                <div style={{width: col2}}>
+                  <label className="flex justify-center uppercase text-slate-11">
+                    <PiFlaskFill/>
+                  </label>
+                </div>
+                <div style={{width: col3}}>
+                  <label className="uppercase text-slate-11">Value</label>
+                </div>
+                <div className="flex justify-center" style={{width: col4}}>
+                  <label className="uppercase text-slate-11">Override</label>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <div
@@ -155,9 +206,9 @@ export default function FeaturesTab() {
             paddingTop: HEADER_H,
           }}
         >
-          {filteredFeatures.map((feature, i) => {
+          {sortedFilteredFeatures.map((feature, i) => {
             const fid = feature?.id;
-            const { evaluatedFeature, isForced, linkedExperiments } =
+            const {evaluatedFeature, isForced, linkedExperiments} =
               getFeatureDetails({
                 fid,
                 features,
@@ -168,6 +219,8 @@ export default function FeaturesTab() {
               ? JSON.stringify(evaluatedFeature.result?.value)
               : "null";
             const isBoolean = valueStr === "true" || valueStr === "false";
+
+            if (!isForced && hideInactiveFeatures && !pageEvaluatedFeatures.has(fid)) return null;
 
             return (
               <div
@@ -182,36 +235,29 @@ export default function FeaturesTab() {
                   className={clsx({
                     "flex-shrink-0": fullWidthListView,
                   })}
-                  style={{ width: fullWidthListView ? col1 : undefined }}
+                  style={{width: fullWidthListView ? col1 : undefined}}
                 >
-                  {isForced && !fullWidthListView && (
-                    <div className="absolute" style={{ left: 6, top: 10 }}>
-                      <PiCircleFill size={10} className="text-amber-600" />
-                    </div>
-                  )}
-                  <div
-                    className={clsx("title absolute line-clamp-1 pl-6 pr-6", {
+                <div
+                    className={clsx("title absolute line-clamp-1 pl-2.5 pr-3", {
                       "top-1": !fullWidthListView,
                       "top-[25%]": fullWidthListView,
                     })}
                     style={{ width: fullWidthListView ? col1 : undefined }}
                   >
+                    <FeatureExperimentStatusIcon
+                      evaluated={pageEvaluatedFeatures.has(fid)}
+                      forced={isForced}
+                      type="feature"
+                    />
                     {fid}
                   </div>
                 </div>
                 {fullWidthListView && (
                   <div
-                    className="flex-shrink-0 text-sm"
+                    className="flex justify-center flex-shrink-0 text-sm"
                     style={{ width: col2 }}
                   >
-                    {linkedExperiments?.length ? (
-                      <>
-                        <PiFlaskFill className="inline-block mr-1" />
-                        <span className="text-indigo-12">
-                          ({linkedExperiments.length})
-                        </span>
-                      </>
-                    ) : null}
+                    {linkedExperiments?.length ? linkedExperiments.length : null}
                   </div>
                 )}
                 <div

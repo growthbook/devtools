@@ -1,9 +1,9 @@
 import { DebugLog } from "devtools";
-import React, {useState} from "react";
-import {Link} from "@radix-ui/themes";
+import React, { useState } from "react";
+import { Link } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
 import * as Accordion from "@radix-ui/react-accordion";
-import {PiCaretRightFill} from "react-icons/pi";
+import { PiCaretRightFill } from "react-icons/pi";
 
 export default function DebugLogger({
   logs,
@@ -20,10 +20,16 @@ export default function DebugLogger({
     <div>
       <div className="flex items-end text-xs mb-2">
         <span>Debug log</span>
-        <Link size="1" role="button" className="hover:underline ml-2 -mb-1" href="#" onClick={(e) => {
-          e.preventDefault();
-          setCollapsed(!collapsed);
-        }}>
+        <Link
+          size="1"
+          role="button"
+          className="hover:underline ml-2 -mb-1"
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            setCollapsed(!collapsed);
+          }}
+        >
           {collapsed ? "Show" : "Hide"}
         </Link>
       </div>
@@ -37,12 +43,22 @@ export default function DebugLogger({
                 </div>
                 {showContext && Object.keys(log?.[1] || {}).length ? (
                   <div className="py-1 pl-2 pr-2 text-2xs">
-
-                    <Accordion.Root className="accordion" type="single" collapsible>
+                    <Accordion.Root
+                      className="accordion"
+                      type="single"
+                      collapsible
+                    >
                       <Accordion.Item value="debug-log">
                         <Accordion.Trigger className="trigger mb-0.5">
-                          <Link size="1" role="button" className="hover:underline">
-                            <PiCaretRightFill className="caret mr-0.5" size={12} />
+                          <Link
+                            size="1"
+                            role="button"
+                            className="hover:underline"
+                          >
+                            <PiCaretRightFill
+                              className="caret mr-0.5"
+                              size={12}
+                            />
                             context
                           </Link>
                         </Accordion.Trigger>
@@ -54,7 +70,7 @@ export default function DebugLogger({
                   </div>
                 ) : null}
               </div>
-            )
+            );
           })}
         </div>
       )}

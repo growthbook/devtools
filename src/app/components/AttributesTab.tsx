@@ -98,7 +98,7 @@ export default function AttributesTab() {
 
   const [selectedArchetype, setSelectedArchetype] = useTabState<
     Archetype | undefined
-  >("selectedArchetype",undefined);
+  >("selectedArchetype", undefined);
 
   const applyAttributes = () => {
     let newAttributes: Attributes;
@@ -179,7 +179,10 @@ export default function AttributesTab() {
         overflowX: "hidden",
       }}
     >
-      <div className="flex justify-between items-top h-[100%] mx-auto" style={{maxWidth: 600}}>
+      <div
+        className="flex justify-between items-top h-[100%] mx-auto"
+        style={{ maxWidth: 600 }}
+      >
         <div className="w-[100%] pl-1 h-[100%]">
           <Flex style={{ height: LABEL_H }} align="center">
             <Text
