@@ -59,7 +59,7 @@
 .featureCard {
   @apply py-1 border-t border-slate-a3 relative items-center cursor-pointer overflow-hidden select-none;
   height: 48px;
-  scroll-margin-top: 40px; /* should be synced with HEADER_H */
+  scroll-margin-top: 100px; /* should be synced with HEADER_H */
 }
 .featureCard:first-of-type {
   @apply border-t-transparent;

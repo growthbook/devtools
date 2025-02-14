@@ -10,7 +10,7 @@ import useGBSandboxEval, {
 } from "@/app/hooks/useGBSandboxEval";
 import { PiCircleFill, PiFlaskFill, PiListBold } from "react-icons/pi";
 import clsx from "clsx";
-import { MW } from "@/app";
+import {MW, NAV_H} from "@/app";
 import { ValueType } from "./ValueField";
 import FeatureDetail from "@/app/components/FeatureDetail";
 import { useSearch } from "@/app/hooks/useSearch";
@@ -76,10 +76,12 @@ export default function FeaturesTab() {
   }, []);
   useEffect(() => {
     if (selectedFid) {
+      const container = document.querySelector("#pageBody");
       const el = document.querySelector(
         `#featuresTab_featureList_${selectedFid}`,
       );
-      el?.scrollIntoView({ behavior: firstLoad ? "instant" : "smooth" });
+      const y = (el?.getBoundingClientRect()?.top || 0) + (container?.scrollTop || 0);
+      container?.scroll?.({ top: y - (NAV_H + HEADER_H) , behavior: firstLoad ? "instant" : "smooth" });
     }
   }, [selectedFid]);
 
