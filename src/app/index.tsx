@@ -6,9 +6,9 @@ import {
   IconButton,
   Dialog,
   Tabs,
-  Select,
+  Tooltip,
 } from "@radix-ui/themes";
-import React, { Attributes, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import logo from "./logo.svg";
 import useTabState from "@/app/hooks/useTabState";
 import SdkTab from "./components/SdkTab";
@@ -22,7 +22,7 @@ import {
   PiX,
   PiCircleFill,
   PiGearSix,
-  PiExclamationMarkBold,
+  PiInfoBold,
 } from "react-icons/pi";
 import clsx from "clsx";
 import ArchetypesList from "@/app/components/ArchetypesList";
@@ -46,9 +46,9 @@ export const App = () => {
     Record<string, any>
   >("forcedVariations", {});
 
-  const [forcedAttributes, _setForcedAttributes] = useTabState<Attributes>(
+  const [forcedAttributes, _setForcedAttributes] = useTabState<boolean>(
     "forcedAttributes",
-    {},
+    false,
   );
   const { canConnect, hasPayload } = useSdkData();
   let sdkStatus = canConnect ? "green" : hasPayload ? "yellow" : "red";
@@ -139,35 +139,38 @@ export const App = () => {
               >
                 <div className="mx-2" />
                 <Tabs.Trigger value="features">
-                  <span>Features</span>
+                  Features
                   {Object.keys(forcedFeatures).length ? (
-                    <div
-                      className="inline-flex items-center justify-center text-xs font-semibold text-amber-700 bg-amber-200 rounded-full ml-1"
-                      style={{ minWidth: 18, height: 18 }}
-                    >
-                      {Object.keys(forcedFeatures).length}
+                    <div className="absolute" style={{ top: -8, right: -16 }}>
+                      <Tooltip content={`${Object.keys(forcedFeatures).length} override${Object.keys(forcedFeatures).length !== 1 ? "s" : ""}`}>
+                        <button className="p-1">
+                          <PiInfoBold className="inline-block mr-1.5 mb-0.5 text-amber-600 bg-white rounded-full" />
+                        </button>
+                      </Tooltip>
                     </div>
                   ) : null}
                 </Tabs.Trigger>
                 <Tabs.Trigger value="experiments">
-                  <span>Experiments</span>
+                  Experiments
                   {Object.keys(forcedVariations).length ? (
-                    <div
-                      className="inline-flex items-center justify-center text-xs font-semibold text-amber-700 bg-amber-200 rounded-full ml-1"
-                      style={{ minWidth: 18, height: 18 }}
-                    >
-                      {Object.keys(forcedVariations).length}
+                    <div className="absolute" style={{ top: -8, right: -16 }}>
+                    <Tooltip content={`${Object.keys(forcedVariations).length} override${Object.keys(forcedVariations).length !== 1 ? "s" : ""}`}>
+                      <button className="p-1">
+                        <PiInfoBold className="inline-block mr-1.5 mb-0.5 text-amber-600 bg-white rounded-full" />
+                      </button>
+                    </Tooltip>
                     </div>
                   ) : null}
                 </Tabs.Trigger>
                 <Tabs.Trigger value="attributes">
-                  <span> Attributes</span>
-                  {forcedAttributes ? (
-                    <div
-                      className="inline-flex items-center justify-center text-xs font-semibold text-amber-700 bg-amber-200 rounded-full ml-1"
-                      style={{ minWidth: 18, height: 18 }}
-                    >
-                      <PiExclamationMarkBold />
+                  Attributes
+                  {forcedAttributes? (
+                    <div className="absolute" style={{ top: -8, right: -16 }}>
+                      <Tooltip content="Has attribute overrides">
+                        <button className="p-1">
+                          <PiInfoBold className="inline-block mr-1.5 mb-0.5 text-amber-600 bg-white rounded-full" />
+                        </button>
+                      </Tooltip>
                     </div>
                   ) : null}
                 </Tabs.Trigger>

@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import uniqid from "uniqid";
+import React, { useEffect, useState } from "react";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
@@ -8,25 +7,19 @@ import {
   Checkbox,
   Container,
   Flex,
-  IconButton,
-  Popover,
-  RadioGroup,
   Text,
 } from "@radix-ui/themes";
 import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
-import { PiArrowClockwise, PiAsterisk, PiTrash, PiXBold } from "react-icons/pi";
-import * as Form from "@radix-ui/react-form";
+import { PiXBold } from "react-icons/pi";
 import useApi from "../hooks/useApi";
 import { MW } from "@/app";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
-import { over, set } from "node_modules/@types/lodash";
 
 export default function AttributesTab() {
   const LABEL_H = 32;
   const SUBHEAD_H = 32;
-  const CTAS_H = 50;
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
   const attributesForm = useForm<Attributes>({ defaultValues: attributes });
   const formAttributes = attributesForm.getValues();

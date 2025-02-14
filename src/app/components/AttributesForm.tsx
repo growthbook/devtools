@@ -3,7 +3,7 @@ import * as Form from "@radix-ui/react-form";
 import { Button, Switch, Select, Flex, TextField } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
-import { PiCheckBold, PiPlusCircle, PiX, PiTrash } from "react-icons/pi";
+import { PiCheckBold, PiPlusCircle, PiX } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import clsx from "clsx";
 
