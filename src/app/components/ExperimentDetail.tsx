@@ -202,60 +202,19 @@ export default function ExperimentDetail({
             </div>
 
             {selectedExperiment && selectedEid ? (
-              <EditableVariationField
-                experiment={selectedExperiment.experiment}
-                value={selectedVariation}
-                evaluatedValue={
-                  selectedExperiment?.evaluatedExperiment?.result?.variationId
-                }
-                setValue={(v) => {
-                  setForcedVariation(selectedEid, v);
-                  setOverrideExperiment(true);
-                }}
-              />
-            ) : null}
+              <>
+                <EditableVariationField
+                  experiment={selectedExperiment.experiment}
+                  value={selectedVariation}
+                  evaluatedValue={
+                    selectedExperiment?.evaluatedExperiment?.result?.variationId
+                  }
+                  setValue={(v) => {
+                    setForcedVariation(selectedEid, v);
+                    setOverrideExperiment(true);
+                  }}
+                />
 
-            {selectedVariation !==
-              selectedExperiment?.evaluatedExperiment?.result?.variationId &&
-            !delayStatus ? (
-              <div className="mt-2 ml-1 mb-3 text-sm text-red-900">
-                <PiWarningBold className="inline-block" /> Cannot apply this
-                variation
-              </div>
-            ) : null}
-
-            {debugLog ? (
-              <div className="box mt-3 mb-4">
-                <div className="flex items-center text-md font-semibold mb-1">
-                  <span>Status</span>
-                  <div
-                    className={clsx(
-                      "inline-block ml-3 capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md",
-                      {
-                        "text-green-900 bg-green-200": status,
-                        "text-red-500 bg-red-100": !status,
-                      },
-                    )}
-                  >
-                    {status ? "In experiment" : "Not in experiment"}
-                  </div>
-                </div>
-                <ul className="list-disc ml-4">
-                  <li className="text-sm" key={"1"}>
-                    <label className="inline-block" style={{ width: 80 }}>
-                      Variation:
-                    </label>
-                    <span>{result.variationId ?? "null"}</span>
-                  </li>
-                  <li className="text-sm" key={"2"}>
-                    <label className="inline-block" style={{ width: 80 }}>
-                      Debug log:
-                    </label>
-                    <code className="text-pink-900 text-xs">
-                      {lastDebugLog}
-                    </code>
-                  </li>
-                </ul>
                 {result ? (
                   <Accordion.Root
                     className="accordion mt-1"
@@ -273,7 +232,7 @@ export default function ExperimentDetail({
                             className="caret mr-0.5"
                             size={12}
                           />
-                          More
+                          Results log
                         </Link>
                       </Accordion.Trigger>
                       <Accordion.Content className="accordionInner overflow-hidden w-full">
@@ -286,8 +245,9 @@ export default function ExperimentDetail({
                     </Accordion.Item>
                   </Accordion.Root>
                 ) : null}
-              </div>
+              </>
             ) : null}
+
           </div>
 
           <div className="mt-4 mb-1 text-md font-semibold">Experiment Type</div>

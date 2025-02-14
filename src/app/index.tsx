@@ -2,7 +2,6 @@ import "@/app/css/index.css";
 import {
   Theme,
   Flex,
-  Button,
   IconButton,
   Dialog,
   Tabs,
@@ -16,21 +15,23 @@ import AttributesTab from "./components/AttributesTab";
 import ExperimentsTab from "./components/ExperimentsTab";
 import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
-import SettingsForm from "@/app/components/Settings";
+import SettingsForm, {API_KEY} from "@/app/components/Settings";
 import useSdkData from "@/app/hooks/useSdkData";
 import {
   PiX,
   PiCircleFill,
-  PiGearSix,
   PiInfoBold,
+  PiGearFill, PiWarningCircleBold,
 } from "react-icons/pi";
 import clsx from "clsx";
 import ArchetypesList from "@/app/components/ArchetypesList";
+import useGlobalState from "@/app/hooks/useGlobalState";
 
 export const MW = 1200; // max-width
 export const NAV_H = 75;
 
 export const App = () => {
+  const [apiKey, setApiKey, apiKeyReady] = useGlobalState(API_KEY, "", true);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
@@ -91,40 +92,7 @@ export const App = () => {
               <span className="font-bold text-slate-11">DevTools</span>
             </h1>
             <Flex align="center" gap="4">
-            <ArchetypesList />
-              <Dialog.Root
-                open={settingsOpen}
-                onOpenChange={(o) => setSettingsOpen(o)}
-              >
-                <Dialog.Trigger>
-                  <Button
-                    variant="ghost"
-                    size="2"
-                    style={{ margin: "0 -6px -20px 0" }}
-                  >
-                    <div className="px-1">
-                      <PiGearSix size={20} />
-                    </div>
-                  </Button>
-                </Dialog.Trigger>
-                <Dialog.Content className="ModalBody">
-                  <Dialog.Title>Settings</Dialog.Title>
-                  <SettingsForm close={() => setSettingsOpen(false)} />
-                  <Dialog.Close
-                    style={{ position: "absolute", top: 5, right: 5 }}
-                  >
-                    <IconButton
-                      color="gray"
-                      highContrast
-                      size="1"
-                      variant="outline"
-                      radius="full"
-                    >
-                      <PiX size={20} />
-                    </IconButton>
-                  </Dialog.Close>
-                </Dialog.Content>
-              </Dialog.Root>
+              <ArchetypesList />
             </Flex>
           </Flex>
           <Tabs.Root
@@ -134,7 +102,7 @@ export const App = () => {
           >
             <Tabs.List>
               <div
-                className="flex items-end mx-auto w-full"
+                className="flex items-center mx-auto w-full"
                 style={{ maxWidth: MW }}
               >
                 <div className="mx-2" />
@@ -144,7 +112,7 @@ export const App = () => {
                     <div className="absolute" style={{ top: -8, right: -16 }}>
                       <Tooltip content={`${Object.keys(forcedFeatures).length} override${Object.keys(forcedFeatures).length !== 1 ? "s" : ""}`}>
                         <button className="p-1">
-                          <PiInfoBold className="inline-block mr-1.5 mb-0.5 text-amber-600 bg-white rounded-full" />
+                          <PiInfoBold className="text-amber-600 bg-white rounded-full" />
                         </button>
                       </Tooltip>
                     </div>
@@ -156,7 +124,7 @@ export const App = () => {
                     <div className="absolute" style={{ top: -8, right: -16 }}>
                     <Tooltip content={`${Object.keys(forcedVariations).length} override${Object.keys(forcedVariations).length !== 1 ? "s" : ""}`}>
                       <button className="p-1">
-                        <PiInfoBold className="inline-block mr-1.5 mb-0.5 text-amber-600 bg-white rounded-full" />
+                        <PiInfoBold className="text-amber-600 bg-white rounded-full" />
                       </button>
                     </Tooltip>
                     </div>
@@ -168,7 +136,7 @@ export const App = () => {
                     <div className="absolute" style={{ top: -8, right: -16 }}>
                       <Tooltip content="Has attribute overrides">
                         <button className="p-1">
-                          <PiInfoBold className="inline-block mr-1.5 mb-0.5 text-amber-600 bg-white rounded-full" />
+                          <PiInfoBold className="text-amber-600 bg-white rounded-full" />
                         </button>
                       </Tooltip>
                     </div>
@@ -187,6 +155,49 @@ export const App = () => {
                   </div>
                   SDK
                 </Tabs.Trigger>
+                <div className="flex-1" />
+                <Dialog.Root
+                  open={settingsOpen}
+                  onOpenChange={(o) => setSettingsOpen(o)}
+                >
+                  <Dialog.Trigger>
+                    <IconButton
+                      className="relative"
+                      variant="ghost"
+                      color="gray"
+                      size="2"
+                      style={{ margin: 0 }}
+                    >
+                      {apiKeyReady && !apiKey ? (
+                        <div className="absolute" style={{ top: -4, left: -8 }}>
+                          <Tooltip content="Enter an Access Token for improved functionality">
+                            <button>
+                              <PiWarningCircleBold className="text-pink-700 bg-white rounded-full" />
+                            </button>
+                          </Tooltip>
+                        </div>
+                      ): null}
+                      <PiGearFill size={18} />
+                    </IconButton>
+                  </Dialog.Trigger>
+                  <Dialog.Content className="ModalBody">
+                    <Dialog.Title>Settings</Dialog.Title>
+                    <SettingsForm close={() => setSettingsOpen(false)} />
+                    <Dialog.Close
+                      style={{ position: "absolute", top: 5, right: 5 }}
+                    >
+                      <IconButton
+                        color="gray"
+                        highContrast
+                        size="1"
+                        variant="outline"
+                        radius="full"
+                      >
+                        <PiX size={20} />
+                      </IconButton>
+                    </Dialog.Close>
+                  </Dialog.Content>
+                </Dialog.Root>
                 <div className="mx-2" />
               </div>
             </Tabs.List>
