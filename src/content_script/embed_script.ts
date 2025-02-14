@@ -57,7 +57,7 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
       clearTimeout(timer);
       getValidGrowthBookInstance(cb);
     },
-    false,
+    false
   );
 }
 
@@ -147,7 +147,7 @@ function updateFeatures(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (data) {
       gb.setForcedFeatures(
-        new Map(Object.entries(data as Record<string, any>)),
+        new Map(Object.entries(data as Record<string, any>))
       );
     } else {
       // todo: do something with these messages or remove them
@@ -179,7 +179,7 @@ async function updateBackgroundSDK(data: SDKHealthCheckResult) {
       type: "GB_SDK_UPDATED",
       data,
     },
-    window.location.origin,
+    window.location.origin
   );
 }
 
@@ -194,13 +194,13 @@ function updateTabState(property: string, value: unknown, append = false) {
       },
       append,
     },
-    window.location.origin,
+    window.location.origin
   );
 }
 
 // add a proxy to the SDKs methods so we know when anything important has been changed programmatically
 function subscribeToSdkChanges(
-  gb: GrowthBook & { patchedMethods?: boolean; logs?: LogUnion[] },
+  gb: GrowthBook & { patchedMethods?: boolean; logs?: LogUnion[] }
 ) {
   if (gb.patchedMethods) return;
   gb.patchedMethods = true;
@@ -267,7 +267,7 @@ function subscribeToSdkChanges(
     const _logEvent = gb.logEvent;
     gb.logEvent = async (
       eventName: string,
-      properties?: Record<string, unknown>,
+      properties?: Record<string, unknown>
     ) => {
       gb.logs!.push({
         eventName,
@@ -284,7 +284,7 @@ function subscribeToSdkChanges(
     gb.setTrackingCallback = (callback: TrackingCallback) => {
       const patchedCallBack = (
         experiment: Experiment<any>,
-        result: Result<any>,
+        result: Result<any>
       ) => {
         gb.logs!.push({
           experiment,
@@ -294,25 +294,41 @@ function subscribeToSdkChanges(
         });
         callback(experiment, result);
       };
+      if ("isNoopCallback" in callback && callback.isNoopCallback) {
+        patchedCallBack.isNoopCallback = true;
+      } else {
+        patchedCallBack.originalParams = callback
+          .toString()
+          .match(/\(([^)]+)\)/)?.[1]
+          .split(",")
+          .map((param: string) => param.trim());
+      }
       _setTrackingCallback?.call(gb, patchedCallBack);
+      pushAppUpdates();
     };
     // Apply the patch helper above to the existing callback
-    if (typeof trackingCallback === "function")
+    if (typeof trackingCallback === "function") {
       gb.setTrackingCallback(trackingCallback);
+    } else {
+      const noop = () => {};
+      // This flag is checked to see if the user has specified their own tracking callback or if it's using the noop
+      noop.isNoopCallback = true;
+      gb.setTrackingCallback(noop);
+    }
 
     // Feature usage callbacks
-    if (typeof onFeatureUsage === "function") {
-      // @ts-expect-error Context is private but we still need to write it here
-      gb.context.onFeatureUsage = (key: string, result: FeatureResult<any>) => {
-        gb.logs!.push({
-          featureKey: key,
-          result,
-          timestamp: Date.now().toString(),
-          logType: "feature",
-        });
+    // @ts-expect-error Context is private but we still need to write it here
+    gb.context.onFeatureUsage = (key: string, result: FeatureResult<any>) => {
+      gb.logs!.push({
+        featureKey: key,
+        result,
+        timestamp: Date.now().toString(),
+        logType: "feature",
+      });
+      if (typeof onFeatureUsage === "function") {
         onFeatureUsage(key, result);
-      };
-    }
+      }
+    };
   }
 
   // Watch for incoming log events and send to tabstate
@@ -353,13 +369,11 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       gb.getExperiments().length > 0);
   const devModeEnabled = gbContext.enableDevMode;
   const _trackingCallback = gbContext.trackingCallback;
-  const hasTrackingCallback = typeof _trackingCallback === "function";
+  const hasTrackingCallback =
+    typeof _trackingCallback === "function" &&
+    !_trackingCallback.isNoopCallback;
   const trackingCallbackParams = hasTrackingCallback
-    ? _trackingCallback
-        .toString()
-        .match(/\(([^)]+)\)/)[1]
-        .split(",")
-        .map((param: string) => param.trim())
+    ? _trackingCallback.originalParams
     : undefined;
   const usingLogEvents = typeof gbContext.eventLogger === "function";
   const hasDecryptionKey = !!gbContext.decryptionKey;
