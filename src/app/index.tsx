@@ -21,7 +21,7 @@ import {
   PiX,
   PiCircleFill,
   PiInfoBold,
-  PiGearFill, PiWarningCircleBold,
+  PiGearFill, PiWarningCircleBold, PiWarningCircleFill, PiGearSixFill,
 } from "react-icons/pi";
 import clsx from "clsx";
 import ArchetypesList from "@/app/components/ArchetypesList";
@@ -107,36 +107,37 @@ export const App = () => {
               >
                 <div className="mx-2" />
                 <Tabs.Trigger value="features">
-                  Features
+                  <span className="px-1">Features</span>
                   {Object.keys(forcedFeatures).length ? (
-                    <div className="absolute" style={{ top: -8, right: -16 }}>
+                    <div className="absolute" style={{ top: -2, right: -2 }}>
                       <Tooltip content={`${Object.keys(forcedFeatures).length} override${Object.keys(forcedFeatures).length !== 1 ? "s" : ""}`}>
                         <button className="p-1">
-                          <PiInfoBold className="text-amber-600 bg-white rounded-full" />
+                          <PiCircleFill size={9} className="text-amber-600 bg-white rounded-full" />
                         </button>
                       </Tooltip>
                     </div>
                   ) : null}
                 </Tabs.Trigger>
                 <Tabs.Trigger value="experiments">
-                  Experiments
+                  <span className="px-1">Experiments</span>
                   {Object.keys(forcedVariations).length ? (
-                    <div className="absolute" style={{ top: -8, right: -16 }}>
-                    <Tooltip content={`${Object.keys(forcedVariations).length} override${Object.keys(forcedVariations).length !== 1 ? "s" : ""}`}>
-                      <button className="p-1">
-                        <PiInfoBold className="text-amber-600 bg-white rounded-full" />
-                      </button>
-                    </Tooltip>
+                    <div className="absolute" style={{top: -2, right: -2}}>
+                      <Tooltip
+                        content={`${Object.keys(forcedVariations).length} override${Object.keys(forcedVariations).length !== 1 ? "s" : ""}`}>
+                        <button className="p-1">
+                          <PiCircleFill size={9} className="text-amber-600 bg-white rounded-full"/>
+                        </button>
+                      </Tooltip>
                     </div>
                   ) : null}
                 </Tabs.Trigger>
                 <Tabs.Trigger value="attributes">
-                  Attributes
+                  <span className="px-1">Attributes</span>
                   {forcedAttributes? (
-                    <div className="absolute" style={{ top: -8, right: -16 }}>
+                    <div className="absolute" style={{top: -2, right: -2}}>
                       <Tooltip content="Has attribute overrides">
                         <button className="p-1">
-                          <PiInfoBold className="text-amber-600 bg-white rounded-full" />
+                          <PiCircleFill size={9} className="text-amber-600 bg-white rounded-full"/>
                         </button>
                       </Tooltip>
                     </div>
@@ -161,24 +162,32 @@ export const App = () => {
                   onOpenChange={(o) => setSettingsOpen(o)}
                 >
                   <Dialog.Trigger>
-                    <IconButton
-                      className="relative"
-                      variant="ghost"
-                      color="gray"
-                      size="2"
-                      style={{ margin: 0 }}
-                    >
-                      {apiKeyReady && !apiKey ? (
-                        <div className="absolute" style={{ top: -4, left: -8 }}>
-                          <Tooltip content="Enter an Access Token for improved functionality">
-                            <button>
-                              <PiWarningCircleBold className="text-pink-700 bg-white rounded-full" />
-                            </button>
-                          </Tooltip>
-                        </div>
-                      ): null}
-                      <PiGearFill size={18} />
-                    </IconButton>
+                    {apiKeyReady && !apiKey ? (
+                      <Tooltip content="Enter an Access Token for improved functionality">
+                        <IconButton
+                          className="relative"
+                          variant="outline"
+                          size="1"
+                          style={{ width: 26, height: 26 }}
+                          onClick={() => setSettingsOpen(true)}
+                        >
+                          <PiCircleFill
+                            size={9}
+                            className="absolute text-red-600 bg-white rounded-full border border-white"
+                            style={{ right: 2, top: 2, }}
+                          />
+                          <PiGearSixFill size={17} />
+                        </IconButton>
+                      </Tooltip>
+                    ): (
+                      <IconButton
+                        variant="outline"
+                        size="1"
+                        style={{ width: 28, height: 28 }}
+                      >
+                        <PiGearSixFill size={17} />
+                      </IconButton>
+                    )}
                   </Dialog.Trigger>
                   <Dialog.Content className="ModalBody">
                     <Dialog.Title>Settings</Dialog.Title>

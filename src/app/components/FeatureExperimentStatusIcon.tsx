@@ -15,16 +15,9 @@ export default function FeatureExperimentStatusIcon({
     if (forced) {
       return (
         <Tooltip
-          content={
-            <>
-              {type === "feature"
-                ? "This feature has been evaluated on this page."
-                : "This experiment is active on this page."
-              }
-              <br />
-              This {type} has an override applied.
-            </>
-          }
+          content={type === "feature"
+            ? "Evaluated on this page; overridden"
+            : "Active on this page; overridden"}
         >
           <button>
             <PiCheckCircleFill className="inline-block mr-1.5 mb-0.5 text-amber-600" />
@@ -34,8 +27,8 @@ export default function FeatureExperimentStatusIcon({
     } else {
       return (
         <Tooltip content={type === "feature"
-          ? "This feature has been evaluated on this page."
-          : "This experiment is active on this page."
+          ? "Evaluated on this page"
+          : "Active on this page."
         }>
           <button>
             <PiCheckCircleBold className="inline-block mr-1.5 mb-0.5 text-violet-8" />
@@ -48,7 +41,7 @@ export default function FeatureExperimentStatusIcon({
   if (forced) {
     return (
       <Tooltip
-        content={`This ${type} has an override applied.`}>
+        content={`Overridden`}>
         <button>
           <PiCircleDuotone className="inline-block mr-1.5 mb-0.5 text-amber-600" />
         </button>
