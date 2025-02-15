@@ -1,12 +1,11 @@
 import { MW, NAV_H } from "@/app";
 import { Button, IconButton, Link, RadioCards } from "@radix-ui/themes";
 import {
-  PiArrowSquareOutBold,
+  PiArrowSquareOut,
   PiCaretRightFill,
   PiFlagFill,
   PiLinkBold,
   PiMonitorBold,
-  PiWarningBold,
   PiXBold,
 } from "react-icons/pi";
 import ValueField from "@/app/components/ValueField";
@@ -147,12 +146,11 @@ export default function ExperimentDetail({
               </div>
               <Link
                 size="2"
-                className="font-semibold"
                 href={`${appOrigin}/experiments/lookup/?trackingKey=${selectedEid}`}
                 target="_blank"
               >
                 GrowthBook
-                <PiArrowSquareOutBold
+                <PiArrowSquareOut
                   size={16}
                   className="inline-block mb-1 ml-0.5"
                 />

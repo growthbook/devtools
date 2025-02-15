@@ -34,7 +34,7 @@ export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
 };
 
 export const LEFT_PERCENT = 0.4;
-export const HEADER_H = 35;
+export const HEADER_H = 40;
 
 export default function ExperimentsTab() {
   const [experiments, setExperiments] = useTabState<AutoExperiment[]>(

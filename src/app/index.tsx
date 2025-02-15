@@ -20,7 +20,7 @@ import useSdkData from "@/app/hooks/useSdkData";
 import {
   PiX,
   PiCircleFill,
-  PiGearSixFill,
+  PiGearSixFill, PiWarningFill, PiWarningOctagonFill,
 } from "react-icons/pi";
 import clsx from "clsx";
 import ArchetypesList from "@/app/components/ArchetypesList";
@@ -106,37 +106,37 @@ export const App = () => {
               >
                 <div className="mx-2" />
                 <Tabs.Trigger value="features">
-                  <span className="px-1">Features</span>
+                  <span className={Object.keys(forcedFeatures).length ? "pr-3" : "px-1.5"}>Features</span>
                   {Object.keys(forcedFeatures).length ? (
-                    <div className="absolute" style={{ top: -2, right: -2 }}>
+                    <div className="absolute right-0">
                       <Tooltip content={`${Object.keys(forcedFeatures).length} override${Object.keys(forcedFeatures).length !== 1 ? "s" : ""}`}>
-                        <button className="p-1">
-                          <PiCircleFill size={9} className="text-amber-600 bg-white rounded-full" />
-                        </button>
+                        <div className="p-1">
+                          <PiCircleFill size={9} className="text-amber-500" />
+                        </div>
                       </Tooltip>
                     </div>
                   ) : null}
                 </Tabs.Trigger>
                 <Tabs.Trigger value="experiments">
-                  <span className="px-1">Experiments</span>
+                  <span className={Object.keys(forcedVariations).length ? "pr-3" : "px-1.5"}>Experiments</span>
                   {Object.keys(forcedVariations).length ? (
-                    <div className="absolute" style={{top: -2, right: -2}}>
+                    <div className="absolute right-0">
                       <Tooltip
                         content={`${Object.keys(forcedVariations).length} override${Object.keys(forcedVariations).length !== 1 ? "s" : ""}`}>
-                        <button className="p-1">
-                          <PiCircleFill size={9} className="text-amber-600 bg-white rounded-full"/>
-                        </button>
+                        <div className="p-1">
+                          <PiCircleFill size={9} className="text-amber-500"/>
+                        </div>
                       </Tooltip>
                     </div>
                   ) : null}
                 </Tabs.Trigger>
                 <Tabs.Trigger value="attributes">
-                  <span className="px-1">Attributes</span>
-                  {forcedAttributes? (
-                    <div className="absolute" style={{top: -2, right: -2}}>
+                  <span className={forcedAttributes ? "pr-3" : "px-1.5"}>Attributes</span>
+                  {forcedAttributes ? (
+                    <div className="absolute right-0">
                       <Tooltip content="Has attribute overrides">
                         <button className="p-1">
-                          <PiCircleFill size={9} className="text-amber-600 bg-white rounded-full"/>
+                          <PiCircleFill size={9} className="text-amber-500"/>
                         </button>
                       </Tooltip>
                     </div>
@@ -144,18 +144,20 @@ export const App = () => {
                 </Tabs.Trigger>
                 <Tabs.Trigger value="logs">Event Logs</Tabs.Trigger>
                 <Tabs.Trigger value="sdkDebug">
-                  <div
-                    className={clsx("inline-block mr-1", {
-                      "text-emerald-500": sdkStatus === "green",
-                      "text-amber-500": sdkStatus === "yellow",
-                      "text-red-500": sdkStatus === "red",
-                    })}
-                  >
-                    <PiCircleFill size={12} />
+                  <span className="pr-4">SDK</span>
+                  <div className="absolute right-1">
+                    {sdkStatus === "green" && (
+                      <PiCircleFill size={9} className="text-emerald-500 mr-1"/>
+                    )}
+                    {sdkStatus === "yellow" && (
+                      <PiWarningFill className="text-amber-500" />
+                    )}
+                    {sdkStatus === "red" && (
+                      <PiWarningOctagonFill className="text-red-700" />
+                    )}
                   </div>
-                  SDK
                 </Tabs.Trigger>
-                <div className="flex-1" />
+                <div className="flex-1"/>
                 <Dialog.Root
                   open={settingsOpen}
                   onOpenChange={(o) => setSettingsOpen(o)}
@@ -163,17 +165,16 @@ export const App = () => {
                   <Dialog.Trigger>
                     {apiKeyReady && !apiKey ? (
                       <Tooltip content="Enter an Access Token for improved functionality">
-                        <IconButton
+                      <IconButton
                           className="relative"
                           variant="outline"
                           size="1"
-                          style={{ width: 26, height: 26 }}
                           onClick={() => setSettingsOpen(true)}
                         >
                           <PiCircleFill
                             size={9}
                             className="absolute text-red-600 bg-white rounded-full border border-white"
-                            style={{ right: 2, top: 2, }}
+                            style={{ right: 1, top: 1, }}
                           />
                           <PiGearSixFill size={17} />
                         </IconButton>

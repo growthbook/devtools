@@ -6,7 +6,7 @@ import { Link } from "@radix-ui/themes";
 import { MW } from "@/app";
 
 export default function LogsTab() {
-  const [_showSdkDebug, setShowSdkDebug] = useTabState("showSdkDebug", false);
+  const [currentTab, setCurrentTab] = useTabState("currentTab", "logs");
 
   useEffect(() => window.scrollTo({ top: 0 }), []);
   const [logEvents] = useTabState<LogUnion[] | undefined>(
@@ -24,18 +24,23 @@ export default function LogsTab() {
       }}
     >
       {typeof logEvents === "undefined" ? (
-        <>
-          SDK logging not connected, see the{" "}
+        <div className="flex w-full h-10 items-end justify-center">
+          <div>
+          SDK logging not connected. See the{" "}
           <Link
+            role="button"
+            href="#"
             className="cursor-pointer"
-            onClick={() => {
-              setShowSdkDebug(true);
+            onClick={(e) => {
+              e.preventDefault();
+              setCurrentTab("sdkDebug");
             }}
           >
             SDK Health
           </Link>{" "}
           tab
-        </>
+          </div>
+        </div>
       ) : (
         <LogsList logEvents={logEvents}></LogsList>
       )}

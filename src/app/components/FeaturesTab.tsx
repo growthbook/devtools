@@ -26,7 +26,7 @@ import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatu
 type FeatureDefinitionWithId = FeatureDefinition & { id: string };
 
 export const LEFT_PERCENT = 0.4;
-export const HEADER_H = 35;
+export const HEADER_H = 40;
 
 export default function FeaturesTab() {
   const [features, setFeatures] = useTabState<

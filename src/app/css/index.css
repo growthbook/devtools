@@ -85,7 +85,7 @@
   transition: 150ms all;
 }
 .featureDetail .header {
-  @apply w-full sticky top-0 z-center pl-6 pr-4 py-3 bg-violet-2 shadow-sm;
+  @apply w-full sticky top-0 z-center pl-6 pr-4 pt-3 pb-2 bg-violet-2 shadow-sm;
 }
 .featureDetail .content {
   @apply pl-6 pr-4 py-2 mb-3;

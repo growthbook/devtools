@@ -1,7 +1,7 @@
 import { MW, NAV_H } from "@/app";
 import { Button, IconButton, Link, Switch } from "@radix-ui/themes";
 import {
-  PiArrowSquareOutBold,
+  PiArrowSquareOut,
   PiCaretRightFill,
   PiXBold,
 } from "react-icons/pi";
@@ -108,12 +108,11 @@ export default function FeatureDetail({
               </div>
               <Link
                 size="2"
-                className="font-semibold"
                 href={`${appOrigin}/features/${selectedFid}`}
                 target="_blank"
               >
                 GrowthBook
-                <PiArrowSquareOutBold
+                <PiArrowSquareOut
                   size={16}
                   className="inline-block mb-1 ml-0.5"
                 />

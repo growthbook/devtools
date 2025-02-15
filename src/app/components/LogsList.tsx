@@ -17,6 +17,9 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { PiCaretRightFill } from "react-icons/pi";
 import ValueField from "./ValueField";
 import clsx from "clsx";
+import {MW} from "@/app";
+
+export const HEADER_H = 40;
 
 const filterCopy: Record<LogType, string> = {
   event: "Events",
@@ -54,6 +57,7 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
   const {
     items: events,
     searchInputProps,
+    clear: clearSearch,
     SortableHeader,
   } = useSearch({
     items: reshapedEvents,
@@ -61,17 +65,23 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
   });
 
   return (
-    <Flex direction="column" className="w-full" style={{ height: "100%" }}>
-      <Flex
-        align="center"
-        mt="2"
-        px="4"
-        className="border-b border-b-slate-200"
+    <Flex direction="column" className="w-full" style={{height: "100%"}}>
+      <div
+        className="w-full flex items-center gap-4 px-3 border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm"
+        style={{ height: HEADER_H }}
       >
-        <SearchBar flexGrow="0" autoFocus searchInputProps={searchInputProps} />
+        <SearchBar
+          flexGrow="0"
+          className="inline-block"
+          style={{width: 200}}
+          autoFocus
+          placeholder="Search Logs"
+          searchInputProps={searchInputProps}
+          clear={clearSearch}
+        />
         <Flex
           ml="auto"
-          gapX="4"
+          gapX="5"
           gapY="1"
           wrap={{
             initial: "wrap",
@@ -80,8 +90,8 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
         >
           {(Object.entries(filterCopy) as Array<[LogType, string]>).map(
             ([filter, copy]) => (
-              <Text as="label" size="2" key={filter}>
-                <Flex gap="1">
+              <Text as="label" size="1" key={filter}>
+                <Flex gap="1" className="cursor-pointer select-none">
                   <Checkbox
                     checked={filters.includes(filter)}
                     onCheckedChange={() => toggleFilter(filter)}
@@ -92,10 +102,10 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
             )
           )}
         </Flex>
-      </Flex>
+      </div>
       <Flex
         className="w-full items-center bg-slate-a2 shadow-sm uppercase text-slate-11  text-xs font-semibold "
-        style={{ height: 35 }}
+        style={{height: 35}}
         px="4"
       >
         <SortableHeader field="timestamp" className="w-[20%] px-1">
@@ -106,7 +116,6 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
         </SortableHeader>
         <SortableHeader field="eventInfo" className="w-[20%] px-1">
           Event Info
-          {/* TODO: tooltip? */}
         </SortableHeader>
         <div className="w-[40%] pr-2">Event Details</div>
       </Flex>
@@ -127,8 +136,8 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
             const date = new Date(timestamp);
             const formattedDateTime =
               date.toLocaleDateString() === new Date().toLocaleDateString()
-                ? date.toLocaleTimeString(undefined, { hourCycle: "h24" })
-                : date.toLocaleString(undefined, { hourCycle: "h24" });
+                ? date.toLocaleTimeString(undefined, {hourCycle: "h24"})
+                : date.toLocaleString(undefined, {hourCycle: "h24"});
             const isExpanded = expandedItems.has(i.toString());
             return (
               <Accordion.Item key={i} value={i.toString()}>
@@ -142,7 +151,7 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
                     )}
                   >
                     <div className="w-[20%] px-1 text-left">
-                      <PiCaretRightFill className="caret mr-0.5" size={12} />
+                      <PiCaretRightFill className="caret mr-0.5" size={12}/>
                       <Text className="text-xs">{formattedDateTime}</Text>
                     </div>
                     <div className="w-[20%] px-1 text-left">{evt.logType}</div>
