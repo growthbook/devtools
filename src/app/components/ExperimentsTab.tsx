@@ -9,15 +9,12 @@ import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedExperiment,
 } from "@/app/hooks/useGBSandboxEval";
-import {Button, Link, Switch} from "@radix-ui/themes";
+import {Link, Switch} from "@radix-ui/themes";
 import {
-  PiCircleFill,
   PiDesktopFill,
   PiFlagFill,
   PiLinkBold,
-  PiListBold,
-  PiCheckFatFill,
-  PiCheckCircleBold, PiXBold,
+  PiXBold,
 } from "react-icons/pi";
 import clsx from "clsx";
 import { MW, NAV_H } from "@/app";
@@ -49,7 +46,33 @@ export default function ExperimentsTab() {
   >("features", {});
   // todo: dedupe?
   const featureExperiments = getFeatureExperiments(features);
-  const allExperiments = [...experiments, ...featureExperiments];
+  const _allExperiments = [...experiments, ...featureExperiments];
+
+  // dedupe
+  const seenEids = new Set<string>();
+  const allExperiments: (AutoExperiment | ExperimentWithFeatures)[] = [];
+  _allExperiments.forEach((exp) => {
+    const key = exp.key;
+    if (seenEids.has(key)) {
+      const idx = allExperiments.findIndex((exp) => exp.key === key);
+      if (idx >= 0 && allExperiments?.[idx]) {
+        // @ts-ignore mutating things...
+        if (exp?.features && exp?.featureTypes) {
+          // @ts-ignore mutating things...
+          allExperiments[idx].features = allExperiments[idx]?.features ?? [];
+          // @ts-ignore mutating things...
+          allExperiments[idx].features = [...allExperiments[idx].features, ...(exp.features ?? [])];
+          // @ts-ignore mutating things...
+          allExperiments[idx].featureTypes = allExperiments[idx]?.featureTypes ?? {};
+          // @ts-ignore mutating things...
+          allExperiments[idx].featuresTypes = {...allExperiments[idx].featureTypes, ...(exp.featureTypes ?? {})};
+        }
+        return;
+      }
+    }
+    seenEids.add(key);
+    allExperiments.push({...exp});
+  });
 
   const [forcedVariations, setForcedVariations] = useTabState<
     Record<string, any>
@@ -206,7 +229,7 @@ export default function ExperimentsTab() {
             return (
               <div
                 id={`experimentsTab_experimentList_${eid}`}
-                key={eid}
+                key={`${i}__${eid}`}
                 className={clsx("featureCard flex", {
                   selected: selectedEid === eid,
                 })}

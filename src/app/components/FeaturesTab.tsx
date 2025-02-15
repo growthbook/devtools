@@ -12,7 +12,7 @@ import useGBSandboxEval, {
 import {
   PiCircleFill,
   PiFlaskFill,
-  PiListBold, PiXBold,
+  PiXBold,
 } from "react-icons/pi";
 import clsx from "clsx";
 import { MW, NAV_H } from "@/app";
@@ -20,7 +20,7 @@ import { ValueType } from "./ValueField";
 import FeatureDetail from "@/app/components/FeatureDetail";
 import { useSearch } from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
-import {Button, Link, Switch} from "@radix-ui/themes";
+import {Link, Switch} from "@radix-ui/themes";
 import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
 
 type FeatureDefinitionWithId = FeatureDefinition & { id: string };
@@ -201,7 +201,7 @@ export default function FeaturesTab() {
             return (
               <div
                 id={`featuresTab_featureList_${fid}`}
-                key={fid}
+                key={`${i}__${fid}`}
                 className={clsx("featureCard flex", {
                   selected: selectedFid === fid,
                 })}

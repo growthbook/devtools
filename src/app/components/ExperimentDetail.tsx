@@ -250,18 +250,24 @@ export default function ExperimentDetail({
 
           </div>
 
-          <div className="mt-4 mb-1 text-md font-semibold">Experiment Type</div>
+          <div className="mt-4 mb-1 text-md font-semibold">Experiment Type{
+            (
+              (types?.redirect ? 1 : 0) +
+              (types?.visual ? 1 : 0) +
+              Object.keys(types?.features || {}).length
+            ) > 1 ? "s" : ""
+          }</div>
           <div>
             {types?.redirect ? (
               <div className="text-sm">
                 <PiLinkBold className="inline-block mr-1" />
-                URL Redirect Experiment
+                URL Redirect
               </div>
             ) : null}
             {types?.visual ? (
               <div className="text-sm">
                 <PiMonitorBold className="inline-block mr-1" />
-                Visual Editor Experiment
+                Visual Editor
               </div>
             ) : null}
             {types?.features?.map((fid) => (

@@ -20,8 +20,7 @@ import useSdkData from "@/app/hooks/useSdkData";
 import {
   PiX,
   PiCircleFill,
-  PiInfoBold,
-  PiGearFill, PiWarningCircleBold, PiWarningCircleFill, PiGearSixFill,
+  PiGearSixFill,
 } from "react-icons/pi";
 import clsx from "clsx";
 import ArchetypesList from "@/app/components/ArchetypesList";
