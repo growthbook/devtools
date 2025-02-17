@@ -72,7 +72,6 @@ export default function FeaturesTab() {
   } = useSearch({
     items: reshapedFeatures,
     defaultSortField: "id",
-    useSort: false,
   });
   const sortedFilteredFeatures = useMemo(() => [...filteredFeatures]
       .sort((feature) => pageEvaluatedFeatures.has(feature.id) ? -1 : 1),

@@ -176,11 +176,14 @@
 .accordionCard .accordionInner[data-state="closed"] {
   animation: slideUp 150ms cubic-bezier(0.87, 0, 0.13, 1) forwards;
 }
-.accordion .trigger .caret {
+.caret {
   display: inline-block;
   transition: 75ms transform;
 }
 .accordion .trigger[data-state="open"] .caret {
+  transform: rotate(90deg);
+}
+.caret.open {
   transform: rotate(90deg);
 }
 

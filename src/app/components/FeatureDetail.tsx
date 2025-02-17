@@ -14,6 +14,7 @@ import { HEADER_H, LEFT_PERCENT, SelectedFeature } from "./FeaturesTab";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
 import useTabState from "@/app/hooks/useTabState";
+import DebugLogger from "@/app/components/DebugLogger";
 
 export default function FeatureDetail({
   selectedFid,
@@ -208,27 +209,7 @@ export default function FeatureDetail({
           {selectedFeature ? (
             <div className="mt-3 mb-1">
               {debugLog ? (
-                <Accordion.Root
-                  className="accordion mt-2"
-                  type="single"
-                  collapsible
-                >
-                  <Accordion.Item value="debug-log">
-                    <Accordion.Trigger className="trigger mb-0.5">
-                      <Link size="2" role="button" className="hover:underline">
-                        <PiCaretRightFill className="caret mr-0.5" size={12} />
-                        Full debug log
-                      </Link>
-                    </Accordion.Trigger>
-                    <Accordion.Content className="accordionInner overflow-hidden w-full">
-                      <ValueField
-                        value={debugLog}
-                        valueType="json"
-                        maxHeight={200}
-                      />
-                    </Accordion.Content>
-                  </Accordion.Item>
-                </Accordion.Root>
+                <DebugLogger logs={debugLog} />
               ) : null}
 
               <Accordion.Root

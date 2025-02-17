@@ -45,31 +45,33 @@ export default function ExperimentsTab() {
     Record<string, FeatureDefinition>
   >("features", {});
   const featureExperiments = getFeatureExperiments(features);
-  const _allExperiments: ExperimentWithFeatures[] = [...experiments, ...featureExperiments];
-  // const allExperiments: ExperimentWithFeatures[] = [...experiments, ...featureExperiments];
 
-  // dedupe
-  const seenEids = new Set<string>();
-  const allExperiments: ExperimentWithFeatures[] = [];
-  _allExperiments.forEach((exp) => {
-    if ("changeId" in exp) {
-      // changeId experiments are already de-duped
-      allExperiments.push({...exp});
-      return;
-    }
-    const key = exp.key;
-    if (seenEids.has(key)) {
-      const idx = allExperiments.findIndex((exp) => exp.key === key && !("changeId" in exp));
-      if (idx >= 0 && allExperiments?.[idx]) {
-        const types = getExperimentTypes(exp);
-        allExperiments[idx].features = [...(allExperiments[idx].features ?? []), ...(types.features ?? [])];
-        allExperiments[idx].featureTypes = {...(allExperiments[idx].featureTypes ?? {}), ...(types.featureTypes ?? {})};
+  // de-dupe
+  const allExperiments = useMemo(() => {
+    const merged: ExperimentWithFeatures[] = [...experiments, ...featureExperiments];
+    const seenEids = new Set<string>();
+    const allExperiments: ExperimentWithFeatures[] = [];
+    merged.forEach((exp) => {
+      if ("changeId" in exp) {
+        // changeId experiments are already de-duped
+        allExperiments.push({...exp});
         return;
       }
-    }
-    seenEids.add(key);
-    allExperiments.push({...exp});
-  });
+      const key = exp.key;
+      if (seenEids.has(key)) {
+        const idx = allExperiments.findIndex((exp) => exp.key === key && !("changeId" in exp));
+        if (idx >= 0 && allExperiments?.[idx]) {
+          const types = getExperimentTypes(exp);
+          allExperiments[idx].features = [...(allExperiments[idx].features ?? []), ...(types.features ?? [])];
+          allExperiments[idx].featureTypes = {...(allExperiments[idx].featureTypes ?? {}), ...(types.featureTypes ?? {})};
+          return;
+        }
+      }
+      seenEids.add(key);
+      allExperiments.push({...exp});
+    });
+    return allExperiments;
+  }, [experiments, featureExperiments]);
 
   const [forcedVariations, setForcedVariations] = useTabState<
     Record<string, any>
@@ -100,7 +102,6 @@ export default function ExperimentsTab() {
   } = useSearch({
     items: allExperiments,
     defaultSortField: "key",
-    useSort: false,
   });
   const sortedFilteredExperiments = useMemo(() => [...filteredExperiments]
     .sort((exp) => pageEvaluatedExperiments.has(exp.key) ? -1 : 1),

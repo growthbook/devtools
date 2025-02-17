@@ -27,6 +27,7 @@ import useTabState from "@/app/hooks/useTabState";
 import { SelectedExperiment } from "@/app/components/ExperimentsTab";
 import { AutoExperimentVariation, isURLTargeted } from "@growthbook/growthbook";
 import clsx from "clsx";
+import DebugLogger, {DebugMessage} from "@/app/components/DebugLogger";
 
 export default function ExperimentDetail({
   selectedEid,
@@ -168,8 +169,13 @@ export default function ExperimentDetail({
                   In experiment
                 </div>
               ) : (
-                <div className="text-slate-9 text-sm">
+                <div className="text-red-900 font-semibold text-sm">
                   Inactive
+                </div>
+              )}
+              {lastDebugLog !== "In experiment" && (
+                <div className="border border-slate-a3 rounded-sm bg-neutral-50 py-1 px-2 mt-1">
+                  <DebugMessage message={lastDebugLog} className="text-2xs"/>
                 </div>
               )}
             </div>
@@ -245,6 +251,19 @@ export default function ExperimentDetail({
             ) : null}
           </div>
 
+          <div className="label font-semibold mt-3">
+            Current value
+            {(types?.features || []).length > 1 ? (
+              <span className="ml-1 text-xs font-normal">
+                (<PiFlagFill className="inline-block"/> {types?.features?.[0]})
+              </span>
+            ) : null}
+          </div>
+          <ValueField
+            value={selectedExperiment?.evaluatedExperiment?.result?.value}
+            valueType={valueType}
+          />
+
           <div className="mt-4 mb-1 text-md font-semibold">Implementation{
             (
               (types?.redirect ? 1 : 0) +
@@ -283,19 +302,6 @@ export default function ExperimentDetail({
               </div>
             ))}
           </div>
-
-          <div className="label font-semibold">
-            Current value
-            {(types?.features || []).length > 1 ? (
-              <span className="ml-1 text-xs font-normal">
-                (<PiFlagFill className="inline-block mr-1" /> {types?.features?.[0]})
-              </span>
-            ) : null}
-          </div>
-          <ValueField
-            value={selectedExperiment?.evaluatedExperiment?.result?.value}
-            valueType={valueType}
-          />
 
           <div className="mt-6 mb-3 text-md font-semibold">
             Targeting and Traffic
@@ -358,27 +364,7 @@ export default function ExperimentDetail({
           {selectedExperiment ? (
             <div className="mt-3 mb-1">
               {debugLog ? (
-                <Accordion.Root
-                  className="accordion mt-2"
-                  type="single"
-                  collapsible
-                >
-                  <Accordion.Item value="debug-log">
-                    <Accordion.Trigger className="trigger mb-0.5">
-                      <Link size="2" role="button" className="hover:underline">
-                        <PiCaretRightFill className="caret mr-0.5" size={12}/>
-                        Debug log
-                      </Link>
-                    </Accordion.Trigger>
-                    <Accordion.Content className="accordionInner overflow-hidden w-full">
-                      <ValueField
-                        value={debugLog}
-                        valueType="json"
-                        maxHeight={200}
-                      />
-                    </Accordion.Content>
-                  </Accordion.Item>
-                </Accordion.Root>
+                <DebugLogger logs={debugLog} />
               ) : null}
 
               <Accordion.Root

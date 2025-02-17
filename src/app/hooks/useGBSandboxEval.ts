@@ -1,11 +1,14 @@
-import { useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
-  Attributes, AutoExperiment,
+  Attributes,
+  AutoExperiment,
   Experiment,
   FeatureDefinition,
   FeatureResult,
   GrowthBook,
   Result,
+  StickyAssignmentsDocument,
+  StickyBucketService,
 } from "@growthbook/growthbook";
 import useTabState from "@/app/hooks/useTabState";
 import { DebugLog } from "devtools";
@@ -25,13 +28,13 @@ export type EvaluatedExperiment = {
 };
 
 export default function useGBSandboxEval() {
-  const { payload: sdkPayload } = useSdkData();
+  const { payload: sdkPayload, usingStickyBucketing } = useSdkData();
   const [attributes] = useTabState<Attributes>("attributes", {});
   const [features] = useTabState<Record<string, FeatureDefinition>>(
     "features",
     {},
   );
-  const [experiments] = useTabState<(AutoExperiment)[]>("experiments", []);
+  const [experiments] = useTabState<AutoExperiment[]>("experiments", []);
   const [forcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
     {},
@@ -41,71 +44,91 @@ export default function useGBSandboxEval() {
     {},
   );
   const [url] = useTabState<string>("url", "");
-  const forcedFeaturesMap = new Map(Object.entries(forcedFeatures));
+  const forcedFeaturesMap = useMemo(() => new Map(Object.entries(forcedFeatures)), [forcedFeatures]);
 
-  return useMemo(() => {
-    let log: DebugLog[] = [];
+  const [evaluatedData, setEvaluatedData] = useState<{
+    evaluatedFeatures: Record<string, EvaluatedFeature>;
+    evaluatedExperiments: EvaluatedExperiment[];
+  }>({
+    evaluatedFeatures: {},
+    evaluatedExperiments: [],
+  });
 
-    const featureExperiments = getFeatureExperiments(features);
+  useEffect(() => {
+    let isMounted = true;
 
-    // add extra info (index) for debugging:
-    const _features = { ...features };
-    for (const fid in _features) {
-      _features[fid].rules = _features[fid]?.rules?.map((rule, i) => ({
-        ...rule,
-        i,
-      }));
-    }
+    const evaluate = async () => {
+      let log: DebugLog[] = [];
 
-    const payload = { ...sdkPayload, features: _features, experiments };
+      const featureExperiments = getFeatureExperiments(features);
 
-    const growthbook = new GrowthBook({
-      attributes,
-      forcedVariations,
-      url,
-      log: (msg: string, ctx: any) => {
-        log.push([msg, ctx]);
-      },
-    });
-    growthbook.setForcedFeatures(forcedFeaturesMap);
-    growthbook.initSync({ payload });
+      const _features = { ...features };
+      for (const fid in _features) {
+        _features[fid].rules = _features[fid]?.rules?.map((rule, i) => ({
+          ...rule,
+          i,
+        }));
+      }
 
-    const evaluatedFeatures: Record<string, EvaluatedFeature> = {};
-    const evaluatedExperiments: EvaluatedExperiment[] = [];
+      const payload = { ...sdkPayload, features: _features, experiments };
 
-    for (const fid in features) {
-      growthbook.debug = true;
-      const result = growthbook.evalFeature(fid);
-      growthbook.debug = false;
-      const debug = [...log];
-      log = [];
-
-      evaluatedFeatures[fid] = {
-        result,
-        debug,
-      };
-    }
-
-    [...experiments, ...featureExperiments].forEach((experiment) => {
-      growthbook.debug = true;
-      const result = growthbook.run(experiment);
-      growthbook.debug = false;
-      const debug = [...log];
-      log = [];
-
-      evaluatedExperiments.push({
-        key: experiment.key,
-        changeId: "changeId" in experiment ? experiment.changeId : undefined,
-        result,
-        debug,
+      const growthbook = new GrowthBook({
+        attributes,
+        forcedVariations,
+        url,
+        log: (msg: string, ctx: any) => {
+          log.push([msg, ctx]);
+        },
+        stickyBucketService: usingStickyBucketing ? new SandboxStickyBucketService() : undefined,
       });
-    });
+      growthbook.setForcedFeatures(forcedFeaturesMap);
+      await growthbook.init({ payload });
 
-    growthbook.destroy();
+      const evaluatedFeatures: Record<string, EvaluatedFeature> = {};
+      const evaluatedExperiments: EvaluatedExperiment[] = [];
 
-    return {
-      evaluatedFeatures,
-      evaluatedExperiments,
+      for (const fid in features) {
+        growthbook.debug = true;
+        const result = growthbook.evalFeature(fid);
+        growthbook.debug = false;
+        const debug = [...log];
+        log = [];
+
+        evaluatedFeatures[fid] = {
+          result,
+          debug,
+        };
+      }
+
+      [...experiments, ...featureExperiments].forEach((experiment) => {
+        growthbook.debug = true;
+        const result = growthbook.run(experiment);
+        growthbook.debug = false;
+        const debug = [...log];
+        log = [];
+
+        evaluatedExperiments.push({
+          key: experiment.key,
+          changeId: "changeId" in experiment ? experiment.changeId : undefined,
+          result,
+          debug,
+        });
+      });
+
+      growthbook.destroy();
+
+      if (isMounted) {
+        setEvaluatedData({
+          evaluatedFeatures,
+          evaluatedExperiments,
+        });
+      }
+    };
+
+    evaluate();
+
+    return () => {
+      isMounted = false;
     };
   }, [
     attributes,
@@ -114,5 +137,23 @@ export default function useGBSandboxEval() {
     forcedFeaturesMap,
     forcedVariations,
     url,
+    usingStickyBucketing,
+    sdkPayload,
   ]);
+
+  return evaluatedData;
+}
+
+export class SandboxStickyBucketService extends StickyBucketService {
+  private store: Record<string, StickyAssignmentsDocument> = {};
+
+  async getAssignments(attributeName: string, attributeValue: string) {
+    const key = this.getKey(attributeName, attributeValue);
+    return this.store[key] || null;
+  }
+
+  async saveAssignments(doc: StickyAssignmentsDocument) {
+    const key = this.getKey(doc.attributeName, doc.attributeValue);
+    this.store[key] = doc;
+  }
 }
