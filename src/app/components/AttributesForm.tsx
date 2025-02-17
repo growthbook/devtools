@@ -96,7 +96,6 @@ export default function AttributesForm({
           ) : (
             <Flex direction="column" gap="1">
               {Object.keys(formAttributes).map((attributeKey, i) => {
-                console.log(newAppliedAttributeIds);
                 return (
                   <div key={attributeKey}>
                     <Form.Field

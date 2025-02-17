@@ -89,8 +89,6 @@ export default function ExperimentDetail({
     ? debugLog[debugLog.length - 1]?.[0]
     : ("" ?? "");
 
-  const status = !!result.inExperiment;
-
   const fid = selectedExperiment?.experiment?.features?.[0];
   const valueType =
     (fid ? selectedExperiment?.experiment?.featureTypes?.[fid] : "json") ??
@@ -194,7 +192,7 @@ export default function ExperimentDetail({
                   className="flex gap-1 items-center bg-amber-200 text-amber-700 hover:bg-amber-300"
                 >
                   Clear override
-                  <PiXBold />
+                  <PiXBold/>
                 </Button>
               )}
             </div>
@@ -245,26 +243,25 @@ export default function ExperimentDetail({
                 ) : null}
               </>
             ) : null}
-
           </div>
 
-          <div className="mt-4 mb-1 text-md font-semibold">Experiment Type{
+          <div className="mt-4 mb-1 text-md font-semibold">Implementation{
             (
               (types?.redirect ? 1 : 0) +
               (types?.visual ? 1 : 0) +
               Object.keys(types?.features || {}).length
             ) > 1 ? "s" : ""
           }</div>
-          <div>
+          <div className="mb-4">
             {types?.redirect ? (
               <div className="text-sm">
-                <PiLinkBold className="inline-block mr-1" />
+                <PiLinkBold className="inline-block mr-1"/>
                 URL Redirect
               </div>
             ) : null}
             {types?.visual ? (
               <div className="text-sm">
-                <PiMonitorBold className="inline-block mr-1" />
+                <PiMonitorBold className="inline-block mr-1"/>
                 Visual Editor
               </div>
             ) : null}
@@ -280,12 +277,25 @@ export default function ExperimentDetail({
                     setCurrentTab("features");
                   }}
                 >
-                  <PiFlagFill className="inline-block mr-1" size={12} />
+                  <PiFlagFill className="inline-block mr-1" size={12}/>
                   {fid}
                 </Link>
               </div>
             ))}
           </div>
+
+          <div className="label font-semibold">
+            Current value
+            {(types?.features || []).length > 1 ? (
+              <span className="ml-1 text-xs font-normal">
+                (<PiFlagFill className="inline-block mr-1" /> {types?.features?.[0]})
+              </span>
+            ) : null}
+          </div>
+          <ValueField
+            value={selectedExperiment?.evaluatedExperiment?.result?.value}
+            valueType={valueType}
+          />
 
           <div className="mt-6 mb-3 text-md font-semibold">
             Targeting and Traffic
@@ -306,11 +316,13 @@ export default function ExperimentDetail({
                     )}
                     <div>
                       {isURLTargeted(url, [pattern]) ? (
-                        <div className="text-green-900 bg-green-200 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                        <div
+                          className="text-green-900 bg-green-200 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
                           Current URL targeted
                         </div>
                       ) : (
-                        <div className="text-red-500 bg-red-100 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                        <div
+                          className="text-red-500 bg-red-100 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
                           Current URL excluded
                         </div>
                       )}
@@ -354,7 +366,7 @@ export default function ExperimentDetail({
                   <Accordion.Item value="debug-log">
                     <Accordion.Trigger className="trigger mb-0.5">
                       <Link size="2" role="button" className="hover:underline">
-                        <PiCaretRightFill className="caret mr-0.5" size={12} />
+                        <PiCaretRightFill className="caret mr-0.5" size={12}/>
                         Debug log
                       </Link>
                     </Accordion.Trigger>
@@ -377,7 +389,7 @@ export default function ExperimentDetail({
                 <Accordion.Item value="feature-definition">
                   <Accordion.Trigger className="trigger mb-0.5">
                     <Link size="2" role="button" className="hover:underline">
-                      <PiCaretRightFill className="caret mr-0.5" size={12} />
+                      <PiCaretRightFill className="caret mr-0.5" size={12}/>
                       Full experiment definition
                     </Link>
                   </Accordion.Trigger>

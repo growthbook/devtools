@@ -118,7 +118,6 @@ export default function AttributesTab() {
           );
         })
         .map((key: string) => {
-          console.log("key", key, !attributes.hasOwnProperty(key));
           if (!attributes.hasOwnProperty(key)) {
             setNewAppliedAttributeIds([...newAppliedAttributeIds, key]);
           }

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import {
-  Attributes,
+  Attributes, AutoExperiment,
   Experiment,
   FeatureDefinition,
   FeatureResult,
@@ -19,6 +19,7 @@ export type EvaluatedFeature = {
 
 export type EvaluatedExperiment = {
   key: string;
+  changeId?: string;
   result: Result<any>;
   debug: DebugLog[];
 };
@@ -30,7 +31,7 @@ export default function useGBSandboxEval() {
     "features",
     {},
   );
-  const [experiments] = useTabState<Experiment<any>[]>("experiments", []);
+  const [experiments] = useTabState<(AutoExperiment)[]>("experiments", []);
   const [forcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
     {},
@@ -94,6 +95,7 @@ export default function useGBSandboxEval() {
 
       evaluatedExperiments.push({
         key: experiment.key,
+        changeId: "changeId" in experiment ? experiment.changeId : undefined,
         result,
         debug,
       });

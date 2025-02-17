@@ -44,6 +44,10 @@ export default function Rule({
     "selectedEid",
     undefined,
   );
+  const [selectedChangeId, setSelectedChangeId] = useTabState<string | undefined>(
+    "selectedChangeId",
+    undefined,
+  )
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [jsonMode, setJsonMode] = useState(false);
 
@@ -157,6 +161,7 @@ export default function Rule({
                 onClick={(e) => {
                   e.preventDefault();
                   setSelectedEid(key);
+                  setSelectedChangeId(undefined);
                   setCurrentTab("experiments");
                 }}
               >

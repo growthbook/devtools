@@ -9,7 +9,7 @@ import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedExperiment,
 } from "@/app/hooks/useGBSandboxEval";
-import {Link, Switch} from "@radix-ui/themes";
+import {Link, Switch, Tooltip} from "@radix-ui/themes";
 import {
   PiDesktopFill,
   PiFlagFill,
@@ -44,29 +44,26 @@ export default function ExperimentsTab() {
   const [features, setFeatures] = useTabState<
     Record<string, FeatureDefinition>
   >("features", {});
-  // todo: dedupe?
   const featureExperiments = getFeatureExperiments(features);
-  const _allExperiments = [...experiments, ...featureExperiments];
+  const _allExperiments: ExperimentWithFeatures[] = [...experiments, ...featureExperiments];
+  // const allExperiments: ExperimentWithFeatures[] = [...experiments, ...featureExperiments];
 
   // dedupe
   const seenEids = new Set<string>();
-  const allExperiments: (AutoExperiment | ExperimentWithFeatures)[] = [];
+  const allExperiments: ExperimentWithFeatures[] = [];
   _allExperiments.forEach((exp) => {
+    if ("changeId" in exp) {
+      // changeId experiments are already de-duped
+      allExperiments.push({...exp});
+      return;
+    }
     const key = exp.key;
     if (seenEids.has(key)) {
-      const idx = allExperiments.findIndex((exp) => exp.key === key);
+      const idx = allExperiments.findIndex((exp) => exp.key === key && !("changeId" in exp));
       if (idx >= 0 && allExperiments?.[idx]) {
-        // @ts-ignore mutating things...
-        if (exp?.features && exp?.featureTypes) {
-          // @ts-ignore mutating things...
-          allExperiments[idx].features = allExperiments[idx]?.features ?? [];
-          // @ts-ignore mutating things...
-          allExperiments[idx].features = [...allExperiments[idx].features, ...(exp.features ?? [])];
-          // @ts-ignore mutating things...
-          allExperiments[idx].featureTypes = allExperiments[idx]?.featureTypes ?? {};
-          // @ts-ignore mutating things...
-          allExperiments[idx].featuresTypes = {...allExperiments[idx].featureTypes, ...(exp.featureTypes ?? {})};
-        }
+        const types = getExperimentTypes(exp);
+        allExperiments[idx].features = [...(allExperiments[idx].features ?? []), ...(types.features ?? [])];
+        allExperiments[idx].featureTypes = {...(allExperiments[idx].featureTypes ?? {}), ...(types.featureTypes ?? {})};
         return;
       }
     }
@@ -114,17 +111,29 @@ export default function ExperimentsTab() {
     "selectedEid",
     undefined,
   );
+  const [selectedChangeId, setSelectedChangeId] = useTabState<string | undefined>(
+    "selectedChangeId",
+    undefined,
+  )
   const selectedExperiment = selectedEid
     ? getExperimentDetails({
         eid: selectedEid,
+        changeId: selectedChangeId,
         experiments: allExperiments,
         evaluatedExperiments,
         forcedVariations,
       })
     : undefined;
 
-  const clickExperiment = (eid: string) =>
-    setSelectedEid(selectedEid !== eid ? eid : undefined);
+  const clickExperiment = (eid: string, changeId: string | undefined) => {
+    if (eid !== selectedEid || changeId !== selectedChangeId) {
+      setSelectedEid(eid);
+      setSelectedChangeId(changeId);
+    } else {
+      setSelectedEid(undefined);
+      setSelectedChangeId(undefined);
+    }
+  }
 
   // load & scroll animations
   const [firstLoad, setFirstLoad] = useState(true);
@@ -135,7 +144,7 @@ export default function ExperimentsTab() {
     if (selectedEid) {
       const container = document.querySelector("#pageBody");
       const el = document.querySelector(
-        `#experimentsTab_experimentList_${selectedEid}`,
+        `#experimentsTab_experimentList_${selectedEid}_${selectedChangeId}`,
       );
       const y =
         (el?.getBoundingClientRect()?.top || 0) + (container?.scrollTop || 0);
@@ -215,9 +224,12 @@ export default function ExperimentsTab() {
         >
           {sortedFilteredExperiments.map((experiment, i) => {
             const eid = experiment?.key;
+            // @ts-ignore changeId is in AutoExperiment
+            const changeId: string | undefined = experiment?.changeId;
             const { evaluatedExperiment, isForced, types } =
               getExperimentDetails({
                 eid,
+                changeId,
                 experiments: allExperiments,
                 evaluatedExperiments,
                 forcedVariations,
@@ -228,15 +240,15 @@ export default function ExperimentsTab() {
 
             return (
               <div
-                id={`experimentsTab_experimentList_${eid}`}
-                key={`${i}__${eid}`}
+                id={`experimentsTab_experimentList_${eid}_${changeId}`}
+                key={`${i}__${eid}__${changeId}`}
                 className={clsx("featureCard flex", {
-                  selected: selectedEid === eid,
+                  selected: selectedEid === eid && selectedChangeId === changeId,
                 })}
-                onClick={() => clickExperiment(eid)}
+                onClick={() => clickExperiment(eid, changeId)}
               >
                 <div
-                  className="title line-clamp-1 pl-2.5 pr-3"
+                  className="title line-clamp-1 pl-2.5 pr-6"
                   style={{ width: fullWidthListView ? col1 : undefined }}
                 >
                   <FeatureExperimentStatusIcon
@@ -246,20 +258,44 @@ export default function ExperimentsTab() {
                   />
                   {eid}
                 </div>
-                {fullWidthListView && (
+                {true || fullWidthListView ? (
                   <div
-                    className="flex items-center flex-shrink-0 text-sm pl-4"
-                    style={{ width: col2 }}
+                    className={clsx("flex items-center flex-shrink-0 text-sm", {
+                      "pl-4": fullWidthListView,
+                      "absolute right-2.5": !fullWidthListView,
+                    })}
+                    style={ fullWidthListView ? { width: col2 } : undefined}
                   >
                     {types ? (
                       <div className="flex items-center gap-2">
-                        {types.redirect ? <PiLinkBold size={12} /> : null}
-                        {types.visual ? <PiDesktopFill size={12} /> : null}
-                        {types.features ? <PiFlagFill size={12} /> : null}
+                        {types.redirect ? (
+                          <Tooltip content="URL Redirect experiment">
+                            <button>
+                              <PiLinkBold size={12} />
+                            </button>
+                          </Tooltip>
+                        ) : null}
+                        {types.visual ? (
+                          <Tooltip content="Visual Editor experiment">
+                            <button>
+                              <PiDesktopFill size={12}/>
+                            </button>
+                          </Tooltip>
+                          ) : null}
+                        {types.features ? (
+                          <Tooltip content="Feature flag experiment">
+                            <button>
+                              <PiFlagFill className="inline-block" size={12}/>
+                              {fullWidthListView ? (
+                                <span className="ml-1">{types.features.length}</span>
+                              ): null}
+                            </button>
+                          </Tooltip>
+                          ) : null}
                       </div>
                     ) : null}
                   </div>
-                )}
+                ): null}
 
                 {fullWidthListView && (
                   <div
@@ -305,32 +341,34 @@ export type SelectedExperiment = {
 
 function getExperimentDetails({
   eid,
+  changeId,
   experiments,
   experimentsMeta,
   evaluatedExperiments,
   forcedVariations,
 }: {
   eid: string;
+  changeId?: string;
   experiments: ExperimentWithFeatures[];
   experimentsMeta?: Record<string, any>;
   evaluatedExperiments?: EvaluatedExperiment[];
   forcedVariations?: Record<string, number>;
 }): SelectedExperiment {
   const experiment = experiments.find(
-    (experiment) => experiment.key === eid,
-  ) as ExperimentWithFeatures;
+    (experiment) => (
+      experiment.key === eid &&
+      // @ts-ignore changeId is in AutoExperiment
+      experiment.changeId === changeId
+    )) as ExperimentWithFeatures;
   const meta = experimentsMeta?.[eid];
 
-  const types = {
-    features: experiment?.features,
-    redirect: experiment?.variations?.some((v) => v.urlRedirect),
-    visual: experiment?.variations?.some(
-      (v) => v.domMutations?.length || v?.css || v?.js,
-    ),
-  };
+  const types = getExperimentTypes(experiment);
 
   const evaluatedExperiment = evaluatedExperiments?.find(
-    (exp) => exp.key === eid,
+    (exp) => (
+      exp.key === eid &&
+      exp.changeId === changeId
+    ),
   );
   const isForced = forcedVariations ? eid in forcedVariations : false;
 
@@ -341,6 +379,17 @@ function getExperimentDetails({
     types,
     evaluatedExperiment,
     isForced,
+  };
+}
+
+export function getExperimentTypes(experiment: ExperimentWithFeatures) {
+  return {
+    features: experiment?.features,
+    featureTypes: experiment?.featureTypes,
+    redirect: experiment?.variations?.some((v) => v.urlRedirect),
+    visual: experiment?.variations?.some(
+      (v) => v.domMutations?.length || v?.css || v?.js,
+    ),
   };
 }
 
