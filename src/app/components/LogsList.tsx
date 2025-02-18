@@ -158,7 +158,7 @@ export default function LogsList({
                       smTextSizeClass,
                     })}
                   >
-                    <div className="w-[20%] min-w-[70px] px-1 text-left text-nowrap text-ellipsis">
+                    <div className="w-[20%] min-w-[70px] px-1 text-left text-nowrap text-ellipsis flex items-center">
                       <PiCaretRightFill className="caret mr-0.5" size={12} />
                       <Text className={xsTextSizeClass}>
                         {formattedDateTime}
@@ -166,7 +166,11 @@ export default function LogsList({
                     </div>
                     <div
                       className={clsx(
-                        `w-[${colWidth}%] px-1 text-left`,
+                        `w-[${colWidth}%]`,
+                        "px-1",
+                        "text-left",
+                        "flex",
+                        "items-center",
                         xsTextSizeClass
                       )}
                     >
@@ -181,6 +185,8 @@ export default function LogsList({
                         "text-ellipsis",
                         "line-clamp-1",
                         "overflow-hidden",
+                        "flex",
+                        "items-center",
                         xsTextSizeClass
                       )}
                     >
