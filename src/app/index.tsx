@@ -1,12 +1,10 @@
 import "@/app/css/index.css";
 import {
   Theme,
-  Flex,
   IconButton,
   Dialog,
   Tabs,
   Tooltip,
-  DropdownMenu,
   Select,
 } from "@radix-ui/themes";
 import React, { useEffect, useRef, useState } from "react";
@@ -273,7 +271,7 @@ export const App = () => {
           ) : currentTab === "attributes" ? (
             <AttributesTab isResponsive={isResponsive} />
           ) : currentTab === "logs" ? (
-            <LogsTab isResponsive={isResponsive} />
+            <LogsTab isResponsive={isResponsive} isTiny={isTiny} />
           ) : currentTab === "sdkDebug" ? (
             <SdkTab isResponsive={isResponsive} />
           ) : null}
