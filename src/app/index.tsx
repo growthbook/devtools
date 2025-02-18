@@ -5,9 +5,10 @@ import {
   IconButton,
   Dialog,
   Tabs,
-  Tooltip,
+  Tooltip, DropdownMenu,
+  Select,
 } from "@radix-ui/themes";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import logo from "./logo.svg";
 import useTabState from "@/app/hooks/useTabState";
 import SdkTab from "./components/SdkTab";
@@ -22,11 +23,15 @@ import {
   PiCircleFill,
   PiGearSixFill, PiWarningFill, PiWarningOctagonFill,
 } from "react-icons/pi";
-import clsx from "clsx";
 import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
+import useResizeObserver from "@react-hook/resize-observer";
+import ConditionalWrapper from "@/app/components/ConditionalWrapper";
+import clsx from "clsx";
 
 export const MW = 1200; // max-width
+export const RESPONSIVE_W = 570; // small width mode
+export const TINY_W = 420;
 export const NAV_H = 75;
 
 export const App = () => {
@@ -69,6 +74,15 @@ export const App = () => {
     }, 2000);
   }, []);
 
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isResponsive, setIsResponsive] = useState(false);
+  const [isTiny, setIsTiny] = useState(false);
+
+  useResizeObserver(containerRef, (entry) => {
+    setIsResponsive(entry.contentRect.width < RESPONSIVE_W);
+    setIsTiny(entry.contentRect.width < TINY_W);
+  });
+
   return (
     <Theme
       accentColor="violet"
@@ -76,141 +90,117 @@ export const App = () => {
       hasBackground={false}
       style={{ minHeight: "unset" }}
     >
-      <div id="main" className="text-indigo-12 overflow-hidden">
+      <div id="main" className="text-indigo-12 overflow-hidden" ref={containerRef}>
         <div
           className={`shadow-sm px-3 pt-1 w-full relative bg-white z-front`}
           style={{ height: NAV_H }}
         >
-          <Flex justify="between" className="mx-auto" style={{ maxWidth: MW, height: 30 }}>
-            <h1 className="text-md select-none">
+          <div className="flex justify-between w-full" style={{ maxWidth: MW, height: 30 }}>
+            <h1
+              className={clsx("text-md select-none -indent-3.5 ml-3.5 flex-shrink-0", {
+                "-mr-2": isTiny,
+              })}
+              style={{ lineHeight: 0.25 }}
+            >
               <img
                 src={logo}
                 alt="GrowthBook"
-                className="w-[120px] inline-block mb-1 mr-2"
+                className="inline-block mb-1"
+                style={{ width: 120 }}
               />
-              <span className="font-bold text-slate-11">DevTools</span>
+              {!isTiny && (
+                <span className="font-bold text-slate-11 ml-2 mr-1">DevTools</span>
+              )}
             </h1>
-            <Flex align="center" gap="4">
+            <div className={!isTiny ? "mt-1" : undefined}>
               <ArchetypesList />
-            </Flex>
-          </Flex>
-          <Tabs.Root
-            value={currentTab}
-            onValueChange={setCurrentTab}
-            className="-mx-4 mt-[1px]"
-          >
-            <Tabs.List>
-              <div
-                className="flex items-center mx-auto w-full"
-                style={{ maxWidth: MW }}
-              >
-                <div className="mx-2" />
-                <Tabs.Trigger value="features">
-                  <span className={Object.keys(forcedFeatures).length ? "pr-3" : "px-1.5"}>Features</span>
-                  {Object.keys(forcedFeatures).length ? (
-                    <div className="absolute right-0">
-                      <Tooltip content={`${Object.keys(forcedFeatures).length} override${Object.keys(forcedFeatures).length !== 1 ? "s" : ""}`}>
-                        <div className="p-1">
-                          <PiCircleFill size={9} className="text-amber-500" />
-                        </div>
-                      </Tooltip>
-                    </div>
-                  ) : null}
-                </Tabs.Trigger>
-                <Tabs.Trigger value="experiments">
-                  <span className={Object.keys(forcedVariations).length ? "pr-3" : "px-1.5"}>Experiments</span>
-                  {Object.keys(forcedVariations).length ? (
-                    <div className="absolute right-0">
-                      <Tooltip
-                        content={`${Object.keys(forcedVariations).length} override${Object.keys(forcedVariations).length !== 1 ? "s" : ""}`}>
-                        <div className="p-1">
-                          <PiCircleFill size={9} className="text-amber-500"/>
-                        </div>
-                      </Tooltip>
-                    </div>
-                  ) : null}
-                </Tabs.Trigger>
-                <Tabs.Trigger value="attributes">
-                  <span className={forcedAttributes ? "pr-3" : "px-1.5"}>Attributes</span>
-                  {forcedAttributes ? (
-                    <div className="absolute right-0">
-                      <Tooltip content="Has attribute overrides">
-                        <button className="p-1">
-                          <PiCircleFill size={9} className="text-amber-500"/>
-                        </button>
-                      </Tooltip>
-                    </div>
-                  ) : null}
-                </Tabs.Trigger>
-                <Tabs.Trigger value="logs">Event Logs</Tabs.Trigger>
-                <Tabs.Trigger value="sdkDebug">
-                  <span className="pr-4">SDK</span>
-                  <div className="absolute right-1">
-                    {sdkStatus === "green" && (
-                      <PiCircleFill size={9} className="text-emerald-500 mr-1"/>
-                    )}
-                    {sdkStatus === "yellow" && (
-                      <PiWarningFill className="text-amber-500" />
-                    )}
-                    {sdkStatus === "red" && (
-                      <PiWarningOctagonFill className="text-red-700" />
-                    )}
-                  </div>
-                </Tabs.Trigger>
-                <div className="flex-1"/>
-                <Dialog.Root
-                  open={settingsOpen}
-                  onOpenChange={(o) => setSettingsOpen(o)}
+            </div>
+          </div>
+          {!isResponsive ? (
+            <Tabs.Root
+              value={currentTab}
+              onValueChange={setCurrentTab}
+              className="-mx-4 mt-[1px]"
+            >
+              <Tabs.List>
+                <div
+                  className="flex items-center mx-auto w-full"
+                  style={{ maxWidth: MW }}
                 >
-                  <Dialog.Trigger>
-                    {apiKeyReady && !apiKey ? (
-                      <Tooltip content="Enter an Access Token for improved functionality">
-                      <IconButton
-                          className="relative"
-                          variant="outline"
-                          size="1"
-                          onClick={() => setSettingsOpen(true)}
-                        >
-                          <PiCircleFill
-                            size={9}
-                            className="absolute text-red-600 bg-white rounded-full border border-white"
-                            style={{ right: 1, top: 1, }}
-                          />
-                          <PiGearSixFill size={17} />
-                        </IconButton>
-                      </Tooltip>
-                    ): (
-                      <IconButton
-                        variant="outline"
-                        size="1"
-                        style={{ width: 28, height: 28 }}
-                      >
-                        <PiGearSixFill size={17} />
-                      </IconButton>
-                    )}
-                  </Dialog.Trigger>
-                  <Dialog.Content className="ModalBody">
-                    <Dialog.Title>Settings</Dialog.Title>
-                    <SettingsForm close={() => setSettingsOpen(false)} />
-                    <Dialog.Close
-                      style={{ position: "absolute", top: 5, right: 5 }}
-                    >
-                      <IconButton
-                        color="gray"
-                        highContrast
-                        size="1"
-                        variant="outline"
-                        radius="full"
-                      >
-                        <PiX size={20} />
-                      </IconButton>
-                    </Dialog.Close>
-                  </Dialog.Content>
-                </Dialog.Root>
-                <div className="mx-2" />
-              </div>
-            </Tabs.List>
-          </Tabs.Root>
+                  <div className="mx-2" />
+                  <Tabs.Trigger value="features">
+                    <NavLabel type="features" forcedFeatures={forcedFeatures} />
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="experiments">
+                    <NavLabel type="experiments" forcedVariations={forcedVariations} />
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="attributes">
+                    <NavLabel type="attributes" forcedAttributes={forcedAttributes} />
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="logs">
+                    <NavLabel type="logs" />
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="sdkDebug">
+                    <NavLabel type="sdkDebug" sdkStatus={sdkStatus} />
+                  </Tabs.Trigger>
+                  <div className="flex-1"/>
+                  <SettingsButton apiKeyReady={apiKeyReady} apiKey={apiKey} setSettingsOpen={setSettingsOpen} />
+
+                  <div className="mx-2" />
+                </div>
+              </Tabs.List>
+            </Tabs.Root>
+          ): (
+            <div className="flex items-center justify-between">
+              <Select.Root
+                value={currentTab}
+                onValueChange={setCurrentTab}
+              >
+                <Select.Trigger
+                  className="!shadow-none !outline-none hover:bg-slate-a3 rounded-none"
+                  style={{ borderBottom: "2px solid var(--violet-a11)" }}
+                >
+                  <div style={{ width: 100 }}>
+                  { currentTab === "features" ? (
+                    <NavLabel type="features" forcedFeatures={forcedFeatures} isDropdown />
+                  ) : currentTab === "experiments" ? (
+                    <NavLabel type="experiments" forcedVariations={forcedVariations} isDropdown />
+                  ) : currentTab === "attributes" ? (
+                    <NavLabel type="attributes" forcedAttributes={forcedAttributes} isDropdown />
+                  ) : currentTab === "logs" ? (
+                    <NavLabel type="logs" isDropdown />
+                  ) : currentTab === "sdkDebug" ? (
+                    <NavLabel type="sdkDebug" sdkStatus={sdkStatus} isDropdown />
+                  ) : null}
+                  </div>
+                </Select.Trigger>
+                <Select.Content
+                  variant="soft"
+                  color="gray"
+                  position="popper"
+                  align="start"
+                >
+                  <Select.Item value="features">
+                    <NavLabel type="features" forcedFeatures={forcedFeatures} isDropdown />
+                  </Select.Item>
+                  <Select.Item value="experiments">
+                    <NavLabel type="experiments" forcedVariations={forcedVariations} isDropdown />
+                  </Select.Item>
+                  <Select.Item value="attributes">
+                    <NavLabel type="attributes" forcedAttributes={forcedAttributes} isDropdown />
+                  </Select.Item>
+                  <Select.Item value="logs">
+                    <NavLabel type="logs" isDropdown />
+                  </Select.Item>
+                  <Select.Item value="sdkDebug">
+                    <NavLabel type="sdkDebug" sdkStatus={sdkStatus} isDropdown />
+                  </Select.Item>
+                </Select.Content>
+              </Select.Root>
+
+              <SettingsButton apiKeyReady={apiKeyReady} apiKey={apiKey} setSettingsOpen={setSettingsOpen} />
+            </div>
+          )}
         </div>
 
         <div
@@ -218,19 +208,185 @@ export const App = () => {
           className="overflow-y-auto"
           style={{ height: `calc(100vh - ${NAV_H}px)` }}
         >
-          {currentTab === "attributes" ? (
-            <AttributesTab />
-          ) : currentTab === "features" ? (
-            <FeaturesTab />
+          {currentTab === "features" ? (
+            <FeaturesTab isResponsive={isResponsive} />
           ) : currentTab === "experiments" ? (
-            <ExperimentsTab />
+            <ExperimentsTab isResponsive={isResponsive} />
+          ) : currentTab === "attributes" ? (
+            <AttributesTab isResponsive={isResponsive} />
           ) : currentTab === "logs" ? (
-            <LogsTab />
+            <LogsTab isResponsive={isResponsive} />
           ) : currentTab === "sdkDebug" ? (
-            <SdkTab />
+            <SdkTab isResponsive={isResponsive} />
           ) : null}
         </div>
+
+        <Dialog.Root
+          open={settingsOpen}
+          onOpenChange={(o) => setSettingsOpen(o)}
+        >
+          <Dialog.Content className="ModalBody">
+            <Dialog.Title>Settings</Dialog.Title>
+            <SettingsForm close={() => setSettingsOpen(false)} />
+            <Dialog.Close
+              style={{ position: "absolute", top: 5, right: 5 }}
+            >
+              <IconButton
+                color="gray"
+                highContrast
+                size="1"
+                variant="outline"
+                radius="full"
+              >
+                <PiX size={20} />
+              </IconButton>
+            </Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Root>
       </div>
     </Theme>
   );
 };
+
+function NavLabel({
+  type,
+  isDropdown = false,
+  forcedFeatures,
+  forcedVariations,
+  forcedAttributes,
+  sdkStatus,
+}:{
+  type: "features" | "experiments" | "attributes" | "logs" | "sdkDebug";
+  isDropdown?: boolean;
+  forcedFeatures?: Record<string, any>;
+  forcedVariations?: Record<string, any>;
+  forcedAttributes?: boolean;
+  sdkStatus?: string;
+}) {
+  if (type === "features") {
+    const count = Object.keys(forcedFeatures || {}).length;
+    return (
+      <ConditionalWrapper condition={isDropdown} wrapper={<div className="flex items-center"/>}>
+        <span className={!isDropdown ? count ? "pr-3" : "px-1.5" : "pr-1"}>
+          Features
+        </span>
+        {count ? (
+          <div className={!isDropdown ? "absolute right-0" : undefined}>
+            <Tooltip
+              content={`${count} override${count !== 1 ? "s" : ""}`}>
+              <div className="p-1">
+                <PiCircleFill size={9} className="text-amber-500"/>
+              </div>
+            </Tooltip>
+          </div>
+        ) : null}
+      </ConditionalWrapper>
+    );
+  }
+
+  if (type === "experiments") {
+    const count = Object.keys(forcedVariations || {}).length;
+    return (
+      <ConditionalWrapper condition={isDropdown} wrapper={<div className="flex items-center"/>}>
+        <span className={!isDropdown ? count ? "pr-3" : "px-1.5" : "pr-1"}>
+          Experiments
+        </span>
+        {count ? (
+          <div className={!isDropdown ? "absolute right-0" : undefined}>
+            <Tooltip
+              content={`${count} override${count !== 1 ? "s" : ""}`}>
+              <div className="p-1">
+                <PiCircleFill size={9} className="text-amber-500"/>
+              </div>
+            </Tooltip>
+          </div>
+        ) : null}
+      </ConditionalWrapper>
+    );
+  }
+
+  if (type === "attributes") {
+    return (
+      <ConditionalWrapper condition={isDropdown} wrapper={<div className="flex items-center"/>}>
+        <span className={!isDropdown ? forcedAttributes ? "pr-3" : "px-1.5" : "pr-1"}>
+          Attributes
+        </span>
+        {forcedAttributes ? (
+          <div className={!isDropdown ? "absolute right-0" : undefined}>
+            <Tooltip content="Has attribute overrides">
+              <button className="p-1">
+                <PiCircleFill size={9} className="text-amber-500"/>
+              </button>
+            </Tooltip>
+          </div>
+        ) : null}
+      </ConditionalWrapper>
+    );
+  }
+
+  if (type === "logs") {
+    return (
+      <ConditionalWrapper condition={isDropdown} wrapper={<div className="flex items-center"/>}>
+        Event Logs
+      </ConditionalWrapper>
+    );
+  }
+
+  if (type === "sdkDebug") {
+    return (
+      <ConditionalWrapper condition={isDropdown} wrapper={<div className="flex items-center"/>}>
+        <span className={!isDropdown ? "pr-3" : "pr-1.5"}>SDK</span>
+        <div className={!isDropdown ? "absolute right-0" : undefined}>
+          {sdkStatus === "green" && (
+            <PiCircleFill size={9} className="text-emerald-500 mr-1"/>
+          )}
+          {sdkStatus === "yellow" && (
+            <PiWarningFill className="text-amber-500"/>
+          )}
+          {sdkStatus === "red" && (
+            <PiWarningOctagonFill className="text-red-700"/>
+          )}
+        </div>
+      </ConditionalWrapper>
+    );
+  }
+
+  return null;
+}
+
+function SettingsButton({
+  apiKeyReady,
+  apiKey,
+  setSettingsOpen,
+} : {
+  apiKeyReady: boolean;
+  apiKey: string;
+  setSettingsOpen: (b: boolean) => void;
+}) {
+  return apiKeyReady && !apiKey ? (
+    <Tooltip content="Enter an Access Token for improved functionality">
+      <IconButton
+        className="relative"
+        variant="outline"
+        size="1"
+        onClick={() => setSettingsOpen(true)}
+      >
+        <PiCircleFill
+          size={9}
+          className="absolute text-red-600 bg-white rounded-full border border-white"
+          style={{ right: 1, top: 1, }}
+        />
+        <PiGearSixFill size={17} />
+      </IconButton>
+    </Tooltip>
+  ): (
+    <IconButton
+      variant="outline"
+      size="1"
+      onClick={() => setSettingsOpen(true)}
+      style={{ width: 28, height: 28 }}
+    >
+      <PiGearSixFill size={17} />
+    </IconButton>
+  );
+}

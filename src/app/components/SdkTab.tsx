@@ -5,7 +5,7 @@ import { ChevronDownIcon, Flex, Grid, Link, Text } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
 import { MW } from "@/app";
 
-export default function SdkTab() {
+export default function SdkTab({ isResponsive } : { isResponsive: boolean }) {
   const [selectedItem, setSelectedItem] = useState<string | undefined>(
     undefined,
   );

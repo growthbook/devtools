@@ -28,7 +28,7 @@ type FeatureDefinitionWithId = FeatureDefinition & { id: string };
 export const LEFT_PERCENT = 0.4;
 export const HEADER_H = 40;
 
-export default function FeaturesTab() {
+export default function FeaturesTab({ isResponsive } : { isResponsive: boolean }) {
   const [features, setFeatures] = useTabState<
     Record<string, FeatureDefinition>
   >("features", {});
@@ -141,7 +141,7 @@ export default function FeaturesTab() {
           <SearchBar
             flexGrow="0"
             className="inline-block"
-            style={{width: 200}}
+            style={{maxWidth: 200}}
             autoFocus
             placeholder="Search Features"
             searchInputProps={searchInputProps}
@@ -158,15 +158,16 @@ export default function FeaturesTab() {
                 e.preventDefault();
                 setForcedFeatures({});
               }}
-              className="flex gap-1 items-center font-normal"
+              className="flex gap-1 items-center font-normal leading-3 text-right"
             >
               Clear all overrides
-              <PiXBold/>
+              <PiXBold className="flex-shrink-0" />
             </Link>
           ) : null}
-          <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer">
-            <span>Hide inactive</span>
+          <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer leading-3 text-right">
+            Hide inactive
             <Switch
+              className="flex-shrink-0"
               size="1"
               checked={hideInactiveFeatures}
               onCheckedChange={(b) => setHideInactiveFeatures(b)}
@@ -267,6 +268,7 @@ export default function FeaturesTab() {
           setSelectedFid={setSelectedFid}
           selectedFeature={selectedFeature}
           open={!!selectedFid && !!selectedFeature}
+          isResponsive={isResponsive}
         />
       </div>
     </>

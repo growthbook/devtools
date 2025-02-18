@@ -358,7 +358,11 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   }
   // @ts-expect-error
   const gbContext = gb.context;
+
+  const devModeEnabled = gbContext.enableDevMode;
+
   const [apiHost, clientKey] = gb.getApiInfo();
+
   const payload = gb.getDecryptedPayload?.() || {
     features: gb.getFeatures(),
     experiments: gb.getExperiments(),
@@ -367,7 +371,15 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     !!gb.getDecryptedPayload?.() ||
     (Object.keys(gb.getFeatures()).length > 0 &&
       gb.getExperiments().length > 0);
-  const devModeEnabled = gbContext.enableDevMode;
+  // check if payload was decrypted
+  const hasDecryptionKey = !!gbContext.decryptionKey;
+  let payloadDecrypted = true;
+  try {
+    JSON.stringify(payload);
+  } catch (e) {
+    payloadDecrypted = false;
+  }
+
   const _trackingCallback = gbContext.trackingCallback;
   const hasTrackingCallback =
     typeof _trackingCallback === "function" &&
@@ -375,19 +387,13 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   const trackingCallbackParams = hasTrackingCallback
     ? _trackingCallback.originalParams
     : undefined;
+
   const usingLogEvents = typeof gbContext.eventLogger === "function";
-  const hasDecryptionKey = !!gbContext.decryptionKey;
+
   const isRemoteEval = gb.isRemoteEval();
+
   const usingStickyBucketing = gbContext.stickyBucketService !== undefined;
-  const streaming = !!gbContext.backgroundSync;
-  const streamingHost = gbContext.streamingHost || apiHost;
-  // check if payload was decrypted
-  let payloadDecrypted = true;
-  try {
-    JSON.stringify(payload);
-  } catch (e) {
-    payloadDecrypted = false;
-  }
+  const stickyBucketAssignmentDocs = gbContext.stickyBucketAssignmentDocs;
 
   // if (!clientKey) {
   //   return {
@@ -415,6 +421,9 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     // ignore
   }
 
+
+  const streaming = !!gbContext.backgroundSync;
+  const streamingHost = gbContext.streamingHost || apiHost;
   const streamingHostRequestHeaders = gbContext.streamingHostRequestHeaders;
   let streamingRes = undefined;
   if (streaming) {
@@ -450,6 +459,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     usingLogEvents,
     isRemoteEval,
     usingStickyBucketing,
+    stickyBucketAssignmentDocs,
     streaming,
     apiHost,
     streamingHost,

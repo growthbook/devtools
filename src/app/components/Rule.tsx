@@ -329,7 +329,7 @@ export function ExperimentRule({
                   />
                 </td>
                 <td className="pl-2 py-0.5">
-                  {weights?.[i] !== undefined ? weights[i] * 100 + "%" : null}
+                  {weights?.[i] !== undefined ? Math.round(weights[i] * 1000) / 10 + "%" : null}
                 </td>
               </tr>
             ))}

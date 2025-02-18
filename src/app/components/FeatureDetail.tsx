@@ -21,11 +21,13 @@ export default function FeatureDetail({
   setSelectedFid,
   selectedFeature,
   open,
+  isResponsive,
 }: {
   selectedFid?: string;
   setSelectedFid: (s: string | undefined) => void;
   selectedFeature?: SelectedFeature;
   open: boolean;
+  isResponsive: boolean;
 }) {
   const [appOrigin] = useGlobalState(APP_ORIGIN, CLOUD_APP_ORIGIN, true);
 
@@ -71,7 +73,7 @@ export default function FeatureDetail({
     }
   }, [selectedFid, JSON.stringify(forcedFeatures)]);
 
-  const rightPercent = 1 - LEFT_PERCENT;
+  const rightPercent = isResponsive ? 1 : 1 - LEFT_PERCENT;
 
   return (
     <div

@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo } from "react";
 import {
   Attributes,
   AutoExperiment,
-  Experiment,
   FeatureDefinition,
   FeatureResult,
   GrowthBook,
@@ -28,7 +27,7 @@ export type EvaluatedExperiment = {
 };
 
 export default function useGBSandboxEval() {
-  const { payload: sdkPayload, usingStickyBucketing } = useSdkData();
+  const { payload: sdkPayload, usingStickyBucketing, stickyBucketAssignmentDocs } = useSdkData();
   const [attributes] = useTabState<Attributes>("attributes", {});
   const [features] = useTabState<Record<string, FeatureDefinition>>(
     "features",
@@ -80,6 +79,7 @@ export default function useGBSandboxEval() {
           log.push([msg, ctx]);
         },
         stickyBucketService: usingStickyBucketing ? new SandboxStickyBucketService() : undefined,
+        stickyBucketAssignmentDocs,
       });
       growthbook.setForcedFeatures(forcedFeaturesMap);
       await growthbook.init({ payload });
@@ -138,6 +138,7 @@ export default function useGBSandboxEval() {
     forcedVariations,
     url,
     usingStickyBucketing,
+    stickyBucketAssignmentDocs,
     sdkPayload,
   ]);
 

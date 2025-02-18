@@ -5,7 +5,7 @@ import LogsList from "./LogsList";
 import { Link } from "@radix-ui/themes";
 import { MW } from "@/app";
 
-export default function LogsTab() {
+export default function LogsTab({ isResponsive } : { isResponsive: boolean }) {
   const [currentTab, setCurrentTab] = useTabState("currentTab", "logs");
 
   useEffect(() => window.scrollTo({ top: 0 }), []);
@@ -42,7 +42,7 @@ export default function LogsTab() {
           </div>
         </div>
       ) : (
-        <LogsList logEvents={logEvents}></LogsList>
+        <LogsList logEvents={logEvents} isResponsive={isResponsive} />
       )}
     </div>
   );

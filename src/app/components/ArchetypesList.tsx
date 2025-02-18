@@ -1,15 +1,10 @@
-import * as Accordion from "@radix-ui/react-accordion";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Archetype } from "../tempGbExports";
 import {
-  Avatar,
-  Button,
-  Container,
-  Flex,
   Text,
-  DropdownMenu,
+  DropdownMenu, Link,
 } from "@radix-ui/themes";
-import { PiUser } from "react-icons/pi";
+import {PiCaretDownFill, PiUser} from "react-icons/pi";
 import useApi from "@/app/hooks/useApi";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import useTabState from "@/app/hooks/useTabState";
@@ -26,7 +21,7 @@ export default function ArchetypesList() {
       CLOUD_APP_ORIGIN,
       true,
     );
-    
+
   const {
     isLoading: archetypesLoading,
     error: archetypesError,
@@ -63,47 +58,55 @@ export default function ArchetypesList() {
     );
   }, [archetypesLoading, archetypesError, archetypesData]);
   return (
-    <Container width="100%">
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger>
-          <Button variant="ghost" size="2">
-            <Flex gap="1" align="center">
-              <PiUser />
-              {selectedArchetype?.name || "Current User"}
-            </Flex>
-          </Button>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content>
-          <DropdownMenu.Label>Archetypes</DropdownMenu.Label>
-          {archetypes.map((arch) => (
-            <DropdownMenu.Item
-              key={arch.id}
-              onSelect={() => updateArchetype(arch)}
-            >
-              <Text>{arch.name}</Text>
-            </DropdownMenu.Item>
-          ))}
-
-          <DropdownMenu.Separator />
-          <DropdownMenu.Item
-            onSelect={() => {
-              setAttributes({});
-              setForcedAttributes(false);
-              setSelectedArchetype(undefined);
-            }}
-            color="red"
-            disabled={!selectedArchetype}
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger>
+        <div className="flex items-center justify-between select-none">
+          <Link
+            size="2"
+            role="button"
+            href="#"
+            className="block text-nowrap overflow-hidden overflow-ellipsis"
+            style={{ maxWidth: "calc(100vw - 120px - 20px - 20px)" }}
           >
-            Clear Override
+            <PiUser className="inline-block mr-1" />
+            {selectedArchetype?.name || "Current User"}
+          </Link>
+          <PiCaretDownFill
+            className="ml-0.5 text-violet-a11"
+            size={12}
+          />
+        </div>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content variant="soft">
+        <DropdownMenu.Label>Archetypes</DropdownMenu.Label>
+        {archetypes.map((arch) => (
+          <DropdownMenu.Item
+            key={arch.id}
+            onSelect={() => updateArchetype(arch)}
+          >
+            <Text>{arch.name}</Text>
           </DropdownMenu.Item>
-          <DropdownMenu.Item onSelect={
-            // go to GrowthBook and add a new archetype
-            () => {
-              window.open(`${appOrigin}/archetypes`, "_blank", "noopener,noreferrer");
-            }
-          }> Add Archetype</DropdownMenu.Item>
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
-    </Container>
+        ))}
+
+        <DropdownMenu.Separator />
+        <DropdownMenu.Item
+          onSelect={() => {
+            setAttributes({});
+            setForcedAttributes(false);
+            setSelectedArchetype(undefined);
+          }}
+          color="red"
+          disabled={!selectedArchetype}
+        >
+          Clear Override
+        </DropdownMenu.Item>
+        <DropdownMenu.Item onSelect={
+          // go to GrowthBook and add a new archetype
+          () => {
+            window.open(`${appOrigin}/archetypes`, "_blank", "noopener,noreferrer");
+          }
+        }> Add Archetype</DropdownMenu.Item>
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
   );
 }

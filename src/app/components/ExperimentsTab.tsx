@@ -36,7 +36,7 @@ export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
 export const LEFT_PERCENT = 0.4;
 export const HEADER_H = 40;
 
-export default function ExperimentsTab() {
+export default function ExperimentsTab({ isResponsive } : { isResponsive: boolean }) {
   const [experiments, setExperiments] = useTabState<AutoExperiment[]>(
     "experiments",
     [],
@@ -183,7 +183,7 @@ export default function ExperimentsTab() {
           <SearchBar
             flexGrow="0"
             className="inline-block"
-            style={{width: 200}}
+            style={{maxWidth: 200}}
             autoFocus
             placeholder="Search Experiments"
             searchInputProps={searchInputProps}
@@ -200,15 +200,16 @@ export default function ExperimentsTab() {
                 e.preventDefault();
                 setForcedVariations({});
               }}
-              className="flex gap-1 items-center font-normal"
+              className="flex gap-1 items-center font-normal leading-3 text-right"
             >
               Clear all overrides
-              <PiXBold/>
+              <PiXBold className="flex-shrink-0" />
             </Link>
           ) : null}
-          <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer">
+          <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer leading-3 text-right">
             <span>Hide inactive</span>
             <Switch
+              className="flex-shrink-0"
               size="1"
               checked={hideInactiveExperiments}
               onCheckedChange={(b) => setHideInactiveExperiments(b)}
@@ -325,6 +326,7 @@ export default function ExperimentsTab() {
           setSelectedEid={setSelectedEid}
           selectedExperiment={selectedExperiment}
           open={!!selectedEid && !!selectedExperiment}
+          isResponsive={isResponsive}
         />
       </div>
     </>

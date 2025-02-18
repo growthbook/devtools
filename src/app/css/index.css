@@ -46,7 +46,7 @@
   line-height: 12px !important;
 }
 .ModalBody {
-  width: 400px;
+  max-width: 400px;
 }
 .mono {
   font-family: monospace;
@@ -85,10 +85,10 @@
   transition: 150ms all;
 }
 .featureDetail .header {
-  @apply w-full sticky top-0 z-center pl-6 pr-4 pt-3 pb-2 bg-violet-2 shadow-sm;
+  @apply w-full sticky top-0 z-center px-6 pt-3 pb-2 bg-violet-2 shadow-sm;
 }
 .featureDetail .content {
-  @apply pl-6 pr-4 py-2 mb-3;
+  @apply px-6 py-2 mb-3;
 }
 
 .rule {
@@ -195,7 +195,7 @@
 }
 
 .searchBar {
-  @apply border-b border-b-slate-a4 flex items-center justify-between;
+  @apply border-b border-b-slate-a4 flex items-center justify-between flex-shrink;
 }
 .searchBar input {
   @apply border-0 px-1 py-0.5 w-full;

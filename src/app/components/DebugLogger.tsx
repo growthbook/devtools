@@ -34,7 +34,7 @@ export default function DebugLogger({
         </Link>
       </div>
       {!collapsed && (
-        <div className="text-xs border border-slate-a3 rounded-sm bg-neutral-50 py-1 px-2">
+        <div className="text-xs border border-slate-a3 rounded-sm bg-neutral-50 pt-1 px-2">
           {logs?.length ? logs.map((log, i) => {
             return (
               <div className="my-0.5">

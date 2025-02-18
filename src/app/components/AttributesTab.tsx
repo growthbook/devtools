@@ -17,7 +17,7 @@ import useApi from "../hooks/useApi";
 import { MW } from "@/app";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
 
-export default function AttributesTab() {
+export default function AttributesTab({ isResponsive } : { isResponsive: boolean }) {
   const LABEL_H = 32;
   const SUBHEAD_H = 32;
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});

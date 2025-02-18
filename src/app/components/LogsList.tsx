@@ -14,7 +14,7 @@ import { useSearch } from "../hooks/useSearch";
 import SearchBar from "./SearchBar";
 import { LogType, reshapeEventLog } from "../utils/logs";
 import * as Accordion from "@radix-ui/react-accordion";
-import { PiCaretRightFill } from "react-icons/pi";
+import {PiCaretRightFill, PiFlagFill, PiFlaskFill} from "react-icons/pi";
 import ValueField from "./ValueField";
 import clsx from "clsx";
 import {MW} from "@/app";
@@ -28,7 +28,20 @@ const filterCopy: Record<LogType, string> = {
   debug: "Debug",
 };
 
-export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
+const responsiveCopy = {
+  event: "Event",
+  feature: (<PiFlagFill />),
+  experiment: (<PiFlaskFill />),
+  debug: "Debug"
+}
+
+export default function LogsList({
+  logEvents,
+  isResponsive,
+}: {
+  logEvents: LogUnion[];
+  isResponsive: boolean;
+}) {
   const [filters, setFilters] = useTabState<LogType[]>("logTypeFilter", [
     "event",
     "experiment",
@@ -65,46 +78,45 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
   });
 
   return (
-    <Flex direction="column" className="w-full" style={{height: "100%"}}>
+    <div className="flex flex-col w-full h-full">
       <div
-        className="w-full flex items-center gap-4 px-3 border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm"
-        style={{ height: HEADER_H }}
+        className="w-full flex items-center justify-between gap-4 px-3 border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm"
+        style={{
+          height: HEADER_H,
+          zIndex: 2000,
+        }}
       >
         <SearchBar
           flexGrow="0"
           className="inline-block"
-          style={{width: 200}}
+          style={{maxWidth: 200}}
           autoFocus
           placeholder="Search Logs"
           searchInputProps={searchInputProps}
           clear={clearSearch}
         />
-        <Flex
-          ml="auto"
-          gapX="5"
-          gapY="1"
-          wrap={{
-            initial: "wrap",
-            md: "nowrap",
-          }}
-        >
+        <div className="flex flex-shrink gap-3">
           {(Object.entries(filterCopy) as Array<[LogType, string]>).map(
             ([filter, copy]) => (
               <Text as="label" size="1" key={filter}>
                 <Flex gap="1" className="cursor-pointer select-none">
                   <Checkbox
+                    variant="soft"
                     checked={filters.includes(filter)}
                     onCheckedChange={() => toggleFilter(filter)}
                   />
-                  {copy}
+                  {!isResponsive ? copy : responsiveCopy[filter]}
                 </Flex>
               </Text>
             )
           )}
-        </Flex>
+        </div>
       </div>
       <Flex
-        className="w-full items-center bg-slate-a2 shadow-sm uppercase text-slate-11  text-xs font-semibold "
+        className={clsx("w-full items-center bg-slate-a2 shadow-sm uppercase text-slate-11 font-semibold", {
+          "text-xs": !isResponsive,
+          "text-2xs": isResponsive,
+        })}
         style={{height: 35}}
         px="4"
       >
@@ -143,24 +155,38 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
               <Accordion.Item key={i} value={i.toString()}>
                 <Accordion.Trigger className="trigger w-full mb-0.5">
                   <Flex
-                    className={clsx(
-                      "w-full",
-                      i > 0 ? "border-t border-t-slate-200" : "",
-                      "py-1",
-                      "text-sm"
+                    className={clsx("w-full py-1", {
+                        "border-t border-t-slate-200": i > 0,
+                        "text-sm": !isResponsive,
+                        "text-xs": isResponsive
+                      }
                     )}
                   >
                     <div className="w-[20%] px-1 text-left">
                       <PiCaretRightFill className="caret mr-0.5" size={12}/>
-                      <Text className="text-xs">{formattedDateTime}</Text>
+                      <Text className={clsx({
+                        "text-xs": !isResponsive,
+                        "text-2xs": isResponsive
+                      })}>{formattedDateTime}</Text>
                     </div>
-                    <div className="w-[20%] px-1 text-left">{evt.logType}</div>
+                    <div
+                      className={clsx("w-[20%] px-1 text-left", {
+                        "text-xs": !isResponsive,
+                        "text-2xs": isResponsive
+                      })}
+                    >
+                      {evt.logType}
+                    </div>
                     <div
                       className={clsx(
                         "w-[20%]",
                         "px-1",
                         "text-left",
-                        isExpanded ? "" : "line-clamp-1"
+                        isExpanded ? "" : "line-clamp-1",
+                        {
+                          "text-xs": !isResponsive,
+                          "text-2xs": isResponsive
+                        }
                       )}
                     >
                       {evt.eventInfo}
@@ -180,8 +206,10 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
                         />
                       ) : (
                         <Text
-                          size="2"
-                          className="text-ellipsis line-clamp-1 overflow-hidden text-slate-9"
+                          className={clsx("text-ellipsis line-clamp-1 overflow-hidden text-slate-9", {
+                            "text-xs": !isResponsive,
+                            "text-2xs": isResponsive
+                          })}
                         >
                           {JSON.stringify(evt.details)}
                         </Text>
@@ -194,6 +222,6 @@ export default function LogsList({ logEvents }: { logEvents: LogUnion[] }) {
           })}
         </Accordion.Root>
       </Box>
-    </Flex>
+    </div>
   );
 }

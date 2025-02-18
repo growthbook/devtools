@@ -34,11 +34,13 @@ export default function ExperimentDetail({
   setSelectedEid,
   selectedExperiment,
   open,
+  isResponsive,
 }: {
   selectedEid?: string;
   setSelectedEid: (s: string | undefined) => void;
   selectedExperiment?: SelectedExperiment;
   open: boolean;
+  isResponsive: boolean;
 }) {
   const [selectedFid, setSelectedFid] = useTabState<string | undefined>(
     "selectedFid",
@@ -105,7 +107,7 @@ export default function ExperimentDetail({
     }
   }, [selectedEid, JSON.stringify(forcedVariations)]);
 
-  const rightPercent = 1 - LEFT_PERCENT;
+  const rightPercent = isResponsive ? 1 : 1 - LEFT_PERCENT;
 
   return (
     <div

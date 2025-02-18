@@ -1,7 +1,7 @@
 import type {
   Experiment,
   FeatureDefinition,
-  ExperimentOverride,
+  ExperimentOverride, StickyAssignmentsDocument,
 } from "@growthbook/growthbook";
 import {
   FetchVisualChangesetPayload,
@@ -220,6 +220,7 @@ type SDKHealthCheckResult = {
   usingLogEvents?: boolean;
   isRemoteEval?: boolean;
   usingStickyBucketing?: boolean;
+  stickyBucketAssignmentDocs?: Record<string, StickyAssignmentsDocument>;
   streaming?: boolean;
   apiHost?: string;
   streamingHost?: string;
