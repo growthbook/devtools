@@ -27,7 +27,7 @@ import useTabState from "@/app/hooks/useTabState";
 import { SelectedExperiment } from "@/app/components/ExperimentsTab";
 import { AutoExperimentVariation, isURLTargeted } from "@growthbook/growthbook";
 import clsx from "clsx";
-import DebugLogger, {DebugMessage} from "@/app/components/DebugLogger";
+import DebugLogger, { DebugLogAccordion } from "@/app/components/DebugLogger";
 
 export default function ExperimentDetail({
   selectedEid,
@@ -44,7 +44,7 @@ export default function ExperimentDetail({
 }) {
   const [selectedFid, setSelectedFid] = useTabState<string | undefined>(
     "selectedFid",
-    undefined,
+    undefined
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "experiments");
 
@@ -89,8 +89,8 @@ export default function ExperimentDetail({
 
   const debugLog = selectedExperiment?.evaluatedExperiment?.debug;
   const lastDebugLog = debugLog
-    ? debugLog[debugLog.length - 1]?.[0]
-    : ("" ?? "");
+    ? (debugLog[debugLog.length - 1]?.[0] ?? "")
+    : "";
 
   const fid = selectedExperiment?.experiment?.features?.[0];
   const valueType =
@@ -163,9 +163,7 @@ export default function ExperimentDetail({
         <div className="content">
           <div className="my-1">
             <div className="mt-2 mb-3">
-              <div className="label font-semibold">
-                Enrollment Status
-              </div>
+              <div className="label font-semibold">Enrollment Status</div>
               {selectedExperiment?.evaluatedExperiment?.result?.inExperiment ? (
                 <div className="text-green-700 font-semibold text-sm">
                   In experiment
@@ -177,7 +175,11 @@ export default function ExperimentDetail({
               )}
               {lastDebugLog !== "In experiment" && (
                 <div className="border border-slate-a3 rounded-sm bg-neutral-50 py-1 px-2 mt-1">
-                  <DebugMessage message={lastDebugLog} className="text-2xs"/>
+                  <DebugLogAccordion
+                    log={[lastDebugLog, {}]}
+                    showContext={false}
+                    logMessageClassName="text-2xs"
+                  />
                 </div>
               )}
             </div>
@@ -200,7 +202,7 @@ export default function ExperimentDetail({
                   className="flex gap-1 items-center bg-amber-200 text-amber-700 hover:bg-amber-300"
                 >
                   Clear override
-                  <PiXBold/>
+                  <PiXBold />
                 </Button>
               )}
             </div>
@@ -257,7 +259,7 @@ export default function ExperimentDetail({
             Current value
             {(types?.features || []).length > 1 ? (
               <span className="ml-1 text-xs font-normal">
-                (<PiFlagFill className="inline-block"/> {types?.features?.[0]})
+                (<PiFlagFill className="inline-block" /> {types?.features?.[0]})
               </span>
             ) : null}
           </div>
@@ -266,23 +268,25 @@ export default function ExperimentDetail({
             valueType={valueType}
           />
 
-          <div className="mt-4 mb-1 text-md font-semibold">Implementation{
-            (
-              (types?.redirect ? 1 : 0) +
+          <div className="mt-4 mb-1 text-md font-semibold">
+            Implementation
+            {(types?.redirect ? 1 : 0) +
               (types?.visual ? 1 : 0) +
-              Object.keys(types?.features || {}).length
-            ) > 1 ? "s" : ""
-          }</div>
+              Object.keys(types?.features || {}).length >
+            1
+              ? "s"
+              : ""}
+          </div>
           <div className="mb-4">
             {types?.redirect ? (
               <div className="text-sm">
-                <PiLinkBold className="inline-block mr-1"/>
+                <PiLinkBold className="inline-block mr-1" />
                 URL Redirect
               </div>
             ) : null}
             {types?.visual ? (
               <div className="text-sm">
-                <PiMonitorBold className="inline-block mr-1"/>
+                <PiMonitorBold className="inline-block mr-1" />
                 Visual Editor
               </div>
             ) : null}
@@ -298,7 +302,7 @@ export default function ExperimentDetail({
                     setCurrentTab("features");
                   }}
                 >
-                  <PiFlagFill className="inline-block mr-1" size={12}/>
+                  <PiFlagFill className="inline-block mr-1" size={12} />
                   {fid}
                 </Link>
               </div>
@@ -324,13 +328,11 @@ export default function ExperimentDetail({
                     )}
                     <div>
                       {isURLTargeted(url, [pattern]) ? (
-                        <div
-                          className="text-green-900 bg-green-200 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                        <div className="text-green-900 bg-green-200 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
                           Current URL targeted
                         </div>
                       ) : (
-                        <div
-                          className="text-red-500 bg-red-100 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                        <div className="text-red-500 bg-red-100 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
                           Current URL excluded
                         </div>
                       )}
@@ -365,9 +367,7 @@ export default function ExperimentDetail({
 
           {selectedExperiment ? (
             <div className="mt-3 mb-1">
-              {debugLog ? (
-                <DebugLogger logs={debugLog} />
-              ) : null}
+              {debugLog ? <DebugLogger logs={debugLog} /> : null}
 
               <Accordion.Root
                 className="accordion mt-2"
@@ -377,7 +377,7 @@ export default function ExperimentDetail({
                 <Accordion.Item value="feature-definition">
                   <Accordion.Trigger className="trigger mb-0.5">
                     <Link size="2" role="button" className="hover:underline">
-                      <PiCaretRightFill className="caret mr-0.5" size={12}/>
+                      <PiCaretRightFill className="caret mr-0.5" size={12} />
                       Full experiment definition
                     </Link>
                   </Accordion.Trigger>
@@ -461,7 +461,7 @@ export function VariationIcon({
     <div
       className={clsx(
         "inline-flex items-center justify-center font-semibold rounded-full border",
-        className,
+        className
       )}
       style={{
         minWidth: size,
