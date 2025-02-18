@@ -252,17 +252,6 @@ function subscribeToSdkChanges(
   if (!gb.logs) {
     gb.logs = [];
 
-    // Debug logs
-    const _log = gb.log;
-    gb.log = (msg: string, ctx: Record<string, unknown>) => {
-      _log.call(gb, msg, ctx);
-      gb.logs!.push({
-        debug: { msg, ctx },
-        timestamp: Date.now().toString(),
-        logType: "debug",
-      });
-    };
-
     // Event logs
     const _logEvent = gb.logEvent;
     gb.logEvent = async (
@@ -420,7 +409,6 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   } catch (e) {
     // ignore
   }
-
 
   const streaming = !!gbContext.backgroundSync;
   const streamingHost = gbContext.streamingHost || apiHost;

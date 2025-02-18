@@ -10,13 +10,6 @@ export type LogType = LogUnion["logType"];
 
 export function reshapeEventLog(evt: LogUnion): FlattenedLogEvent {
   switch (evt.logType) {
-    case "debug":
-      return {
-        timestamp: evt.timestamp,
-        logType: evt.logType,
-        eventInfo: evt.debug.msg,
-        details: evt.debug.ctx || {},
-      };
     case "event":
       return {
         timestamp: evt.timestamp,

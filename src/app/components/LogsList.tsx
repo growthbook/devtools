@@ -1,23 +1,14 @@
 import { LogUnion } from "@growthbook/growthbook";
-import {
-  Badge,
-  Box,
-  Button,
-  Checkbox,
-  Container,
-  Flex,
-  Text,
-} from "@radix-ui/themes";
-import React, { useMemo, useState } from "react";
+import { Box, Checkbox, Flex, Text } from "@radix-ui/themes";
+import React, { ReactNode, useMemo, useState } from "react";
 import useTabState from "../hooks/useTabState";
 import { useSearch } from "../hooks/useSearch";
 import SearchBar from "./SearchBar";
 import { LogType, reshapeEventLog } from "../utils/logs";
 import * as Accordion from "@radix-ui/react-accordion";
-import {PiCaretRightFill, PiFlagFill, PiFlaskFill} from "react-icons/pi";
+import { PiCaretRightFill, PiFlagFill, PiFlaskFill } from "react-icons/pi";
 import ValueField from "./ValueField";
 import clsx from "clsx";
-import {MW} from "@/app";
 
 export const HEADER_H = 40;
 
@@ -25,15 +16,13 @@ const filterCopy: Record<LogType, string> = {
   event: "Events",
   feature: "Features",
   experiment: "Experiments",
-  debug: "Debug",
 };
 
-const responsiveCopy = {
+const responsiveCopy: Record<LogType, ReactNode> = {
   event: "Event",
-  feature: (<PiFlagFill />),
-  experiment: (<PiFlaskFill />),
-  debug: "Debug"
-}
+  feature: <PiFlagFill />,
+  experiment: <PiFlaskFill />,
+};
 
 export default function LogsList({
   logEvents,
@@ -89,7 +78,7 @@ export default function LogsList({
         <SearchBar
           flexGrow="0"
           className="inline-block"
-          style={{maxWidth: 200}}
+          style={{ maxWidth: 200 }}
           autoFocus
           placeholder="Search Logs"
           searchInputProps={searchInputProps}
@@ -113,11 +102,14 @@ export default function LogsList({
         </div>
       </div>
       <Flex
-        className={clsx("w-full items-center bg-slate-a2 shadow-sm uppercase text-slate-11 font-semibold", {
-          "text-xs": !isResponsive,
-          "text-2xs": isResponsive,
-        })}
-        style={{height: 35}}
+        className={clsx(
+          "w-full items-center bg-slate-a2 shadow-sm uppercase text-slate-11 font-semibold",
+          {
+            "text-xs": !isResponsive,
+            "text-2xs": isResponsive,
+          }
+        )}
+        style={{ height: 35 }}
         px="4"
       >
         <SortableHeader field="timestamp" className="w-[20%] px-1">
@@ -148,31 +140,34 @@ export default function LogsList({
             const date = new Date(timestamp);
             const formattedDateTime =
               date.toLocaleDateString() === new Date().toLocaleDateString()
-                ? date.toLocaleTimeString(undefined, {hourCycle: "h24"})
-                : date.toLocaleString(undefined, {hourCycle: "h24"});
+                ? date.toLocaleTimeString(undefined, { hourCycle: "h24" })
+                : date.toLocaleString(undefined, { hourCycle: "h24" });
             const isExpanded = expandedItems.has(i.toString());
             return (
               <Accordion.Item key={i} value={i.toString()}>
                 <Accordion.Trigger className="trigger w-full mb-0.5">
                   <Flex
                     className={clsx("w-full py-1", {
-                        "border-t border-t-slate-200": i > 0,
-                        "text-sm": !isResponsive,
-                        "text-xs": isResponsive
-                      }
-                    )}
+                      "border-t border-t-slate-200": i > 0,
+                      "text-sm": !isResponsive,
+                      "text-xs": isResponsive,
+                    })}
                   >
                     <div className="w-[20%] px-1 text-left">
-                      <PiCaretRightFill className="caret mr-0.5" size={12}/>
-                      <Text className={clsx({
-                        "text-xs": !isResponsive,
-                        "text-2xs": isResponsive
-                      })}>{formattedDateTime}</Text>
+                      <PiCaretRightFill className="caret mr-0.5" size={12} />
+                      <Text
+                        className={clsx({
+                          "text-xs": !isResponsive,
+                          "text-2xs": isResponsive,
+                        })}
+                      >
+                        {formattedDateTime}
+                      </Text>
                     </div>
                     <div
                       className={clsx("w-[20%] px-1 text-left", {
                         "text-xs": !isResponsive,
-                        "text-2xs": isResponsive
+                        "text-2xs": isResponsive,
                       })}
                     >
                       {evt.logType}
@@ -185,7 +180,7 @@ export default function LogsList({
                         isExpanded ? "" : "line-clamp-1",
                         {
                           "text-xs": !isResponsive,
-                          "text-2xs": isResponsive
+                          "text-2xs": isResponsive,
                         }
                       )}
                     >
@@ -206,10 +201,13 @@ export default function LogsList({
                         />
                       ) : (
                         <Text
-                          className={clsx("text-ellipsis line-clamp-1 overflow-hidden text-slate-9", {
-                            "text-xs": !isResponsive,
-                            "text-2xs": isResponsive
-                          })}
+                          className={clsx(
+                            "text-ellipsis line-clamp-1 overflow-hidden text-slate-9",
+                            {
+                              "text-xs": !isResponsive,
+                              "text-2xs": isResponsive,
+                            }
+                          )}
                         >
                           {JSON.stringify(evt.details)}
                         </Text>
