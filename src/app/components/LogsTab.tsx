@@ -5,7 +5,13 @@ import LogsList from "./LogsList";
 import { Link } from "@radix-ui/themes";
 import { MW } from "@/app";
 
-export default function LogsTab({ isResponsive } : { isResponsive: boolean }) {
+export default function LogsTab({
+  isResponsive,
+  isTiny,
+}: {
+  isResponsive: boolean;
+  isTiny: boolean;
+}) {
   const [currentTab, setCurrentTab] = useTabState("currentTab", "logs");
 
   useEffect(() => window.scrollTo({ top: 0 }), []);
@@ -26,23 +32,27 @@ export default function LogsTab({ isResponsive } : { isResponsive: boolean }) {
       {typeof logEvents === "undefined" ? (
         <div className="flex w-full h-10 items-end justify-center">
           <div>
-          SDK logging not connected. See the{" "}
-          <Link
-            role="button"
-            href="#"
-            className="cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              setCurrentTab("sdkDebug");
-            }}
-          >
-            SDK Health
-          </Link>{" "}
-          tab
+            SDK logging not connected. See the{" "}
+            <Link
+              role="button"
+              href="#"
+              className="cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                setCurrentTab("sdkDebug");
+              }}
+            >
+              SDK Health
+            </Link>{" "}
+            tab
           </div>
         </div>
       ) : (
-        <LogsList logEvents={logEvents} isResponsive={isResponsive} />
+        <LogsList
+          logEvents={logEvents}
+          isResponsive={isResponsive}
+          isTiny={isTiny}
+        />
       )}
     </div>
   );

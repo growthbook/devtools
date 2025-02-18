@@ -5,7 +5,8 @@ import {
   IconButton,
   Dialog,
   Tabs,
-  Tooltip, DropdownMenu,
+  Tooltip,
+  DropdownMenu,
   Select,
 } from "@radix-ui/themes";
 import React, { useEffect, useRef, useState } from "react";
@@ -16,12 +17,14 @@ import AttributesTab from "./components/AttributesTab";
 import ExperimentsTab from "./components/ExperimentsTab";
 import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
-import SettingsForm, {API_KEY} from "@/app/components/Settings";
+import SettingsForm, { API_KEY } from "@/app/components/Settings";
 import useSdkData from "@/app/hooks/useSdkData";
 import {
   PiX,
   PiCircleFill,
-  PiGearSixFill, PiWarningFill, PiWarningOctagonFill,
+  PiGearSixFill,
+  PiWarningFill,
+  PiWarningOctagonFill,
 } from "react-icons/pi";
 import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
@@ -40,12 +43,12 @@ export const App = () => {
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
     "sdkFound",
-    undefined,
+    undefined
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
-    {},
+    {}
   );
   const [forcedVariations, setForcedVariations] = useTabState<
     Record<string, any>
@@ -53,7 +56,7 @@ export const App = () => {
 
   const [forcedAttributes, _setForcedAttributes] = useTabState<boolean>(
     "forcedAttributes",
-    false,
+    false
   );
   const { canConnect, hasPayload } = useSdkData();
   let sdkStatus = canConnect ? "green" : hasPayload ? "yellow" : "red";
@@ -90,16 +93,26 @@ export const App = () => {
       hasBackground={false}
       style={{ minHeight: "unset" }}
     >
-      <div id="main" className="text-indigo-12 overflow-hidden" ref={containerRef}>
+      <div
+        id="main"
+        className="text-indigo-12 overflow-hidden"
+        ref={containerRef}
+      >
         <div
           className={`shadow-sm px-3 pt-1 w-full relative bg-white z-front`}
           style={{ height: NAV_H }}
         >
-          <div className="flex justify-between w-full" style={{ maxWidth: MW, height: 30 }}>
+          <div
+            className="flex justify-between w-full"
+            style={{ maxWidth: MW, height: 30 }}
+          >
             <h1
-              className={clsx("text-md select-none -indent-3.5 ml-3.5 flex-shrink-0", {
-                "-mr-2": isTiny,
-              })}
+              className={clsx(
+                "text-md select-none -indent-3.5 ml-3.5 flex-shrink-0",
+                {
+                  "-mr-2": isTiny,
+                }
+              )}
               style={{ lineHeight: 0.25 }}
             >
               <img
@@ -109,7 +122,9 @@ export const App = () => {
                 style={{ width: 120 }}
               />
               {!isTiny && (
-                <span className="font-bold text-slate-11 ml-2 mr-1">DevTools</span>
+                <span className="font-bold text-slate-11 ml-2 mr-1">
+                  DevTools
+                </span>
               )}
             </h1>
             <div className={!isTiny ? "mt-1" : undefined}>
@@ -132,10 +147,16 @@ export const App = () => {
                     <NavLabel type="features" forcedFeatures={forcedFeatures} />
                   </Tabs.Trigger>
                   <Tabs.Trigger value="experiments">
-                    <NavLabel type="experiments" forcedVariations={forcedVariations} />
+                    <NavLabel
+                      type="experiments"
+                      forcedVariations={forcedVariations}
+                    />
                   </Tabs.Trigger>
                   <Tabs.Trigger value="attributes">
-                    <NavLabel type="attributes" forcedAttributes={forcedAttributes} />
+                    <NavLabel
+                      type="attributes"
+                      forcedAttributes={forcedAttributes}
+                    />
                   </Tabs.Trigger>
                   <Tabs.Trigger value="logs">
                     <NavLabel type="logs" />
@@ -143,35 +164,52 @@ export const App = () => {
                   <Tabs.Trigger value="sdkDebug">
                     <NavLabel type="sdkDebug" sdkStatus={sdkStatus} />
                   </Tabs.Trigger>
-                  <div className="flex-1"/>
-                  <SettingsButton apiKeyReady={apiKeyReady} apiKey={apiKey} setSettingsOpen={setSettingsOpen} />
+                  <div className="flex-1" />
+                  <SettingsButton
+                    apiKeyReady={apiKeyReady}
+                    apiKey={apiKey}
+                    setSettingsOpen={setSettingsOpen}
+                  />
 
                   <div className="mx-2" />
                 </div>
               </Tabs.List>
             </Tabs.Root>
-          ): (
+          ) : (
             <div className="flex items-center justify-between">
-              <Select.Root
-                value={currentTab}
-                onValueChange={setCurrentTab}
-              >
+              <Select.Root value={currentTab} onValueChange={setCurrentTab}>
                 <Select.Trigger
                   className="!shadow-none !outline-none hover:bg-slate-a3 rounded-none"
                   style={{ borderBottom: "2px solid var(--violet-a11)" }}
                 >
                   <div style={{ width: 100 }}>
-                  { currentTab === "features" ? (
-                    <NavLabel type="features" forcedFeatures={forcedFeatures} isDropdown />
-                  ) : currentTab === "experiments" ? (
-                    <NavLabel type="experiments" forcedVariations={forcedVariations} isDropdown />
-                  ) : currentTab === "attributes" ? (
-                    <NavLabel type="attributes" forcedAttributes={forcedAttributes} isDropdown />
-                  ) : currentTab === "logs" ? (
-                    <NavLabel type="logs" isDropdown />
-                  ) : currentTab === "sdkDebug" ? (
-                    <NavLabel type="sdkDebug" sdkStatus={sdkStatus} isDropdown />
-                  ) : null}
+                    {currentTab === "features" ? (
+                      <NavLabel
+                        type="features"
+                        forcedFeatures={forcedFeatures}
+                        isDropdown
+                      />
+                    ) : currentTab === "experiments" ? (
+                      <NavLabel
+                        type="experiments"
+                        forcedVariations={forcedVariations}
+                        isDropdown
+                      />
+                    ) : currentTab === "attributes" ? (
+                      <NavLabel
+                        type="attributes"
+                        forcedAttributes={forcedAttributes}
+                        isDropdown
+                      />
+                    ) : currentTab === "logs" ? (
+                      <NavLabel type="logs" isDropdown />
+                    ) : currentTab === "sdkDebug" ? (
+                      <NavLabel
+                        type="sdkDebug"
+                        sdkStatus={sdkStatus}
+                        isDropdown
+                      />
+                    ) : null}
                   </div>
                 </Select.Trigger>
                 <Select.Content
@@ -181,24 +219,44 @@ export const App = () => {
                   align="start"
                 >
                   <Select.Item value="features">
-                    <NavLabel type="features" forcedFeatures={forcedFeatures} isDropdown />
+                    <NavLabel
+                      type="features"
+                      forcedFeatures={forcedFeatures}
+                      isDropdown
+                    />
                   </Select.Item>
                   <Select.Item value="experiments">
-                    <NavLabel type="experiments" forcedVariations={forcedVariations} isDropdown />
+                    <NavLabel
+                      type="experiments"
+                      forcedVariations={forcedVariations}
+                      isDropdown
+                    />
                   </Select.Item>
                   <Select.Item value="attributes">
-                    <NavLabel type="attributes" forcedAttributes={forcedAttributes} isDropdown />
+                    <NavLabel
+                      type="attributes"
+                      forcedAttributes={forcedAttributes}
+                      isDropdown
+                    />
                   </Select.Item>
                   <Select.Item value="logs">
                     <NavLabel type="logs" isDropdown />
                   </Select.Item>
                   <Select.Item value="sdkDebug">
-                    <NavLabel type="sdkDebug" sdkStatus={sdkStatus} isDropdown />
+                    <NavLabel
+                      type="sdkDebug"
+                      sdkStatus={sdkStatus}
+                      isDropdown
+                    />
                   </Select.Item>
                 </Select.Content>
               </Select.Root>
 
-              <SettingsButton apiKeyReady={apiKeyReady} apiKey={apiKey} setSettingsOpen={setSettingsOpen} />
+              <SettingsButton
+                apiKeyReady={apiKeyReady}
+                apiKey={apiKey}
+                setSettingsOpen={setSettingsOpen}
+              />
             </div>
           )}
         </div>
@@ -215,7 +273,7 @@ export const App = () => {
           ) : currentTab === "attributes" ? (
             <AttributesTab isResponsive={isResponsive} />
           ) : currentTab === "logs" ? (
-            <LogsTab isResponsive={isResponsive} />
+            <LogsTab isResponsive={isResponsive} isTiny={isTiny} />
           ) : currentTab === "sdkDebug" ? (
             <SdkTab isResponsive={isResponsive} />
           ) : null}
@@ -228,9 +286,7 @@ export const App = () => {
           <Dialog.Content className="ModalBody">
             <Dialog.Title>Settings</Dialog.Title>
             <SettingsForm close={() => setSettingsOpen(false)} />
-            <Dialog.Close
-              style={{ position: "absolute", top: 5, right: 5 }}
-            >
+            <Dialog.Close style={{ position: "absolute", top: 5, right: 5 }}>
               <IconButton
                 color="gray"
                 highContrast
@@ -255,7 +311,7 @@ function NavLabel({
   forcedVariations,
   forcedAttributes,
   sdkStatus,
-}:{
+}: {
   type: "features" | "experiments" | "attributes" | "logs" | "sdkDebug";
   isDropdown?: boolean;
   forcedFeatures?: Record<string, any>;
@@ -266,16 +322,18 @@ function NavLabel({
   if (type === "features") {
     const count = Object.keys(forcedFeatures || {}).length;
     return (
-      <ConditionalWrapper condition={isDropdown} wrapper={<div className="flex items-center"/>}>
-        <span className={!isDropdown ? count ? "pr-3" : "px-1.5" : "pr-1"}>
+      <ConditionalWrapper
+        condition={isDropdown}
+        wrapper={<div className="flex items-center" />}
+      >
+        <span className={!isDropdown ? (count ? "pr-3" : "px-1.5") : "pr-1"}>
           Features
         </span>
         {count ? (
           <div className={!isDropdown ? "absolute right-0" : undefined}>
-            <Tooltip
-              content={`${count} override${count !== 1 ? "s" : ""}`}>
+            <Tooltip content={`${count} override${count !== 1 ? "s" : ""}`}>
               <div className="p-1">
-                <PiCircleFill size={9} className="text-amber-500"/>
+                <PiCircleFill size={9} className="text-amber-500" />
               </div>
             </Tooltip>
           </div>
@@ -287,16 +345,18 @@ function NavLabel({
   if (type === "experiments") {
     const count = Object.keys(forcedVariations || {}).length;
     return (
-      <ConditionalWrapper condition={isDropdown} wrapper={<div className="flex items-center"/>}>
-        <span className={!isDropdown ? count ? "pr-3" : "px-1.5" : "pr-1"}>
+      <ConditionalWrapper
+        condition={isDropdown}
+        wrapper={<div className="flex items-center" />}
+      >
+        <span className={!isDropdown ? (count ? "pr-3" : "px-1.5") : "pr-1"}>
           Experiments
         </span>
         {count ? (
           <div className={!isDropdown ? "absolute right-0" : undefined}>
-            <Tooltip
-              content={`${count} override${count !== 1 ? "s" : ""}`}>
+            <Tooltip content={`${count} override${count !== 1 ? "s" : ""}`}>
               <div className="p-1">
-                <PiCircleFill size={9} className="text-amber-500"/>
+                <PiCircleFill size={9} className="text-amber-500" />
               </div>
             </Tooltip>
           </div>
@@ -307,15 +367,22 @@ function NavLabel({
 
   if (type === "attributes") {
     return (
-      <ConditionalWrapper condition={isDropdown} wrapper={<div className="flex items-center"/>}>
-        <span className={!isDropdown ? forcedAttributes ? "pr-3" : "px-1.5" : "pr-1"}>
+      <ConditionalWrapper
+        condition={isDropdown}
+        wrapper={<div className="flex items-center" />}
+      >
+        <span
+          className={
+            !isDropdown ? (forcedAttributes ? "pr-3" : "px-1.5") : "pr-1"
+          }
+        >
           Attributes
         </span>
         {forcedAttributes ? (
           <div className={!isDropdown ? "absolute right-0" : undefined}>
             <Tooltip content="Has attribute overrides">
               <button className="p-1">
-                <PiCircleFill size={9} className="text-amber-500"/>
+                <PiCircleFill size={9} className="text-amber-500" />
               </button>
             </Tooltip>
           </div>
@@ -326,7 +393,10 @@ function NavLabel({
 
   if (type === "logs") {
     return (
-      <ConditionalWrapper condition={isDropdown} wrapper={<div className="flex items-center"/>}>
+      <ConditionalWrapper
+        condition={isDropdown}
+        wrapper={<div className="flex items-center" />}
+      >
         Event Logs
       </ConditionalWrapper>
     );
@@ -334,17 +404,20 @@ function NavLabel({
 
   if (type === "sdkDebug") {
     return (
-      <ConditionalWrapper condition={isDropdown} wrapper={<div className="flex items-center"/>}>
+      <ConditionalWrapper
+        condition={isDropdown}
+        wrapper={<div className="flex items-center" />}
+      >
         <span className={!isDropdown ? "pr-3" : "pr-1.5"}>SDK</span>
         <div className={!isDropdown ? "absolute right-0" : undefined}>
           {sdkStatus === "green" && (
-            <PiCircleFill size={9} className="text-emerald-500 mr-1"/>
+            <PiCircleFill size={9} className="text-emerald-500 mr-1" />
           )}
           {sdkStatus === "yellow" && (
-            <PiWarningFill className="text-amber-500"/>
+            <PiWarningFill className="text-amber-500" />
           )}
           {sdkStatus === "red" && (
-            <PiWarningOctagonFill className="text-red-700"/>
+            <PiWarningOctagonFill className="text-red-700" />
           )}
         </div>
       </ConditionalWrapper>
@@ -358,7 +431,7 @@ function SettingsButton({
   apiKeyReady,
   apiKey,
   setSettingsOpen,
-} : {
+}: {
   apiKeyReady: boolean;
   apiKey: string;
   setSettingsOpen: (b: boolean) => void;
@@ -374,12 +447,12 @@ function SettingsButton({
         <PiCircleFill
           size={9}
           className="absolute text-red-600 bg-white rounded-full border border-white"
-          style={{ right: 1, top: 1, }}
+          style={{ right: 1, top: 1 }}
         />
         <PiGearSixFill size={17} />
       </IconButton>
     </Tooltip>
-  ): (
+  ) : (
     <IconButton
       variant="outline"
       size="1"

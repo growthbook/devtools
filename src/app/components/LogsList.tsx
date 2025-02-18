@@ -27,9 +27,11 @@ const responsiveCopy: Record<LogType, ReactNode> = {
 export default function LogsList({
   logEvents,
   isResponsive,
+  isTiny,
 }: {
   logEvents: LogUnion[];
   isResponsive: boolean;
+  isTiny: boolean;
 }) {
   const [filters, setFilters] = useTabState<LogType[]>("logTypeFilter", [
     "event",
@@ -65,6 +67,10 @@ export default function LogsList({
     items: reshapedEvents,
     defaultSortField: "timestamp",
   });
+
+  const smTextSizeClass = isTiny ? "text-xs" : "text-sm";
+  const xsTextSizeClass = isTiny ? "text-2xs" : "text-xs";
+  const colWidth = isResponsive ? "40" : "20";
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -104,24 +110,24 @@ export default function LogsList({
       <Flex
         className={clsx(
           "w-full items-center bg-slate-a2 shadow-sm uppercase text-slate-11 font-semibold",
-          {
-            "text-xs": !isResponsive,
-            "text-2xs": isResponsive,
-          }
+          xsTextSizeClass
         )}
         style={{ height: 35 }}
         px="4"
       >
-        <SortableHeader field="timestamp" className="w-[20%] px-1">
+        <SortableHeader
+          field="timestamp"
+          className={`w-[20%] min-w-[70px] px-1`}
+        >
           Timestamp
         </SortableHeader>
-        <SortableHeader field="logType" className="w-[20%] px-1">
+        <SortableHeader field="logType" className={`w-[${colWidth}%] px-1`}>
           Log Type
         </SortableHeader>
-        <SortableHeader field="eventInfo" className="w-[20%] px-1">
+        <SortableHeader field="eventInfo" className={`w-[${colWidth}%] px-1`}>
           Event Info
         </SortableHeader>
-        <div className="w-[40%] pr-2">Event Details</div>
+        {!isResponsive && <div className="w-[40%] pr-2">Event Details</div>}
       </Flex>
       <Box px="4" flexGrow={"1"} overflowY="auto">
         {!events.length && (
@@ -130,7 +136,7 @@ export default function LogsList({
           </Box>
         )}
         <Accordion.Root
-          className="accordion"
+          className="accordion w-full"
           type="multiple"
           value={[...expandedItems]}
           onValueChange={(newValues) => setExpandedItems(new Set(newValues))}
@@ -149,72 +155,65 @@ export default function LogsList({
                   <Flex
                     className={clsx("w-full py-1", {
                       "border-t border-t-slate-200": i > 0,
-                      "text-sm": !isResponsive,
-                      "text-xs": isResponsive,
+                      smTextSizeClass,
                     })}
                   >
-                    <div className="w-[20%] px-1 text-left">
+                    <div className="w-[20%] min-w-[70px] px-1 text-left text-nowrap text-ellipsis">
                       <PiCaretRightFill className="caret mr-0.5" size={12} />
-                      <Text
-                        className={clsx({
-                          "text-xs": !isResponsive,
-                          "text-2xs": isResponsive,
-                        })}
-                      >
+                      <Text className={xsTextSizeClass}>
                         {formattedDateTime}
                       </Text>
                     </div>
                     <div
-                      className={clsx("w-[20%] px-1 text-left", {
-                        "text-xs": !isResponsive,
-                        "text-2xs": isResponsive,
-                      })}
+                      className={clsx(
+                        `w-[${colWidth}%] px-1 text-left`,
+                        xsTextSizeClass
+                      )}
                     >
                       {evt.logType}
                     </div>
                     <div
                       className={clsx(
-                        "w-[20%]",
+                        `w-[${colWidth}%]`,
                         "px-1",
                         "text-left",
-                        isExpanded ? "" : "line-clamp-1",
-                        {
-                          "text-xs": !isResponsive,
-                          "text-2xs": isResponsive,
-                        }
+                        "text-nowrap",
+                        "text-ellipsis",
+                        "line-clamp-1",
+                        "overflow-hidden",
+                        xsTextSizeClass
                       )}
                     >
                       {evt.eventInfo}
                     </div>
-                    <div className="w-[40%] px-2 text-left">
-                      {isExpanded ? (
-                        <ValueField
-                          value={evt.details}
-                          valueType="json"
-                          jsonStringifySpaces={2}
-                          maxHeight={120}
-                          customPrismOuterStyle={{
-                            border: "none",
-                            borderRadius: "unset",
-                            background: "transparent",
-                          }}
-                        />
-                      ) : (
+                    {!isResponsive && (
+                      <div className="w-[40%] px-2 text-left">
                         <Text
                           className={clsx(
-                            "text-ellipsis line-clamp-1 overflow-hidden text-slate-9",
-                            {
-                              "text-xs": !isResponsive,
-                              "text-2xs": isResponsive,
-                            }
+                            "text-nowrap text-slate-9 inline-block w-full overflow-auto",
+                            xsTextSizeClass
                           )}
+                          style={{ scrollbarWidth: "none" }}
                         >
                           {JSON.stringify(evt.details)}
                         </Text>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </Flex>
                 </Accordion.Trigger>
+                <Accordion.Content>
+                  <ValueField
+                    value={evt.details}
+                    valueType="json"
+                    jsonStringifySpaces={2}
+                    maxHeight={120}
+                    customPrismOuterStyle={{
+                      border: "none",
+                      borderRadius: "unset",
+                      background: "transparent",
+                    }}
+                  />
+                </Accordion.Content>
               </Accordion.Item>
             );
           })}
