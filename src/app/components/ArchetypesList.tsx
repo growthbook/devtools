@@ -1,10 +1,7 @@
 import React, { useEffect } from "react";
 import { Archetype } from "../tempGbExports";
-import {
-  Text,
-  DropdownMenu, Link,
-} from "@radix-ui/themes";
-import {PiCaretDownFill, PiUser} from "react-icons/pi";
+import { Text, DropdownMenu, Link } from "@radix-ui/themes";
+import { PiCaretDownFill, PiUser } from "react-icons/pi";
 import useApi from "@/app/hooks/useApi";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import useTabState from "@/app/hooks/useTabState";
@@ -14,13 +11,13 @@ export default function ArchetypesList() {
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
     "allArchetypes",
     [],
-    true
+    true,
   );
-    const [appOrigin, _setAppOrigin, _appOriginReady] = useGlobalState(
-      APP_ORIGIN,
-      CLOUD_APP_ORIGIN,
-      true,
-    );
+  const [appOrigin, _setAppOrigin, _appOriginReady] = useGlobalState(
+    APP_ORIGIN,
+    CLOUD_APP_ORIGIN,
+    true,
+  );
 
   const {
     isLoading: archetypesLoading,
@@ -30,10 +27,12 @@ export default function ArchetypesList() {
 
   const [attributes, setAttributes] = useTabState<Record<string, any>>(
     "attributes",
-    {}
+    {},
   );
-  const [forcedAttributes, setForcedAttributes] = useTabState<
-  boolean>("forcedAttributes",false)
+  const [forcedAttributes, setForcedAttributes] = useTabState<boolean>(
+    "forcedAttributes",
+    false,
+  );
 
   const [selectedArchetype, setSelectedArchetype] = useTabState<
     Archetype | undefined
@@ -53,8 +52,8 @@ export default function ArchetypesList() {
           (archetypesData.archetypes || []).map((arch) => ({
             ...arch,
             source: "growthbook",
-          }))
-        )
+          })),
+        ),
     );
   }, [archetypesLoading, archetypesError, archetypesData]);
   return (
@@ -71,10 +70,7 @@ export default function ArchetypesList() {
             <PiUser className="inline-block mr-1" />
             {selectedArchetype?.name || "Current User"}
           </Link>
-          <PiCaretDownFill
-            className="ml-0.5 text-violet-a11"
-            size={12}
-          />
+          <PiCaretDownFill className="ml-0.5 text-violet-a11" size={12} />
         </div>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content variant="soft">
@@ -100,12 +96,21 @@ export default function ArchetypesList() {
         >
           Clear Override
         </DropdownMenu.Item>
-        <DropdownMenu.Item onSelect={
-          // go to GrowthBook and add a new archetype
-          () => {
-            window.open(`${appOrigin}/archetypes`, "_blank", "noopener,noreferrer");
+        <DropdownMenu.Item
+          onSelect={
+            // go to GrowthBook and add a new archetype
+            () => {
+              window.open(
+                `${appOrigin}/archetypes`,
+                "_blank",
+                "noopener,noreferrer",
+              );
+            }
           }
-        }> Add Archetype</DropdownMenu.Item>
+        >
+          {" "}
+          Add Archetype
+        </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   );

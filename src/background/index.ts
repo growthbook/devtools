@@ -142,34 +142,45 @@ const UpdateTabIconBasedOnSDK = (
   tabId?: number,
 ) => {
   const { data } = message;
+  const status = getSdkStatus(data);
   if (!tabId) tabId = data?.tabId;
+
   let title = "GrowthBook DevTools";
-  if (data.canConnect) {
-    chrome.action.setIcon({
-      tabId,
-      path: chrome.runtime.getURL("/logo128-connected.png"),
-    });
-    title = "GrowthBook DevTools\n🟢 SDK connected";
-    if (data?.version) title += ` (${data.version})`;
-  } else if (data.sdkFound && data.hasPayload) {
-    chrome.action.setIcon({
-      tabId,
-      path: chrome.runtime.getURL("/logo128-connected.png"),
-    });
-    title =
-      "GrowthBook DevTools\n🟢 SDK connected with Payload \n Client Key is not connected";
-  } else if (!data.canConnect) {
+
+  if (data.sdkFound) {
+    if (status === "green") {
+      chrome.action.setIcon({
+        tabId,
+        path: chrome.runtime.getURL("/logo128-connected.png"),
+      });
+      title = "GrowthBook DevTools\n🟢 SDK connected";
+      if (data?.version) title += ` (${data.version})`;
+    } else if (status === "yellow") {
+      chrome.action.setIcon({
+        tabId,
+        path: chrome.runtime.getURL("/logo128-problem.png"),
+      });
+      title =
+        "GrowthBook DevTools\n🟡 SDK connected\n" +
+        ((!data.hasPayload ? "No SDK payload\n" : "") +
+          (!data.hasPayload ? "No SDK payload\n" : "") +
+          (data.trackingCallbackParams?.length !== 2
+            ? "Tracking callback issues\n"
+            : "") +
+          (!data.payloadDecrypted ? "Decryption issues" : ""));
+    } else {
+      chrome.action.setIcon({
+        tabId,
+        path: chrome.runtime.getURL("/logo128.png"),
+      });
+      title = "GrowthBook DevTools\n🔴 SDK not connected";
+    }
+  } else {
     chrome.action.setIcon({
       tabId,
       path: chrome.runtime.getURL("/logo128.png"),
     });
-    title = "GrowthBook DevTools\n🔴 SDK not connected";
-  } else if (!data.sdkFound) {
-    chrome.action.setIcon({
-      tabId,
-      path: chrome.runtime.getURL("/logo128.png"),
-    });
-    title = "GrowthBook DevTools\n⚪ no SDK present";
+    title = "GrowthBook DevTools\n⚪ No SDK present";
   }
 
   // update the badge and icon
@@ -222,3 +233,19 @@ export const isSameOrigin = (url: string, origin: string) => {
     return false;
   }
 };
+
+export function getSdkStatus(
+  sdkData: SDKHealthCheckResult,
+): "green" | "yellow" | "red" {
+  if (!sdkData.canConnect) {
+    return "red";
+  }
+  if (
+    !sdkData.hasPayload ||
+    sdkData.trackingCallbackParams?.length !== 2 ||
+    !sdkData.payloadDecrypted
+  ) {
+    return "yellow";
+  }
+  return "green";
+}

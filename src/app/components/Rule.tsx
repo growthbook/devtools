@@ -44,10 +44,9 @@ export default function Rule({
     "selectedEid",
     undefined,
   );
-  const [selectedChangeId, setSelectedChangeId] = useTabState<string | undefined>(
-    "selectedChangeId",
-    undefined,
-  )
+  const [selectedChangeId, setSelectedChangeId] = useTabState<
+    string | undefined
+  >("selectedChangeId", undefined);
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [jsonMode, setJsonMode] = useState(false);
 
@@ -329,7 +328,9 @@ export function ExperimentRule({
                   />
                 </td>
                 <td className="pl-2 py-0.5">
-                  {weights?.[i] !== undefined ? Math.round(weights[i] * 1000) / 10 + "%" : null}
+                  {weights?.[i] !== undefined
+                    ? Math.round(weights[i] * 1000) / 10 + "%"
+                    : null}
                 </td>
               </tr>
             ))}
