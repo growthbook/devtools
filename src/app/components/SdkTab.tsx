@@ -1,14 +1,29 @@
 import React, { useEffect, useState } from "react";
 import useTabState from "../hooks/useTabState";
 import { SDKHealthCheckResult } from "devtools";
-import { ChevronDownIcon, Flex, Grid, Link, Text } from "@radix-ui/themes";
+import {IconButton, Link, Text} from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
-import { MW } from "@/app";
+import {MW, NAV_H} from "@/app";
+import clsx from "clsx";
+import {PiXBold} from "react-icons/pi";
+
+const customTheme = {
+  padding: "5px",
+  margin: 0,
+  border: "0px none",
+  backgroundColor: "transparent",
+  whiteSpace: "pre-wrap",
+  lineHeight: "12px",
+  maxHeight: 200,
+};
+
+export const LEFT_PERCENT = 0.4;
 
 export default function SdkTab({ isResponsive } : { isResponsive: boolean }) {
   const [selectedItem, setSelectedItem] = useState<string | undefined>(
-    undefined,
+    !isResponsive ? "status" : undefined
   );
+
   const [sdkData] = useTabState<SDKHealthCheckResult | {}>("sdkData", {});
   const {
     sdkFound,
@@ -20,7 +35,7 @@ export default function SdkTab({ isResponsive } : { isResponsive: boolean }) {
     trackingCallbackParams,
     hasDecryptionKey,
     payloadDecrypted,
-    usingLogEvents,
+    usingLogEvent,
     isRemoteEval,
     usingStickyBucketing,
     streaming,
@@ -30,103 +45,60 @@ export default function SdkTab({ isResponsive } : { isResponsive: boolean }) {
     streamingHostRequestHeaders,
   } = sdkData as SDKHealthCheckResult;
 
-  const customTheme = {
-    padding: "5px",
-    margin: 0,
-    border: "0px none",
-    backgroundColor: "transparent",
-    whiteSpace: "pre-wrap",
-    lineHeight: "12px",
-    maxHeight: 200,
-  };
+  const decryptedStatus = payloadDecrypted ? "Decrypted" : "DecryptionError";
+  const securityStatus = hasDecryptionKey
+    ? decryptedStatus
+    : isRemoteEval
+      ? "Remote Eval"
+      : "Plain Text";
+  const trackingCallbackStatus =
+    trackingCallbackParams?.length === 2
+      ? "Found"
+      : !trackingCallbackParams
+        ? "None Found"
+        : `Callback has Incorrect Amount of Params`;
+  const trackingCallbackStatusColor =
+    trackingCallbackParams?.length === 2
+      ? "green"
+      : !trackingCallbackParams
+        ? "red"
+        : "orange";
+  const canConnectStatus = canConnect ? "Connected" : "Not Connected";
+  const canConnectStatusColor = canConnect
+    ? "green"
+    : hasPayload
+      ? "orange"
+      : "red";
 
   useEffect(() => window.scrollTo({ top: 0 }), []);
-
-  type displayStatusProps = {
-    title: string;
-    status?: string | boolean;
-    statusColor: "green" | "red" | "gray" | "orange";
-    id: string;
-  };
-
-  const displayStatus = ({
-    title,
-    status,
-    statusColor,
-    id,
-  }: displayStatusProps) => {
-    if (typeof status === "boolean") {
-      status = status ? "Yes" : "No";
-    }
-    return (
-      <Flex
-        gap="1"
-        className="sdkDebugListItem"
-        align="center"
-        justify="between"
-        px="3"
-        onClick={() => setSelectedItem(id)}
-      >
-        <Text size="2" weight="medium">
-          {title}
-        </Text>
-        <Flex gap="3" align="center">
-          <Text size="2" weight="light" color={statusColor}>
-            {status}
-          </Text>
-        </Flex>
-      </Flex>
-    );
-  };
-
-  const displayNoSdkFound = () => {
-    return (
-      <div>
-        <div>
-          {displayStatus({
-            id: "status",
-            title: "Status",
-            status: "No SDK found",
-            statusColor: "red",
-          })}
-        </div>
-        <div>
-          <Text size="1" weight="light">
-            Refer to the{" "}
-            <Link
-              href="https://docs.growthbook.io/lib/js"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Getting Started with GrowthBook SDK
-            </Link>{" "}
-            documentation
-          </Text>
-        </div>
-      </div>
-    );
-  };
 
   const displayRightPanel = () => {
     switch (selectedItem) {
       case "payload":
-        return <ValueField value={payload} valueType="json" maxHeight={276} />;
+        return (
+          <div>
+            <h1 className="text-md mb-4 font-bold">
+              SDK Payload
+            </h1>
+            <ValueField value={payload} valueType="json" maxHeight={null}/>
+          </div>
+        );
       case "status":
         return (
-          <div className="sdkDebugDetailedView">
-            <Text as="div" weight="medium">
-              Status
-            </Text>
+          <div>
+            <h1 className="text-md mb-4 font-bold">
+              SDK Status
+            </h1>
             <Text as="div" size="2" weight="regular" mb="2">
               {canConnect
                 ? "The SDK is connected to the GrowthBook API."
                 : "The SDK is not connected to the GrowthBook API."}
             </Text>
             <Text as="div" size="2" weight="regular">
-              <strong>Host </strong> {apiHost ?? "None"}
+              <label className="inline-block font-semibold" style={{ width: 150 }}>Host:</label> {apiHost ?? "None"}
             </Text>
             <Text as="div" size="2" weight="regular">
-              <strong>Client Key </strong> {clientKey ?? "None"}
+              <label className="inline-block font-semibold" style={{ width: 150 }}>Client Key:</label> {clientKey ?? "None"}
             </Text>
             {errorMessage && (
               <Text as="div" size="2" weight="light">
@@ -137,21 +109,20 @@ export default function SdkTab({ isResponsive } : { isResponsive: boolean }) {
         );
       case "version":
         return (
-          <div className="sdkDebugDetailedView">
-            <Text as="div" weight="medium">
-              Version
-            </Text>
+          <div>
+            <h1 className="text-md mb-4 font-bold">
+              SDK Version
+            </h1>
             <Text as="div" size="2" weight="regular">
               {!version ? (
                 <Text>
-                  "unable to find your sdk version this might be because your on
-                  a old version of the SDK and consider updating to the lastest"
+                  Unable to find your SDK version. You might be using
+                  an old version of the SDK. Consider updating to the latest version.
                 </Text>
               ) : (
                 <Text>
                   {" "}
-                  you are on <strong>{version}</strong> version make sure that
-                  you have all the features you require
+                  You are on version <strong>{version}</strong> of the JavaScript SDK.
                 </Text>
               )}
             </Text>
@@ -159,82 +130,90 @@ export default function SdkTab({ isResponsive } : { isResponsive: boolean }) {
         );
       case "trackingCallback":
         return (
-          <div className="sdkDebugDetailedView">
-            <Text as="div" weight="medium">
+          <div>
+            <h1 className="text-md mb-4 font-bold">
               Tracking Callback
-            </Text>
+            </h1>
             <Text as="div" size="2" weight="regular">
               {trackingCallbackParams?.length === 2
-                ? "The SDK is using a tracking callback."
+                ? (<>The SDK is using a <code className="text-pink-700">trackingCallback</code>.</>)
                 : !trackingCallbackParams
-                  ? "The SDK is not using a tracking callback. you will need to add one to track events to your data warehouse.."
-                  : `The SDK is using a tracking callback with ${trackingCallbackParams.length} params instead of 2. please check your implementation.`}
+                ? (<>The SDK is not using a <code className="text-pink-700">trackingCallback</code>. You will need to
+                    add one to track experiment exposure to your data warehouse.</>)
+                : (<>The SDK is using a <code className="text-pink-700">trackingCallback</code> with {trackingCallbackParams.length} params instead of 2. Please check your implementation.</>)
+              }
             </Text>
           </div>
         );
-      case "logEvents":
+      case "logEvent":
         return (
-          <div className="sdkDebugDetailedView">
-            <Text as="div" weight="medium">
-              Log Events Callback
-            </Text>
+          <div>
+            <h1 className="text-md mb-4 font-bold">
+              Log Event Callback
+            </h1>
             <Text as="div" size="2" weight="regular">
-              {usingLogEvents
-                ? "The SDK is using a log events callback. "
-                : "The SDK is not using a log events callback. Log events is optional but you can add one to track events to your data warehouse."}
+              {usingLogEvent
+                ? (<>The SDK is using a <code className="text-pink-700">logEvent</code> callback.</>)
+                : (<>The SDK is not using a <code className="text-pink-700">logEvent</code> callback. This callback is
+                  optional but you can add one to track events to your data warehouse.</>)
+              }
             </Text>
           </div>
         );
       case "security":
         return (
-          <div className="sdkDebugDetailedView">
-            <Text as="div" weight="medium">
+          <div>
+            <h1 className="text-md mb-4 font-bold">
               Payload Security
-            </Text>
+            </h1>
             <Text as="div" size="2" weight="regular">
               {hasDecryptionKey
                 ? payloadDecrypted
-                  ? "The SDK is using a decryption key and the payload is not being decrypted. please check you have the correct decryption key."
+                  ? "The SDK is using a decryption key and the payload is not being decrypted. Please check you have the correct decryption key."
                   : "The SDK is using a decryption key and the payload is being decrypted."
                 : isRemoteEval
                   ? "The SDK is using remote evaluation."
-                  : "The SDK is not using a decryption key or remote eval. The payload is in plain text."}
+                  : "The SDK is not using a decryption key or remote evaluation. The payload is in plain text."}
             </Text>
           </div>
         );
       case "stickyBucketing":
         return (
-          <div className="sdkDebugDetailedView">
-            <Text as="div" weight="medium">
+          <div>
+            <h1 className="text-md mb-4 font-bold">
               Sticky Bucketing
-            </Text>
+            </h1>
             <Text as="div" size="2" weight="regular">
               {usingStickyBucketing
                 ? "The SDK is using sticky bucketing."
-                : "The SDK is not using sticky bucketing. Sticky bucketing is optional and used to ensure that users are consistently bucketed into the same experiment."}
+                : "The SDK is not using sticky bucketing. Sticky bucketing is optional and is used to ensure that users are consistently bucketed."}
             </Text>
           </div>
         );
       case "streaming":
         return (
-          <div className="sdkDebugDetailedView">
-            <Text as="div" weight="medium">
+          <div>
+            <h1 className="text-md mb-4 font-bold">
               Streaming
-            </Text>
-            <Text as="div" size="2" weight="regular">
+            </h1>
+            <Text as="div" size="2" weight="regular" mb="2">
               {streaming
-                ? "The SDK is using streaming."
-                : "The SDK is not using streaming. Streaming is optional and used to update the SDK with the latest data without refreshing the page."}
+                ? "The SDK is using streaming (SSE)."
+                : "The SDK is not using streaming (SSE). Streaming is optional and is used to update the SDK with the latest data without refreshing the page."}
             </Text>
             <Text as="div" size="2" weight="regular">
-              <strong>Host </strong> {streamingHost ?? "None"}
+              <label className="inline-block font-semibold" style={{ width: 150 }}>Streaming host:</label> {streamingHost ?? "None"}
             </Text>
             <Text as="div" size="2" weight="regular">
-              <strong>Client Key </strong> {clientKey ?? "None"}
+              <label className="inline-block font-semibold" style={{ width: 150 }}>Client
+                Key:</label> {clientKey ?? "None"}
             </Text>
-            <Text as="div" size="2" weight="regular">
-              <strong>Streaming host request headers </strong>{" "}
-              {JSON.stringify(streamingHostRequestHeaders) ?? "None"}
+            <Text as="div" size="2" weight="regular" mt="2">
+              <label className="inline-block font-semibold mr-2">Streaming host request
+                headers:</label>
+              <div className="mt-1">
+                {JSON.stringify(streamingHostRequestHeaders) ?? "None"}
+              </div>
             </Text>
           </div>
         );
@@ -243,106 +222,207 @@ export default function SdkTab({ isResponsive } : { isResponsive: boolean }) {
     }
   };
 
-  const displaySDKFoundStatusesAndPayload = () => {
-    const decryptedStatus = payloadDecrypted ? "Decrypted" : "DecryptionError";
-    const securityStatus = hasDecryptionKey
-      ? decryptedStatus
-      : isRemoteEval
-        ? "Remote Eval"
-        : "Plain Text";
-    const trackingCallBackStatus =
-      trackingCallbackParams?.length === 2
-        ? "Found"
-        : !trackingCallbackParams
-          ? "None Found"
-          : `Callback has Incorrect Amount of Params`;
-    const TrackingCallbackStatusColor =
-      trackingCallbackParams?.length === 2
-        ? "green"
-        : !trackingCallbackParams
-          ? "red"
-          : "orange";
-    const canConnectStatus = canConnect ? "Connected" : "Not Connected";
-    const canConnectStatusColor = canConnect
-      ? "green"
-      : hasPayload
-        ? "orange"
-        : "red";
-
-    return (
-      <Grid columns="2" gap="3">
-        <Flex direction="column" gap="1">
-          {displayStatus({
-            id: "status",
-            title: "Status",
-            status: canConnectStatus,
-            statusColor: canConnectStatusColor,
-          })}
-          {displayStatus({
-            id: "version",
-            title: "Version",
-            status: version,
-            statusColor: "gray",
-          })}
-          {displayStatus({
-            id: "trackingCallback",
-            title: "Tracking Callback",
-            status: trackingCallBackStatus,
-            statusColor: TrackingCallbackStatusColor,
-          })}
-          {displayStatus({
-            id: "logEvents",
-            title: "Log Events Callback",
-            status: usingLogEvents,
-            statusColor: "gray",
-          })}
-          {displayStatus({
-            id: "security",
-            title: "Payload Security",
-            status: securityStatus,
-            statusColor: "gray",
-          })}
-          {displayStatus({
-            id: "stickyBucketing",
-            title: "Sticky Bucketing",
-            status: usingStickyBucketing,
-            statusColor: "gray",
-          })}
-          {displayStatus({
-            id: "streaming",
-            title: "Streaming",
-            status: streaming,
-            statusColor: "gray",
-          })}
-          {displayStatus({
-            id: "payload",
-            title: "Payload",
-            status: hasPayload,
-            statusColor: "gray",
-          })}
-        </Flex>
-        {displayRightPanel()}
-      </Grid>
-    );
-  };
+  const fullWidthListView = !selectedItem;
+  const leftPercent = fullWidthListView ? 1 : LEFT_PERCENT;
+  const rightPercent = isResponsive ? 1 : 1 - LEFT_PERCENT;
 
   return (
-    <div className="mx-auto px-2" style={{ maxWidth: MW }}>
-      <Text weight="medium" size="4" as="div" className="py-3">
-        GrowthBook SDK
-      </Text>
+    <div
+      className="mx-auto"
+      style={{
+        maxWidth: MW,
+        overflowX: "hidden",
+      }}
+    >
+      <div
+        style={{
+          width: `${leftPercent * 100}vw`,
+          maxWidth: MW * leftPercent,
+        }}
+      >
+        {sdkFound === false && <NoSdkFound />}
 
-      {sdkFound && <>{displaySDKFoundStatusesAndPayload()}</>}
+        {sdkFound === undefined && (
+          <div>
+            <Text size="2" weight="medium">
+              Loading...
+            </Text>
+          </div>
+        )}
 
-      {sdkFound === false && <>{displayNoSdkFound()}</>}
+        {sdkFound === true && (
+          <>
+            <div
+              key={`sdkTab_sdkItems_status`}
+              className={clsx("featureCard flex items-center justify-between", {
+                selected: selectedItem === "status",
+              })}
+              onClick={() => setSelectedItem("status")}
+            >
+              <ItemStatus title="Status" status={canConnectStatus} color={canConnectStatusColor}/>
+            </div>
 
-      {sdkFound === undefined && (
-        <div>
-          <Text size="2" weight="medium">
-            Loading...
-          </Text>
+            <div
+              key={`sdkTab_sdkItems_version`}
+              className={clsx("featureCard flex items-center justify-between", {
+                selected: selectedItem === "version",
+              })}
+              onClick={() => setSelectedItem("version")}
+            >
+              <ItemStatus title="Version" status={version} color="gray"/>
+            </div>
+
+            <div
+              key={`sdkTab_sdkItems_trackingCallback`}
+              className={clsx("featureCard flex items-center justify-between", {
+                selected: selectedItem === "trackingCallback",
+              })}
+              onClick={() => setSelectedItem("trackingCallback")}
+            >
+              <ItemStatus title="Tracking Callback" status={trackingCallbackStatus} color={trackingCallbackStatusColor}/>
+            </div>
+
+            <div
+              key={`sdkTab_sdkItems_logEvent`}
+              className={clsx("featureCard flex items-center justify-between", {
+                selected: selectedItem === "logEvent",
+              })}
+              onClick={() => setSelectedItem("logEvent")}
+            >
+              <ItemStatus title="Log Event Callback" status={usingLogEvent} color="gray"/>
+            </div>
+
+            <div
+              key={`sdkTab_sdkItems_security`}
+              className={clsx("featureCard flex items-center justify-between", {
+                selected: selectedItem === "security",
+              })}
+              onClick={() => setSelectedItem("security")}
+            >
+              <ItemStatus title="Payload Security" status={securityStatus} color="gray"/>
+            </div>
+
+            <div
+              key={`sdkTab_sdkItems_stickyBucketing`}
+              className={clsx("featureCard flex items-center justify-between", {
+                selected: selectedItem === "stickyBucketing",
+              })}
+              onClick={() => setSelectedItem("stickyBucketing")}
+            >
+              <ItemStatus title="Sticky Bucketing" status={usingStickyBucketing} color="gray"/>
+            </div>
+
+            <div
+              key={`sdkTab_sdkItems_streaming`}
+              className={clsx("featureCard flex items-center justify-between", {
+                selected: selectedItem === "streaming",
+              })}
+              onClick={() => setSelectedItem("streaming")}
+            >
+              <ItemStatus title="Streaming" status={streaming} color="gray"/>
+            </div>
+
+            <div
+              key={`sdkTab_sdkItems_payload`}
+              className={clsx("featureCard flex items-center justify-between", {
+                selected: selectedItem === "payload",
+              })}
+              onClick={() => setSelectedItem("payload")}
+            >
+              <ItemStatus title="SDK Payload" status={hasPayload} color="gray"/>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div
+        className="featureDetailWrapper fixed overflow-y-auto"
+        style={{
+          top: NAV_H,
+          height: `calc(100vh - ${NAV_H}px)`,
+          width: `${rightPercent * 100}vw`,
+          maxWidth: MW * rightPercent,
+          right: selectedItem
+            ? `calc(max((100vw - ${MW}px)/2 + 8px, 0px))`
+            : `-${rightPercent * 100}vw`,
+          zIndex: 1000,
+          pointerEvents: !open ? "none" : undefined,
+        }}
+      >
+        <div className="featureDetail px-6 py-4" key={`selected_${selectedItem}`}>
+          {isResponsive && (
+            <IconButton
+              size="3"
+              variant="ghost"
+              radius="full"
+              className="absolute right-3 top-3"
+              style={{ margin: 0 }}
+              onClick={(e) => {
+                e.preventDefault();
+                setSelectedItem(undefined);
+              }}
+            >
+              <PiXBold />
+            </IconButton>
+          )}
+
+          {displayRightPanel()}
         </div>
-      )}
+      </div>
+
     </div>
   );
 }
+
+function ItemStatus({
+  title,
+  status,
+  color,
+  fullWidth,
+}: {
+  title: string;
+  status? : string | boolean;
+  color: "green" | "red" | "gray" | "orange";
+  fullWidth?: boolean;
+}) {
+  if (typeof status === "boolean") {
+    status = status ? "Yes" : "No";
+  }
+  return (
+    <>
+      <div className="title pl-2.5 pr-6">
+        {title}
+      </div>
+      <div className="flex pr-2.5 items-center flex-shrink-0 text-sm"
+
+      >
+        <Text color={color}>
+          {status}
+        </Text>
+      </div>
+    </>
+  );
+};
+
+function NoSdkFound() {
+  return (
+    <div>
+      <div>
+        <ItemStatus title="Status" status="No SDK found" color="red" />
+      </div>
+      <div>
+        <Text size="1" weight="light">
+          Refer to the{" "}
+          <Link
+            href="https://docs.growthbook.io/lib/js"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Getting Started with GrowthBook SDK
+          </Link>{" "}
+          documentation
+        </Text>
+      </div>
+    </div>
+  );
+};

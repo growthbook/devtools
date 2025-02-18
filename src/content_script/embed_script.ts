@@ -377,7 +377,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     ? _trackingCallback.originalParams
     : undefined;
 
-  const usingLogEvents = typeof gbContext.eventLogger === "function";
+  const usingLogEvent = typeof gbContext.eventLogger === "function";
 
   const isRemoteEval = gb.isRemoteEval();
 
@@ -444,7 +444,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     trackingCallbackParams,
     hasDecryptionKey,
     payloadDecrypted,
-    usingLogEvents,
+    usingLogEvent,
     isRemoteEval,
     usingStickyBucketing,
     stickyBucketAssignmentDocs,

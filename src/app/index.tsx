@@ -384,7 +384,6 @@ function SettingsButton({
       variant="outline"
       size="1"
       onClick={() => setSettingsOpen(true)}
-      style={{ width: 28, height: 28 }}
     >
       <PiGearSixFill size={17} />
     </IconButton>

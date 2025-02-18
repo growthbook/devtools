@@ -145,13 +145,6 @@
 .accordion .trigger[data-state="open"] .chevron {
   transform: rotate(180deg);
 }
-.sdkDebugListItem {
-  @apply border border-slate-a3 rounded-sm bg-violet-2;
-  height: 40px;
-}
-.sdkDebugDetailedView {
-  @apply border border-slate-a3 rounded-sm bg-violet-2;
-}
 @keyframes slideDown {
   from {
     height: 0;

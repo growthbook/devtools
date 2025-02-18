@@ -260,44 +260,42 @@ export default function ExperimentsTab({ isResponsive } : { isResponsive: boolea
                   />
                   {eid}
                 </div>
-                {true || fullWidthListView ? (
-                  <div
-                    className={clsx("flex items-center flex-shrink-0 text-sm", {
-                      "pl-4": fullWidthListView,
-                      "absolute right-2.5": !fullWidthListView,
-                    })}
-                    style={ fullWidthListView ? { width: col2 } : undefined}
-                  >
-                    {types ? (
-                      <div className="flex items-center gap-2">
-                        {types.redirect ? (
-                          <Tooltip content="URL Redirect experiment">
-                            <button>
-                              <PiLinkBold size={12} />
-                            </button>
-                          </Tooltip>
+                <div
+                  className={clsx("flex items-center flex-shrink-0 text-sm", {
+                    "pl-4": fullWidthListView,
+                    "absolute right-2.5": !fullWidthListView,
+                  })}
+                  style={ fullWidthListView ? { width: col2 } : undefined}
+                >
+                  {types ? (
+                    <div className="flex items-center gap-2">
+                      {types.redirect ? (
+                        <Tooltip content="URL Redirect experiment">
+                          <button>
+                            <PiLinkBold size={12} />
+                          </button>
+                        </Tooltip>
+                      ) : null}
+                      {types.visual ? (
+                        <Tooltip content="Visual Editor experiment">
+                          <button>
+                            <PiDesktopFill size={12}/>
+                          </button>
+                        </Tooltip>
                         ) : null}
-                        {types.visual ? (
-                          <Tooltip content="Visual Editor experiment">
-                            <button>
-                              <PiDesktopFill size={12}/>
-                            </button>
-                          </Tooltip>
-                          ) : null}
-                        {types.features ? (
-                          <Tooltip content="Feature flag experiment">
-                            <button>
-                              <PiFlagFill className="inline-block" size={12}/>
-                              {fullWidthListView ? (
-                                <span className="ml-1">{types.features.length}</span>
-                              ): null}
-                            </button>
-                          </Tooltip>
-                          ) : null}
-                      </div>
-                    ) : null}
-                  </div>
-                ): null}
+                      {types.features ? (
+                        <Tooltip content="Feature flag experiment">
+                          <button>
+                            <PiFlagFill className="inline-block" size={12}/>
+                            {fullWidthListView ? (
+                              <span className="ml-1">{types.features.length}</span>
+                            ): null}
+                          </button>
+                        </Tooltip>
+                        ) : null}
+                    </div>
+                  ) : null}
+                </div>
 
                 {fullWidthListView && (
                   <div
