@@ -96,8 +96,8 @@ export const App = () => {
           style={{ height: NAV_H }}
         >
           <div
-            className="flex justify-between w-full"
-            style={{ maxWidth: MW, height: 30 }}
+            className="flex justify-between w-full mx-auto"
+            style={{ maxWidth: MW - 32, height: 30 }}
           >
             <img
               src={logo}

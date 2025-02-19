@@ -15,7 +15,6 @@ import { useForm } from "react-hook-form";
 import {
   PiX,
 } from "react-icons/pi";
-import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
 import { MW } from "@/app";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
@@ -176,7 +175,6 @@ export default function AttributesTab({
         { "px-2": !isResponsive }
       )}
       style={{
-        maxWidth: MW,
         overflowX: "hidden",
       }}
     >
