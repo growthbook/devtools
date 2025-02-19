@@ -7,20 +7,14 @@ import {
   Checkbox,
   Container,
   Flex,
-  Select,
   Text,
-  TextField,
 } from "@radix-ui/themes";
 import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
 import {
-  PiArrowClockwise,
-  PiCheckBold,
-  PiPlusCircle,
   PiX,
 } from "react-icons/pi";
-import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
 import { MW } from "@/app";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
@@ -176,7 +170,6 @@ export default function AttributesTab({
     <div
       className="mx-auto px-3 h-[100%]"
       style={{
-        maxWidth: MW,
         overflowX: "hidden",
       }}
     >
