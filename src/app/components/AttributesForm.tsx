@@ -5,6 +5,7 @@ import {
   Switch,
   Flex,
   TextField,
+  Text,
   Select,
 } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
@@ -135,7 +136,7 @@ export default function AttributesForm({
           !Object.keys(formAttributes).length ? (
             <em className="text-2xs">No attributes found</em>
           ) : (
-            <Flex direction="column" gap="1">
+            <Flex direction="column">
               {attributesWithoutCustom.map((attributeKey, i) => {
                 return (
                   <div key={attributeKey}>
@@ -161,16 +162,6 @@ export default function AttributesForm({
                         setDirty,
                         saveOnBlur
                       })}
-                      {
-                        <Button
-                          type="button"
-                          size="1"
-                          variant="ghost"
-                          disabled={true}
-                          className="ml-2 mr-1"
-                          onClick={() => removeField(attributeKey)}
-                        ></Button>
-                      }
                     </Form.Field>
                   </div>
                 );

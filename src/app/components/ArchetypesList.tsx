@@ -6,6 +6,7 @@ import {
   PiCheck,
   PiPencilSimple,
   PiUser,
+  PiUserCircle,
 } from "react-icons/pi";
 import useApi from "@/app/hooks/useApi";
 import useGlobalState from "@/app/hooks/useGlobalState";
@@ -71,13 +72,14 @@ export default function ArchetypesList() {
             className="block text-nowrap overflow-hidden overflow-ellipsis"
             style={{ maxWidth: "calc(100vw - 120px - 20px - 20px)" }}
           >
-            <PiUser className="inline-block mr-1" />
-            {selectedArchetype?.name || "Default User"}
+            <PiUserCircle className="inline-block mr-1" />
+            {selectedArchetype?.name || "Current User"}
           </Link>
           <PiCaretDownFill className="ml-0.5 text-violet-a11" size={12} />
         </div>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content variant="soft">
+        <DropdownMenu.Label>PREVIEW</DropdownMenu.Label>
         <DropdownMenu.Item
           onSelect={() => {
             setAttributes({});
@@ -87,11 +89,11 @@ export default function ArchetypesList() {
           disabled={!selectedArchetype}
         >
           <Flex gap="1" align="center">
-          <div className="w-4">{!selectedArchetype && <PiCheck />}</div> <Text> Default User</Text>
+          <div className="w-4">{!selectedArchetype && <PiCheck />}</div> <Text> Current User</Text>
           </Flex>
         </DropdownMenu.Item>
         <DropdownMenu.Separator />
-        <DropdownMenu.Label>Archetypes</DropdownMenu.Label>
+        <DropdownMenu.Label>ARCHETYPES</DropdownMenu.Label>
         {archetypes.map((arch) => (
           <DropdownMenu.Item
             key={arch.id}
