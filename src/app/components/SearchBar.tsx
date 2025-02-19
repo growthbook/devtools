@@ -1,6 +1,6 @@
 import { Container, ContainerProps, IconButton } from "@radix-ui/themes";
 import React, { ChangeEvent } from "react";
-import {PiMagnifyingGlassBold, PiXBold} from "react-icons/pi";
+import { PiMagnifyingGlassBold, PiXBold } from "react-icons/pi";
 
 type SearchBarProps = ContainerProps & {
   searchInputProps: {
@@ -22,7 +22,10 @@ export default function SearchBar({
   return (
     <Container {...containerProps}>
       <div className="searchBar">
-        <PiMagnifyingGlassBold className="inline-block mx-1 text-slate-8" size={16} />
+        <PiMagnifyingGlassBold
+          className="inline-block mx-1 text-slate-8"
+          size={16}
+        />
         <input
           autoFocus={autoFocus}
           placeholder={placeholder}

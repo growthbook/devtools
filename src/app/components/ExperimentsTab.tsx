@@ -9,13 +9,8 @@ import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedExperiment,
 } from "@/app/hooks/useGBSandboxEval";
-import {Link, Switch, Tooltip} from "@radix-ui/themes";
-import {
-  PiDesktopFill,
-  PiFlagFill,
-  PiLinkBold,
-  PiXBold,
-} from "react-icons/pi";
+import { Link, Switch, Tooltip } from "@radix-ui/themes";
+import { PiDesktopFill, PiFlagFill, PiLinkBold, PiXBold } from "react-icons/pi";
 import clsx from "clsx";
 import { MW, NAV_H } from "@/app";
 import { useSearch } from "@/app/hooks/useSearch";
@@ -36,7 +31,11 @@ export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
 export const LEFT_PERCENT = 0.4;
 export const HEADER_H = 40;
 
-export default function ExperimentsTab({ isResponsive } : { isResponsive: boolean }) {
+export default function ExperimentsTab({
+  isResponsive,
+}: {
+  isResponsive: boolean;
+}) {
   const [experiments, setExperiments] = useTabState<AutoExperiment[]>(
     "experiments",
     [],
@@ -48,27 +47,38 @@ export default function ExperimentsTab({ isResponsive } : { isResponsive: boolea
 
   // de-dupe
   const allExperiments = useMemo(() => {
-    const merged: ExperimentWithFeatures[] = [...experiments, ...featureExperiments];
+    const merged: ExperimentWithFeatures[] = [
+      ...experiments,
+      ...featureExperiments,
+    ];
     const seenEids = new Set<string>();
     const allExperiments: ExperimentWithFeatures[] = [];
     merged.forEach((exp) => {
       if ("changeId" in exp) {
         // changeId experiments are already de-duped
-        allExperiments.push({...exp});
+        allExperiments.push({ ...exp });
         return;
       }
       const key = exp.key;
       if (seenEids.has(key)) {
-        const idx = allExperiments.findIndex((exp) => exp.key === key && !("changeId" in exp));
+        const idx = allExperiments.findIndex(
+          (exp) => exp.key === key && !("changeId" in exp),
+        );
         if (idx >= 0 && allExperiments?.[idx]) {
           const types = getExperimentTypes(exp);
-          allExperiments[idx].features = [...(allExperiments[idx].features ?? []), ...(types.features ?? [])];
-          allExperiments[idx].featureTypes = {...(allExperiments[idx].featureTypes ?? {}), ...(types.featureTypes ?? {})};
+          allExperiments[idx].features = [
+            ...(allExperiments[idx].features ?? []),
+            ...(types.features ?? []),
+          ];
+          allExperiments[idx].featureTypes = {
+            ...(allExperiments[idx].featureTypes ?? {}),
+            ...(types.featureTypes ?? {}),
+          };
           return;
         }
       }
       seenEids.add(key);
-      allExperiments.push({...exp});
+      allExperiments.push({ ...exp });
     });
     return allExperiments;
   }, [experiments, featureExperiments]);
@@ -90,10 +100,8 @@ export default function ExperimentsTab({ isResponsive } : { isResponsive: boolea
         .map((log) => log?.experiment?.key),
     );
   }, [logEvents]);
-  const [hideInactiveExperiments, setHideInactiveExperiments] = useTabState<boolean>(
-    "hideInactiveExperiments",
-    false,
-  );
+  const [hideInactiveExperiments, setHideInactiveExperiments] =
+    useTabState<boolean>("hideInactiveExperiments", false);
 
   const {
     items: filteredExperiments,
@@ -103,19 +111,21 @@ export default function ExperimentsTab({ isResponsive } : { isResponsive: boolea
     items: allExperiments,
     defaultSortField: "key",
   });
-  const sortedFilteredExperiments = useMemo(() => [...filteredExperiments]
-    .sort((exp) => pageEvaluatedExperiments.has(exp.key) ? -1 : 1),
-    [filteredExperiments, pageEvaluatedExperiments]
+  const sortedFilteredExperiments = useMemo(
+    () =>
+      [...filteredExperiments].sort((exp) =>
+        pageEvaluatedExperiments.has(exp.key) ? -1 : 1,
+      ),
+    [filteredExperiments, pageEvaluatedExperiments],
   );
 
   const [selectedEid, setSelectedEid] = useTabState<string | undefined>(
     "selectedEid",
     undefined,
   );
-  const [selectedChangeId, setSelectedChangeId] = useTabState<string | undefined>(
-    "selectedChangeId",
-    undefined,
-  )
+  const [selectedChangeId, setSelectedChangeId] = useTabState<
+    string | undefined
+  >("selectedChangeId", undefined);
   const selectedExperiment = selectedEid
     ? getExperimentDetails({
         eid: selectedEid,
@@ -134,7 +144,7 @@ export default function ExperimentsTab({ isResponsive } : { isResponsive: boolea
       setSelectedEid(undefined);
       setSelectedChangeId(undefined);
     }
-  }
+  };
 
   // load & scroll animations
   const [firstLoad, setFirstLoad] = useState(true);
@@ -183,13 +193,13 @@ export default function ExperimentsTab({ isResponsive } : { isResponsive: boolea
           <SearchBar
             flexGrow="0"
             className="inline-block"
-            style={{maxWidth: 200}}
+            style={{ maxWidth: 200 }}
             autoFocus
             placeholder="Search Experiments"
             searchInputProps={searchInputProps}
             clear={clearSearch}
           />
-          <div className="flex-1"/>
+          <div className="flex-1" />
           {Object.keys(forcedVariations).length ? (
             <Link
               href="#"
@@ -238,14 +248,20 @@ export default function ExperimentsTab({ isResponsive } : { isResponsive: boolea
               });
             const value = evaluatedExperiment?.result?.variationId ?? 0;
 
-            if (!isForced && hideInactiveExperiments && !pageEvaluatedExperiments.has(eid)) return null;
+            if (
+              !isForced &&
+              hideInactiveExperiments &&
+              !pageEvaluatedExperiments.has(eid)
+            )
+              return null;
 
             return (
               <div
                 id={`experimentsTab_experimentList_${eid}_${changeId}`}
                 key={`${i}__${eid}__${changeId}`}
                 className={clsx("featureCard flex", {
-                  selected: selectedEid === eid && selectedChangeId === changeId,
+                  selected:
+                    selectedEid === eid && selectedChangeId === changeId,
                 })}
                 onClick={() => clickExperiment(eid, changeId)}
               >
@@ -265,7 +281,7 @@ export default function ExperimentsTab({ isResponsive } : { isResponsive: boolea
                     "pl-4": fullWidthListView,
                     "absolute right-2.5": !fullWidthListView,
                   })}
-                  style={ fullWidthListView ? { width: col2 } : undefined}
+                  style={fullWidthListView ? { width: col2 } : undefined}
                 >
                   {types ? (
                     <div className="flex items-center gap-2">
@@ -279,20 +295,22 @@ export default function ExperimentsTab({ isResponsive } : { isResponsive: boolea
                       {types.visual ? (
                         <Tooltip content="Visual Editor experiment">
                           <button>
-                            <PiDesktopFill size={12}/>
+                            <PiDesktopFill size={12} />
                           </button>
                         </Tooltip>
-                        ) : null}
+                      ) : null}
                       {types.features ? (
                         <Tooltip content="Feature flag experiment">
                           <button>
-                            <PiFlagFill className="inline-block" size={12}/>
+                            <PiFlagFill className="inline-block" size={12} />
                             {fullWidthListView ? (
-                              <span className="ml-1">{types.features.length}</span>
-                            ): null}
+                              <span className="ml-1">
+                                {types.features.length}
+                              </span>
+                            ) : null}
                           </button>
                         </Tooltip>
-                        ) : null}
+                      ) : null}
                     </div>
                   ) : null}
                 </div>
@@ -308,9 +326,7 @@ export default function ExperimentsTab({ isResponsive } : { isResponsive: boolea
                         {getVariationSummary({ experiment, i })}
                       </div>
                     ) : (
-                      <div className="text-slate-9">
-                        Inactive
-                      </div>
+                      <div className="text-slate-9">Inactive</div>
                     )}
                   </div>
                 )}
@@ -356,20 +372,17 @@ function getExperimentDetails({
   forcedVariations?: Record<string, number>;
 }): SelectedExperiment {
   const experiment = experiments.find(
-    (experiment) => (
+    (experiment) =>
       experiment.key === eid &&
       // @ts-ignore changeId is in AutoExperiment
-      experiment.changeId === changeId
-    )) as ExperimentWithFeatures;
+      experiment.changeId === changeId,
+  ) as ExperimentWithFeatures;
   const meta = experimentsMeta?.[eid];
 
   const types = getExperimentTypes(experiment);
 
   const evaluatedExperiment = evaluatedExperiments?.find(
-    (exp) => (
-      exp.key === eid &&
-      exp.changeId === changeId
-    ),
+    (exp) => exp.key === eid && exp.changeId === changeId,
   );
   const isForced = forcedVariations ? eid in forcedVariations : false;
 

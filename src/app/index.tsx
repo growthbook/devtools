@@ -1,18 +1,16 @@
 import "@/app/css/index.css";
 import {
   Theme,
-  Flex,
   IconButton,
   Dialog,
   Tabs,
   Tooltip,
-  DropdownMenu,
   Select,
 } from "@radix-ui/themes";
 import React, { useEffect, useRef, useState } from "react";
 import logo from "./logo.svg";
 import useTabState from "@/app/hooks/useTabState";
-import SdkTab from "./components/SdkTab";
+import SdkTab, { getSdkStatus } from "./components/SdkTab";
 import AttributesTab from "./components/AttributesTab";
 import ExperimentsTab from "./components/ExperimentsTab";
 import FeaturesTab from "./components/FeaturesTab";
@@ -43,12 +41,12 @@ export const App = () => {
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
     "sdkFound",
-    undefined
+    undefined,
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
-    {}
+    {},
   );
   const [forcedVariations, setForcedVariations] = useTabState<
     Record<string, any>
@@ -56,10 +54,10 @@ export const App = () => {
 
   const [forcedAttributes, _setForcedAttributes] = useTabState<boolean>(
     "forcedAttributes",
-    false
+    false,
   );
-  const { canConnect, hasPayload } = useSdkData();
-  let sdkStatus = canConnect ? "green" : hasPayload ? "yellow" : "red";
+  const sdkData = useSdkData();
+  let sdkStatus = getSdkStatus(sdkData);
   const refresh = () => {
     chrome.tabs.query({ currentWindow: true, active: true }, async (tabs) => {
       let activeTab = tabs[0];
@@ -111,7 +109,7 @@ export const App = () => {
                 "text-md select-none -indent-3.5 ml-3.5 flex-shrink-0",
                 {
                   "-mr-2": isTiny,
-                }
+                },
               )}
               style={{ lineHeight: 0.25 }}
             >

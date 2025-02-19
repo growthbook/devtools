@@ -27,7 +27,11 @@ export type EvaluatedExperiment = {
 };
 
 export default function useGBSandboxEval() {
-  const { payload: sdkPayload, usingStickyBucketing, stickyBucketAssignmentDocs } = useSdkData();
+  const {
+    payload: sdkPayload,
+    usingStickyBucketing,
+    stickyBucketAssignmentDocs,
+  } = useSdkData();
   const [attributes] = useTabState<Attributes>("attributes", {});
   const [features] = useTabState<Record<string, FeatureDefinition>>(
     "features",
@@ -43,7 +47,10 @@ export default function useGBSandboxEval() {
     {},
   );
   const [url] = useTabState<string>("url", "");
-  const forcedFeaturesMap = useMemo(() => new Map(Object.entries(forcedFeatures)), [forcedFeatures]);
+  const forcedFeaturesMap = useMemo(
+    () => new Map(Object.entries(forcedFeatures)),
+    [forcedFeatures],
+  );
 
   const [evaluatedData, setEvaluatedData] = useState<{
     evaluatedFeatures: Record<string, EvaluatedFeature>;
@@ -78,7 +85,9 @@ export default function useGBSandboxEval() {
         log: (msg: string, ctx: any) => {
           log.push([msg, ctx]);
         },
-        stickyBucketService: usingStickyBucketing ? new SandboxStickyBucketService() : undefined,
+        stickyBucketService: usingStickyBucketing
+          ? new SandboxStickyBucketService()
+          : undefined,
         stickyBucketAssignmentDocs,
       });
       growthbook.setForcedFeatures(forcedFeaturesMap);

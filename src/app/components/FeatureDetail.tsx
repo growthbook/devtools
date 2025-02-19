@@ -1,10 +1,6 @@
 import { MW, NAV_H } from "@/app";
 import { Button, IconButton, Link, Switch } from "@radix-ui/themes";
-import {
-  PiArrowSquareOut,
-  PiCaretRightFill,
-  PiXBold,
-} from "react-icons/pi";
+import { PiArrowSquareOut, PiCaretRightFill, PiXBold } from "react-icons/pi";
 import EditableValueField from "@/app/components/EditableValueField";
 import ValueField from "@/app/components/ValueField";
 import Rule, { USE_PREVIOUS_LOG_IF_MATCH } from "@/app/components/Rule";
@@ -210,9 +206,7 @@ export default function FeatureDetail({
 
           {selectedFeature ? (
             <div className="mt-3 mb-1">
-              {debugLog ? (
-                <DebugLogger logs={debugLog} />
-              ) : null}
+              {debugLog ? <DebugLogger logs={debugLog} /> : null}
 
               <Accordion.Root
                 className="accordion mt-2"

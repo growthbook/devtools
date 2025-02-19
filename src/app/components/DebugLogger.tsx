@@ -78,7 +78,7 @@ export function DebugLogAccordion({
               <span
                 className={clsx(
                   "font-mono text-semibold text-slate-12 text-xs",
-                  logMessageClassName
+                  logMessageClassName,
                 )}
               >
                 {log[0]}

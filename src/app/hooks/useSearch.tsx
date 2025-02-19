@@ -49,7 +49,7 @@ export function useSearch<T>({
 
   const filtered = useMemo(() => {
     return items.filter((item) =>
-      JSON.stringify(item).toLowerCase().includes(value.toLowerCase())
+      JSON.stringify(item).toLowerCase().includes(value.toLowerCase()),
     );
   }, [items, value]);
 

@@ -57,7 +57,7 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
       clearTimeout(timer);
       getValidGrowthBookInstance(cb);
     },
-    false
+    false,
   );
 }
 
@@ -147,7 +147,7 @@ function updateFeatures(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (data) {
       gb.setForcedFeatures(
-        new Map(Object.entries(data as Record<string, any>))
+        new Map(Object.entries(data as Record<string, any>)),
       );
     } else {
       // todo: do something with these messages or remove them
@@ -179,7 +179,7 @@ async function updateBackgroundSDK(data: SDKHealthCheckResult) {
       type: "GB_SDK_UPDATED",
       data,
     },
-    window.location.origin
+    window.location.origin,
   );
 }
 
@@ -194,13 +194,13 @@ function updateTabState(property: string, value: unknown, append = false) {
       },
       append,
     },
-    window.location.origin
+    window.location.origin,
   );
 }
 
 // add a proxy to the SDKs methods so we know when anything important has been changed programmatically
 function subscribeToSdkChanges(
-  gb: GrowthBook & { patchedMethods?: boolean; logs?: LogUnion[] }
+  gb: GrowthBook & { patchedMethods?: boolean; logs?: LogUnion[] },
 ) {
   if (gb.patchedMethods) return;
   gb.patchedMethods = true;
@@ -249,6 +249,10 @@ function subscribeToSdkChanges(
   }: Options = gb.context;
 
   // Monkeypatches for logging on outdated sdk versions
+  let hasSdkLogSupport = false;
+  if (gb.logs) {
+    hasSdkLogSupport = true;
+  }
   if (!gb.logs) {
     gb.logs = [];
 
@@ -256,7 +260,7 @@ function subscribeToSdkChanges(
     const _logEvent = gb.logEvent;
     gb.logEvent = async (
       eventName: string,
-      properties?: Record<string, unknown>
+      properties?: Record<string, unknown>,
     ) => {
       gb.logs!.push({
         eventName,
@@ -266,59 +270,63 @@ function subscribeToSdkChanges(
       });
       _logEvent.call(gb, eventName, properties);
     };
+  }
 
-    // Experiment tracking callbacks
-    const _setTrackingCallback = gb.setTrackingCallback || (() => {});
-    // Create a helper to automatically patch any callbacks the user sets
-    gb.setTrackingCallback = (callback: TrackingCallback) => {
-      const patchedCallBack = (
-        experiment: Experiment<any>,
-        result: Result<any>
-      ) => {
+  // Experiment tracking callbacks
+  const _setTrackingCallback = gb.setTrackingCallback || (() => {});
+  // Create a helper to automatically patch any callbacks the user sets
+  gb.setTrackingCallback = (callback: TrackingCallback) => {
+    const patchedCallBack = (
+      experiment: Experiment<any>,
+      result: Result<any>,
+    ) => {
+      if (!hasSdkLogSupport) {
         gb.logs!.push({
           experiment,
           result,
           timestamp: Date.now().toString(),
           logType: "experiment",
         });
-        callback(experiment, result);
-      };
-      if ("isNoopCallback" in callback && callback.isNoopCallback) {
-        patchedCallBack.isNoopCallback = true;
-      } else {
-        patchedCallBack.originalParams = callback
-          .toString()
-          .match(/\(([^)]+)\)/)?.[1]
-          .split(",")
-          .map((param: string) => param.trim());
       }
-      _setTrackingCallback?.call(gb, patchedCallBack);
-      pushAppUpdates();
+      callback(experiment, result);
     };
-    // Apply the patch helper above to the existing callback
-    if (typeof trackingCallback === "function") {
-      gb.setTrackingCallback(trackingCallback);
+    if ("isNoopCallback" in callback && callback.isNoopCallback) {
+      patchedCallBack.isNoopCallback = true;
     } else {
-      const noop = () => {};
-      // This flag is checked to see if the user has specified their own tracking callback or if it's using the noop
-      noop.isNoopCallback = true;
-      gb.setTrackingCallback(noop);
+      patchedCallBack.originalParams = callback
+        .toString()
+        .match(/\(([^)]+)\)/)?.[1]
+        .split(",")
+        .map((param: string) => param.trim());
     }
+    _setTrackingCallback?.call(gb, patchedCallBack);
+    pushAppUpdates();
+  };
+  // Apply the patch helper above to the existing callback
+  if (typeof trackingCallback === "function") {
+    gb.setTrackingCallback(trackingCallback);
+  } else {
+    const noop = () => {};
+    // This flag is checked to see if the user has specified their own tracking callback or if it's using the noop
+    noop.isNoopCallback = true;
+    gb.setTrackingCallback(noop);
+  }
 
-    // Feature usage callbacks
-    // @ts-expect-error Context is private but we still need to write it here
-    gb.context.onFeatureUsage = (key: string, result: FeatureResult<any>) => {
+  // Feature usage callbacks
+  // @ts-expect-error Context is private but we still need to write it here
+  gb.context.onFeatureUsage = (key: string, result: FeatureResult<any>) => {
+    if (!hasSdkLogSupport) {
       gb.logs!.push({
         featureKey: key,
         result,
         timestamp: Date.now().toString(),
         logType: "feature",
       });
-      if (typeof onFeatureUsage === "function") {
-        onFeatureUsage(key, result);
-      }
-    };
-  }
+    }
+    if (typeof onFeatureUsage === "function") {
+      onFeatureUsage(key, result);
+    }
+  };
 
   // Watch for incoming log events and send to tabstate
   updateTabState("logEvents", []);
@@ -384,17 +392,6 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   const usingStickyBucketing = gbContext.stickyBucketService !== undefined;
   const stickyBucketAssignmentDocs = gbContext.stickyBucketAssignmentDocs;
 
-  // if (!clientKey) {
-  //   return {
-  //     canConnect: false,
-  //     hasClientKey: false,
-  //     hasPayload,
-  //     devModeEnabled,
-  //     sdkFound: true,
-  //     version: gb?.version,
-  //     errorMessage: "No API Client Key found",
-  //   };
-  // }
   const apiRequestHeaders = gbContext.apiRequestHeaders;
   let res;
   try {

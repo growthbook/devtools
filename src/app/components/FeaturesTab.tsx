@@ -9,18 +9,14 @@ import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
-import {
-  PiCircleFill,
-  PiFlaskFill,
-  PiXBold,
-} from "react-icons/pi";
+import { PiCircleFill, PiFlaskFill, PiXBold } from "react-icons/pi";
 import clsx from "clsx";
 import { MW, NAV_H } from "@/app";
 import { ValueType } from "./ValueField";
 import FeatureDetail from "@/app/components/FeatureDetail";
 import { useSearch } from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
-import {Link, Switch} from "@radix-ui/themes";
+import { Link, Switch } from "@radix-ui/themes";
 import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
 
 type FeatureDefinitionWithId = FeatureDefinition & { id: string };
@@ -28,7 +24,11 @@ type FeatureDefinitionWithId = FeatureDefinition & { id: string };
 export const LEFT_PERCENT = 0.4;
 export const HEADER_H = 40;
 
-export default function FeaturesTab({ isResponsive } : { isResponsive: boolean }) {
+export default function FeaturesTab({
+  isResponsive,
+}: {
+  isResponsive: boolean;
+}) {
   const [features, setFeatures] = useTabState<
     Record<string, FeatureDefinition>
   >("features", {});
@@ -73,9 +73,12 @@ export default function FeaturesTab({ isResponsive } : { isResponsive: boolean }
     items: reshapedFeatures,
     defaultSortField: "id",
   });
-  const sortedFilteredFeatures = useMemo(() => [...filteredFeatures]
-      .sort((feature) => pageEvaluatedFeatures.has(feature.id) ? -1 : 1),
-    [filteredFeatures, pageEvaluatedFeatures]
+  const sortedFilteredFeatures = useMemo(
+    () =>
+      [...filteredFeatures].sort((feature) =>
+        pageEvaluatedFeatures.has(feature.id) ? -1 : 1,
+      ),
+    [filteredFeatures, pageEvaluatedFeatures],
   );
 
   const [selectedFid, setSelectedFid] = useTabState<string | undefined>(
@@ -141,13 +144,13 @@ export default function FeaturesTab({ isResponsive } : { isResponsive: boolean }
           <SearchBar
             flexGrow="0"
             className="inline-block"
-            style={{maxWidth: 200}}
+            style={{ maxWidth: 200 }}
             autoFocus
             placeholder="Search Features"
             searchInputProps={searchInputProps}
             clear={clearSearch}
           />
-          <div className="flex-1"/>
+          <div className="flex-1" />
           {Object.keys(forcedFeatures).length ? (
             <Link
               href="#"
@@ -184,7 +187,7 @@ export default function FeaturesTab({ isResponsive } : { isResponsive: boolean }
         >
           {sortedFilteredFeatures.map((feature, i) => {
             const fid = feature?.id;
-            const {evaluatedFeature, isForced, linkedExperiments} =
+            const { evaluatedFeature, isForced, linkedExperiments } =
               getFeatureDetails({
                 fid,
                 features,
@@ -196,7 +199,12 @@ export default function FeaturesTab({ isResponsive } : { isResponsive: boolean }
               : "null";
             const isBoolean = valueStr === "true" || valueStr === "false";
 
-            if (!isForced && hideInactiveFeatures && !pageEvaluatedFeatures.has(fid)) return null;
+            if (
+              !isForced &&
+              hideInactiveFeatures &&
+              !pageEvaluatedFeatures.has(fid)
+            )
+              return null;
 
             return (
               <div
@@ -211,9 +219,9 @@ export default function FeaturesTab({ isResponsive } : { isResponsive: boolean }
                   className={clsx({
                     "flex-shrink-0": fullWidthListView,
                   })}
-                  style={{width: fullWidthListView ? col1 : undefined}}
+                  style={{ width: fullWidthListView ? col1 : undefined }}
                 >
-                <div
+                  <div
                     className={clsx("title absolute line-clamp-1 pl-2.5 pr-3", {
                       "top-1": !fullWidthListView,
                     })}
@@ -232,10 +240,12 @@ export default function FeaturesTab({ isResponsive } : { isResponsive: boolean }
                     className="flex items-center gap-1 flex-shrink-0 text-sm pl-4"
                     style={{ width: col2 }}
                   >
-                    {linkedExperiments?.length ? (<>
-                      <PiFlaskFill />
-                      {linkedExperiments.length}
-                    </>) : null}
+                    {linkedExperiments?.length ? (
+                      <>
+                        <PiFlaskFill />
+                        {linkedExperiments.length}
+                      </>
+                    ) : null}
                   </div>
                 )}
                 <div

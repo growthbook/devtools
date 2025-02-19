@@ -44,7 +44,7 @@ export default function ExperimentDetail({
 }) {
   const [selectedFid, setSelectedFid] = useTabState<string | undefined>(
     "selectedFid",
-    undefined
+    undefined,
   );
   const [currentTab, setCurrentTab] = useTabState("currentTab", "experiments");
 
@@ -461,7 +461,7 @@ export function VariationIcon({
     <div
       className={clsx(
         "inline-flex items-center justify-center font-semibold rounded-full border",
-        className
+        className,
       )}
       style={{
         minWidth: size,
