@@ -14,7 +14,7 @@ import { PiCheckBold, PiPlusCircle, PiX } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import useDebounce from "@/app/hooks/useDebounce";
 import clsx from "clsx";
-import { at } from "node_modules/@types/lodash";
+import { at, set } from "node_modules/@types/lodash";
 
 export default function AttributesForm({
   form,
@@ -48,7 +48,7 @@ export default function AttributesForm({
   const watchAllFields = form.watch();
   const debouncedValue = useDebounce(watchAllFields, 500);
   useEffect(() => {
-      if (saveOnBlur) {
+      if (saveOnBlur && !jsonMode) {
         saveOnBlur();
       }
   }, [debouncedValue]);
@@ -341,7 +341,11 @@ export default function AttributesForm({
             <Button
               type="button"
               className="mt-2 float-right"
-              onClick={saveOnBlur}
+              disabled={!dirty}
+              onClick={ () => {
+                setDirty?.(true);
+                saveOnBlur?.();
+              }}
             >
               Apply
             </Button>
