@@ -144,7 +144,7 @@
 }
 
 .attributesForm {
-  @apply py-2 border border-slate-a3 bg-violet-2;
+  @apply mb-2 py-2 bg-violet-2;
 }
 
 .accordion .trigger {

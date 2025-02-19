@@ -161,16 +161,16 @@ export default function AttributesTab({
   return (
     <div
       id="attributesTab"
-      className={clsx("mx-auto  h-[100%]", { "px-2": !isResponsive })}
+      className={clsx("mx-auto h-[100%]", { "px-4": !isResponsive })}
       style={{
         overflowX: "hidden",
       }}
     >
       <div
         className="flex justify-between items-top h-[100%] mx-auto"
-        style={{ maxWidth: 600 }}
+        style={{ maxWidth: 700 }}
       >
-        <div className={clsx("w-[100%] h-[100%]", { "pr-1": !isResponsive })}>
+        <div className="w-full">
           <Flex style={{ height: LABEL_H }} align="center">
             <Text
               my="2"
@@ -246,6 +246,7 @@ export default function AttributesTab({
               />
             </Container>
           </div>
+          <div className="h-1" />
         </div>
       </div>
     </div>
