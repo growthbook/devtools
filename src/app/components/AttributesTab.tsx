@@ -8,7 +8,6 @@ import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
 import { PiX } from "react-icons/pi";
 import useApi from "../hooks/useApi";
-import { MW } from "@/app";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
 import clsx from "clsx";
 

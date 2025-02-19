@@ -13,15 +13,12 @@ import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
 import {
   PiCaretDownFill,
-  PiCheckBold,
   PiPlusCircleFill,
   PiX,
 } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import useDebounce from "@/app/hooks/useDebounce";
 import clsx from "clsx";
-import {NAV_H} from "@/app";
-import {HEADER_H} from "@/app/components/ExperimentsTab";
 
 export default function AttributesForm({
   form,
@@ -140,6 +137,7 @@ export default function AttributesForm({
         return "Unknown";
     }
   };
+
   return (
     <Form.Root className="FormRoot m-0 small">
       <div>
@@ -241,6 +239,7 @@ export default function AttributesForm({
                       <Flex gap="2" align="center" className="w-full">
                         <div className="w-full">
                           <TextField.Root
+                            key={"addCustomAttributeField"}
                             ref={addCustomIdRef}
                             type="text"
                             list="schema-attributes"
@@ -248,6 +247,7 @@ export default function AttributesForm({
                             className=""
                             placeholder="field name"
                             value={addCustomId}
+                            onClick={() => setAddCustomIdDropdownOpen(true)}
                             onChange={(e) => {
                               const v = e.target.value;
                               setAddCustomId(v);
@@ -255,12 +255,19 @@ export default function AttributesForm({
                             onKeyDown={(e) => {
                               if (e.code === "Enter" && addCustomId.trim()) {
                                 addCustomField();
+                                setAddCustomIdDropdownOpen(false);
                               }
                             }}
                           >
                             <DropdownMenu.Root
                               open={addCustomIdDropdownOpen}
-                              onOpenChange={setAddCustomIdDropdownOpen}
+                              onOpenChange={(o) => {
+                                setTimeout(() => {
+                                  if (!o && document.activeElement === addCustomIdRef.current) return;
+                                  setAddCustomIdDropdownOpen(o);
+                                }, 50);
+                              }}
+                              modal={false}
                             >
                               <DropdownMenu.Trigger>
                                 <TextField.Slot
@@ -280,6 +287,7 @@ export default function AttributesForm({
                                 onCloseAutoFocus={() =>
                                   addCustomIdRef?.current?.focus()
                                 }
+                                style={{ width: 200, maxHeight: 300 }}
                               >
                                 <div id="schema-attributes">
                                   {Object.keys(schema || {})
@@ -288,12 +296,13 @@ export default function AttributesForm({
                                         !Object.prototype.hasOwnProperty.call(
                                           formAttributes,
                                           key
-                                        )
+                                        ) && key.includes(addCustomIdRef?.current?.value || "")
                                     )
                                     .map((key) => (
                                       <DropdownMenu.Item
                                         onSelect={() => {
                                           setAddCustomId(key);
+                                          setAddCustomIdDropdownOpen(false);
                                         }}
                                         key={key}
                                       >
