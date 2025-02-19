@@ -79,7 +79,7 @@ export default function ArchetypesList() {
         </div>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content variant="soft">
-        <DropdownMenu.Label>PREVIEW</DropdownMenu.Label>
+        <DropdownMenu.Label><Text weight="medium">PREVIEW</Text></DropdownMenu.Label>
         <DropdownMenu.Item
           onSelect={() => {
             setAttributes({});
@@ -93,7 +93,7 @@ export default function ArchetypesList() {
           </Flex>
         </DropdownMenu.Item>
         <DropdownMenu.Separator />
-        <DropdownMenu.Label>ARCHETYPES</DropdownMenu.Label>
+        <DropdownMenu.Label><Text weight="medium">ARCHETYPES</Text></DropdownMenu.Label>
         {archetypes.map((arch) => (
           <DropdownMenu.Item
             key={arch.id}

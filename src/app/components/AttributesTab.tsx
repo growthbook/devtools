@@ -2,19 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
-import {
-  Button,
-  Checkbox,
-  Container,
-  Flex,
-  Text,
-} from "@radix-ui/themes";
+import { Button, Checkbox, Container, Flex, Text } from "@radix-ui/themes";
 import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
-import {
-  PiX,
-} from "react-icons/pi";
+import { PiX } from "react-icons/pi";
 import useApi from "../hooks/useApi";
 import { MW } from "@/app";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
@@ -35,14 +27,14 @@ export default function AttributesTab({
     useState(formAttributesString);
   const [textareaError, setTextareaError] = useState(false);
   const [dirty, setDirty] = useState(false);
-  
+
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
-    false,
+    false
   );
   const [forcedAttributes, setForcedAttributes] = useTabState<boolean>(
     "forcedAttributes",
-    false,
+    false
   );
   const [newAppliedAttributeIds, setNewAppliedAttributeIds] = useTabState<
     string[]
@@ -53,7 +45,7 @@ export default function AttributesTab({
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
     "allArchetypes",
     [],
-    true,
+    true
   );
   const {
     isLoading: archetypesLoading,
@@ -70,8 +62,8 @@ export default function AttributesTab({
           (archetypesData.archetypes || []).map((arch) => ({
             ...arch,
             source: "growthbook",
-          })),
-        ),
+          }))
+        )
     );
   }, [archetypesLoading, archetypesError, archetypesData]);
 
@@ -92,8 +84,8 @@ export default function AttributesTab({
         (attributesData.attributes || []).map((attr) => [
           attr.property,
           attr.datatype,
-        ]),
-      ),
+        ])
+      )
     );
   }, [attributesLoading, attributesError, attributesData]);
 
@@ -127,14 +119,14 @@ export default function AttributesTab({
             setNewAppliedAttributeIds([...newAppliedAttributeIds, key]);
           }
           return [key, newAttributes[key]];
-        }),
+        })
     );
     // check if newAttributes has any keys that are removed from attributes
     Object.keys(attributes).forEach((key) => {
       (key: string) => {
         if (!newAttributes.hasOwnProperty(key)) {
           setNewAppliedAttributeIds(
-            newAppliedAttributeIds.filter((id) => id !== key),
+            newAppliedAttributeIds.filter((id) => id !== key)
           );
         }
       };
@@ -170,10 +162,7 @@ export default function AttributesTab({
 
   return (
     <div
-      className={clsx(
-        "mx-auto  h-[100%]",
-        { "px-2": !isResponsive }
-      )}
+      className={clsx("mx-auto  h-[100%]", { "px-2": !isResponsive })}
       style={{
         overflowX: "hidden",
       }}
@@ -182,8 +171,7 @@ export default function AttributesTab({
         className="flex justify-between items-top h-[100%] mx-auto"
         style={{ maxWidth: 600 }}
       >
-        <div className={clsx("w-[100%] h-[100%]", { "pr-1": !isResponsive })}
-        >
+        <div className={clsx("w-[100%] h-[100%]", { "pr-1": !isResponsive })}>
           <Flex style={{ height: LABEL_H }} align="center">
             <Text
               my="2"
@@ -195,7 +183,14 @@ export default function AttributesTab({
               User Attributes
             </Text>
           </Flex>
-          <div className={clsx("attributesForm", {"px-3": !isResponsive, "px-2": isResponsive})}>
+          <div
+            className={clsx("attributesForm", {
+              "px-3": !isResponsive,
+              "rounded-md": !isResponsive,
+              "rounded-none": isResponsive,
+              "px-2": isResponsive,
+            })}
+          >
             <Flex
               justify="between"
               mb="2"
