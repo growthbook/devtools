@@ -1,9 +1,22 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as Form from "@radix-ui/react-form";
-import { Button, Switch, Flex, TextField, Select } from "@radix-ui/themes";
+import {
+  Button,
+  Switch,
+  Flex,
+  TextField,
+  Select,
+  DropdownMenu,
+  Link,
+} from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
-import { PiCheckBold, PiPlusCircleFill, PiX } from "react-icons/pi";
+import {
+  PiCaretDownFill,
+  PiCheckBold,
+  PiPlusCircleFill,
+  PiX,
+} from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import useDebounce from "@/app/hooks/useDebounce";
 import clsx from "clsx";
@@ -36,6 +49,8 @@ export default function AttributesForm({
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
   const [addingCustom, setAddingCustom] = useState(false);
   const [addCustomId, setAddCustomId] = useState("");
+  const [addCustomIdDropdownOpen, setAddCustomIdDropdownOpen] = useState(false);
+  const addCustomIdRef = useRef<HTMLInputElement>(null);
   const [addCustomType, setAddCustomType] = useState("string");
   const watchAllFields = form.watch();
   // const debouncedValue = useDebounce(watchAllFields, 500);
@@ -222,6 +237,7 @@ export default function AttributesForm({
                       <Flex gap="2" align="center" className="w-full">
                         <div className="w-full">
                           <TextField.Root
+                            ref={addCustomIdRef}
                             type="text"
                             list="schema-attributes"
                             autoFocus
@@ -238,20 +254,51 @@ export default function AttributesForm({
                               }
                             }}
                           >
-                            <TextField.Slot />
-                            <datalist id="schema-attributes">
-                              {Object.keys(schema || {})
-                                .filter(
-                                  (key) =>
-                                    !Object.prototype.hasOwnProperty.call(
-                                      formAttributes,
-                                      key
+                            <DropdownMenu.Root
+                              open={addCustomIdDropdownOpen}
+                              onOpenChange={setAddCustomIdDropdownOpen}
+                            >
+                              <DropdownMenu.Trigger>
+                                <TextField.Slot
+                                  className="cursor-pointer"
+                                  onClick={() => {
+                                    setAddCustomIdDropdownOpen(
+                                      !addCustomIdDropdownOpen
+                                    );
+                                  }}
+                                  side="right"
+                                >
+                                  <PiCaretDownFill />
+                                </TextField.Slot>
+                              </DropdownMenu.Trigger>
+                              <DropdownMenu.Content
+                                align="end"
+                                onCloseAutoFocus={() =>
+                                  addCustomIdRef?.current?.focus()
+                                }
+                              >
+                                <div id="schema-attributes">
+                                  {Object.keys(schema || {})
+                                    .filter(
+                                      (key) =>
+                                        !Object.prototype.hasOwnProperty.call(
+                                          formAttributes,
+                                          key
+                                        )
                                     )
-                                )
-                                .map((key) => (
-                                  <option key={key}>{key}</option>
-                                ))}
-                            </datalist>
+                                    .map((key) => (
+                                      <DropdownMenu.Item
+                                        onSelect={() => {
+                                          setAddCustomId(key);
+                                        }}
+                                        key={key}
+                                      >
+                                        {key}
+                                      </DropdownMenu.Item>
+                                    ))}
+                                </div>
+                              </DropdownMenu.Content>
+                            </DropdownMenu.Root>
                           </TextField.Root>
                         </div>
 
@@ -310,6 +357,7 @@ export default function AttributesForm({
                       e.preventDefault();
                       e.stopPropagation();
                       setAddingCustom(true);
+                      setAddCustomIdDropdownOpen(true);
                     }}
                     className="flex gap-1 mt-1"
                   >
