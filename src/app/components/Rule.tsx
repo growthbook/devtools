@@ -306,8 +306,8 @@ export function ExperimentRule({
         <table className="leading-3">
           <tbody>
             {variations?.map?.((variation, i) => (
-              <tr key={i} className="">
-                <td className="pr-2 py-0.5">
+              <tr key={i}>
+                <td className="pr-2 py-1">
                   <div
                     className="px-0.5 rounded-full border font-semibold"
                     style={{
@@ -319,7 +319,7 @@ export function ExperimentRule({
                     {i}
                   </div>
                 </td>
-                <td width="100%" className="py-0.5">
+                <td width="100%" className="py-1">
                   <ValueField
                     value={variation}
                     valueType={valueType}
@@ -327,7 +327,7 @@ export function ExperimentRule({
                     maxHeight={50}
                   />
                 </td>
-                <td className="pl-2 py-0.5">
+                <td className="pl-2 py-1">
                   {weights?.[i] !== undefined
                     ? Math.round(weights[i] * 1000) / 10 + "%"
                     : null}
@@ -337,7 +337,7 @@ export function ExperimentRule({
           </tbody>
         </table>
         <div
-          className="mt-1 rt-ProgressRoot rt-r-size-3 rt-variant-surface flex overflow-hidden h-[15px]"
+          className="rt-ProgressRoot rt-r-size-3 rt-variant-surface flex overflow-hidden h-[15px] mt-2"
           data-radius="small"
         >
           {weights?.map((w, i) => (
@@ -349,14 +349,16 @@ export function ExperimentRule({
                 "--progress-value": 100,
                 "--accent-track": getVariationColor(i),
                 width: w * (appliedCoverage ?? 1) * 100 + "%",
-                filter: "saturate(.85)",
+                borderLeft: "0.5px solid #fff6",
+                borderRight: "0.5px solid #fff6",
+                boxSizing: "border-box",
               }}
             >
               {w * (appliedCoverage ?? 1) >= 0.15 && (
                 <div
                   className="text-2xs font-bold relative top-[2px] left-[2px] z-center text-white"
                   style={{
-                    textShadow: "0 1px #0006, 0 0 1px #0006",
+                    textShadow: "0 1px #0006, 0 0 1px #000, 0 0 2px #000",
                   }}
                 >
                   {Math.round(w * (appliedCoverage ?? 1) * 1000) / 10}%
@@ -705,14 +707,15 @@ function operatorToText(operator: string, isPrerequisite?: boolean): string {
 
 export function getVariationColor(i: number) {
   const colors = [
-    "#4f69ff",
-    "#03d1ca",
-    "#e67112",
-    "#e83e8c",
-    "#fdc714",
-    "#bd41d9",
-    "#57d9a3",
-    "#f87a7a",
+    "var(--blue-10)",
+    "var(--teal-10)",
+    "var(--orange-10)",
+    "var(--pink-10)",
+    "var(--amber-10)",
+    "var(--mint-10)",
+    "var(--lime-11)",
+    "var(--cyan-10)",
+    "var(--red-10)",
   ];
   return colors[i % colors.length];
 }
