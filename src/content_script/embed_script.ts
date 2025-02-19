@@ -315,12 +315,14 @@ function subscribeToSdkChanges(
   // Feature usage callbacks
   // @ts-expect-error Context is private but we still need to write it here
   gb.context.onFeatureUsage = (key: string, result: FeatureResult<any>) => {
-    gb.logs!.push({
-      featureKey: key,
-      result,
-      timestamp: Date.now().toString(),
-      logType: "feature",
-    });
+    if (!hasSdkLogSupport) {
+      gb.logs!.push({
+        featureKey: key,
+        result,
+        timestamp: Date.now().toString(),
+        logType: "feature",
+      });
+    }
     if (typeof onFeatureUsage === "function") {
       onFeatureUsage(key, result);
     }
