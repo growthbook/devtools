@@ -5,7 +5,7 @@ import { IconButton, Link, Text } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
 import { MW, NAV_H } from "@/app";
 import clsx from "clsx";
-import { PiXBold } from "react-icons/pi";
+import {PiCaretRight, PiCaretRightBold, PiCaretRightFill, PiXBold} from "react-icons/pi";
 
 export const LEFT_PERCENT = 0.5;
 
@@ -118,23 +118,13 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                     ? "The SDK is connected to the GrowthBook API."
                     : "The SDK is not connected to the GrowthBook API."}
                 </Text>
-                <Text as="div" size="2" weight="regular" mb="1">
-                  <label
-                    className="inline-block font-semibold mb-0.5"
-                    style={{ width: 150 }}
-                  >
-                    Host:
-                  </label>
-                  <span className="text-nowrap">{apiHost ?? "None"}</span>
+                <Text as="div" size="2" weight="regular" mb="2">
+                  <div className="font-semibold mb-0.5">Host:</div>
+                  <code className="text-pink-800">{apiHost ?? "None"}</code>
                 </Text>
-                <Text as="div" size="2" weight="regular" mb="1">
-                  <label
-                    className="inline-block font-semibold mb-1"
-                    style={{ width: 150 }}
-                  >
-                    Client Key:
-                  </label>
-                  <span className="text-nowrap">{clientKey ?? "None"}</span>
+                <Text as="div" size="2" weight="regular" mb="2">
+                  <div className="font-semibold mb-0.5">Client Key:</div>
+                  <code className="text-pink-800">{clientKey ?? "None"}</code>
                 </Text>
                 {errorMessage && (
                   <Text as="div" size="2" weight="light">
@@ -173,19 +163,19 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
               {trackingCallbackParams?.length === 2 ? (
                 <>
                   The SDK is using a{" "}
-                  <code className="text-pink-700">trackingCallback</code>.
+                  <code className="text-pink-800">trackingCallback</code>.
                 </>
               ) : !hasTrackingCallback ? (
                 <>
                   The SDK is not using a{" "}
-                  <code className="text-pink-700">trackingCallback</code>. You
+                  <code className="text-pink-800">trackingCallback</code>. You
                   will need to add one to track experiment exposure to your data
                   warehouse.
                 </>
               ) : (
                 <>
                   The SDK is using a{" "}
-                  <code className="text-pink-700">trackingCallback</code> with{" "}
+                  <code className="text-pink-800">trackingCallback</code> with{" "}
                   {trackingCallbackParams?.length ? (
                     <em className="text-amber-600">
                       {trackingCallbackParams.length}
@@ -210,12 +200,12 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
               {usingLogEvent ? (
                 <>
                   The SDK is using a{" "}
-                  <code className="text-pink-700">logEvent</code> callback.
+                  <code className="text-pink-800">logEvent</code> callback.
                 </>
               ) : (
                 <>
                   The SDK is not using a{" "}
-                  <code className="text-pink-700">logEvent</code> callback. This
+                  <code className="text-pink-800">logEvent</code> callback. This
                   callback is optional but you can add one to track events to
                   your data warehouse.
                 </>
@@ -258,30 +248,22 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 ? "The SDK is using streaming (SSE)."
                 : "The SDK is not using streaming (SSE). Streaming is optional and is used to update the SDK with the latest data without refreshing the page."}
             </Text>
-            <Text as="div" size="2" weight="regular" mb="1">
-              <label
-                className="inline-block font-semibold mb-0.5"
-                style={{ width: 150 }}
-              >
-                Streaming host:
-              </label>
-              <span className="text-nowrap">{streamingHost ?? "None"}</span>
+            <Text as="div" size="2" weight="regular" mb="2">
+              <div className="font-semibold mb-0.5">Streaming host:</div>
+              <code className="text-pink-800">{streamingHost ?? "None"}</code>
             </Text>
             <Text as="div" size="2" weight="regular">
-              <label
-                className="inline-block font-semibold mb-0.5"
-                style={{ width: 150 }}
-              >
-                Client Key:
-              </label>
-              <span className="text-nowrap">{clientKey ?? "None"}</span>
+              <div className="font-semibold mb-0.5">Client Key:</div>
+              <code className="text-pink-800">{clientKey ?? "None"}</code>
             </Text>
             <Text as="div" size="2" weight="regular" mt="2">
-              <label className="inline-block font-semibold">
+              <div className="font-semibold">
                 Streaming host request headers:
-              </label>
-              <div className="mt-1">
-                {JSON.stringify(streamingHostRequestHeaders) ?? "None"}
+              </div>
+              <div>
+                <code className="text-pink-800">
+                  {JSON.stringify(streamingHostRequestHeaders) ?? "None"}
+                </code>
               </div>
             </Text>
           </div>
@@ -311,7 +293,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
       >
         <div
           key={`sdkTab_sdkItems_status`}
-          className={clsx("featureCard flex items-center justify-between", {
+          className={clsx("itemCard flex items-center justify-between", {
             selected: selectedItem === "status",
           })}
           onClick={() => setSelectedItem("status")}
@@ -320,6 +302,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
             title="Status"
             status={canConnectStatus}
             color={canConnectStatusColor}
+            showCaret={isResponsive}
           />
         </div>
 
@@ -327,17 +310,22 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
           <>
             <div
               key={`sdkTab_sdkItems_version`}
-              className={clsx("featureCard flex items-center justify-between", {
+              className={clsx("itemCard flex items-center justify-between", {
                 selected: selectedItem === "version",
               })}
               onClick={() => setSelectedItem("version")}
             >
-              <ItemStatus title="Version" status={version} color="gray" />
+              <ItemStatus
+                title="Version"
+                status={version}
+                color="gray"
+                showCaret={isResponsive}
+              />
             </div>
 
             <div
               key={`sdkTab_sdkItems_trackingCallback`}
-              className={clsx("featureCard flex items-center justify-between", {
+              className={clsx("itemCard flex items-center justify-between", {
                 selected: selectedItem === "trackingCallback",
               })}
               onClick={() => setSelectedItem("trackingCallback")}
@@ -346,12 +334,13 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 title="Tracking Callback"
                 status={trackingCallbackStatus}
                 color={trackingCallbackStatusColor}
+                showCaret={isResponsive}
               />
             </div>
 
             <div
               key={`sdkTab_sdkItems_logEvent`}
-              className={clsx("featureCard flex items-center justify-between", {
+              className={clsx("itemCard flex items-center justify-between", {
                 selected: selectedItem === "logEvent",
               })}
               onClick={() => setSelectedItem("logEvent")}
@@ -360,12 +349,13 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 title="Log Event Callback"
                 status={usingLogEvent}
                 color="gray"
+                showCaret={isResponsive}
               />
             </div>
 
             <div
               key={`sdkTab_sdkItems_security`}
-              className={clsx("featureCard flex items-center justify-between", {
+              className={clsx("itemCard flex items-center justify-between", {
                 selected: selectedItem === "security",
               })}
               onClick={() => setSelectedItem("security")}
@@ -374,12 +364,13 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 title="Payload Security"
                 status={securityStatus}
                 color="gray"
+                showCaret={isResponsive}
               />
             </div>
 
             <div
               key={`sdkTab_sdkItems_stickyBucketing`}
-              className={clsx("featureCard flex items-center justify-between", {
+              className={clsx("itemCard flex items-center justify-between", {
                 selected: selectedItem === "stickyBucketing",
               })}
               onClick={() => setSelectedItem("stickyBucketing")}
@@ -388,22 +379,28 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 title="Sticky Bucketing"
                 status={usingStickyBucketing}
                 color="gray"
+                showCaret={isResponsive}
               />
             </div>
 
             <div
               key={`sdkTab_sdkItems_streaming`}
-              className={clsx("featureCard flex items-center justify-between", {
+              className={clsx("itemCard flex items-center justify-between", {
                 selected: selectedItem === "streaming",
               })}
               onClick={() => setSelectedItem("streaming")}
             >
-              <ItemStatus title="Streaming" status={streaming} color="gray" />
+              <ItemStatus
+                title="Streaming"
+                status={streaming}
+                color="gray"
+                showCaret={isResponsive}
+              />
             </div>
 
             <div
               key={`sdkTab_sdkItems_payload`}
-              className={clsx("featureCard flex items-center justify-between", {
+              className={clsx("itemCard flex items-center justify-between", {
                 selected: selectedItem === "payload",
               })}
               onClick={() => setSelectedItem("payload")}
@@ -412,6 +409,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 title="SDK Payload"
                 status={hasPayload}
                 color="gray"
+                showCaret={isResponsive}
               />
             </div>
           </>
@@ -463,10 +461,12 @@ function ItemStatus({
   title,
   status,
   color,
+  showCaret,
 }: {
   title: string;
   status?: string | boolean;
   color: "green" | "red" | "gray" | "orange";
+  showCaret: boolean;
 }) {
   if (typeof status === "boolean") {
     status = status ? "Yes" : "No";
@@ -476,6 +476,11 @@ function ItemStatus({
       <div className="title pl-4 pr-6">{title}</div>
       <div className="flex pr-4 items-center flex-shrink-0 text-sm">
         <Text color={color}>{status}</Text>
+        {showCaret && (
+          <div className="ml-5 font-bold">
+            <PiCaretRight />
+          </div>
+        )}
       </div>
     </>
   );
