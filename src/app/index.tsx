@@ -104,28 +104,13 @@ export const App = () => {
             className="flex justify-between w-full"
             style={{ maxWidth: MW, height: 30 }}
           >
-            <h1
-              className={clsx(
-                "text-md select-none -indent-3.5 ml-3.5 flex-shrink-0",
-                {
-                  "-mr-2": isTiny,
-                },
-              )}
-              style={{ lineHeight: 0.25 }}
-            >
-              <img
-                src={logo}
-                alt="GrowthBook"
-                className="inline-block mb-1"
-                style={{ width: 120 }}
-              />
-              {!isTiny && (
-                <span className="font-bold text-slate-11 ml-2 mr-1">
-                  DevTools
-                </span>
-              )}
-            </h1>
-            <div className={!isTiny ? "mt-1" : undefined}>
+            <img
+              src={logo}
+              alt="GrowthBook"
+              className="inline-block mb-1 flex-shrink-0 mt-0.5 -mr-2"
+              style={{ width: 120 }}
+            />
+            <div className="mt-0.5">
               <ArchetypesList />
             </div>
           </div>
