@@ -5,16 +5,14 @@ import {
   Switch,
   Flex,
   TextField,
-  Text,
   Select,
 } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
-import { PiCheckBold, PiPlusCircle, PiX } from "react-icons/pi";
+import { PiCheckBold, PiPlusCircleFill, PiX } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import useDebounce from "@/app/hooks/useDebounce";
 import clsx from "clsx";
-import { at, set } from "node_modules/@types/lodash";
 
 export default function AttributesForm({
   form,
@@ -46,12 +44,14 @@ export default function AttributesForm({
   const [addCustomId, setAddCustomId] = useState("");
   const [addCustomType, setAddCustomType] = useState("string");
   const watchAllFields = form.watch();
-  const debouncedValue = useDebounce(watchAllFields, 500);
-  useEffect(() => {
-      if (saveOnBlur && !jsonMode) {
-        saveOnBlur();
-      }
-  }, [debouncedValue]);
+  // const debouncedValue = useDebounce(watchAllFields, 500);
+  //
+  // useEffect(() => {
+  //     if (saveOnBlur && !jsonMode) {
+  //       saveOnBlur();
+  //     }
+  // }, [debouncedValue]);
+
   const addCustomField = () => {
     setDirty?.(true);
     const newAttributes = form.getValues();
@@ -304,20 +304,22 @@ export default function AttributesForm({
                     </div>
                   </div>
                 )}
-                <Button
-                  color="violet"
-                  variant="ghost"
-                  size="1"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setAddingCustom(true);
-                  }}
-                  className="flex gap-1"
-                >
-                  <PiPlusCircle />
-                  Add Field
-                </Button>
+                {!jsonMode && !addingCustom && (
+                  <Button
+                    color="violet"
+                    variant="ghost"
+                    size="2"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setAddingCustom(true);
+                    }}
+                    className="flex gap-1 mt-1"
+                  >
+                    <PiPlusCircleFill />
+                    Add Field
+                  </Button>
+                )}
               </div>
             </Flex>
           )
