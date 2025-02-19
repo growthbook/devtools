@@ -209,7 +209,7 @@ export default function AttributesForm({
                 })}
 
                 {!jsonMode && addingCustom && (
-                  <div className="pb-2 border-b border-b-slate-200">
+                  <div className="pb-2">
                     <Form.Field
                       className="FormFieldInline my-1 w-full"
                       name="customField"
