@@ -224,6 +224,7 @@ export default function FeaturesTab({
                   <div
                     className={clsx("title absolute line-clamp-1 pl-2.5 pr-3", {
                       "top-1": !fullWidthListView,
+                      "top-[13px]": fullWidthListView,
                     })}
                     style={{ width: fullWidthListView ? col1 : undefined }}
                   >
