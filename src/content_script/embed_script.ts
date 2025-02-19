@@ -249,6 +249,10 @@ function subscribeToSdkChanges(
   }: Options = gb.context;
 
   // Monkeypatches for logging on outdated sdk versions
+  let hasSdkLogSupport = false;
+  if (gb.logs) {
+    hasSdkLogSupport = true;
+  }
   if (!gb.logs) {
     gb.logs = [];
 
@@ -266,59 +270,61 @@ function subscribeToSdkChanges(
       });
       _logEvent.call(gb, eventName, properties);
     };
+  }
 
-    // Experiment tracking callbacks
-    const _setTrackingCallback = gb.setTrackingCallback || (() => {});
-    // Create a helper to automatically patch any callbacks the user sets
-    gb.setTrackingCallback = (callback: TrackingCallback) => {
-      const patchedCallBack = (
-        experiment: Experiment<any>,
-        result: Result<any>,
-      ) => {
+  // Experiment tracking callbacks
+  const _setTrackingCallback = gb.setTrackingCallback || (() => {});
+  // Create a helper to automatically patch any callbacks the user sets
+  gb.setTrackingCallback = (callback: TrackingCallback) => {
+    const patchedCallBack = (
+      experiment: Experiment<any>,
+      result: Result<any>,
+    ) => {
+      if (!hasSdkLogSupport) {
         gb.logs!.push({
           experiment,
           result,
           timestamp: Date.now().toString(),
           logType: "experiment",
         });
-        callback(experiment, result);
-      };
-      if ("isNoopCallback" in callback && callback.isNoopCallback) {
-        patchedCallBack.isNoopCallback = true;
-      } else {
-        patchedCallBack.originalParams = callback
-          .toString()
-          .match(/\(([^)]+)\)/)?.[1]
-          .split(",")
-          .map((param: string) => param.trim());
       }
-      _setTrackingCallback?.call(gb, patchedCallBack);
-      pushAppUpdates();
+      callback(experiment, result);
     };
-    // Apply the patch helper above to the existing callback
-    if (typeof trackingCallback === "function") {
-      gb.setTrackingCallback(trackingCallback);
+    if ("isNoopCallback" in callback && callback.isNoopCallback) {
+      patchedCallBack.isNoopCallback = true;
     } else {
-      const noop = () => {};
-      // This flag is checked to see if the user has specified their own tracking callback or if it's using the noop
-      noop.isNoopCallback = true;
-      gb.setTrackingCallback(noop);
+      patchedCallBack.originalParams = callback
+        .toString()
+        .match(/\(([^)]+)\)/)?.[1]
+        .split(",")
+        .map((param: string) => param.trim());
     }
-
-    // Feature usage callbacks
-    // @ts-expect-error Context is private but we still need to write it here
-    gb.context.onFeatureUsage = (key: string, result: FeatureResult<any>) => {
-      gb.logs!.push({
-        featureKey: key,
-        result,
-        timestamp: Date.now().toString(),
-        logType: "feature",
-      });
-      if (typeof onFeatureUsage === "function") {
-        onFeatureUsage(key, result);
-      }
-    };
+    _setTrackingCallback?.call(gb, patchedCallBack);
+    pushAppUpdates();
+  };
+  // Apply the patch helper above to the existing callback
+  if (typeof trackingCallback === "function") {
+    gb.setTrackingCallback(trackingCallback);
+  } else {
+    const noop = () => {};
+    // This flag is checked to see if the user has specified their own tracking callback or if it's using the noop
+    noop.isNoopCallback = true;
+    gb.setTrackingCallback(noop);
   }
+
+  // Feature usage callbacks
+  // @ts-expect-error Context is private but we still need to write it here
+  gb.context.onFeatureUsage = (key: string, result: FeatureResult<any>) => {
+    gb.logs!.push({
+      featureKey: key,
+      result,
+      timestamp: Date.now().toString(),
+      logType: "feature",
+    });
+    if (typeof onFeatureUsage === "function") {
+      onFeatureUsage(key, result);
+    }
+  };
 
   // Watch for incoming log events and send to tabstate
   updateTabState("logEvents", []);
