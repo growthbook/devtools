@@ -2,9 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
-<<<<<<< Updated upstream
-import { Button, Checkbox, Container, Flex, Text } from "@radix-ui/themes";
-=======
 import {
   Button,
   Checkbox,
@@ -14,7 +11,6 @@ import {
   Text,
   TextField,
 } from "@radix-ui/themes";
->>>>>>> Stashed changes
 import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
