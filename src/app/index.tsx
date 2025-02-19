@@ -70,20 +70,6 @@ export const App = () => {
     }, 400);
   }, []);
 
-  const [refreshing, setRefreshing] = useState(false);
-  const refresh = () => {
-    setRefreshing(true);
-    window.setTimeout(() => setRefreshing(false), 500);
-    chrome.tabs.query({ currentWindow: true, active: true }, async (tabs) => {
-      let activeTab = tabs[0];
-      if (activeTab.id) {
-        await chrome.tabs.sendMessage(activeTab.id, {
-          type: "GB_REQUEST_REFRESH",
-        });
-      }
-    });
-  };
-
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isResponsive, setIsResponsive] = useState(false);
   const [isTiny, setIsTiny] = useState(false);
@@ -158,12 +144,6 @@ export const App = () => {
                   </Tabs.Trigger>
                   <div className="flex-1"/>
                   <div className="flex items-center gap-3 flex-grow-0 flex-shrink-0">
-                    {sdkStatus !== "green" && (
-                      <RefreshButton
-                        refresh={refresh}
-                        refreshing={refreshing}
-                      />
-                    )}
                     <SettingsButton
                       apiKeyReady={apiKeyReady}
                       apiKey={apiKey}
@@ -251,12 +231,6 @@ export const App = () => {
                 </Select.Content>
               </Select.Root>
               <div className="flex items-center gap-3 flex-grow-0 flex-shrink-0">
-                {sdkStatus !== "green" && (
-                  <RefreshButton
-                    refresh={refresh}
-                    refreshing={refreshing}
-                  />
-                )}
                 <SettingsButton
                   apiKeyReady={apiKeyReady}
                   apiKey={apiKey}
@@ -431,28 +405,6 @@ function NavLabel({
   }
 
   return null;
-}
-
-function RefreshButton({
-  refresh,
-  refreshing,
-} : {
-  refresh: () => void;
-  refreshing: boolean;
-}) {
-  return (
-    <IconButton
-      variant="ghost"
-      style={{ marginTop: 0, marginBottom: 0 }}
-      size="1"
-      onClick={() => {
-        refresh();
-      }}
-      disabled={refreshing}
-    >
-      <PiArrowsClockwise />
-    </IconButton>
-  );
 }
 
 function SettingsButton({

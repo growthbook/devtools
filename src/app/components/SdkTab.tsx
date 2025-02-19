@@ -1,11 +1,11 @@
 import React, {ReactElement, useEffect, useMemo, useState} from "react";
 import useTabState from "../hooks/useTabState";
 import { SDKHealthCheckResult } from "devtools";
-import { IconButton, Link, Text } from "@radix-ui/themes";
+import {Button, IconButton, Link, Text} from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
 import { MW, NAV_H } from "@/app";
 import clsx from "clsx";
-import {PiCaretRight, PiCaretRightFill, PiXBold} from "react-icons/pi";
+import {PiArrowsClockwise, PiCaretRight, PiCaretRightFill, PiXBold} from "react-icons/pi";
 import * as Accordion from "@radix-ui/react-accordion";
 
 export const LEFT_PERCENT = 0.5;
@@ -14,6 +14,20 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
   const [selectedItem, setSelectedItem] = useState<string | undefined>(
     !isResponsive ? "status" : undefined,
   );
+
+  const [refreshing, setRefreshing] = useState(false);
+  const refresh = () => {
+    setRefreshing(true);
+    window.setTimeout(() => setRefreshing(false), 500);
+    chrome.tabs.query({ currentWindow: true, active: true }, async (tabs) => {
+      let activeTab = tabs[0];
+      if (activeTab.id) {
+        await chrome.tabs.sendMessage(activeTab.id, {
+          type: "GB_REQUEST_REFRESH",
+        });
+      }
+    });
+  };
 
   const [sdkData] = useTabState<SDKHealthCheckResult | {}>("sdkData", {});
   const {
@@ -159,6 +173,22 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                   )}
                 </>
               )}
+              <div className="mt-8">
+                <Text as="div" size="2" weight="light">
+                  Is DevTools out of sync or failing to connect to your SDK?
+                </Text>
+                <Button
+                  variant="outline"
+                  size="2"
+                  onClick={() => {
+                    refresh();
+                  }}
+                  disabled={refreshing}
+                  mt="2"
+                >
+                  <PiArrowsClockwise /> Refresh DevTools
+                </Button>
+              </div>
             </>
           )
         };
@@ -363,7 +393,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
         return undefined;
     }
   },
-    [selectedItem, sdkData]
+    [selectedItem, sdkData, refreshing]
   );
 
   useEffect(() => window.scrollTo({ top: 0 }), []);
