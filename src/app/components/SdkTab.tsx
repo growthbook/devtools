@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {ReactElement, useEffect, useMemo, useState} from "react";
 import useTabState from "../hooks/useTabState";
 import { SDKHealthCheckResult } from "devtools";
 import { IconButton, Link, Text } from "@radix-ui/themes";
@@ -68,77 +68,83 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
       ? "orange"
       : "red";
 
-  useEffect(() => window.scrollTo({ top: 0 }), []);
 
-  const displayRightPanel = () => {
+  const item: {
+    title: string;
+    content: ReactElement | null;
+  } | undefined = useMemo(() => {
     switch (selectedItem) {
       case "payload":
-        return (
-          <div>
-            <h1 className="text-md mb-4 font-bold">SDK Payload</h1>
-            <ValueField value={payload} valueType="json" maxHeight={null} />
-          </div>
-        );
+        return {
+          title: "SDK Payload",
+          content: (
+            <ValueField value={payload} valueType="json" maxHeight={null}/>
+          )
+        };
+
       case "status":
-        return (
-          <div>
-            <h1 className="text-md mb-4 font-bold">SDK Status</h1>
-            {!sdkFound ? (
-              <>
-                <Text as="div" size="2" weight="regular" mb="4" color="gray">
-                  Attempting to connect to SDK...
-                </Text>
-                <Text as="div" size="2" weight="regular" mb="2">
-                  No SDK was found. Please refer to our SDK implementation
-                  guide.
-                </Text>
-                <div className="py-0.5">
-                  <Link
-                    size="2"
-                    href="https://docs.growthbook.io/lib/script-tag"
-                  >
-                    HTML Script Tag SDK
-                  </Link>
-                </div>
-                <div className="py-0.5">
-                  <Link size="2" href="https://docs.growthbook.io/lib/js">
-                    JavaScript SDK
-                  </Link>
-                </div>
-                <div className="py-0.5">
-                  <Link size="2" href="https://docs.growthbook.io/lib/react">
-                    React SDK
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <>
-                <Text as="div" size="2" weight="regular" mb="2">
-                  {canConnect
-                    ? "The SDK is connected to the GrowthBook API."
-                    : "The SDK is not connected to the GrowthBook API."}
-                </Text>
-                <Text as="div" size="2" weight="regular" mb="2">
-                  <div className="font-semibold mb-0.5">Host:</div>
-                  <code className="text-pink-800">{apiHost ?? "None"}</code>
-                </Text>
-                <Text as="div" size="2" weight="regular" mb="2">
-                  <div className="font-semibold mb-0.5">Client Key:</div>
-                  <code className="text-pink-800">{clientKey ?? "None"}</code>
-                </Text>
-                {errorMessage && (
-                  <Text as="div" size="2" weight="light">
-                    error: {errorMessage ?? "None"}
+        return {
+          title: "SDK Status",
+          content: (
+            <>
+              {!sdkFound ? (
+                <>
+                  <Text as="div" size="2" weight="regular" mb="4" color="gray">
+                    Attempting to connect to SDK...
                   </Text>
-                )}
-              </>
-            )}
-          </div>
-        );
+                  <Text as="div" size="2" weight="regular" mb="2">
+                    No SDK was found. Please refer to our SDK implementation
+                    guide.
+                  </Text>
+                  <div className="py-0.5">
+                    <Link
+                      size="2"
+                      href="https://docs.growthbook.io/lib/script-tag"
+                    >
+                      HTML Script Tag SDK
+                    </Link>
+                  </div>
+                  <div className="py-0.5">
+                    <Link size="2" href="https://docs.growthbook.io/lib/js">
+                      JavaScript SDK
+                    </Link>
+                  </div>
+                  <div className="py-0.5">
+                    <Link size="2" href="https://docs.growthbook.io/lib/react">
+                      React SDK
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Text as="div" size="2" weight="regular" mb="2">
+                    {canConnect
+                      ? "The SDK is connected to the GrowthBook API."
+                      : "The SDK is not connected to the GrowthBook API."}
+                  </Text>
+                  <Text as="div" size="2" weight="regular" mb="2">
+                    <div className="font-semibold mb-0.5">Host:</div>
+                    <code className="text-pink-800">{apiHost ?? "None"}</code>
+                  </Text>
+                  <Text as="div" size="2" weight="regular" mb="2">
+                    <div className="font-semibold mb-0.5">Client Key:</div>
+                    <code className="text-pink-800">{clientKey ?? "None"}</code>
+                  </Text>
+                  {errorMessage && (
+                    <Text as="div" size="2" weight="light">
+                      error: {errorMessage ?? "None"}
+                    </Text>
+                  )}
+                </>
+              )}
+            </>
+          )
+        };
+
       case "version":
-        return (
-          <div>
-            <h1 className="text-md mb-4 font-bold">SDK Version</h1>
+        return {
+          title: "SDK Version",
+          content: (
             <Text as="div" size="2" weight="regular">
               {!version ? (
                 <Text>
@@ -153,12 +159,13 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 </Text>
               )}
             </Text>
-          </div>
-        );
+          )
+        };
+
       case "trackingCallback":
-        return (
-          <div>
-            <h1 className="text-md mb-4 font-bold">Tracking Callback</h1>
+        return {
+          title: "Tracking Callback",
+          content: (
             <Text as="div" size="2" weight="regular">
               {trackingCallbackParams?.length === 2 ? (
                 <>
@@ -190,12 +197,13 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 </>
               )}
             </Text>
-          </div>
-        );
+          )
+        };
+
       case "logEvent":
-        return (
-          <div>
-            <h1 className="text-md mb-4 font-bold">Log Event Callback</h1>
+        return {
+          title: "Log Event Callback",
+          content: (
             <Text as="div" size="2" weight="regular">
               {usingLogEvent ? (
                 <>
@@ -211,12 +219,13 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 </>
               )}
             </Text>
-          </div>
-        );
+          )
+        };
+
       case "security":
-        return (
-          <div>
-            <h1 className="text-md mb-4 font-bold">Payload Security</h1>
+        return {
+          title: "Payload Security",
+          content: (
             <Text as="div" size="2" weight="regular">
               {hasDecryptionKey
                 ? payloadDecrypted
@@ -226,52 +235,61 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                   ? "The SDK is using remote evaluation."
                   : "The SDK is not using a decryption key or remote evaluation. The payload is in plain text."}
             </Text>
-          </div>
-        );
+          )
+        };
+
       case "stickyBucketing":
-        return (
-          <div>
-            <h1 className="text-md mb-4 font-bold">Sticky Bucketing</h1>
+        return {
+          title: "Sticky Bucketing",
+          content: (
             <Text as="div" size="2" weight="regular">
               {usingStickyBucketing
                 ? "The SDK is using sticky bucketing."
                 : "The SDK is not using sticky bucketing. Sticky bucketing is optional and is used to ensure that users are consistently bucketed."}
             </Text>
-          </div>
-        );
+          )
+        };
+
       case "streaming":
-        return (
-          <div>
-            <h1 className="text-md mb-4 font-bold">Streaming</h1>
-            <Text as="div" size="2" weight="regular" mb="2">
-              {streaming
-                ? "The SDK is using streaming (SSE)."
-                : "The SDK is not using streaming (SSE). Streaming is optional and is used to update the SDK with the latest data without refreshing the page."}
-            </Text>
-            <Text as="div" size="2" weight="regular" mb="2">
-              <div className="font-semibold mb-0.5">Streaming host:</div>
-              <code className="text-pink-800">{streamingHost ?? "None"}</code>
-            </Text>
-            <Text as="div" size="2" weight="regular">
-              <div className="font-semibold mb-0.5">Client Key:</div>
-              <code className="text-pink-800">{clientKey ?? "None"}</code>
-            </Text>
-            <Text as="div" size="2" weight="regular" mt="2">
-              <div className="font-semibold">
-                Streaming host request headers:
-              </div>
-              <div>
-                <code className="text-pink-800">
-                  {JSON.stringify(streamingHostRequestHeaders) ?? "None"}
-                </code>
-              </div>
-            </Text>
-          </div>
-        );
+        return {
+          title: "Streaming",
+          content: (
+            <>
+              <Text as="div" size="2" weight="regular" mb="2">
+                {streaming
+                  ? "The SDK is using streaming (SSE)."
+                  : "The SDK is not using streaming (SSE). Streaming is optional and is used to update the SDK with the latest data without refreshing the page."}
+              </Text>
+              <Text as="div" size="2" weight="regular" mb="2">
+                <div className="font-semibold mb-0.5">Streaming host:</div>
+                <code className="text-pink-800">{streamingHost ?? "None"}</code>
+              </Text>
+              <Text as="div" size="2" weight="regular">
+                <div className="font-semibold mb-0.5">Client Key:</div>
+                <code className="text-pink-800">{clientKey ?? "None"}</code>
+              </Text>
+              <Text as="div" size="2" weight="regular" mt="2">
+                <div className="font-semibold">
+                  Streaming host request headers:
+                </div>
+                <div>
+                  <code className="text-pink-800">
+                    {JSON.stringify(streamingHostRequestHeaders) ?? "None"}
+                  </code>
+                </div>
+              </Text>
+            </>
+          )
+        };
+
       default:
-        return null;
+        return undefined;
     }
-  };
+  },
+    [selectedItem]
+  );
+
+  useEffect(() => window.scrollTo({ top: 0 }), []);
 
   const fullWidthListView = !selectedItem;
   const leftPercent = fullWidthListView ? 1 : LEFT_PERCENT;
@@ -279,7 +297,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
 
   return (
     <div
-      className="mx-auto"
+      className="mx-auto pt-1"
       style={{
         maxWidth: MW,
         overflowX: "hidden",
@@ -431,26 +449,35 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
         }}
       >
         <div
-          className="featureDetail px-6 py-4"
+          className="featureDetail"
           key={`selected_${selectedItem}`}
         >
-          {isResponsive && (
-            <IconButton
-              size="3"
-              variant="ghost"
-              radius="full"
-              className="absolute right-3 top-3"
-              style={{ margin: 0 }}
-              onClick={(e) => {
-                e.preventDefault();
-                setSelectedItem(undefined);
-              }}
-            >
-              <PiXBold />
-            </IconButton>
-          )}
-
-          {displayRightPanel()}
+          <div className="header">
+            <div className="flex items-start gap-2">
+              <h2 className="font-bold flex-1 my-1.5">
+                {item?.title}
+              </h2>
+              {isResponsive && (
+                <IconButton
+                  size="3"
+                  variant="ghost"
+                  radius="full"
+                  style={{ margin: "0 -8px -10px 0" }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedItem(undefined);
+                  }}
+                >
+                  <PiXBold />
+                </IconButton>
+              )}
+            </div>
+          </div>
+          <div className="content">
+            <div className="my-2">
+              {item?.content}
+            </div>
+          </div>
         </div>
       </div>
     </div>
