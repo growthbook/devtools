@@ -22,13 +22,12 @@ import {
   PiCircleFill,
   PiGearSixFill,
   PiWarningFill,
-  PiWarningOctagonFill,
+  PiWarningOctagonFill, PiArrowsClockwise,
 } from "react-icons/pi";
 import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import useResizeObserver from "@react-hook/resize-observer";
 import ConditionalWrapper from "@/app/components/ConditionalWrapper";
-import clsx from "clsx";
 
 export const MW = 1200; // max-width
 export const RESPONSIVE_W = 570; // small width mode
@@ -36,14 +35,15 @@ export const TINY_W = 420;
 export const NAV_H = 75;
 
 export const App = () => {
-  const [apiKey, setApiKey, apiKeyReady] = useGlobalState(API_KEY, "", true);
+  const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const [apiKey, setApiKey, apiKeyReady] = useGlobalState(API_KEY, "", true);
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
     "sdkFound",
     undefined,
   );
-  const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
     "forcedFeatures",
     {},
@@ -58,7 +58,22 @@ export const App = () => {
   );
   const sdkData = useSdkData();
   let sdkStatus = getSdkStatus(sdkData);
+
+  const sdkDataRef = useRef(sdkData);
+  useEffect(() => {
+    sdkDataRef.current = sdkData;
+  }, [sdkData]);
+
+  useEffect(() => {
+    window.setTimeout(() => {
+      if (!sdkDataRef.current.sdkFound) setCurrentTab("sdkDebug");
+    }, 400);
+  }, []);
+
+  const [refreshing, setRefreshing] = useState(false);
   const refresh = () => {
+    setRefreshing(true);
+    window.setTimeout(() => setRefreshing(false), 500);
     chrome.tabs.query({ currentWindow: true, active: true }, async (tabs) => {
       let activeTab = tabs[0];
       if (activeTab.id) {
@@ -68,12 +83,6 @@ export const App = () => {
       }
     });
   };
-
-  useEffect(() => {
-    window.setTimeout(() => {
-      if (sdkFound === undefined) setSdkFound(false);
-    }, 2000);
-  }, []);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isResponsive, setIsResponsive] = useState(false);
@@ -123,11 +132,11 @@ export const App = () => {
               <Tabs.List>
                 <div
                   className="flex items-center mx-auto w-full"
-                  style={{ maxWidth: MW }}
+                  style={{maxWidth: MW}}
                 >
-                  <div className="mx-2" />
+                  <div className="mx-2"/>
                   <Tabs.Trigger value="features">
-                    <NavLabel type="features" forcedFeatures={forcedFeatures} />
+                    <NavLabel type="features" forcedFeatures={forcedFeatures}/>
                   </Tabs.Trigger>
                   <Tabs.Trigger value="experiments">
                     <NavLabel
@@ -142,23 +151,30 @@ export const App = () => {
                     />
                   </Tabs.Trigger>
                   <Tabs.Trigger value="logs">
-                    <NavLabel type="logs" />
+                    <NavLabel type="logs"/>
                   </Tabs.Trigger>
                   <Tabs.Trigger value="sdkDebug">
-                    <NavLabel type="sdkDebug" sdkStatus={sdkStatus} />
+                    <NavLabel type="sdkDebug" sdkStatus={sdkStatus}/>
                   </Tabs.Trigger>
-                  <div className="flex-1" />
-                  <SettingsButton
-                    apiKeyReady={apiKeyReady}
-                    apiKey={apiKey}
-                    setSettingsOpen={setSettingsOpen}
-                  />
-
-                  <div className="mx-2" />
+                  <div className="flex-1"/>
+                  <div className="flex items-center gap-3 flex-grow-0 flex-shrink-0">
+                    {sdkStatus !== "green" && (
+                      <RefreshButton
+                        refresh={refresh}
+                        refreshing={refreshing}
+                      />
+                    )}
+                    <SettingsButton
+                      apiKeyReady={apiKeyReady}
+                      apiKey={apiKey}
+                      setSettingsOpen={setSettingsOpen}
+                    />
+                  </div>
+                  <div className="mx-2"/>
                 </div>
               </Tabs.List>
             </Tabs.Root>
-          ) : (
+            ) : (
             <div className="flex items-center justify-between">
               <Select.Root value={currentTab} onValueChange={setCurrentTab}>
                 <Select.Trigger
@@ -234,12 +250,19 @@ export const App = () => {
                   </Select.Item>
                 </Select.Content>
               </Select.Root>
-
-              <SettingsButton
-                apiKeyReady={apiKeyReady}
-                apiKey={apiKey}
-                setSettingsOpen={setSettingsOpen}
-              />
+              <div className="flex items-center gap-3 flex-grow-0 flex-shrink-0">
+                {sdkStatus !== "green" && (
+                  <RefreshButton
+                    refresh={refresh}
+                    refreshing={refreshing}
+                  />
+                )}
+                <SettingsButton
+                  apiKeyReady={apiKeyReady}
+                  apiKey={apiKey}
+                  setSettingsOpen={setSettingsOpen}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -408,6 +431,28 @@ function NavLabel({
   }
 
   return null;
+}
+
+function RefreshButton({
+  refresh,
+  refreshing,
+} : {
+  refresh: () => void;
+  refreshing: boolean;
+}) {
+  return (
+    <IconButton
+      variant="ghost"
+      style={{ marginTop: 0, marginBottom: 0 }}
+      size="1"
+      onClick={() => {
+        refresh();
+      }}
+      disabled={refreshing}
+    >
+      <PiArrowsClockwise />
+    </IconButton>
+  );
 }
 
 function SettingsButton({

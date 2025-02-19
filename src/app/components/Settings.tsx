@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import * as Form from "@radix-ui/react-form";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { useForm } from "react-hook-form";
-import { Button, Checkbox } from "@radix-ui/themes";
+import {Button, Checkbox, Link} from "@radix-ui/themes";
 
 const NAMESPACE = "devtools";
 const VERSION = "v1";
@@ -71,6 +71,17 @@ const SettingsForm = ({ close }: { close?: () => void }) => {
         <Form.Control asChild>
           <input className="Input" {...form.register("apiKey")} />
         </Form.Control>
+        <div className="mt-1 text-slate-11 text-xs">
+          Add an{" "}
+          <Link
+            size="1"
+            href={`${appOrigin}/account/personal-access-tokens`}
+            target="_blank"
+          >
+            Access Token
+          </Link>{" "}
+          for a better DevTools experience. Syncs your Attributes, Archetypes, and meta information. Required for Visual Editor.
+        </div>
       </Form.Field>
 
       <Form.Field className="FormFieldInline" name="isCloud">

@@ -98,9 +98,25 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                       Attempting to connect to SDK...
                     </Text>
                   ): null}
+                  <Text as="div" size="2" weight="regular" mb="3">
+                    No SDK was found.
+                  </Text>
+                  <Text as="div" size="2" weight="regular" mb="3">
+                    Ensure that <code className="text-pink-800">enableDevMode: true</code>{" "}
+                    is set when creating your GrowthBook SDK instance (JavaScript and React only).
+                  </Text>
+                  <Text as="div" size="2" weight="regular" mb="6">
+                    If your site has a Content Security Policy (CSP), check whether the CSP allows
+                    your HTML Script Tag or SDK to load.{" "}
+                    <Link
+                      size="2"
+                      href="https://docs.growthbook.io/lib/script-tag#content-security-policy-csp"
+                    >
+                      Read more
+                    </Link>
+                  </Text>
                   <Text as="div" size="2" weight="regular" mb="2">
-                    No SDK was found. Please refer to our SDK implementation
-                    guide.
+                    See our SDK implementation guides:
                   </Text>
                   <div className="py-0.5">
                     <Link
