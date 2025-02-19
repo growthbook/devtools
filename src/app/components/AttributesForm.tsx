@@ -274,9 +274,7 @@ export default function AttributesForm({
                                 <TextField.Slot
                                   className="cursor-pointer"
                                   onClick={() => {
-                                    setAddCustomIdDropdownOpen(
-                                      !addCustomIdDropdownOpen,
-                                    );
+                                    setAddCustomIdDropdownOpen(true);
                                   }}
                                   side="right"
                                 >

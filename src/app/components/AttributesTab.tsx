@@ -2,22 +2,24 @@ import React, { useEffect, useState } from "react";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
-import { Button, Checkbox, Container, Flex, Text } from "@radix-ui/themes";
+import {Button, Checkbox, Container, Flex, Link, Text} from "@radix-ui/themes";
 import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
-import { PiX } from "react-icons/pi";
+import {PiX, PiXBold} from "react-icons/pi";
 import useApi from "../hooks/useApi";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
 import clsx from "clsx";
+import {MW} from "@/app";
+
+export const HEADER_H = 40;
 
 export default function AttributesTab({
   isResponsive,
 }: {
   isResponsive: boolean;
 }) {
-  const LABEL_H = 32;
-  const SUBHEAD_H = 32;
+
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
   const attributesForm = useForm<Attributes>({ defaultValues: attributes });
   const formAttributes = attributesForm.getValues();
@@ -158,96 +160,99 @@ export default function AttributesTab({
   }, [JSON.stringify(attributes)]);
 
   return (
-    <div
-      id="attributesTab"
-      className={clsx("mx-auto h-[100%]", { "px-4": !isResponsive })}
-      style={{
-        overflowX: "hidden",
-      }}
-    >
+    <>
       <div
-        className="flex justify-between items-top h-[100%] mx-auto"
-        style={{ maxWidth: 700 }}
+        id="attributesTab"
+        className="mx-auto h-[100%]"
+        style={{
+          maxWidth: 700,
+          overflowX: "hidden",
+        }}
       >
-        <div className="w-full">
-          <Flex style={{ height: LABEL_H }} align="center">
-            <Text
-              my="2"
-              weight="medium"
-              color="gray"
-              size="1"
-              className={clsx("uppercase", { "px-2": isResponsive })}
-            >
-              User Attributes
-            </Text>
-          </Flex>
-          <div
-            className={clsx("attributesForm", {
-              "px-3": !isResponsive,
-              "rounded-md": !isResponsive,
-              "rounded-none": isResponsive,
-              "px-2": isResponsive,
-            })}
-          >
-            <Flex
-              justify="between"
-              mb="2"
-              pb="1"
-              align="center"
-              className="border-b border-b-slate-200"
-              style={{ height: SUBHEAD_H }}
-            >
-              <Text size="1" weight="medium">
-                {forcedAttributes
-                  ? selectedArchetype?.name || "Custom Attributes"
-                  : "User Attributes"}
-              </Text>
-              <Flex gap="2" align="center">
-                {forcedAttributes && !selectedArchetype && (
-                  <Button
-                    color="red"
-                    variant="ghost"
-                    size="1"
-                    onClick={() => {
-                      resetAttributesOverride();
-                    }}
-                    className="flex gap-1"
-                  >
-                    <PiX />
-                    Clear Overrides
-                  </Button>
-                )}
-                <label className="flex items-center text-xs cursor-pointer select-none">
-                  <Checkbox
-                    checked={jsonMode}
-                    onCheckedChange={() => setJsonMode(!jsonMode)}
-                    size="1"
-                    mr="1"
-                    className="cursor-pointer"
-                  />
-                  <span>JSON input</span>
-                </label>
-              </Flex>
-            </Flex>
 
-            <Container className="p-3" overflowX="hidden">
-              <AttributesForm
-                form={attributesForm}
-                dirty={dirty}
-                setDirty={setDirty}
-                jsonMode={jsonMode}
-                textareaAttributes={textareaAttributes}
-                setTextareaAttributes={setTextareaAttributes}
-                textareaError={textareaError}
-                setTextareaError={setTextareaError}
-                schema={attributeSchema}
-                saveOnBlur={applyAttributes}
+        <div
+          className={clsx("mx-auto fixed w-full flex items-center justify-between border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm", {
+            "pl-4 pr-6": !isResponsive,
+            "pl-2 pr-3": isResponsive,
+          })}
+          style={{
+            maxWidth: 700,
+            height: HEADER_H,
+            zIndex: 2000,
+          }}
+        >
+          <Text
+            my="2"
+            weight="medium"
+            color="gray"
+            size="1"
+            className={clsx("uppercase", {"px-2": isResponsive})}
+          >
+            User Attributes
+          </Text>
+          <div className="flex flex-shrink-1 items-center justify-end gap-3">
+            {forcedAttributes && !selectedArchetype && (
+              <Link
+                href="#"
+                role="button"
+                color="amber"
+                size="1"
+                onClick={(e) => {
+                  e.preventDefault();
+                  resetAttributesOverride();
+                }}
+                className="flex gap-1 items-center font-normal leading-3 text-right"
+              >
+                Clear overrides
+                <PiXBold className="flex-shrink-0" />
+              </Link>
+            )}
+            <label className="flex flex-shrink-1 items-center text-xs cursor-pointer leading-3 select-none">
+              <Checkbox
+                checked={jsonMode}
+                onCheckedChange={() => setJsonMode(!jsonMode)}
+                size="1"
+                mr="1"
+                className="cursor-pointer"
               />
-            </Container>
+              <span>JSON input</span>
+            </label>
           </div>
-          <div className="h-1" />
+        </div>
+
+        <div
+          className={clsx("flex justify-between items-top h-[100%] mx-auto", {"px-4": !isResponsive})}
+          style={{maxWidth: 700}}
+        >
+          <div className="w-full">
+            <div
+              className={clsx("attributesForm", {
+                "px-3": !isResponsive,
+                "rounded-md": !isResponsive,
+                "rounded-none": isResponsive,
+                "px-2": isResponsive,
+              })}
+              style={{"marginTop": HEADER_H + (!isResponsive ? 12 : 0)}}
+            >
+              <Container className="p-3" overflowX="hidden">
+                <AttributesForm
+                  form={attributesForm}
+                  dirty={dirty}
+                  setDirty={setDirty}
+                  jsonMode={jsonMode}
+                  textareaAttributes={textareaAttributes}
+                  setTextareaAttributes={setTextareaAttributes}
+                  textareaError={textareaError}
+                  setTextareaError={setTextareaError}
+                  schema={attributeSchema}
+                  saveOnBlur={applyAttributes}
+                />
+              </Container>
+            </div>
+            <div className="h-1"/>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

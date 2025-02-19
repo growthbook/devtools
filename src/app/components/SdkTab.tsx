@@ -187,10 +187,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                   )}
                 </>
               )}
-              <div className="mt-8">
-                <Text as="div" size="2" weight="light">
-                  Is DevTools out of sync or failing to connect to your SDK?
-                </Text>
+              <div className="mt-6">
                 <Button
                   variant="outline"
                   size="2"
