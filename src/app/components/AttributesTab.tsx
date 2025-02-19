@@ -7,23 +7,19 @@ import {
   Checkbox,
   Container,
   Flex,
-  Select,
   Text,
-  TextField,
 } from "@radix-ui/themes";
 import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
 import {
-  PiArrowClockwise,
-  PiCheckBold,
-  PiPlusCircle,
   PiX,
 } from "react-icons/pi";
 import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
 import { MW } from "@/app";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
+import clsx from "clsx";
 
 export default function AttributesTab({
   isResponsive,
@@ -40,6 +36,7 @@ export default function AttributesTab({
     useState(formAttributesString);
   const [textareaError, setTextareaError] = useState(false);
   const [dirty, setDirty] = useState(false);
+  
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
     false,
@@ -174,7 +171,10 @@ export default function AttributesTab({
 
   return (
     <div
-      className="mx-auto px-3 h-[100%]"
+      className={clsx(
+        "mx-auto  h-[100%]",
+        { "px-2": !isResponsive }
+      )}
       style={{
         maxWidth: MW,
         overflowX: "hidden",
@@ -184,19 +184,20 @@ export default function AttributesTab({
         className="flex justify-between items-top h-[100%] mx-auto"
         style={{ maxWidth: 600 }}
       >
-        <div className="w-[100%] pl-1 h-[100%]">
+        <div className={clsx("w-[100%] h-[100%]", { "pr-1": !isResponsive })}
+        >
           <Flex style={{ height: LABEL_H }} align="center">
             <Text
               my="2"
               weight="medium"
               color="gray"
               size="1"
-              className="uppercase"
+              className={clsx("uppercase", { "px-2": isResponsive })}
             >
               User Attributes
             </Text>
           </Flex>
-          <div className="attributesForm">
+          <div className={clsx("attributesForm", {"px-3": !isResponsive, "px-2": isResponsive})}>
             <Flex
               justify="between"
               mb="2"
