@@ -39,7 +39,7 @@ export default function ArchetypesList() {
     "forcedAttributes",
     false,
   );
-  
+
   const [selectedArchetype, setSelectedArchetype] =
     useTabState<Archetype | null>("selectedArchetype", null);
 
@@ -64,7 +64,7 @@ export default function ArchetypesList() {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
-        <div className="flex items-center justify-between select-none">
+        <div className="flex items-center justify-between select-none mt-0.5">
           <Link
             size="2"
             role="button"
@@ -79,7 +79,9 @@ export default function ArchetypesList() {
         </div>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content variant="soft">
-        <DropdownMenu.Label><Text weight="medium">PREVIEW</Text></DropdownMenu.Label>
+        <DropdownMenu.Label className="font-semibold uppercase text-slate-a10 py-1 h-auto text-xs">
+          Preview
+        </DropdownMenu.Label>
         <DropdownMenu.Item
           onSelect={() => {
             setAttributes({});
@@ -93,7 +95,9 @@ export default function ArchetypesList() {
           </Flex>
         </DropdownMenu.Item>
         <DropdownMenu.Separator />
-        <DropdownMenu.Label><Text weight="medium">ARCHETYPES</Text></DropdownMenu.Label>
+        <DropdownMenu.Label className="font-semibold uppercase text-slate-a10 py-1 h-auto text-xs">
+          Archetypes
+        </DropdownMenu.Label>
         {archetypes.map((arch) => (
           <DropdownMenu.Item
             key={arch.id}
