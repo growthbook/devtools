@@ -71,9 +71,18 @@ export function DebugLogAccordion({
           disabled={disableAccordion}
         >
           <Accordion.Item value="debug-log">
-            <Accordion.Trigger className="trigger mb-0.5">
+            <Accordion.Trigger
+              className="trigger mb-0.5"
+              style={{
+                textAlign: "left",
+                ...(!disableAccordion ? {
+                  textIndent: -14,
+                  marginLeft: 12,
+                } : {}),
+              }}
+            >
               {!disableAccordion && (
-                <PiCaretRightFill className="caret mr-0.5" size={12} />
+                <PiCaretRightFill className="caret mr-0.5 relative" size={12} style={{ top: -1.5 }} />
               )}
               <span
                 className={clsx(
