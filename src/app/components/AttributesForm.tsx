@@ -1,12 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import * as Form from "@radix-ui/react-form";
-import {
-  Button,
-  Switch,
-  Flex,
-  TextField,
-  Select,
-} from "@radix-ui/themes";
+import { Button, Switch, Flex, TextField, Select } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
 import { PiCheckBold, PiPlusCircleFill, PiX } from "react-icons/pi";
@@ -160,7 +154,7 @@ export default function AttributesForm({
                         form,
                         schema,
                         setDirty,
-                        saveOnBlur
+                        saveOnBlur,
                       })}
                     </Form.Field>
                   </div>
@@ -243,21 +237,24 @@ export default function AttributesForm({
                                 addCustomField();
                               }
                             }}
-                          />
-                        </div>
-                        <datalist id="schema-attributes">
-                          {Object.keys(schema || {})
-                            .filter(
-                              (key) =>
-                                !Object.prototype.hasOwnProperty.call(
-                                  formAttributes,
-                                  key
+                          >
+                            <TextField.Slot />
+                            <datalist id="schema-attributes">
+                              {Object.keys(schema || {})
+                                .filter(
+                                  (key) =>
+                                    !Object.prototype.hasOwnProperty.call(
+                                      formAttributes,
+                                      key
+                                    )
                                 )
-                            )
-                            .map((key) => (
-                              <option key={key}>{key}</option>
-                            ))}
-                        </datalist>
+                                .map((key) => (
+                                  <option key={key}>{key}</option>
+                                ))}
+                            </datalist>
+                          </TextField.Root>
+                        </div>
+
                         <Select.Root
                           defaultValue="string"
                           size="2"
@@ -344,7 +341,7 @@ export default function AttributesForm({
               type="button"
               className="mt-2 float-right"
               disabled={!dirty}
-              onClick={ () => {
+              onClick={() => {
                 setDirty?.(true);
                 saveOnBlur?.();
               }}
@@ -363,7 +360,7 @@ function renderInputField({
   form,
   schema,
   setDirty,
-  saveOnBlur
+  saveOnBlur,
 }: {
   attributeKey: string;
   form: UseFormReturn<Attributes>;
@@ -399,7 +396,7 @@ function renderInputField({
             checked={form.watch(attributeKey)}
             onCheckedChange={(v: boolean) => {
               form.setValue(attributeKey, v);
-              saveOnBlur?.({[attributeKey]: v});
+              saveOnBlur?.({ [attributeKey]: v });
               setDirty?.(true);
             }}
           />
