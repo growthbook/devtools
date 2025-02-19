@@ -20,6 +20,8 @@ import {
 import useTabState from "@/app/hooks/useTabState";
 import useDebounce from "@/app/hooks/useDebounce";
 import clsx from "clsx";
+import {NAV_H} from "@/app";
+import {HEADER_H} from "@/app/components/ExperimentsTab";
 
 export default function AttributesForm({
   form,
@@ -175,47 +177,49 @@ export default function AttributesForm({
                   </div>
                 );
               })}
-              <div className="border-t border-gray-200 mt-2 mb-2 py-2">
-                {customAttributes.map((attributeKey, i) => {
-                  return (
-                    <div key={attributeKey}>
-                      <Form.Field
-                        className="FormFieldInline my-1"
-                        name={attributeKey}
-                        onBlur={() => {
-                          saveOnBlur?.();
-                        }}
-                      >
-                        <Form.Label className="FormLabel mr-1 text-nowrap">
-                          <div
-                            className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
-                            style={{ width: 100 }}
+              <div className="border-t border-gray-200 mt-4 pt-4">
+                {customAttributes.length > 0 && (
+                  <div className="mb-2">
+                    {customAttributes.map((attributeKey, i) => {
+                      return (
+                        <div key={attributeKey}>
+                          <Form.Field
+                            className="FormFieldInline my-1"
+                            name={attributeKey}
+                            onBlur={() => {
+                              saveOnBlur?.();
+                            }}
                           >
-                            {attributeKey}
-                          </div>
-                        </Form.Label>
-                        {renderInputField({
-                          attributeKey,
-                          form,
-                          schema,
-                          setDirty,
-                        })}
-                        {
-                          <Button
-                            type="button"
-                            size="1"
-                            variant="ghost"
-                            color="red"
-                            className="ml-2 mr-1"
-                            onClick={() => removeField(attributeKey)}
-                          >
-                            <PiX />
-                          </Button>
-                        }
-                      </Form.Field>
-                    </div>
-                  );
-                })}
+                            <Form.Label className="FormLabel mr-1 text-nowrap">
+                              <div
+                                className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
+                                style={{ width: 100 }}
+                              >
+                                {attributeKey}
+                              </div>
+                            </Form.Label>
+                            {renderInputField({
+                              attributeKey,
+                              form,
+                              schema,
+                              setDirty,
+                            })}
+                            <Button
+                              type="button"
+                              size="1"
+                              variant="ghost"
+                              color="red"
+                              className="ml-2 mr-1"
+                              onClick={() => removeField(attributeKey)}
+                            >
+                              <PiX />
+                            </Button>
+                          </Form.Field>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {!jsonMode && addingCustom && (
                   <div className="pb-2">
@@ -231,7 +235,7 @@ export default function AttributesForm({
                           className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
                           style={{ width: 100 }}
                         >
-                          Add New Field
+                          Add field
                         </div>
                       </Form.Label>
                       <Flex gap="2" align="center" className="w-full">
@@ -321,29 +325,25 @@ export default function AttributesForm({
                         </Select.Root>
                       </Flex>
                     </Form.Field>
-                    <div className="flex items-center gap-1 -mr-1">
+                    <div className="flex justify-end items-center gap-3 mt-2.5 -mb-1.5">
+                      <Link
+                        href="#"
+                        size="2"
+                        role="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          cancelAddCustomField()
+                        }}
+                      >
+                        Cancel
+                      </Link>
                       <Button
                         type="button"
                         disabled={!addCustomId.trim()}
-                        radius="full"
-                        size="1"
+                        size="2"
                         onClick={() => addCustomField()}
-                        style={{ width: 24 }}
-                        className="px-0"
                       >
-                        <PiCheckBold />
-                      </Button>
-                      <Button
-                        type="button"
-                        radius="full"
-                        size="1"
-                        color="gray"
-                        variant="outline"
-                        onClick={() => cancelAddCustomField()}
-                        style={{ width: 24 }}
-                        className="px-0"
-                      >
-                        <PiX />
+                        Add field
                       </Button>
                     </div>
                   </div>
@@ -358,6 +358,14 @@ export default function AttributesForm({
                       e.stopPropagation();
                       setAddingCustom(true);
                       setAddCustomIdDropdownOpen(true);
+
+                      const container = document.querySelector("#attributesTab");
+                      window.setTimeout(() => {
+                        container?.scroll?.({
+                          top: container?.scrollHeight,
+                          behavior: "smooth",
+                        });
+                      }, 50);
                     }}
                     className="flex gap-1 mt-1"
                   >

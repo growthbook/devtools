@@ -13,8 +13,6 @@ export default function LogsTab({
   isTiny: boolean;
 }) {
   const [currentTab, setCurrentTab] = useTabState("currentTab", "logs");
-
-  useEffect(() => window.scrollTo({ top: 0 }), []);
   const [logEvents] = useTabState<LogUnion[] | undefined>(
     "logEvents",
     undefined,

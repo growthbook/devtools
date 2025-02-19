@@ -396,8 +396,6 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
     [selectedItem, sdkData, refreshing]
   );
 
-  useEffect(() => window.scrollTo({ top: 0 }), []);
-
   const fullWidthListView = !selectedItem;
   const leftPercent = fullWidthListView ? 1 : LEFT_PERCENT;
   const rightPercent = isResponsive ? 1 : 1 - LEFT_PERCENT;

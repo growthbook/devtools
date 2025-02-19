@@ -361,9 +361,9 @@ function NavLabel({
         {forcedAttributes ? (
           <div className={!isDropdown ? "absolute right-0" : undefined}>
             <Tooltip content="Has attribute overrides">
-              <button className="p-1">
+              <div className="p-1">
                 <PiCircleFill size={9} className="text-amber-500" />
-              </button>
+              </div>
             </Tooltip>
           </div>
         ) : null}

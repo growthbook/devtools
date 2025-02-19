@@ -158,10 +158,9 @@ export default function AttributesTab({
     }
   }, [JSON.stringify(attributes)]);
 
-  useEffect(() => window.scrollTo({ top: 0 }), []);
-
   return (
     <div
+      id="attributesTab"
       className={clsx("mx-auto  h-[100%]", { "px-2": !isResponsive })}
       style={{
         overflowX: "hidden",
