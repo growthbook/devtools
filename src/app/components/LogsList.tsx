@@ -50,12 +50,12 @@ export default function LogsList({
 
   const filteredLogEvents = useMemo(
     () => logEvents.filter((evt) => filters.includes(evt.logType)),
-    [filters, logEvents]
+    [filters, logEvents],
   );
 
   const reshapedEvents = useMemo(
     () => filteredLogEvents.map(reshapeEventLog),
-    [filteredLogEvents]
+    [filteredLogEvents],
   );
 
   const {
@@ -103,14 +103,14 @@ export default function LogsList({
                   {!isResponsive ? copy : responsiveCopy[filter]}
                 </Flex>
               </Text>
-            )
+            ),
           )}
         </div>
       </div>
       <Flex
         className={clsx(
           "w-full items-center bg-slate-a2 shadow-sm uppercase text-slate-11 font-semibold",
-          xsTextSizeClass
+          xsTextSizeClass,
         )}
         style={{ height: 35 }}
         px="4"
@@ -171,7 +171,7 @@ export default function LogsList({
                         "text-left",
                         "flex",
                         "items-center",
-                        xsTextSizeClass
+                        xsTextSizeClass,
                       )}
                     >
                       {evt.logType}
@@ -187,7 +187,7 @@ export default function LogsList({
                         "overflow-hidden",
                         "flex",
                         "items-center",
-                        xsTextSizeClass
+                        xsTextSizeClass,
                       )}
                     >
                       {evt.eventInfo}
@@ -197,7 +197,7 @@ export default function LogsList({
                         <Text
                           className={clsx(
                             "text-nowrap text-slate-9 inline-block w-full overflow-auto",
-                            xsTextSizeClass
+                            xsTextSizeClass,
                           )}
                           style={{ scrollbarWidth: "none" }}
                         >

@@ -186,12 +186,17 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 <>
                   The SDK is using a{" "}
                   <code className="text-pink-700">trackingCallback</code> with{" "}
-                  {trackingCallbackParams?.length ?? (
+                  {trackingCallbackParams?.length ? (
+                    <em className="text-amber-600">
+                      {trackingCallbackParams.length}
+                    </em>
+                  ) : (
                     <>
                       an <em className="text-amber-600">unknown</em> number of
                     </>
                   )}{" "}
-                  params instead of 2. Please check your implementation.
+                  param{trackingCallbackParams?.length !== 1 ? "s" : ""} instead
+                  of 2. Please check your implementation.
                 </>
               )}
             </Text>
