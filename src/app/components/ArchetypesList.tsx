@@ -1,11 +1,23 @@
 import React, { useEffect } from "react";
 import { Archetype } from "../tempGbExports";
+<<<<<<< Updated upstream
 import { Text, DropdownMenu, Link } from "@radix-ui/themes";
 import { PiCaretDownFill, PiUser } from "react-icons/pi";
+=======
+import { Text, DropdownMenu, Link, Flex } from "@radix-ui/themes";
+import {
+  PiCaretDownFill,
+  PiCheck,
+  PiPencilSimple,
+  PiPencilSimpleSlash,
+  PiUser,
+} from "react-icons/pi";
+>>>>>>> Stashed changes
 import useApi from "@/app/hooks/useApi";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import useTabState from "@/app/hooks/useTabState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
+import { Pi } from "node_modules/@phosphor-icons/react/dist/ssr";
 
 export default function ArchetypesList() {
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
@@ -18,6 +30,14 @@ export default function ArchetypesList() {
     CLOUD_APP_ORIGIN,
     true,
   );
+<<<<<<< Updated upstream
+=======
+  const [appOrigin, _setAppOrigin, _appOriginReady] = useGlobalState(
+    APP_ORIGIN,
+    CLOUD_APP_ORIGIN,
+    true
+  );
+>>>>>>> Stashed changes
 
   const {
     isLoading: archetypesLoading,
@@ -25,7 +45,7 @@ export default function ArchetypesList() {
     data: archetypesData,
   } = useApi<{ archetypes: Archetype[] }>("/api/v1/archetypes");
 
-  const [attributes, setAttributes] = useTabState<Record<string, any>>(
+  const [_attributes, setAttributes] = useTabState<Record<string, any>>(
     "attributes",
     {},
   );
@@ -33,13 +53,19 @@ export default function ArchetypesList() {
     "forcedAttributes",
     false,
   );
+<<<<<<< Updated upstream
+=======
+  const [forcedAttributes, setForcedAttributes] = useTabState<boolean>(
+    "forcedAttributes",
+    false
+  );
+>>>>>>> Stashed changes
 
-  const [selectedArchetype, setSelectedArchetype] = useTabState<
-    Archetype | undefined
-  >("selectedArchetype", undefined);
+  const [selectedArchetype, setSelectedArchetype] =
+    useTabState<Archetype | null>("selectedArchetype", null);
 
   const updateArchetype = (arch: Archetype) => {
-    setAttributes({ archetypes, ...arch.attributes });
+    setAttributes({ ...arch.attributes });
     setForcedAttributes(true);
     setSelectedArchetype(arch);
   };
@@ -68,24 +94,42 @@ export default function ArchetypesList() {
             style={{ maxWidth: "calc(100vw - 120px - 20px - 20px)" }}
           >
             <PiUser className="inline-block mr-1" />
-            {selectedArchetype?.name || "Current User"}
+            {selectedArchetype?.name || "Default User"}
           </Link>
           <PiCaretDownFill className="ml-0.5 text-violet-a11" size={12} />
         </div>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content variant="soft">
+        <DropdownMenu.Item
+          onSelect={() => {
+            setAttributes({});
+            setForcedAttributes(false);
+            setSelectedArchetype(null);
+          }}
+          disabled={!selectedArchetype}
+        >
+          <Flex gap="1" align="center">
+          <div className="w-4">{!selectedArchetype && <PiCheck />}</div> <Text> Default User</Text>
+          </Flex>
+        </DropdownMenu.Item>
+        <DropdownMenu.Separator />
         <DropdownMenu.Label>Archetypes</DropdownMenu.Label>
         {archetypes.map((arch) => (
           <DropdownMenu.Item
             key={arch.id}
             onSelect={() => updateArchetype(arch)}
+            disabled={selectedArchetype?.id === arch.id}
           >
-            <Text>{arch.name}</Text>
+            <Flex gap="1" align="center">
+              <div className="w-4">{selectedArchetype?.id === arch.id && <PiCheck />} </div>
+              <Text> {arch.name}</Text>
+            </Flex>
           </DropdownMenu.Item>
         ))}
 
         <DropdownMenu.Separator />
         <DropdownMenu.Item
+<<<<<<< Updated upstream
           onSelect={() => {
             setAttributes({});
             setForcedAttributes(false);
@@ -97,19 +141,31 @@ export default function ArchetypesList() {
           Clear Override
         </DropdownMenu.Item>
         <DropdownMenu.Item
+=======
+>>>>>>> Stashed changes
           onSelect={
             // go to GrowthBook and add a new archetype
             () => {
               window.open(
                 `${appOrigin}/archetypes`,
                 "_blank",
+<<<<<<< Updated upstream
                 "noopener,noreferrer",
+=======
+                "noopener,noreferrer"
+>>>>>>> Stashed changes
               );
             }
           }
         >
+<<<<<<< Updated upstream
           {" "}
           Add Archetype
+=======
+          <Flex gap="1" align="center">
+          <div className="w-4"> <PiPencilSimple /></div> <Text> Manage Archetypes</Text>{" "}
+          </Flex>
+>>>>>>> Stashed changes
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>

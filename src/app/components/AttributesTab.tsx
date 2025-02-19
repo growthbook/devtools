@@ -2,11 +2,29 @@ import React, { useEffect, useState } from "react";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
+<<<<<<< Updated upstream
 import { Button, Checkbox, Container, Flex, Text } from "@radix-ui/themes";
+=======
+import {
+  Button,
+  Checkbox,
+  Container,
+  Flex,
+  Select,
+  Text,
+  TextField,
+} from "@radix-ui/themes";
+>>>>>>> Stashed changes
 import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
-import { PiXBold } from "react-icons/pi";
+import {
+  PiArrowClockwise,
+  PiCheckBold,
+  PiPlusCircle,
+  PiX,
+} from "react-icons/pi";
+import * as Form from "@radix-ui/react-form";
 import useApi from "../hooks/useApi";
 import { MW } from "@/app";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
@@ -87,15 +105,12 @@ export default function AttributesTab({
     );
   }, [attributesLoading, attributesError, attributesData]);
 
-  const [selectedArchetype, setSelectedArchetype] = useTabState<
-    Archetype | undefined
-  >("selectedArchetype", undefined);
-
-  const applyAttributes = () => {
-    let newAttributes: Attributes;
+  const [selectedArchetype, setSelectedArchetype] =
+    useTabState<Archetype | null>("selectedArchetype", null);
+  const applyAttributes = (newAttributes: Attributes | undefined) => {
     if (!jsonMode) {
       // check to see if the two objects are the same to avoid unnecessary updates
-      newAttributes = formAttributes;
+      newAttributes = newAttributes || (formAttributes as Attributes);
     } else {
       try {
         newAttributes = JSON.parse(textareaAttributes);
@@ -134,10 +149,10 @@ export default function AttributesTab({
     });
     if (Object.keys(newOverriddenAttributes).length > 0) {
       setForcedAttributes(true);
-      setSelectedArchetype(undefined);
+      setSelectedArchetype(null);
       setAttributes({ ...attributes, ...newOverriddenAttributes });
     } else if (Object.keys(newAttributes).length === 0) {
-      setSelectedArchetype(undefined);
+      setSelectedArchetype(null);
       setForcedAttributes(false);
     }
     attributesForm.reset({ ...attributes, ...newAttributes });
@@ -147,7 +162,7 @@ export default function AttributesTab({
   const resetAttributesOverride = () => {
     setForcedAttributes(false);
     setNewAppliedAttributeIds([]);
-    setSelectedArchetype(undefined);
+    setSelectedArchetype(null);
     setAttributes({});
     setDirty(false); // we want to wait for the next render to reset with the initial attributes
   };
@@ -194,39 +209,37 @@ export default function AttributesTab({
               className="border-b border-b-slate-200"
               style={{ height: SUBHEAD_H }}
             >
+              <Text size="1" weight="medium">
+                {forcedAttributes
+                  ? selectedArchetype?.name || "Custom Attributes"
+                  : "User Attributes"}
+              </Text>
               <Flex gap="2" align="center">
-                <Text size="1" weight="medium">
-                  {forcedAttributes
-                    ? selectedArchetype?.name || "Custom Attributes"
-                    : "User Attributes"}
-                </Text>
-                {forcedAttributes && (
+                {forcedAttributes && !selectedArchetype && (
                   <Button
-                    color="amber"
-                    variant="solid"
-                    radius="full"
+                    color="red"
+                    variant="ghost"
                     size="1"
-                    onClick={(e) => {
-                      e.preventDefault();
+                    onClick={() => {
                       resetAttributesOverride();
                     }}
-                    className="flex gap-1 items-center bg-amber-200 text-amber-700 hover:bg-amber-300"
+                    className="flex gap-1"
                   >
-                    Clear override
-                    <PiXBold />
+                    <PiX />
+                    Clear Overrides
                   </Button>
                 )}
+                <label className="flex items-center text-xs cursor-pointer select-none">
+                  <Checkbox
+                    checked={jsonMode}
+                    onCheckedChange={() => setJsonMode(!jsonMode)}
+                    size="1"
+                    mr="1"
+                    className="cursor-pointer"
+                  />
+                  <span>JSON input</span>
+                </label>
               </Flex>
-              <label className="flex items-center text-xs cursor-pointer select-none">
-                <Checkbox
-                  checked={jsonMode}
-                  onCheckedChange={() => setJsonMode(!jsonMode)}
-                  size="1"
-                  mr="1"
-                  className="cursor-pointer"
-                />
-                <span>JSON input</span>
-              </label>
             </Flex>
 
             <Container className="p-3" overflowX="hidden">
@@ -243,77 +256,6 @@ export default function AttributesTab({
                 saveOnBlur={applyAttributes}
               />
             </Container>
-            {/* <Flex
-              align="center"
-              justify="between"
-              width="100%"
-              className="shadow-sm-up border-t border-t-slate-200 px-3"
-              style={{ height: CTAS_H }}
-            >
-              <Popover.Root
-                open={saveArchetypeOpen}
-                onOpenChange={(o) => setSaveArchetypeOpen(o)}
-              >
-                <Popover.Trigger>
-                  <Button variant="ghost">Save...</Button>
-                </Popover.Trigger>
-                <Popover.Content style={{ width: 200 }}>
-                  <Form.Root
-                    className="FormRoot small"
-                    onSubmit={submitArchetypeForm}
-                  >
-                    {canSaveToExistingArchetype && (
-                      <Form.Field className="FormField" name="type">
-                        <Form.Label className="FormLabel">
-                          Save User Attributes as...
-                        </Form.Label>
-                        <RadioGroup.Root
-                          value={saveArchetypeForm.watch("type")}
-                          onValueChange={(value) => {
-                            saveArchetypeForm.setValue("type", value);
-                          }}
-                        >
-                          <RadioGroup.Item value="new">
-                            New Archetype
-                          </RadioGroup.Item>
-                          <RadioGroup.Item value="existing">
-                            Update "{appliedArchetype.name}"
-                          </RadioGroup.Item>
-                        </RadioGroup.Root>
-                      </Form.Field>
-                    )}
-                    {saveArchetypeForm.watch("type") === "new" && (
-                      <Form.Field className="FormField" name="name">
-                        <Form.Label className="FormLabel">
-                          Archetype Name
-                        </Form.Label>
-                        <Form.Control asChild>
-                          <input
-                            className="Input"
-                            {...saveArchetypeForm.register("name")}
-                          />
-                        </Form.Control>
-                      </Form.Field>
-                    )}
-                    <div className="mt-2">
-                      <Form.Submit
-                        asChild
-                        disabled={
-                          (saveArchetypeForm.watch("type") === "new" &&
-                            !newArchetypeIsValid) ||
-                          (saveArchetypeForm.watch("type") === "existing" &&
-                            !canSaveToExistingArchetype)
-                        }
-                      >
-                        <Button size="1" className="w-full">
-                          Save
-                        </Button>
-                      </Form.Submit>
-                    </div>
-                  </Form.Root>
-                </Popover.Content>
-              </Popover.Root>
-            </Flex> */}
           </div>
         </div>
       </div>
