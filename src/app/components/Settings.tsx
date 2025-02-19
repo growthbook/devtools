@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import * as Form from "@radix-ui/react-form";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { useForm } from "react-hook-form";
-import {Button, Checkbox, Link} from "@radix-ui/themes";
+import { Button, Checkbox, Link } from "@radix-ui/themes";
 
 const NAMESPACE = "devtools";
 const VERSION = "v1";
@@ -80,7 +80,8 @@ const SettingsForm = ({ close }: { close?: () => void }) => {
           >
             Access Token
           </Link>{" "}
-          for a better DevTools experience. Syncs your Attributes, Archetypes, and meta information. Required for Visual Editor.
+          for a better DevTools experience. Syncs your Attributes, Archetypes,
+          and meta information. Required for Visual Editor.
         </div>
       </Form.Field>
 

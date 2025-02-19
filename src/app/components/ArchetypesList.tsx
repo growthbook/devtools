@@ -22,7 +22,7 @@ export default function ArchetypesList() {
   const [appOrigin, _setAppOrigin, _appOriginReady] = useGlobalState(
     APP_ORIGIN,
     CLOUD_APP_ORIGIN,
-    true
+    true,
   );
 
   const {
@@ -91,7 +91,8 @@ export default function ArchetypesList() {
           disabled={!selectedArchetype}
         >
           <Flex gap="1" align="center">
-          <div className="w-4">{!selectedArchetype && <PiCheck />}</div> <Text> Current User</Text>
+            <div className="w-4">{!selectedArchetype && <PiCheck />}</div>{" "}
+            <Text> Current User</Text>
           </Flex>
         </DropdownMenu.Item>
         <DropdownMenu.Separator />
@@ -105,7 +106,9 @@ export default function ArchetypesList() {
             disabled={selectedArchetype?.id === arch.id}
           >
             <Flex gap="1" align="center">
-              <div className="w-4">{selectedArchetype?.id === arch.id && <PiCheck />} </div>
+              <div className="w-4">
+                {selectedArchetype?.id === arch.id && <PiCheck />}{" "}
+              </div>
               <Text> {arch.name}</Text>
             </Flex>
           </DropdownMenu.Item>
@@ -119,13 +122,17 @@ export default function ArchetypesList() {
               window.open(
                 `${appOrigin}/archetypes`,
                 "_blank",
-                "noopener,noreferrer"
+                "noopener,noreferrer",
               );
             }
           }
         >
           <Flex gap="1" align="center">
-          <div className="w-4"> <PiPencilSimple /></div> <Text> Manage Archetypes</Text>{" "}
+            <div className="w-4">
+              {" "}
+              <PiPencilSimple />
+            </div>{" "}
+            <Text> Manage Archetypes</Text>{" "}
           </Flex>
         </DropdownMenu.Item>
       </DropdownMenu.Content>

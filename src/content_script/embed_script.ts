@@ -292,14 +292,13 @@ function subscribeToSdkChanges(
       if ("isNoopCallback" in callback && callback.isNoopCallback) {
         gb.setDeferredTrackingCalls([
           ...gb.getDeferredTrackingCalls(),
-          {experiment, result}
+          { experiment, result },
         ]);
       }
       callback(experiment, result);
     };
     if ("isNoopCallback" in callback && callback.isNoopCallback) {
       patchedCallBack.isNoopCallback = true;
-      
     } else {
       patchedCallBack.originalParams = callback
         .toString()

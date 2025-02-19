@@ -29,11 +29,11 @@ export default function AttributesTab({
 
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
-    false
+    false,
   );
   const [forcedAttributes, setForcedAttributes] = useTabState<boolean>(
     "forcedAttributes",
-    false
+    false,
   );
   const [newAppliedAttributeIds, setNewAppliedAttributeIds] = useTabState<
     string[]
@@ -44,7 +44,7 @@ export default function AttributesTab({
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
     "allArchetypes",
     [],
-    true
+    true,
   );
   const {
     isLoading: archetypesLoading,
@@ -61,8 +61,8 @@ export default function AttributesTab({
           (archetypesData.archetypes || []).map((arch) => ({
             ...arch,
             source: "growthbook",
-          }))
-        )
+          })),
+        ),
     );
   }, [archetypesLoading, archetypesError, archetypesData]);
 
@@ -83,8 +83,8 @@ export default function AttributesTab({
         (attributesData.attributes || []).map((attr) => [
           attr.property,
           attr.datatype,
-        ])
-      )
+        ]),
+      ),
     );
   }, [attributesLoading, attributesError, attributesData]);
 
@@ -118,14 +118,14 @@ export default function AttributesTab({
             setNewAppliedAttributeIds([...newAppliedAttributeIds, key]);
           }
           return [key, newAttributes[key]];
-        })
+        }),
     );
     // check if newAttributes has any keys that are removed from attributes
     Object.keys(attributes).forEach((key) => {
       (key: string) => {
         if (!newAttributes.hasOwnProperty(key)) {
           setNewAppliedAttributeIds(
-            newAppliedAttributeIds.filter((id) => id !== key)
+            newAppliedAttributeIds.filter((id) => id !== key),
           );
         }
       };

@@ -75,14 +75,20 @@ export function DebugLogAccordion({
               className="trigger mb-0.5"
               style={{
                 textAlign: "left",
-                ...(!disableAccordion ? {
-                  textIndent: -14,
-                  marginLeft: 12,
-                } : {}),
+                ...(!disableAccordion
+                  ? {
+                      textIndent: -14,
+                      marginLeft: 12,
+                    }
+                  : {}),
               }}
             >
               {!disableAccordion && (
-                <PiCaretRightFill className="caret mr-0.5 relative" size={12} style={{ top: -1.5 }} />
+                <PiCaretRightFill
+                  className="caret mr-0.5 relative"
+                  size={12}
+                  style={{ top: -1.5 }}
+                />
               )}
               <span
                 className={clsx(

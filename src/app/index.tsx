@@ -22,7 +22,8 @@ import {
   PiCircleFill,
   PiGearSixFill,
   PiWarningFill,
-  PiWarningOctagonFill, PiArrowsClockwise,
+  PiWarningOctagonFill,
+  PiArrowsClockwise,
 } from "react-icons/pi";
 import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
@@ -118,11 +119,11 @@ export const App = () => {
               <Tabs.List>
                 <div
                   className="flex items-center mx-auto w-full"
-                  style={{maxWidth: MW}}
+                  style={{ maxWidth: MW }}
                 >
-                  <div className="mx-2"/>
+                  <div className="mx-2" />
                   <Tabs.Trigger value="features">
-                    <NavLabel type="features" forcedFeatures={forcedFeatures}/>
+                    <NavLabel type="features" forcedFeatures={forcedFeatures} />
                   </Tabs.Trigger>
                   <Tabs.Trigger value="experiments">
                     <NavLabel
@@ -137,12 +138,12 @@ export const App = () => {
                     />
                   </Tabs.Trigger>
                   <Tabs.Trigger value="logs">
-                    <NavLabel type="logs"/>
+                    <NavLabel type="logs" />
                   </Tabs.Trigger>
                   <Tabs.Trigger value="sdkDebug">
-                    <NavLabel type="sdkDebug" sdkStatus={sdkStatus}/>
+                    <NavLabel type="sdkDebug" sdkStatus={sdkStatus} />
                   </Tabs.Trigger>
-                  <div className="flex-1"/>
+                  <div className="flex-1" />
                   <div className="flex items-center gap-3 flex-grow-0 flex-shrink-0">
                     <SettingsButton
                       apiKeyReady={apiKeyReady}
@@ -150,11 +151,11 @@ export const App = () => {
                       setSettingsOpen={setSettingsOpen}
                     />
                   </div>
-                  <div className="mx-2"/>
+                  <div className="mx-2" />
                 </div>
               </Tabs.List>
             </Tabs.Root>
-            ) : (
+          ) : (
             <div className="flex items-center justify-between">
               <Select.Root value={currentTab} onValueChange={setCurrentTab}>
                 <Select.Trigger

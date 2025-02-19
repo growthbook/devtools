@@ -1,11 +1,16 @@
-import React, {ReactElement, useEffect, useMemo, useState} from "react";
+import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import useTabState from "../hooks/useTabState";
 import { SDKHealthCheckResult } from "devtools";
-import {Button, IconButton, Link, Text} from "@radix-ui/themes";
+import { Button, IconButton, Link, Text } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
 import { MW, NAV_H } from "@/app";
 import clsx from "clsx";
-import {PiArrowsClockwise, PiCaretRight, PiCaretRightFill, PiXBold} from "react-icons/pi";
+import {
+  PiArrowsClockwise,
+  PiCaretRight,
+  PiCaretRightFill,
+  PiXBold,
+} from "react-icons/pi";
 import * as Accordion from "@radix-ui/react-accordion";
 
 export const LEFT_PERCENT = 0.5;
@@ -86,18 +91,19 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
       ? "orange"
       : "red";
 
-
-  const item: {
-    title: string;
-    content: ReactElement | null;
-  } | undefined = useMemo(() => {
+  const item:
+    | {
+        title: string;
+        content: ReactElement | null;
+      }
+    | undefined = useMemo(() => {
     switch (selectedItem) {
       case "payload":
         return {
           title: "SDK Payload",
           content: (
-            <ValueField value={payload} valueType="json" maxHeight={null}/>
-          )
+            <ValueField value={payload} valueType="json" maxHeight={null} />
+          ),
         };
 
       case "status":
@@ -108,20 +114,28 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
               {!sdkFound ? (
                 <>
                   {sdkFound === undefined ? (
-                    <Text as="div" size="2" weight="regular" mb="4" color="gray">
+                    <Text
+                      as="div"
+                      size="2"
+                      weight="regular"
+                      mb="4"
+                      color="gray"
+                    >
                       Attempting to connect to SDK...
                     </Text>
-                  ): null}
+                  ) : null}
                   <Text as="div" size="2" weight="regular" mb="3">
                     No SDK was found.
                   </Text>
                   <Text as="div" size="2" weight="regular" mb="3">
-                    Ensure that <code className="text-pink-800">enableDevMode: true</code>{" "}
-                    is set when creating your GrowthBook SDK instance (JavaScript and React only).
+                    Ensure that{" "}
+                    <code className="text-pink-800">enableDevMode: true</code>{" "}
+                    is set when creating your GrowthBook SDK instance
+                    (JavaScript and React only).
                   </Text>
                   <Text as="div" size="2" weight="regular" mb="6">
-                    If your site has a Content Security Policy (CSP), check whether the CSP allows
-                    your HTML Script Tag or SDK to load.{" "}
+                    If your site has a Content Security Policy (CSP), check
+                    whether the CSP allows your HTML Script Tag or SDK to load.{" "}
                     <Link
                       size="2"
                       href="https://docs.growthbook.io/lib/script-tag#content-security-policy-csp"
@@ -190,7 +204,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 </Button>
               </div>
             </>
-          )
+          ),
         };
 
       case "version":
@@ -208,12 +222,14 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                   <Text>
                     Detected version <strong>{version}</strong> of the
                     JavaScript SDK.
-                    {hasWindowConfig ? " Embedded via the HTML Script Tag." : null}
+                    {hasWindowConfig
+                      ? " Embedded via the HTML Script Tag."
+                      : null}
                   </Text>
                 </>
               )}
             </Text>
-          )
+          ),
         };
 
       case "trackingCallback":
@@ -251,7 +267,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 </>
               )}
             </Text>
-          )
+          ),
         };
 
       case "logEvent":
@@ -268,12 +284,12 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 <>
                   The SDK is not using a{" "}
                   <code className="text-pink-800">logEvent</code> callback. This
-                  optional callback allows you to track events to a data warehouse
-                  directly from the SDK.
+                  optional callback allows you to track events to a data
+                  warehouse directly from the SDK.
                 </>
               )}
             </Text>
-          )
+          ),
         };
 
       case "onFeatureUsage":
@@ -284,17 +300,19 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
               {usingOnFeatureUsage ? (
                 <>
                   The SDK is using an{" "}
-                  <code className="text-pink-800">onFeatureUsage</code> callback.
+                  <code className="text-pink-800">onFeatureUsage</code>{" "}
+                  callback.
                 </>
               ) : (
                 <>
                   The SDK is not using a{" "}
-                  <code className="text-pink-800">onFeatureUsage</code> callback. This
-                  optional callback allows you to track feature flag telemetry to a data warehouse.
+                  <code className="text-pink-800">onFeatureUsage</code>{" "}
+                  callback. This optional callback allows you to track feature
+                  flag telemetry to a data warehouse.
                 </>
               )}
             </Text>
-          )
+          ),
         };
 
       case "security":
@@ -310,7 +328,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                   ? "The SDK is using remote evaluation."
                   : "The SDK is not using a decryption key or remote evaluation. The payload is in plain text."}
             </Text>
-          )
+          ),
         };
 
       case "stickyBucketing":
@@ -331,15 +349,8 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 >
                   <Accordion.Item value="debug-log">
                     <Accordion.Trigger className="trigger mb-0.5">
-                      <Link
-                        size="2"
-                        role="button"
-                        className="hover:underline"
-                      >
-                        <PiCaretRightFill
-                          className="caret mr-0.5"
-                          size={12}
-                        />
+                      <Link size="2" role="button" className="hover:underline">
+                        <PiCaretRightFill className="caret mr-0.5" size={12} />
                         Sticky bucket assignments
                       </Link>
                     </Accordion.Trigger>
@@ -354,7 +365,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 </Accordion.Root>
               ) : null}
             </>
-          )
+          ),
         };
 
       case "streaming":
@@ -386,15 +397,13 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 </div>
               </Text>
             </>
-          )
+          ),
         };
 
       default:
         return undefined;
     }
-  },
-    [selectedItem, sdkData, refreshing]
-  );
+  }, [selectedItem, sdkData, refreshing]);
 
   const fullWidthListView = !selectedItem;
   const leftPercent = fullWidthListView ? 1 : LEFT_PERCENT;
@@ -568,21 +577,16 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
           pointerEvents: !open ? "none" : undefined,
         }}
       >
-        <div
-          className="featureDetail"
-          key={`selected_${selectedItem}`}
-        >
+        <div className="featureDetail" key={`selected_${selectedItem}`}>
           <div className="header">
             <div className="flex items-start gap-2">
-              <h2 className="font-bold flex-1 my-1.5">
-                {item?.title}
-              </h2>
+              <h2 className="font-bold flex-1 my-1.5">{item?.title}</h2>
               {isResponsive && (
                 <IconButton
                   size="3"
                   variant="ghost"
                   radius="full"
-                  style={{margin: "0 -8px -10px 0"}}
+                  style={{ margin: "0 -8px -10px 0" }}
                   onClick={(e) => {
                     e.preventDefault();
                     setSelectedItem(undefined);
@@ -594,9 +598,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
             </div>
           </div>
           <div className="content">
-            <div className="my-2">
-              {item?.content}
-            </div>
+            <div className="my-2">{item?.content}</div>
           </div>
         </div>
       </div>

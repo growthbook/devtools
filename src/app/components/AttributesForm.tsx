@@ -11,11 +11,7 @@ import {
 } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
-import {
-  PiCaretDownFill,
-  PiPlusCircleFill,
-  PiX,
-} from "react-icons/pi";
+import { PiCaretDownFill, PiPlusCircleFill, PiX } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import useDebounce from "@/app/hooks/useDebounce";
 import clsx from "clsx";
@@ -121,7 +117,7 @@ export default function AttributesForm({
 
   const attributesWithoutCustom = useMemo(() => {
     return Object.keys(formAttributes).filter(
-      (key) => !newAppliedAttributeIds.includes(key)
+      (key) => !newAppliedAttributeIds.includes(key),
     );
   }, [formAttributes, newAppliedAttributeIds]);
 
@@ -263,7 +259,12 @@ export default function AttributesForm({
                               open={addCustomIdDropdownOpen}
                               onOpenChange={(o) => {
                                 setTimeout(() => {
-                                  if (!o && document.activeElement === addCustomIdRef.current) return;
+                                  if (
+                                    !o &&
+                                    document.activeElement ===
+                                      addCustomIdRef.current
+                                  )
+                                    return;
                                   setAddCustomIdDropdownOpen(o);
                                 }, 50);
                               }}
@@ -274,7 +275,7 @@ export default function AttributesForm({
                                   className="cursor-pointer"
                                   onClick={() => {
                                     setAddCustomIdDropdownOpen(
-                                      !addCustomIdDropdownOpen
+                                      !addCustomIdDropdownOpen,
                                     );
                                   }}
                                   side="right"
@@ -295,8 +296,11 @@ export default function AttributesForm({
                                       (key) =>
                                         !Object.prototype.hasOwnProperty.call(
                                           formAttributes,
-                                          key
-                                        ) && key.includes(addCustomIdRef?.current?.value || "")
+                                          key,
+                                        ) &&
+                                        key.includes(
+                                          addCustomIdRef?.current?.value || "",
+                                        ),
                                     )
                                     .map((key) => (
                                       <DropdownMenu.Item
@@ -341,7 +345,7 @@ export default function AttributesForm({
                         role="button"
                         onClick={(e) => {
                           e.preventDefault();
-                          cancelAddCustomField()
+                          cancelAddCustomField();
                         }}
                       >
                         Cancel
@@ -368,7 +372,8 @@ export default function AttributesForm({
                       setAddingCustom(true);
                       setAddCustomIdDropdownOpen(true);
 
-                      const container = document.querySelector("#attributesTab");
+                      const container =
+                        document.querySelector("#attributesTab");
                       window.setTimeout(() => {
                         container?.scroll?.({
                           top: container?.scrollHeight,
@@ -436,7 +441,7 @@ function renderInputField({
   let attributeType = getAttributeType(
     attributeKey,
     form.watch(attributeKey),
-    schema
+    schema,
   );
   //
 
