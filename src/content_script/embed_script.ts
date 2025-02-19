@@ -16,6 +16,7 @@ import { decrypt } from "node_modules/@growthbook/growthbook/dist/util";
 declare global {
   interface Window {
     _growthbook?: GrowthBook;
+    growthbook_config?: any;
   }
 }
 
@@ -387,6 +388,8 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
 
   const usingLogEvent = typeof gbContext.eventLogger === "function";
 
+  const usingOnFeatureUsage = typeof gbContext.onFeatureUsage === "function";
+
   const isRemoteEval = gb.isRemoteEval();
 
   const usingStickyBucketing = gbContext.stickyBucketService !== undefined;
@@ -434,6 +437,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     hasPayload,
     devModeEnabled,
     version: gb?.version,
+    hasWindowConfig: !!window?.growthbook_config,
     sdkFound: true,
     clientKey,
     payload,
@@ -442,6 +446,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     hasDecryptionKey,
     payloadDecrypted,
     usingLogEvent,
+    usingOnFeatureUsage,
     isRemoteEval,
     usingStickyBucketing,
     stickyBucketAssignmentDocs,

@@ -208,6 +208,7 @@ type SDKHealthCheckResult = {
   hasClientKey?: boolean;
   errorMessage?: string;
   version?: string;
+  hasWindowConfig?: boolean;
   sdkFound?: boolean;
   clientKey?: string;
   isLoading?: boolean;
@@ -218,6 +219,7 @@ type SDKHealthCheckResult = {
   hasDecryptionKey?: boolean;
   payloadDecrypted?:boolean;
   usingLogEvent?: boolean;
+  usingOnFeatureUsage?: boolean;
   isRemoteEval?: boolean;
   usingStickyBucketing?: boolean;
   stickyBucketAssignmentDocs?: Record<string, StickyAssignmentsDocument>;

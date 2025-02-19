@@ -5,7 +5,8 @@ import { IconButton, Link, Text } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
 import { MW, NAV_H } from "@/app";
 import clsx from "clsx";
-import {PiCaretRight, PiCaretRightBold, PiCaretRightFill, PiXBold} from "react-icons/pi";
+import {PiCaretRight, PiCaretRightFill, PiXBold} from "react-icons/pi";
+import * as Accordion from "@radix-ui/react-accordion";
 
 export const LEFT_PERCENT = 0.5;
 
@@ -18,6 +19,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
   const {
     sdkFound,
     version,
+    hasWindowConfig,
     errorMessage,
     canConnect,
     hasPayload,
@@ -27,8 +29,10 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
     hasDecryptionKey,
     payloadDecrypted,
     usingLogEvent,
+    usingOnFeatureUsage,
     isRemoteEval,
     usingStickyBucketing,
+    stickyBucketAssignmentDocs,
     streaming,
     apiHost,
     clientKey,
@@ -89,9 +93,11 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
             <>
               {!sdkFound ? (
                 <>
-                  <Text as="div" size="2" weight="regular" mb="4" color="gray">
-                    Attempting to connect to SDK...
-                  </Text>
+                  {sdkFound === undefined ? (
+                    <Text as="div" size="2" weight="regular" mb="4" color="gray">
+                      Attempting to connect to SDK...
+                    </Text>
+                  ): null}
                   <Text as="div" size="2" weight="regular" mb="2">
                     No SDK was found. Please refer to our SDK implementation
                     guide.
@@ -152,11 +158,13 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                   version of the SDK. Consider updating to the latest version.
                 </Text>
               ) : (
-                <Text>
-                  {" "}
-                  You are using version <strong>{version}</strong> of the
-                  JavaScript SDK.
-                </Text>
+                <>
+                  <Text>
+                    Detected version <strong>{version}</strong> of the
+                    JavaScript SDK.
+                    {hasWindowConfig ? " Embedded via the HTML Script Tag." : null}
+                  </Text>
+                </>
               )}
             </Text>
           )
@@ -214,8 +222,29 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 <>
                   The SDK is not using a{" "}
                   <code className="text-pink-800">logEvent</code> callback. This
-                  callback is optional but you can add one to track events to
-                  your data warehouse.
+                  optional callback allows you to track events to a data warehouse
+                  directly from the SDK.
+                </>
+              )}
+            </Text>
+          )
+        };
+
+      case "onFeatureUsage":
+        return {
+          title: "On Feature Usage Callback",
+          content: (
+            <Text as="div" size="2" weight="regular">
+              {usingOnFeatureUsage ? (
+                <>
+                  The SDK is using an{" "}
+                  <code className="text-pink-800">onFeatureUsage</code> callback.
+                </>
+              ) : (
+                <>
+                  The SDK is not using a{" "}
+                  <code className="text-pink-800">onFeatureUsage</code> callback. This
+                  optional callback allows you to track feature flag telemetry to a data warehouse.
                 </>
               )}
             </Text>
@@ -242,11 +271,43 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
         return {
           title: "Sticky Bucketing",
           content: (
-            <Text as="div" size="2" weight="regular">
-              {usingStickyBucketing
-                ? "The SDK is using sticky bucketing."
-                : "The SDK is not using sticky bucketing. Sticky bucketing is optional and is used to ensure that users are consistently bucketed."}
-            </Text>
+            <>
+              <Text as="div" size="2" weight="regular">
+                {usingStickyBucketing
+                  ? "The SDK is using sticky bucketing."
+                  : "The SDK is not using sticky bucketing. Sticky bucketing is optional and is used to ensure that users are consistently bucketed."}
+              </Text>
+              {usingStickyBucketing && stickyBucketAssignmentDocs ? (
+                <Accordion.Root
+                  className="accordion mt-2"
+                  type="single"
+                  collapsible
+                >
+                  <Accordion.Item value="debug-log">
+                    <Accordion.Trigger className="trigger mb-0.5">
+                      <Link
+                        size="2"
+                        role="button"
+                        className="hover:underline"
+                      >
+                        <PiCaretRightFill
+                          className="caret mr-0.5"
+                          size={12}
+                        />
+                        Sticky bucket assignments
+                      </Link>
+                    </Accordion.Trigger>
+                    <Accordion.Content className="accordionInner overflow-hidden w-full">
+                      <ValueField
+                        value={Object.values(stickyBucketAssignmentDocs)}
+                        valueType="json"
+                        maxHeight={null}
+                      />
+                    </Accordion.Content>
+                  </Accordion.Item>
+                </Accordion.Root>
+              ) : null}
+            </>
           )
         };
 
@@ -286,7 +347,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
         return undefined;
     }
   },
-    [selectedItem]
+    [selectedItem, sdkData]
   );
 
   useEffect(() => window.scrollTo({ top: 0 }), []);
@@ -357,21 +418,6 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
             </div>
 
             <div
-              key={`sdkTab_sdkItems_logEvent`}
-              className={clsx("itemCard flex items-center justify-between", {
-                selected: selectedItem === "logEvent",
-              })}
-              onClick={() => setSelectedItem("logEvent")}
-            >
-              <ItemStatus
-                title="Log Event Callback"
-                status={usingLogEvent}
-                color="gray"
-                showCaret={isResponsive}
-              />
-            </div>
-
-            <div
               key={`sdkTab_sdkItems_security`}
               className={clsx("itemCard flex items-center justify-between", {
                 selected: selectedItem === "security",
@@ -430,6 +476,36 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                 showCaret={isResponsive}
               />
             </div>
+
+            <div
+              key={`sdkTab_sdkItems_logEvent`}
+              className={clsx("itemCard flex items-center justify-between", {
+                selected: selectedItem === "logEvent",
+              })}
+              onClick={() => setSelectedItem("logEvent")}
+            >
+              <ItemStatus
+                title="Log Event Callback"
+                status={usingLogEvent}
+                color="gray"
+                showCaret={isResponsive}
+              />
+            </div>
+
+            <div
+              key={`sdkTab_sdkItems_onFeatureUsage`}
+              className={clsx("itemCard flex items-center justify-between", {
+                selected: selectedItem === "onFeatureUsage",
+              })}
+              onClick={() => setSelectedItem("onFeatureUsage")}
+            >
+              <ItemStatus
+                title="On Feature Usage Callback"
+                status={usingOnFeatureUsage}
+                color="gray"
+                showCaret={isResponsive}
+              />
+            </div>
           </>
         )}
       </div>
@@ -462,7 +538,7 @@ export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
                   size="3"
                   variant="ghost"
                   radius="full"
-                  style={{ margin: "0 -8px -10px 0" }}
+                  style={{margin: "0 -8px -10px 0"}}
                   onClick={(e) => {
                     e.preventDefault();
                     setSelectedItem(undefined);

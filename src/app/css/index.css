@@ -81,8 +81,8 @@
 }
 
 .itemCard {
-  @apply my-2 mx-4 py-1 rounded-md relative items-center cursor-pointer overflow-hidden select-none;
-  height: 48px;
+  @apply my-2 mx-4 py-1 rounded-md relative items-center cursor-pointer select-none;
+  min-height: 40px;
 }
 .itemCard:not(.selected):hover {
   @apply bg-violet-1;
