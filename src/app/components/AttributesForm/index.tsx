@@ -52,7 +52,9 @@ export default function AttributesForm({
         ? 0
         : customAttrType === "boolean"
           ? false
-          : "";
+          : arrayAttributeTypes.includes(customAttrType)
+            ? []
+            : "";
     setNewAppliedAttributeIds([...newAppliedAttributeIds, customAttrId]);
     setCustomAttrSchema({
       ...customAttrSchema,
@@ -301,21 +303,12 @@ function renderInputField({
             placeholder="Add to list..."
             className="text-sm"
             menuPlacement="top"
-            value={form
-              .watch(attributeKey)
-              .split(",")
-              .map((segment: string) => segment.trim())
-              .filter((entry: string) => entry !== "")}
-            options={form
-              .watch(attributeKey)
-              .split(",")
-              .map((segment: string) => segment.trim())
-              .filter((entry: string) => entry !== "")
-              .map((entry: string) => ({
-                value: entry,
-                label: entry,
-              }))}
-            onChange={(v) => form.setValue(attributeKey, v.join(","))}
+            value={form.watch(attributeKey)}
+            options={form.watch(attributeKey).map((entry: string) => ({
+              value: entry,
+              label: entry,
+            }))}
+            onChange={(v) => form.setValue(attributeKey, v)}
             formatCreateLabel={(input: string) => `Add "${input}"`}
             validOptionPattern={attributeType === "number[]" ? "^\\d+$" : ".+"}
           />
