@@ -76,147 +76,181 @@ export default function AddCustomAttribute({
     }
   };
 
-  return addingCustom ? (
-    <Form.Root className="pb-2">
-      <Form.Field className="FormFieldInline my-1 w-full" name="type">
-        <Flex direction={isTiny ? "row" : "column"}>
-          <Form.Label className="FormLabel mr-1 text-nowrap">
-            <div className="inline-block -mb-2 overflow-hidden overflow-ellipsis">
-              Field Type
-            </div>
-          </Form.Label>
-        </Flex>
-        <Flex gap="2" align="center" className="w-full">
-          <div className="w-full">
-            <TextField.Root
-              key={"addCustomAttributeField"}
-              ref={addCustomIdRef}
-              type="text"
-              list="schema-attributes"
-              autoFocus
-              className=""
-              placeholder="field name"
-              value={addCustomId}
-              onClick={() => setAddCustomIdDropdownOpen(true)}
-              onChange={(e) => {
-                const v = e.target.value;
-                setAddCustomId(v);
-              }}
-              onKeyDown={(e) => {
-                if (e.code === "Enter" && addCustomId.trim()) {
-                  submit();
-                  setAddCustomIdDropdownOpen(false);
-                }
+  if (!addingCustom)
+    return (
+      <Button
+        color="violet"
+        variant="ghost"
+        size="2"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setAddingCustom(true);
+          setAddCustomIdDropdownOpen(true);
+
+          const container = document.querySelector("#attributesTab");
+          window.setTimeout(() => {
+            container?.scroll?.({
+              top: container?.scrollHeight,
+              behavior: "smooth",
+            });
+          }, 50);
+        }}
+        className="flex mt-1"
+      >
+        <PiPlusCircleFill />
+        Add Field
+      </Button>
+    );
+
+  return (
+    <Form.Root className="pb-2" onSubmit={submit}>
+      <Flex direction={isTiny ? "column" : "row"}>
+        <Form.Field className="FormFieldInline my-1" name="type">
+          <Flex
+            direction={isTiny ? "row" : "column"}
+            px="2"
+            justify="between"
+            flexGrow="1"
+          >
+            <Form.Label className="FormLabel mr-1 text-nowrap">
+              <div className="inline-block -mb-2 overflow-hidden overflow-ellipsis">
+                Field Type
+              </div>
+            </Form.Label>
+
+            <Select.Root
+              defaultValue="string"
+              size="2"
+              value={addCustomType}
+              onValueChange={(v) => setAddCustomType(v as SDKAttributeType)}
+              disabled={!!schema?.[addCustomId]}
+            >
+              <Select.Trigger>
+                {attributeTypeReadable(addCustomType)}
+              </Select.Trigger>
+              <Select.Content>
+                <Select.Item value="string">String</Select.Item>
+                <Select.Item value="number">Number</Select.Item>
+                <Select.Item value="boolean">Boolean</Select.Item>
+                {/*todo: number[], string[]*/}
+              </Select.Content>
+            </Select.Root>
+          </Flex>
+        </Form.Field>
+        <Form.Field className="FormFieldInline my-1" name="name">
+          <Flex
+            direction={isTiny ? "row" : "column"}
+            px="2"
+            justify="between"
+            flexGrow="1"
+          >
+            <Form.Label className="FormLabel mr-1 text-nowrap">
+              <div className="inline-block -mb-2 overflow-hidden overflow-ellipsis">
+                Field Name
+              </div>
+            </Form.Label>
+            <Flex align="center">
+              <TextField.Root
+                ml="1"
+                key={"addCustomAttributeField"}
+                ref={addCustomIdRef}
+                type="text"
+                list="schema-attributes"
+                autoFocus
+                placeholder="Search or enter custom"
+                value={addCustomId}
+                onClick={() => setAddCustomIdDropdownOpen(true)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setAddCustomId(v);
+                }}
+                onKeyDown={(e) => {
+                  if (e.code === "Enter" && addCustomId.trim()) {
+                    submit();
+                    setAddCustomIdDropdownOpen(false);
+                  }
+                }}
+              >
+                <DropdownMenu.Root
+                  open={addCustomIdDropdownOpen}
+                  onOpenChange={(o) => {
+                    setTimeout(() => {
+                      if (
+                        !o &&
+                        document.activeElement === addCustomIdRef.current
+                      )
+                        return;
+                      setAddCustomIdDropdownOpen(o);
+                    }, 50);
+                  }}
+                  modal={false}
+                >
+                  <DropdownMenu.Trigger>
+                    <TextField.Slot
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setAddCustomIdDropdownOpen(true);
+                      }}
+                      side="right"
+                    >
+                      <PiCaretDownFill />
+                    </TextField.Slot>
+                  </DropdownMenu.Trigger>
+                  <DropdownMenu.Content
+                    align="end"
+                    onCloseAutoFocus={() => addCustomIdRef?.current?.focus()}
+                  >
+                    <div id="schema-attributes">
+                      {unusedSchemaAttributes.map((key) => (
+                        <DropdownMenu.Item
+                          onSelect={() => {
+                            setAddCustomId(key);
+                            setAddCustomIdDropdownOpen(false);
+                          }}
+                          key={key}
+                        >
+                          {key}
+                        </DropdownMenu.Item>
+                      ))}
+                    </div>
+                  </DropdownMenu.Content>
+                </DropdownMenu.Root>
+              </TextField.Root>
+            </Flex>
+          </Flex>
+        </Form.Field>
+        <Flex my="1" direction={isTiny ? "row" : "column"} px="2" justify="end">
+          <label className="FormLabel mr-1 text-nowrap">
+            <div className="inline-block -mb-2 overflow-hidden overflow-ellipsis"></div>
+          </label>
+          <Flex align="center">
+            <Link
+              href="#"
+              size="2"
+              role="button"
+              onClick={(e) => {
+                e.preventDefault();
+                cancelAddCustomField();
               }}
             >
-              <DropdownMenu.Root
-                open={addCustomIdDropdownOpen}
-                onOpenChange={(o) => {
-                  setTimeout(() => {
-                    if (!o && document.activeElement === addCustomIdRef.current)
-                      return;
-                    setAddCustomIdDropdownOpen(o);
-                  }, 50);
-                }}
-                modal={false}
-              >
-                <DropdownMenu.Trigger>
-                  <TextField.Slot
-                    className="cursor-pointer"
-                    onClick={() => {
-                      setAddCustomIdDropdownOpen(true);
-                    }}
-                    side="right"
-                  >
-                    <PiCaretDownFill />
-                  </TextField.Slot>
-                </DropdownMenu.Trigger>
-                <DropdownMenu.Content
-                  align="end"
-                  onCloseAutoFocus={() => addCustomIdRef?.current?.focus()}
-                >
-                  <div id="schema-attributes">
-                    {unusedSchemaAttributes.map((key) => (
-                      <DropdownMenu.Item
-                        onSelect={() => {
-                          setAddCustomId(key);
-                          setAddCustomIdDropdownOpen(false);
-                        }}
-                        key={key}
-                      >
-                        {key}
-                      </DropdownMenu.Item>
-                    ))}
-                  </div>
-                </DropdownMenu.Content>
-              </DropdownMenu.Root>
-            </TextField.Root>
-          </div>
-
-          <Select.Root
-            defaultValue="string"
-            size="2"
-            value={addCustomType}
-            onValueChange={(v) => setAddCustomType(v as SDKAttributeType)}
-            disabled={!!schema?.[addCustomId]}
-          >
-            <Select.Trigger>
-              {attributeTypeReadable(addCustomType)}
-            </Select.Trigger>
-            <Select.Content>
-              <Select.Item value="string">String</Select.Item>
-              <Select.Item value="number">Number</Select.Item>
-              <Select.Item value="boolean">Boolean</Select.Item>
-              {/*todo: number[], string[]*/}
-            </Select.Content>
-          </Select.Root>
+              Cancel
+            </Link>
+            <Button
+              type="button"
+              disabled={!addCustomId.trim()}
+              size="2"
+              onClick={submit}
+              style={{
+                textWrap: "nowrap",
+              }}
+              ml="2"
+            >
+              Add field
+            </Button>
+          </Flex>
         </Flex>
-      </Form.Field>
-      <div className="flex justify-end items-center gap-3 mt-2.5 -mb-1.5">
-        <Link
-          href="#"
-          size="2"
-          role="button"
-          onClick={(e) => {
-            e.preventDefault();
-            cancelAddCustomField();
-          }}
-        >
-          Cancel
-        </Link>
-        <Button
-          type="button"
-          disabled={!addCustomId.trim()}
-          size="2"
-          onClick={submit}
-        >
-          Add field
-        </Button>
-      </div>
+      </Flex>
     </Form.Root>
-  ) : (
-    <Button
-      color="violet"
-      variant="ghost"
-      size="2"
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setAddingCustom(true);
-        setAddCustomIdDropdownOpen(true);
-
-        const container = document.querySelector("#attributesTab");
-        window.setTimeout(() => {
-          container?.scroll?.({
-            top: container?.scrollHeight,
-            behavior: "smooth",
-          });
-        }, 50);
-      }}
-      className="flex gap-1 mt-1"
-    >
-      <PiPlusCircleFill />
-      Add Field
-    </Button>
   );
 }
