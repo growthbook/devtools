@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import * as Form from "@radix-ui/react-form";
-import { Button, Switch, Flex, TextField } from "@radix-ui/themes";
+import {Button, Switch, Flex, TextField, IconButton} from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
 import { PiX } from "react-icons/pi";
@@ -115,7 +115,7 @@ export default function AttributesForm({
               <em className="text-2xs">No attributes found</em>
             ) : (
               <Flex direction="column">
-                {attributesWithoutCustom.map((attributeKey, i) => {
+                {attributesWithoutCustom?.map((attributeKey, i) => {
                   return (
                     <div key={attributeKey}>
                       <Form.Field
@@ -125,10 +125,10 @@ export default function AttributesForm({
                           saveOnBlur?.();
                         }}
                       >
-                        <Form.Label className="FormLabel mr-1 text-nowrap">
+                        <Form.Label className="FormLabel mr-2 flex-shrink-0">
                           <div
-                            className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
-                            style={{ width: 100 }}
+                            className="inline-block line-clamp-2 leading-4 mt-1.5"
+                            style={{ width: 120 }}
                           >
                             {attributeKey}
                           </div>
@@ -145,51 +145,49 @@ export default function AttributesForm({
                     </div>
                   );
                 })}
-                <div className="border-t border-gray-200 mt-4 pt-4">
-                  {customAttributes.length > 0 && (
-                    <div className="mb-2">
-                      {customAttributes.map((attributeKey, i) => {
-                        return (
-                          <div key={attributeKey}>
-                            <Form.Field
-                              className="FormFieldInline my-1"
-                              name={attributeKey}
-                              onBlur={() => {
-                                saveOnBlur?.();
-                              }}
-                            >
-                              <Form.Label className="FormLabel mr-1 text-nowrap">
-                                <div
-                                  className="inline-block -mb-2 overflow-hidden overflow-ellipsis"
-                                  style={{ width: 100 }}
-                                >
-                                  {attributeKey}
-                                </div>
-                              </Form.Label>
-                              {renderInputField({
-                                attributeKey,
-                                form,
-                                schema,
-                                customAttrSchema,
-                                setDirty,
-                              })}
-                              <Button
-                                type="button"
-                                size="1"
-                                variant="ghost"
-                                color="red"
-                                className="ml-2 mr-1"
-                                onClick={() => removeField(attributeKey)}
-                              >
-                                <PiX />
-                              </Button>
-                            </Form.Field>
+                <div className="border-t border-gray-200 my-4 h-0" />
+                {customAttributes.length > 0 ? customAttributes?.map((attributeKey, i) => {
+                  return (
+                    <div key={attributeKey}>
+                      <Form.Field
+                        className="FormFieldInline my-1"
+                        name={attributeKey}
+                        onBlur={() => {
+                          saveOnBlur?.();
+                        }}
+                      >
+                        <Form.Label className="FormLabel mr-2 flex-shrink-0">
+                          <div
+                            className="inline-block line-clamp-2 leading-4 mt-1.5"
+                            style={{ width: 120 }}
+                          >
+                            {attributeKey}
                           </div>
-                        );
-                      })}
+                        </Form.Label>
+                        {renderInputField({
+                          attributeKey,
+                          form,
+                          schema,
+                          customAttrSchema,
+                          setDirty,
+                        })}
+                        <IconButton
+                          type="button"
+                          size="2"
+                          variant="ghost"
+                          color="red"
+                          style={{ margin: "0 0 0 8px" }}
+                          onClick={() => removeField(attributeKey)}
+                        >
+                          <PiX />
+                        </IconButton>
+                      </Form.Field>
                     </div>
-                  )}
-                </div>
+                  );
+                }) : null }
+                {customAttributes.length > 0 && (
+                  <div className="border-t border-gray-200 my-4 h-0"/>
+                )}
               </Flex>
             )
           ) : (
@@ -259,7 +257,7 @@ function renderInputField({
   );
 
   return (
-    <div className="w-full">
+    <div className="w-full flex items-center">
       <Form.Control asChild>
         {attributeType === "number" ? (
           <TextField.Root
@@ -269,6 +267,7 @@ function renderInputField({
               setDirty?.(true);
             }}
             value={form.watch(attributeKey)}
+            className="w-full"
           />
         ) : attributeType === "boolean" ? (
           <Switch
@@ -283,7 +282,7 @@ function renderInputField({
           />
         ) : attributeType === "enum" ? (
           <SelectField
-            className="text-sm"
+            className="text-sm w-full"
             menuPlacement="top"
             value={form.watch(attributeKey)}
             options={
@@ -301,17 +300,17 @@ function renderInputField({
           <MultiSelectField
             creatable
             placeholder="Add to list..."
-            className="text-sm"
+            className="text-sm w-full"
             menuPlacement="top"
             value={form.watch(attributeKey)}
-            options={form.watch(attributeKey).map((entry: string) => ({
+            options={(form.watch(attributeKey) || [])?.map((entry: string) => ({
               value: entry,
               label: entry,
             }))}
             onChange={(v) =>
               form.setValue(
                 attributeKey,
-                attributeType === "number[]" ? v.map((n) => parseInt(n)) : v,
+                attributeType === "number[]" ? v?.map((n) => parseInt(n)) : v,
               )
             }
             formatCreateLabel={(input: string) => `Add "${input}"`}
@@ -325,6 +324,7 @@ function renderInputField({
               setDirty?.(true);
             }}
             value={form.watch(attributeKey)}
+            className="w-full"
           />
         )}
       </Form.Control>

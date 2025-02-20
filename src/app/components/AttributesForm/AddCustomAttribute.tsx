@@ -1,15 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as Form from "@radix-ui/react-form";
-import { Button, Flex, Link } from "@radix-ui/themes";
+import {Button, Flex, Link, TextField} from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { PiPlusCircleFill } from "react-icons/pi";
 import {
-  attributeDataTypes,
+  attributeDataTypes, primitiveDataTypes,
   SDKAttribute,
   SDKAttributeType,
 } from "@/app/tempGbExports";
 import { useResponsiveContext } from "@/app/hooks/useResponsive";
 import SelectField from "../Forms/SelectField";
+import clsx from "clsx";
 
 export default function AddCustomAttribute({
   formAttributes,
@@ -92,7 +93,7 @@ export default function AddCustomAttribute({
           e.stopPropagation();
           setAddingCustom(true);
 
-          const container = document.querySelector("#attributesTab");
+          const container = document.querySelector("#pageBody");
           window.setTimeout(() => {
             container?.scroll?.({
               top: container?.scrollHeight,
@@ -108,17 +109,17 @@ export default function AddCustomAttribute({
     );
 
   return (
-    <Form.Root className="pb-2" onSubmit={submit}>
-      <Flex direction={isResponsive ? "column" : "row"}>
+    <Form.Root className="FormRoot pb-2 small" onSubmit={submit}>
+      <Flex direction={isResponsive ? "column" : "row"} gapX="2" gapY="1">
         <Form.Field className="FormFieldInline my-1" name="type">
           <Flex
             direction={isResponsive ? "row" : "column"}
-            pr="2"
+            pr={!isResponsive ? "2" : undefined}
             justify="between"
             flexGrow="1"
           >
             <Form.Label className="FormLabel text-nowrap text-sm">
-              <div className="inline-block -mb-2 overflow-hidden overflow-ellipsis">
+              <div className={clsx("inline-block -mb-1 overflow-hidden overflow-ellipsis", { "mt-1" : isResponsive })}>
                 Field Type
               </div>
             </Form.Label>
@@ -132,7 +133,7 @@ export default function AddCustomAttribute({
             >
               <SelectField
                 value={addCustomType}
-                options={attributeDataTypes.map((opt) => ({
+                options={(Object.keys(schema ?? {}).includes(addCustomId) ? attributeDataTypes : primitiveDataTypes).map((opt) => ({
                   label: attributeTypeReadable(opt),
                   value: opt,
                 }))}
@@ -150,12 +151,11 @@ export default function AddCustomAttribute({
         <Form.Field className="FormFieldInline my-1 flex-grow" name="name">
           <Flex
             direction={isResponsive ? "row" : "column"}
-            pr="2"
             justify="between"
             flexGrow="1"
           >
             <Form.Label className="FormLabel text-nowrap text-sm">
-              <div className="inline-block -mb-2 overflow-hidden overflow-ellipsis">
+              <div className={clsx("inline-block -mb-1 overflow-hidden overflow-ellipsis", {"mt-1": isResponsive})}>
                 Field Name
               </div>
             </Form.Label>
@@ -166,6 +166,7 @@ export default function AddCustomAttribute({
               maxWidth="350px"
               minWidth="200px"
             >
+              {Object.keys(schema || {}).length ? (
               <SelectField
                 className="w-full text-sm"
                 creatable
@@ -184,19 +185,38 @@ export default function AddCustomAttribute({
                 validOptionPattern=".+"
                 menuPlacement="top"
               />
+              ) : (
+                <TextField.Root
+                  type="text"
+                  onChange={(e) => {
+                    setAddCustomId(e.target.value);
+                  }}
+                  value={addCustomId}
+                  className="w-full"
+                />
+              )}
             </Flex>
           </Flex>
         </Form.Field>
         <Flex
           my="1"
           direction={isResponsive ? "row" : "column"}
-          pr="2"
           justify="end"
         >
           <label className="FormLabel text-nowrap">
-            <div className="inline-block -mb-2 overflow-hidden overflow-ellipsis"></div>
+            <div className="inline-block -mb-1 overflow-hidden overflow-ellipsis"></div>
           </label>
-          <Flex align="center">
+          <Flex align="center" gapX="3">
+            <Button
+              type="button"
+              disabled={!addCustomId.trim()}
+              size="2"
+              onClick={submit}
+              className="flex-shrink-0"
+              ml="2"
+            >
+              Add field
+            </Button>
             <Link
               href="#"
               size="2"
@@ -208,18 +228,6 @@ export default function AddCustomAttribute({
             >
               Cancel
             </Link>
-            <Button
-              type="button"
-              disabled={!addCustomId.trim()}
-              size="2"
-              onClick={submit}
-              style={{
-                textWrap: "nowrap",
-              }}
-              ml="2"
-            >
-              Add field
-            </Button>
           </Flex>
         </Flex>
       </Flex>

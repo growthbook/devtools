@@ -164,7 +164,7 @@ export default function AttributesTab() {
     <>
       <div
         id="attributesTab"
-        className="mx-auto h-[100%]"
+        className="mx-auto"
         style={{
           maxWidth: 700,
           overflowX: "hidden",

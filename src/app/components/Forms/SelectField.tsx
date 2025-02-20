@@ -6,6 +6,34 @@ import ReactSelect, {
 } from "react-select";
 import { clone } from "lodash";
 
+export const customStyles = {
+  control: (provided: any, state: any) => ({
+    ...provided,
+    borderColor: state.isFocused ? "var(--focus-8)" : provided.borderColor,
+    boxShadow: state.isFocused ? "0 0 0 1px var(--focus-8)" : "none",
+    "&:hover": {
+      borderColor: state.isFocused ? "var(--focus-8)" : provided.borderColor,
+    },
+  }),
+  option: (provided: any, state: any) => ({
+    ...provided,
+    backgroundColor: state.isSelected
+      ? "var(--focus-9)"
+      : state.isFocused
+        ? "var(--focus-a3)"
+        : "transparent",
+    color: state.isSelected ? "white" : "inherit",
+    cursor: "pointer",
+    "&:active": {
+      backgroundColor: "var(--focus-a6)",
+    },
+    height: "30px",
+    display: "flex",
+    alignItems: "center",
+    padding: "0 12px",
+  }),
+};
+
 export type SingleValue = { label: string; value: string; tooltip?: string };
 export type FormatOptionLabelType = (
   value: SingleValue,
@@ -119,6 +147,8 @@ export default function SelectField({
         formatOptionLabel={formatOptionLabel}
         isSearchable={!!isSearchable}
         isOptionDisabled={isOptionDisabled}
+        styles={customStyles}
+        classNamePrefix="gb-multi-select"
       />
     );
   }
@@ -139,6 +169,8 @@ export default function SelectField({
       formatOptionLabel={formatOptionLabel}
       isSearchable={!!isSearchable}
       isOptionDisabled={isOptionDisabled}
+      styles={customStyles}
+      classNamePrefix="gb-multi-select"
     />
   );
 }

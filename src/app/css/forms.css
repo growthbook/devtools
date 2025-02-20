@@ -83,3 +83,18 @@ textarea {
     padding: 2px 6px;
   }
 }
+
+.gb-multi-select__control {
+  height: 32px !important;
+  min-height: initial !important;
+}
+.gb-multi-select__value-container {
+  padding: 0 4px !important;
+}
+.gb-multi-select__multi-value {
+  background-color: var(--violet-a4) !important;
+}
+.gb-multi-select__indicator {
+  height: 28px !important;
+  padding: 4px !important;
+}

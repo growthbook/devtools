@@ -4,7 +4,7 @@ import ReactSelect, {
   MenuPlacement,
 } from "react-select";
 import CreatableSelect from "react-select/creatable";
-import { SingleValue } from "./SelectField";
+import {customStyles, SingleValue} from "./SelectField";
 import { clone } from "lodash";
 import { isDefined } from "@/app/utils";
 
@@ -92,6 +92,7 @@ export default function MultiSelectField({
         : {})}
       placeholder={initialOption ?? placeholder}
       isOptionDisabled={isOptionDisabled}
+      styles={customStyles}
     />
   );
 }

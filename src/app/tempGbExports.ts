@@ -1,6 +1,5 @@
 import { Attributes } from "@growthbook/growthbook";
 
-// TODO: export proper types from @growthbook
 export const attributeDataTypes = [
   "boolean",
   "string",
@@ -10,6 +9,14 @@ export const attributeDataTypes = [
   "string[]",
   "number[]",
   "secureString[]",
+] as const;
+
+export const primitiveDataTypes = [
+  "boolean",
+  "string",
+  "number",
+  "string[]",
+  "number[]",
 ] as const;
 
 export type SDKAttributeType = (typeof attributeDataTypes)[number];
