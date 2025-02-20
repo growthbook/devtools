@@ -2,15 +2,15 @@
 
 Home of the:
 
--   Chrome DevTools extension that interfaces with the GrowthBook [Javascript](https://docs.growthbook.io/lib/js) and [React](https://docs.growthbook.io/lib/react) SDKs.
--   [Visual Editor](https://docs.growthbook.io/app/visual), used to create and edit variations for visual experiments.
+- Chrome DevTools extension that interfaces with the GrowthBook [Javascript](https://docs.growthbook.io/lib/js) and [React](https://docs.growthbook.io/lib/react) SDKs.
+- [Visual Editor](https://docs.growthbook.io/app/visual), used to create and edit variations for visual experiments.
 
 DevTools Features
 
--   View all features and experiments used on the current page
--   Override assigned values to test all the different variations
--   Override targeting attributes to simulate what different users will see
--   Detailed logs explaining exactly why you got assigned a specific value
+- View all features and experiments used on the current page
+- Override assigned values to test all the different variations
+- Override targeting attributes to simulate what different users will see
+- Detailed logs explaining exactly why you got assigned a specific value
 
 ![DevTools Screenshot](/devtools-screenshot.png)
 
@@ -21,10 +21,11 @@ To build and use this extension locally:
 1. Run `yarn` to install dependencies
 2. Run `yarn build` to create a new build
 3. In Chrome, go to chrome://extensions
-    - Make sure the "Developer Mode" toggle is on
-    - Remove any existing GrowthBook devtool extensions
-    - Click "Load Unpacked Extension" and select the `build` directory
-4. Make changes and run `yarn build` again and it should update in Chrome automatically
+   - Make sure the "Developer Mode" toggle is on
+   - Remove any existing GrowthBook devtool extensions
+   - Click "Load Unpacked Extension" and select the `dist` directory
+4. To enable hot-reloading, run `yarn dev` which will pick up most changes automatically
+5. For changes to certain files (content_script/index), you also need to refresh the extension by right clicking -> manage extension and use the refresh button in the top right corner
 
 To release a new version of the extension to the Chrome Web Store:
 
@@ -43,6 +44,6 @@ See the Visual Editor [CONTRIBUTING](/src/visual_editor/CONTRIBUTING.md) doc for
 
 Some notes
 
--   HTML files go into `public/` and are **copied** by the build into `dist/`
--   TS/TSX files go into `src/` and are **compiled** by the build and put into `dist/`
--   Other assets such as icons, images, and the `manifest.json` are kept in `public/` and also copied into `dist/` on build
+- HTML files go into `public/` and are **copied** by the build into `dist/`
+- TS/TSX files go into `src/` and are **compiled** by the build and put into `dist/`
+- Other assets such as icons, images, and the `manifest.json` are kept in `public/` and also copied into `dist/` on build
