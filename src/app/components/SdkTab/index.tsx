@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
-import useTabState from "../hooks/useTabState";
+import useTabState from "@/app/hooks/useTabState";
 import { SDKHealthCheckResult } from "devtools";
 import { Button, IconButton, Link, Text } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
@@ -12,7 +12,7 @@ import {
   PiXBold,
 } from "react-icons/pi";
 import * as Accordion from "@radix-ui/react-accordion";
-import { useResponsiveContext } from "../hooks/useResponsive";
+import { useResponsiveContext } from "@/app/hooks/useResponsive";
 
 export const LEFT_PERCENT = 0.5;
 
@@ -20,7 +20,7 @@ export default function SdkTab() {
   const { isResponsive } = useResponsiveContext();
 
   const [selectedItem, setSelectedItem] = useState<string | undefined>(
-    !isResponsive ? "status" : undefined,
+    !isResponsive ? "status" : undefined
   );
 
   const [activeTabId, setActiveTabId] = useState<number | undefined>(undefined);
@@ -650,7 +650,7 @@ function ItemStatus({
 }
 
 export function getSdkStatus(
-  sdkData: SDKHealthCheckResult,
+  sdkData: SDKHealthCheckResult
 ): "green" | "yellow" | "red" {
   if (!sdkData.canConnect) {
     return "red";
