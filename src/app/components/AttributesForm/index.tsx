@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import * as Form from "@radix-ui/react-form";
-import {Button, Switch, Flex, TextField, IconButton} from "@radix-ui/themes";
+import {Button, Switch, Flex, TextField, IconButton, Link} from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
 import { PiX } from "react-icons/pi";
@@ -11,6 +11,7 @@ import AddCustomAttribute from "./AddCustomAttribute";
 import SelectField from "../Forms/SelectField";
 import MultiSelectField from "../Forms/MultiSelectField";
 import useGlobalState from "@/app/hooks/useGlobalState";
+import TextareaAutosize from "react-textarea-autosize";
 
 const arrayAttributeTypes = ["string[]", "number[]", "secureString[]"];
 
@@ -21,6 +22,7 @@ export default function AttributesForm({
   jsonMode = false,
   textareaAttributes,
   setTextareaAttributes,
+  resetTextarea,
   textareaError,
   setTextareaError,
   schema,
@@ -29,13 +31,14 @@ export default function AttributesForm({
   form: UseFormReturn<Attributes>;
   dirty?: boolean;
   setDirty?: (d: boolean) => void;
-  jsonMode?: boolean;
-  textareaAttributes?: string;
-  setTextareaAttributes?: (v: string) => void;
-  textareaError?: boolean;
-  setTextareaError?: (v: boolean) => void;
+  jsonMode: boolean;
+  textareaAttributes: string;
+  setTextareaAttributes: (v: string) => void;
+  resetTextarea: () => void;
+  textareaError: boolean;
+  setTextareaError: (v: boolean) => void;
   schema: Record<string, SDKAttribute>;
-  saveOnBlur?: (Attributes?: Attributes) => void;
+  saveOnBlur: (Attributes?: Attributes) => void;
 }) {
   const [customAttrSchema, setCustomAttrSchema] = useGlobalState<
     Record<string, SDKAttribute>
@@ -192,7 +195,7 @@ export default function AttributesForm({
             )
           ) : (
             <>
-              <textarea
+              <TextareaAutosize
                 className={clsx("Textarea mono mt-1", {
                   "border-red-700": textareaError,
                 })}
@@ -205,19 +208,33 @@ export default function AttributesForm({
                   setDirty?.(true);
                 }}
                 style={{ fontSize: "10px", lineHeight: "15px" }}
-                rows={15}
+                minRows={15}
               />
-              <Button
-                type="button"
-                className="mt-2 float-right"
-                disabled={!dirty}
-                onClick={() => {
-                  setDirty?.(true);
-                  saveOnBlur?.();
-                }}
-              >
-                Apply
-              </Button>
+              <div className="flex items-center justify-end mt-2 gap-3">
+                {dirty && (
+                  <Link
+                    href="#"
+                    size="2"
+                    role="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      resetTextarea();
+                    }}
+                  >
+                    Cancel
+                  </Link>
+                )}
+                <Button
+                  type="button"
+                  disabled={!dirty}
+                  onClick={() => {
+                    setDirty?.(true);
+                    saveOnBlur?.();
+                  }}
+                >
+                  Apply
+                </Button>
+              </div>
             </>
           )}
         </div>
@@ -286,7 +303,7 @@ function renderInputField({
             menuPlacement="top"
             value={form.watch(attributeKey)}
             options={
-              schema[attributeKey].enum?.split(",")?.map((strSegment) => {
+              (schema[attributeKey].enum || "")?.split(",")?.map((strSegment) => {
                 const trimmed = strSegment.trim();
                 return {
                   value: trimmed,
@@ -302,8 +319,8 @@ function renderInputField({
             placeholder="Add to list..."
             className="text-sm w-full"
             menuPlacement="top"
-            value={form.watch(attributeKey)}
-            options={(form.watch(attributeKey) || [])?.map((entry: string) => ({
+            value={Array.isArray(form.watch(attributeKey)) ? form.watch(attributeKey) : []}
+            options={(Array.isArray(form.watch(attributeKey)) ? form.watch(attributeKey) : [])?.map?.((entry: string) => ({
               value: entry,
               label: entry,
             }))}

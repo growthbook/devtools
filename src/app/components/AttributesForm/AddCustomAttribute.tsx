@@ -215,20 +215,7 @@ export default function AddCustomAttribute({
           direction={isResponsive ? "row" : "column"}
           justify="end"
         >
-          <label className="FormLabel text-nowrap">
-            <div className="inline-block -mb-1 overflow-hidden overflow-ellipsis"></div>
-          </label>
-          <Flex align="center" gapX="3">
-            <Button
-              type="button"
-              disabled={!addCustomId.trim()}
-              size="2"
-              onClick={submit}
-              className="flex-shrink-0"
-              ml="2"
-            >
-              Add field
-            </Button>
+          <Flex align="center" gapX="2" ml="3">
             <Link
               href="#"
               size="2"
@@ -240,6 +227,16 @@ export default function AddCustomAttribute({
             >
               Cancel
             </Link>
+            <Button
+              type="button"
+              disabled={!addCustomId.trim()}
+              size="2"
+              onClick={submit}
+              className="flex-shrink-0"
+              ml="2"
+            >
+              Add field
+            </Button>
           </Flex>
         </Flex>
       </Flex>

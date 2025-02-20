@@ -33,6 +33,12 @@ export default function AttributesTab() {
   const [textareaError, setTextareaError] = useState(false);
   const [dirty, setDirty] = useState(false);
 
+  const resetTextarea = () => {
+    setTextareaAttributes(formAttributesString);
+    setTextareaError(false);
+    setDirty(false);
+  };
+
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
     false,
@@ -247,6 +253,7 @@ export default function AttributesTab() {
                   jsonMode={jsonMode}
                   textareaAttributes={textareaAttributes}
                   setTextareaAttributes={setTextareaAttributes}
+                  resetTextarea={resetTextarea}
                   textareaError={textareaError}
                   setTextareaError={setTextareaError}
                   schema={attributeSchema}
