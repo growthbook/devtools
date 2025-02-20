@@ -10,10 +10,7 @@ const DOMMutationAccordian: FC<{
   onRemoveMutation: (mutation: DeclarativeMutation) => void;
 }> = ({ mutations, onRemoveMutation }) => {
   return (
-    <Accordion.Root
-      className="text-xs rounded overflow-hidden"
-      type="multiple"
-    >
+    <Accordion.Root className="text-xs rounded overflow-hidden" type="multiple">
       {mutations.map((m, i) => (
         <Accordion.Item
           key={i}
@@ -44,13 +41,8 @@ const DOMMutationAccordian: FC<{
               ]
                 .filter((key) => !!m[key as keyof DeclarativeMutation])
                 .map((key) => (
-                  <div
-                    key={key}
-                    className="flex flex-col mb-2  last:mb-0"
-                  >
-                    <div className="text-xs text-slate-400 mb-1">
-                      {key}
-                    </div>
+                  <div key={key} className="flex flex-col mb-2  last:mb-0">
+                    <div className="text-xs text-slate-400 mb-1">{key}</div>
                     <div className="text-light">
                       <code>{m[key as keyof DeclarativeMutation]}</code>
                     </div>
@@ -139,10 +131,7 @@ const DOMMutationList: FC<{
       </div>
 
       {addMutation && !showEditor && (
-        <div
-          className="text-link text-sm"
-          onClick={() => setShowEditor(true)}
-        >
+        <div className="text-link text-sm" onClick={() => setShowEditor(true)}>
           + Add custom DOM mutation
         </div>
       )}

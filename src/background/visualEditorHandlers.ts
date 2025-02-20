@@ -1,27 +1,81 @@
-import { isEqual } from "lodash";
-import {
-  fromUrl,
-  parseDomain,
-  ParseResultType,
-  Validation,
-} from "parse-domain";
 import {
   APIExperiment,
   APIVisualChangeset,
-  BGMessage,
+  BGLoadVisualChangsetMessage,
+  BGTransformCopyMessage,
+  BGUpdateVisualChangsetMessage,
   CopyMode,
-} from "../devtools";
+} from "devtools";
 import {
   loadApiHost,
   loadApiKey,
   loadAppOrigin,
   saveAppOrigin,
-} from "./visual_editor/lib/storage";
+} from "@/app/storage";
+import { genHeaders, isSameOrigin } from "@/background/index";
+import MessageSender = chrome.runtime.MessageSender;
 
-const genHeaders = (apiKey: string) => ({
-  Authorization: `Basic ${btoa(apiKey + ":")}`,
-  ["Content-Type"]: "application/json",
-});
+export async function handleLoadVisualChangeset(
+  message: BGLoadVisualChangsetMessage,
+  sender: MessageSender,
+  sendResponse: (res: FetchVisualChangesetPayload | { error: string }) => void,
+) {
+  const { data } = message;
+  const senderOrigin = sender.origin;
+
+  const res = await fetchVisualChangeset(data);
+  if (res.error) return sendResponse({ error: res.error });
+
+  const editorUrl = res.visualChangeset?.editorUrl;
+  if (!editorUrl || !senderOrigin || !isSameOrigin(editorUrl, senderOrigin)) {
+    return sendResponse({
+      error: `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`,
+    });
+  }
+
+  sendResponse(res);
+}
+
+export async function handleUpdateVisualChangeset(
+  message: BGUpdateVisualChangsetMessage,
+  sender: MessageSender,
+  sendResponse: (res: UpdateVisualChangesetPayload | { error: string }) => void,
+) {
+  const { data } = message;
+  const senderOrigin = sender.origin;
+
+  try {
+    const res = await fetchVisualChangeset(data);
+    if (res.error) throw new Error(res.error);
+
+    const editorUrl = res.visualChangeset?.editorUrl;
+    if (!editorUrl || !senderOrigin || !isSameOrigin(editorUrl, senderOrigin))
+      throw new Error(
+        `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`,
+      );
+    const res2 = await updateVisualChangeset(data);
+    if (res2.error) throw new Error(res2.error);
+    sendResponse(res2);
+  } catch (e: any) {
+    sendResponse({ error: e?.message || "" });
+  }
+}
+
+export async function handleTransformCopy(
+  message: BGTransformCopyMessage,
+  sender: MessageSender,
+  sendResponse: (res: TransformCopyPayload | { error: string }) => void,
+) {
+  const { data } = message;
+  const senderOrigin = sender.origin;
+
+  const res = await transformCopy(data);
+  if (res.error) return sendResponse({ error: res.error });
+  sendResponse(res);
+}
+
+// CRUD methods
+// ============
 
 export type FetchVisualChangesetPayload =
   | {
@@ -223,108 +277,3 @@ const transformCopy = async ({
     };
   }
 };
-
-const isSameOrigin = (url: string, origin: string) => {
-  try {
-    const urlParseResult = parseDomain(fromUrl(url), {
-      validation: Validation.Lax,
-    });
-    const originParseResult = parseDomain(fromUrl(origin), {
-      validation: Validation.Lax,
-    });
-    if (
-      urlParseResult.type === ParseResultType.Listed &&
-      originParseResult.type === ParseResultType.Listed
-    ) {
-      const { domain: urlDomain } = urlParseResult;
-      const { domain: originDomain } = originParseResult;
-
-      return urlDomain === originDomain;
-    } else if (
-      urlParseResult.type === ParseResultType.Reserved &&
-      originParseResult.type === ParseResultType.Reserved
-    ) {
-      return isEqual(urlParseResult.labels, originParseResult.labels);
-    } else if (
-      urlParseResult.type === ParseResultType.NotListed &&
-      originParseResult.type === ParseResultType.NotListed
-    ) {
-      return isEqual(urlParseResult.labels, originParseResult.labels);
-    } else {
-      console.error('Unrecognizable domain type for either "url" or "origin"', {
-        url,
-        origin,
-      });
-      throw new Error(
-        'Unrecognizable domain type for either "url" or "origin"',
-      );
-    }
-  } catch (e) {
-    console.error("isSameOrigin - Error checking origin", e);
-    return false;
-  }
-};
-
-/**
- * Listen for messages from the devtools. We have to keep the handler synchronous
- * so we can return true to indicate an async response to chrome.
- */
-chrome.runtime.onMessage.addListener(
-  (message: BGMessage, sender, sendResponse) => {
-    const { type, data } = message;
-    const senderOrigin = sender.origin;
-
-    switch (type) {
-      case "BG_LOAD_VISUAL_CHANGESET":
-        fetchVisualChangeset(data).then((res) => {
-          if (res.error) return sendResponse({ error: res.error });
-          const editorUrl = res.visualChangeset?.editorUrl;
-          if (
-            !editorUrl ||
-            !senderOrigin ||
-            !isSameOrigin(editorUrl, senderOrigin)
-          )
-            return sendResponse({
-              error: `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`,
-            });
-          sendResponse(res);
-        });
-        break;
-      case "BG_UPDATE_VISUAL_CHANGESET":
-        fetchVisualChangeset(data)
-          .then((res) => {
-            if (res.error) throw new Error(res.error);
-            const editorUrl = res.visualChangeset?.editorUrl;
-            if (
-              !editorUrl ||
-              !senderOrigin ||
-              !isSameOrigin(editorUrl, senderOrigin)
-            )
-              throw new Error(
-                `Unable to verify sender origin (editorUrl: ${editorUrl}; senderOrigin: ${senderOrigin})`,
-              );
-            return updateVisualChangeset(data);
-          })
-          .then((res) => {
-            if (res.error) throw new Error(res.error);
-            sendResponse(res);
-          })
-          .catch((e) => {
-            sendResponse({ error: e });
-          });
-        break;
-      case "BG_TRANSFORM_COPY":
-        transformCopy(data).then((res) => {
-          if (res.error) return sendResponse({ error: res.error });
-          sendResponse(res);
-        });
-        break;
-      default:
-        sendResponse();
-        break;
-    }
-
-    // return true to indicate async response
-    return true;
-  },
-);

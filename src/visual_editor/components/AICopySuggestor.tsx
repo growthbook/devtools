@@ -2,7 +2,7 @@ import clsx from "clsx";
 import React, { FC, MouseEvent, useCallback, useEffect, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { BiLoaderCircle } from "react-icons/bi";
-import { CopyMode } from "../../../devtools";
+import { CopyMode } from "devtools";
 import { TransformCopyFn } from "../lib/hooks/useAiCopySuggestion";
 
 const AICopySuggestor: FC<{
@@ -62,9 +62,7 @@ const AICopySuggestor: FC<{
   return (
     <div className="flex flex-col ml-4">
       <div className="bg-dark text-light flex flex-col">
-        <div className="w-24 text-xs text-slate-400">
-          Original copy
-        </div>
+        <div className="w-24 text-xs text-slate-400">Original copy</div>
         <div
           className={clsx(
             "text-slate-400",
@@ -250,13 +248,10 @@ const AICopySuggestor: FC<{
 
       <div className="overflow-hidden">
         <div
-          className={clsx(
-            "flex justify-center items-center transition-all",
-            {
-              "-mt-32": !loading,
-              "mt-4": loading,
-            },
-          )}
+          className={clsx("flex justify-center items-center transition-all", {
+            "-mt-32": !loading,
+            "mt-4": loading,
+          })}
         >
           <BiLoaderCircle className="animate-spin text-indigo-500" />
         </div>
@@ -269,9 +264,7 @@ const AICopySuggestor: FC<{
             "mt-0": !!generatedCopy,
           })}
         >
-          <div className="w-24 text-xs text-ai-label mt-2">
-            Transformed{" "}
-          </div>
+          <div className="w-24 text-xs text-ai-label mt-2">Transformed </div>
           <TextareaAutosize
             className={clsx(
               "text-slate-200",

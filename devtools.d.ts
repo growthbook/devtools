@@ -1,13 +1,13 @@
 import type {
   Experiment,
   FeatureDefinition,
-  ExperimentOverride,
+  ExperimentOverride, StickyAssignmentsDocument,
 } from "@growthbook/growthbook";
 import {
   FetchVisualChangesetPayload,
   TransformCopyPayload,
   UpdateVisualChangesetPayload,
-} from "./src/background";
+} from "@/background/visualEditorHandlers";
 
 declare global {
   interface Window {
@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-export type DebugLogs = [string, any][];
+export type DebugLog = [string, any];
 
 export type CopyMode = "energetic" | "concise" | "humorous";
 
@@ -152,6 +152,16 @@ type TransformCopyResponseMessage = {
   data: TransformCopyPayload;
 };
 
+type UpdateTabState = {
+  append?: boolean;
+  type: "UPDATE_TAB_STATE";
+  data: {
+    property: string;
+    value: unknown;
+    tabId: number;
+  };
+};
+
 // Messages sent to content script
 export type Message =
   | RequestRefreshMessage
@@ -165,7 +175,8 @@ export type Message =
   | UpdateVisualChangesetRequestMessage
   | UpdateVisualChangesetResponseMessage
   | TransformCopyRequestMessage
-  | TransformCopyResponseMessage;
+  | TransformCopyResponseMessage
+  | UpdateTabState;
 
 export type BGLoadVisualChangsetMessage = {
   type: "BG_LOAD_VISUAL_CHANGESET";
@@ -191,8 +202,42 @@ export type BGTransformCopyMessage = {
   };
 };
 
+type SDKHealthCheckResult = {
+  canConnect: boolean;
+  hasPayload: boolean;
+  hasClientKey?: boolean;
+  errorMessage?: string;
+  version?: string;
+  hasWindowConfig?: boolean;
+  sdkFound?: boolean;
+  clientKey?: string;
+  isLoading?: boolean;
+  payload?: Record<string, any>;
+  devModeEnabled: boolean;
+  hasTrackingCallback?: boolean;
+  trackingCallbackParams?: string[];
+  hasDecryptionKey?: boolean;
+  payloadDecrypted?:boolean;
+  usingLogEvent?: boolean;
+  usingOnFeatureUsage?: boolean;
+  isRemoteEval?: boolean;
+  usingStickyBucketing?: boolean;
+  stickyBucketAssignmentDocs?: Record<string, StickyAssignmentsDocument>;
+  streaming?: boolean;
+  apiHost?: string;
+  streamingHost?: string;
+  apiRequestHeaders?: Record<string, string>;
+  streamingHostRequestHeaders?: Record<string, string>;
+};
+
+type BGSetSDKUsageData = {
+  type: "GB_SDK_UPDATED";
+  data: SDKHealthCheckResult & { tabId?: number };
+};
+
 // Messages sent to background script
 export type BGMessage =
   | BGLoadVisualChangsetMessage
   | BGUpdateVisualChangsetMessage
-  | BGTransformCopyMessage;
+  | BGTransformCopyMessage
+  | BGSetSDKUsageData;

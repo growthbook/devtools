@@ -1,9 +1,7 @@
 import {
   BGUpdateVisualChangsetMessage,
-  ErrorMessage,
   LoadVisualChangesetRequestMessage,
   OpenVisualEditorRequestMessage,
-  RefreshMessage,
   UpdateVisualChangesetRequestMessage,
   TransformCopyRequestMessage,
   BGTransformCopyMessage,
@@ -11,20 +9,14 @@ import {
   UpdateVisualChangesetResponseMessage,
   LoadVisualChangesetResponseMessage,
   TransformCopyResponseMessage,
-} from "../../devtools";
+} from "devtools";
 import {
   FetchVisualChangesetPayload,
   TransformCopyPayload,
   UpdateVisualChangesetPayload,
-} from "../background";
-import { VISUAL_CHANGESET_ID_PARAMS_KEY } from "../visual_editor/lib/constants";
-import { saveApiHost, saveApiKey } from "../visual_editor/lib/storage";
-
-export const genericDevtoolsMessagePassThrough = (
-  message: RefreshMessage | ErrorMessage,
-) => {
-  chrome.runtime.sendMessage(message);
-};
+} from "@/background/visualEditorHandlers";
+import { VISUAL_CHANGESET_ID_PARAMS_KEY } from "@/visual_editor/lib/constants";
+import { saveApiHost, saveApiKey } from "@/app/storage";
 
 // 1. save key to local storage
 // 2. send response message to content script

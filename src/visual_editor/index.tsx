@@ -10,7 +10,7 @@ import React, {
 } from "react";
 import * as ReactDOM from "react-dom/client";
 
-import { VisualEditorVariation } from "../../devtools";
+import { VisualEditorVariation } from "devtools";
 import useFixedPositioning from "./lib/hooks/useFixedPositioning";
 import useQueryParams from "./lib/hooks/useQueryParams";
 import useVisualChangeset from "./lib/hooks/useVisualChangeset";
