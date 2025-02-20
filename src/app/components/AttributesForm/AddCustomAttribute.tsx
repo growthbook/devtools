@@ -1,28 +1,15 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as Form from "@radix-ui/react-form";
-import {
-  Button,
-  Switch,
-  Flex,
-  TextField,
-  Select,
-  DropdownMenu,
-  Link,
-} from "@radix-ui/themes";
+import { Button, Flex, Link } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
-import { UseFormReturn } from "react-hook-form";
-import { PiCaretDownFill, PiPlusCircleFill, PiX } from "react-icons/pi";
-import useTabState from "@/app/hooks/useTabState";
-import useDebounce from "@/app/hooks/useDebounce";
-import clsx from "clsx";
-import { SDKAttributeType } from "@/app/tempGbExports";
+import { PiPlusCircleFill } from "react-icons/pi";
+import {
+  attributeDataTypes,
+  SDKAttribute,
+  SDKAttributeType,
+} from "@/app/tempGbExports";
 import { useResponsiveContext } from "@/app/hooks/useResponsive";
+import SelectField from "../Forms/SelectField";
 
 export default function AddCustomAttribute({
   formAttributes,
@@ -31,12 +18,11 @@ export default function AddCustomAttribute({
 }: {
   formAttributes: Attributes;
   addCustomField: (fieldName: string, fieldType: SDKAttributeType) => void;
-  schema?: Record<string, SDKAttributeType>;
+  schema?: Record<string, SDKAttribute>;
 }) {
-  const { isTiny } = useResponsiveContext();
+  const { isResponsive } = useResponsiveContext();
   const [addingCustom, setAddingCustom] = useState(false);
   const [addCustomId, setAddCustomId] = useState("");
-  const [addCustomIdDropdownOpen, setAddCustomIdDropdownOpen] = useState(false);
   const addCustomIdRef = useRef<HTMLInputElement>(null);
   const [addCustomType, setAddCustomType] =
     useState<SDKAttributeType>("string");
@@ -55,15 +41,18 @@ export default function AddCustomAttribute({
 
   const submit = useCallback(() => {
     addCustomField(addCustomId, addCustomType);
+    cancelAddCustomField();
   }, [addCustomId, addCustomType]);
 
   useEffect(() => {
     if (schema?.[addCustomId]) {
-      setAddCustomType(schema[addCustomId]);
+      setAddCustomType(schema[addCustomId].datatype);
+    } else if (!primitiveTypes.has(addCustomType)) {
+      setAddCustomType("string");
     }
   }, [addCustomId]);
 
-  const attributeTypeReadable = (type: string) => {
+  const attributeTypeReadable = (type: SDKAttributeType) => {
     switch (type) {
       case "string":
         return "String";
@@ -71,10 +60,26 @@ export default function AddCustomAttribute({
         return "Number";
       case "boolean":
         return "Boolean";
-      default:
-        return "Unknown";
+      case "enum":
+        return "Enum";
+      case "secureString":
+        return "Secure String";
+      case "string[]":
+        return "String Array";
+      case "number[]":
+        return "Num Array";
+      case "secureString[]":
+        return "Secure String Array";
     }
   };
+
+  const primitiveTypes = new Set([
+    "string",
+    "number",
+    "boolean",
+    "string[]",
+    "number[]",
+  ]);
 
   if (!addingCustom)
     return (
@@ -86,7 +91,6 @@ export default function AddCustomAttribute({
           e.preventDefault();
           e.stopPropagation();
           setAddingCustom(true);
-          setAddCustomIdDropdownOpen(true);
 
           const container = document.querySelector("#attributesTab");
           window.setTimeout(() => {
@@ -105,123 +109,91 @@ export default function AddCustomAttribute({
 
   return (
     <Form.Root className="pb-2" onSubmit={submit}>
-      <Flex direction={isTiny ? "column" : "row"}>
+      <Flex direction={isResponsive ? "column" : "row"}>
         <Form.Field className="FormFieldInline my-1" name="type">
           <Flex
-            direction={isTiny ? "row" : "column"}
-            px="2"
+            direction={isResponsive ? "row" : "column"}
+            pr="2"
             justify="between"
             flexGrow="1"
           >
-            <Form.Label className="FormLabel mr-1 text-nowrap">
+            <Form.Label className="FormLabel text-nowrap text-sm">
               <div className="inline-block -mb-2 overflow-hidden overflow-ellipsis">
                 Field Type
               </div>
             </Form.Label>
 
-            <Select.Root
-              defaultValue="string"
-              size="2"
-              value={addCustomType}
-              onValueChange={(v) => setAddCustomType(v as SDKAttributeType)}
-              disabled={!!schema?.[addCustomId]}
+            <Flex
+              align="center"
+              flexGrow="1"
+              ml={isResponsive ? "2" : "0"}
+              minWidth="150px"
+              maxWidth="350px"
             >
-              <Select.Trigger>
-                {attributeTypeReadable(addCustomType)}
-              </Select.Trigger>
-              <Select.Content>
-                <Select.Item value="string">String</Select.Item>
-                <Select.Item value="number">Number</Select.Item>
-                <Select.Item value="boolean">Boolean</Select.Item>
-                {/*todo: number[], string[]*/}
-              </Select.Content>
-            </Select.Root>
+              <SelectField
+                value={addCustomType}
+                options={attributeDataTypes.map((opt) => ({
+                  label: attributeTypeReadable(opt),
+                  value: opt,
+                }))}
+                formatOptionLabel={(val) => val.label}
+                isOptionDisabled={(opt) => !primitiveTypes.has(opt.value)}
+                onChange={(v) => setAddCustomType(v as SDKAttributeType)}
+                disabled={!!schema?.[addCustomId]}
+                className="w-full text-sm"
+                isSearchable
+                menuPlacement="top"
+              />
+            </Flex>
           </Flex>
         </Form.Field>
-        <Form.Field className="FormFieldInline my-1" name="name">
+        <Form.Field className="FormFieldInline my-1 flex-grow" name="name">
           <Flex
-            direction={isTiny ? "row" : "column"}
-            px="2"
+            direction={isResponsive ? "row" : "column"}
+            pr="2"
             justify="between"
             flexGrow="1"
           >
-            <Form.Label className="FormLabel mr-1 text-nowrap">
+            <Form.Label className="FormLabel text-nowrap text-sm">
               <div className="inline-block -mb-2 overflow-hidden overflow-ellipsis">
                 Field Name
               </div>
             </Form.Label>
-            <Flex align="center">
-              <TextField.Root
-                ml="1"
-                key={"addCustomAttributeField"}
-                ref={addCustomIdRef}
-                type="text"
-                list="schema-attributes"
-                autoFocus
-                placeholder="Search or enter custom"
+            <Flex
+              align="center"
+              flexGrow="1"
+              ml={isResponsive ? "2" : "0"}
+              maxWidth="350px"
+              minWidth="200px"
+            >
+              <SelectField
+                className="w-full text-sm"
+                creatable
+                isClearable
+                isSearchable
+                options={unusedSchemaAttributes.map((attr) => ({
+                  value: attr,
+                  label: attr,
+                }))}
+                formatOptionLabel={(value) => (
+                  <div className="text-nowrap line-clamp-1">{value.label}</div>
+                )}
                 value={addCustomId}
-                onClick={() => setAddCustomIdDropdownOpen(true)}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setAddCustomId(v);
-                }}
-                onKeyDown={(e) => {
-                  if (e.code === "Enter" && addCustomId.trim()) {
-                    submit();
-                    setAddCustomIdDropdownOpen(false);
-                  }
-                }}
-              >
-                <DropdownMenu.Root
-                  open={addCustomIdDropdownOpen}
-                  onOpenChange={(o) => {
-                    setTimeout(() => {
-                      if (
-                        !o &&
-                        document.activeElement === addCustomIdRef.current
-                      )
-                        return;
-                      setAddCustomIdDropdownOpen(o);
-                    }, 50);
-                  }}
-                  modal={false}
-                >
-                  <DropdownMenu.Trigger>
-                    <TextField.Slot
-                      className="cursor-pointer"
-                      onClick={() => {
-                        setAddCustomIdDropdownOpen(true);
-                      }}
-                      side="right"
-                    >
-                      <PiCaretDownFill />
-                    </TextField.Slot>
-                  </DropdownMenu.Trigger>
-                  <DropdownMenu.Content
-                    align="end"
-                    onCloseAutoFocus={() => addCustomIdRef?.current?.focus()}
-                  >
-                    <div id="schema-attributes">
-                      {unusedSchemaAttributes.map((key) => (
-                        <DropdownMenu.Item
-                          onSelect={() => {
-                            setAddCustomId(key);
-                            setAddCustomIdDropdownOpen(false);
-                          }}
-                          key={key}
-                        >
-                          {key}
-                        </DropdownMenu.Item>
-                      ))}
-                    </div>
-                  </DropdownMenu.Content>
-                </DropdownMenu.Root>
-              </TextField.Root>
+                onChange={setAddCustomId}
+                formatCreateLabel={(val) => `Use custom field name "${val}"`}
+                validOptionPattern=".+"
+                menuPlacement="top"
+              />
             </Flex>
           </Flex>
         </Form.Field>
-        <Flex my="1" direction={isTiny ? "row" : "column"} px="2" justify="end">
-          <label className="FormLabel mr-1 text-nowrap">
+        <Flex
+          my="1"
+          direction={isResponsive ? "row" : "column"}
+          pr="2"
+          justify="end"
+        >
+          <label className="FormLabel text-nowrap">
             <div className="inline-block -mb-2 overflow-hidden overflow-ellipsis"></div>
           </label>
           <Flex align="center">

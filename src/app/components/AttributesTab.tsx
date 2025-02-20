@@ -23,7 +23,7 @@ import { useResponsiveContext } from "../hooks/useResponsive";
 export const HEADER_H = 40;
 
 export default function AttributesTab() {
-  const { isResponsive, isTiny } = useResponsiveContext();
+  const { isResponsive } = useResponsiveContext();
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
   const attributesForm = useForm<Attributes>({ defaultValues: attributes });
   const formAttributes = attributesForm.getValues();
@@ -73,7 +73,7 @@ export default function AttributesTab() {
   }, [archetypesLoading, archetypesError, archetypesData]);
 
   const [attributeSchema, setAttributeSchema] = useGlobalState<
-    Record<string, SDKAttributeType>
+    Record<string, SDKAttribute>
   >("attributeSchema", {}, true);
 
   const {
@@ -86,10 +86,7 @@ export default function AttributesTab() {
     if (attributesLoading || attributesError || !attributesData) return;
     setAttributeSchema(
       Object.fromEntries(
-        (attributesData.attributes || []).map((attr) => [
-          attr.property,
-          attr.datatype,
-        ]),
+        (attributesData.attributes || []).map((attr) => [attr.property, attr]),
       ),
     );
   }, [attributesLoading, attributesError, attributesData]);
@@ -245,7 +242,6 @@ export default function AttributesTab() {
               <Container className="p-3" overflowX="hidden">
                 <AttributesForm
                   form={attributesForm}
-                  isTiny={isTiny}
                   dirty={dirty}
                   setDirty={setDirty}
                   jsonMode={jsonMode}

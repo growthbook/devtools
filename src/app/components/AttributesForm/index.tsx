@@ -1,26 +1,21 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import * as Form from "@radix-ui/react-form";
-import {
-  Button,
-  Switch,
-  Flex,
-  TextField,
-  Select,
-  DropdownMenu,
-  Link,
-} from "@radix-ui/themes";
+import { Button, Switch, Flex, TextField } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
-import { PiCaretDownFill, PiPlusCircleFill, PiX } from "react-icons/pi";
+import { PiX } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
-import useDebounce from "@/app/hooks/useDebounce";
 import clsx from "clsx";
-import { SDKAttributeType } from "@/app/tempGbExports";
-import AddCustomAttribute from ".//AddCustomAttribute";
+import { SDKAttribute, SDKAttributeType } from "@/app/tempGbExports";
+import AddCustomAttribute from "./AddCustomAttribute";
+import SelectField from "../Forms/SelectField";
+import MultiSelectField from "../Forms/MultiSelectField";
+import useGlobalState from "@/app/hooks/useGlobalState";
+
+const arrayAttributeTypes = ["string[]", "number[]", "secureString[]"];
 
 export default function AttributesForm({
   form,
-  isTiny,
   dirty = false,
   setDirty,
   jsonMode = false,
@@ -30,10 +25,8 @@ export default function AttributesForm({
   setTextareaError,
   schema,
   saveOnBlur,
-  canAddRemoveFields = true,
 }: {
   form: UseFormReturn<Attributes>;
-  isTiny: boolean;
   dirty?: boolean;
   setDirty?: (d: boolean) => void;
   jsonMode?: boolean;
@@ -41,10 +34,13 @@ export default function AttributesForm({
   setTextareaAttributes?: (v: string) => void;
   textareaError?: boolean;
   setTextareaError?: (v: boolean) => void;
-  schema?: Record<string, SDKAttributeType>;
+  schema: Record<string, SDKAttribute>;
   saveOnBlur?: (Attributes?: Attributes) => void;
-  canAddRemoveFields?: boolean;
 }) {
+  const [customAttrSchema, setCustomAttrSchema] = useGlobalState<
+    Record<string, SDKAttribute>
+  >("customAttributeSchema", {}, true);
+
   const addCustomField = (
     customAttrId: string,
     customAttrType: SDKAttributeType,
@@ -57,8 +53,14 @@ export default function AttributesForm({
         : customAttrType === "boolean"
           ? false
           : "";
-    // todo: number[], string[]
     setNewAppliedAttributeIds([...newAppliedAttributeIds, customAttrId]);
+    setCustomAttrSchema({
+      ...customAttrSchema,
+      [customAttrId]: {
+        property: customAttrId,
+        datatype: customAttrType,
+      },
+    });
     form.reset(newAttributes);
   };
 
@@ -133,6 +135,7 @@ export default function AttributesForm({
                           attributeKey,
                           form,
                           schema,
+                          customAttrSchema,
                           setDirty,
                           saveOnBlur,
                         })}
@@ -165,6 +168,7 @@ export default function AttributesForm({
                                 attributeKey,
                                 form,
                                 schema,
+                                customAttrSchema,
                                 setDirty,
                               })}
                               <Button
@@ -234,12 +238,14 @@ function renderInputField({
   attributeKey,
   form,
   schema,
+  customAttrSchema,
   setDirty,
   saveOnBlur,
 }: {
   attributeKey: string;
   form: UseFormReturn<Attributes>;
-  schema?: Record<string, string>;
+  schema: Record<string, SDKAttribute>;
+  customAttrSchema: Record<string, SDKAttribute>;
   setDirty?: (b: boolean) => void;
   saveOnBlur?: (newAttributes: Attributes) => void;
 }) {
@@ -247,11 +253,9 @@ function renderInputField({
     attributeKey,
     form.watch(attributeKey),
     schema,
+    customAttrSchema,
   );
-  //
 
-  // todo: enum, number[], string[]
-  // todo (maybe. or just use string): secureString, secureString[]
   return (
     <div className="w-full">
       <Form.Control asChild>
@@ -275,8 +279,47 @@ function renderInputField({
               setDirty?.(true);
             }}
           />
+        ) : attributeType === "enum" ? (
+          <SelectField
+            className="text-sm"
+            menuPlacement="top"
+            value={form.watch(attributeKey)}
+            options={
+              schema[attributeKey].enum?.split(",")?.map((strSegment) => {
+                const trimmed = strSegment.trim();
+                return {
+                  value: trimmed,
+                  label: trimmed,
+                };
+              }) || []
+            }
+            onChange={(v) => form.setValue(attributeKey, v)}
+          />
+        ) : arrayAttributeTypes.includes(attributeType) ? (
+          <MultiSelectField
+            creatable
+            placeholder="Add to list..."
+            className="text-sm"
+            menuPlacement="top"
+            value={form
+              .watch(attributeKey)
+              .split(",")
+              .map((segment: string) => segment.trim())
+              .filter((entry: string) => entry !== "")}
+            options={form
+              .watch(attributeKey)
+              .split(",")
+              .map((segment: string) => segment.trim())
+              .filter((entry: string) => entry !== "")
+              .map((entry: string) => ({
+                value: entry,
+                label: entry,
+              }))}
+            onChange={(v) => form.setValue(attributeKey, v.join(","))}
+            formatCreateLabel={(input: string) => `Add "${input}"`}
+            validOptionPattern={attributeType === "number[]" ? "^\\d+$" : ".+"}
+          />
         ) : (
-          // make it so that when you select it is the end of the text
           <TextField.Root
             type="text"
             onChange={(e) => {
@@ -291,7 +334,13 @@ function renderInputField({
   );
 }
 
-function getAttributeType(a: string, v: any, schema?: Record<string, string>) {
-  if (schema?.[a]) return schema[a];
+function getAttributeType(
+  a: string,
+  v: any,
+  schema: Record<string, SDKAttribute>,
+  customAttrSchema: Record<string, SDKAttribute>,
+) {
+  if (schema[a]) return schema[a].datatype;
+  if (customAttrSchema[a]) return customAttrSchema[a].datatype;
   return typeof v;
 }

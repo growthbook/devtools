@@ -16,7 +16,7 @@ import { ValueType } from "./ValueField";
 import FeatureDetail from "@/app/components/FeatureDetail";
 import { useSearch } from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
-import {Box, Link, Switch} from "@radix-ui/themes";
+import { Box, Link, Switch } from "@radix-ui/themes";
 import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
 import { useResponsiveContext } from "../hooks/useResponsive";
 
