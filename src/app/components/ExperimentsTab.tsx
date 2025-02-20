@@ -35,6 +35,8 @@ export const HEADER_H = 40;
 export default function ExperimentsTab() {
   const { isResponsive } = useResponsiveContext();
 
+  const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
+
   const [experiments, setExperiments] = useTabState<AutoExperiment[]>(
     "experiments",
     [],
@@ -332,6 +334,27 @@ export default function ExperimentsTab() {
               </div>
             );
           })}
+
+          {!firstLoad && !sortedFilteredExperiments.length ? (
+            <div className="my-3 mx-4">
+              <em>No experiments found.</em>
+              <div className="mt-1 text-sm">
+                See the{" "}
+                <Link
+                  role="button"
+                  href="#"
+                  className="cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentTab("sdkDebug");
+                  }}
+                >
+                  SDK Health
+                </Link>{" "}
+                tab.
+              </div>
+            </div>
+          ) : null}
         </div>
 
         <ExperimentDetail

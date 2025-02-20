@@ -39,7 +39,7 @@ export default function LogsTab() {
             >
               SDK Health
             </Link>{" "}
-            tab
+            tab.
           </div>
         </div>
       ) : (

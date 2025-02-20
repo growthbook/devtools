@@ -16,7 +16,7 @@ import { ValueType } from "./ValueField";
 import FeatureDetail from "@/app/components/FeatureDetail";
 import { useSearch } from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
-import { Link, Switch } from "@radix-ui/themes";
+import {Box, Link, Switch} from "@radix-ui/themes";
 import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
 import { useResponsiveContext } from "../hooks/useResponsive";
 
@@ -27,6 +27,8 @@ export const HEADER_H = 40;
 
 export default function FeaturesTab() {
   const { isResponsive } = useResponsiveContext();
+
+  const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
 
   const [features, setFeatures] = useTabState<
     Record<string, FeatureDefinition>
@@ -271,6 +273,27 @@ export default function FeaturesTab() {
               </div>
             );
           })}
+
+          {!firstLoad && !sortedFilteredFeatures.length ? (
+            <div className="my-3 mx-4">
+              <em>No features found.</em>
+              <div className="mt-1 text-sm">
+                See the{" "}
+                <Link
+                  role="button"
+                  href="#"
+                  className="cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentTab("sdkDebug");
+                  }}
+                >
+                  SDK Health
+                </Link>{" "}
+                tab.
+              </div>
+            </div>
+          ) : null}
         </div>
 
         <FeatureDetail
