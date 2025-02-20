@@ -5,14 +5,8 @@ export default function useSdkData() {
   const [sdkData] = useTabState<SDKHealthCheckResult>("sdkData", {
     canConnect: false,
     hasPayload: false,
-    hasClientKey: false,
     devModeEnabled: false,
-    errorMessage: undefined,
-    version: undefined,
-    sdkFound: false,
-    clientKey: undefined,
     isLoading: true, // set to true to show loading state if needed
-    payload: undefined,
   });
   return sdkData;
 }
