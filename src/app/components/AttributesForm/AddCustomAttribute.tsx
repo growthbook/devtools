@@ -181,7 +181,12 @@ export default function AddCustomAttribute({
                 )}
                 value={addCustomId}
                 onChange={setAddCustomId}
-                formatCreateLabel={(val) => `Use custom field name "${val}"`}
+                formatCreateLabel={(val) => (
+                  <>
+                    <span className="text-gray-600 text-xs mr-1">Create custom:</span>
+                    {val}
+                  </>
+                )}
                 validOptionPattern=".+"
                 menuPlacement="top"
               />

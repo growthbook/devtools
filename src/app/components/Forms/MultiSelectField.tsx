@@ -93,6 +93,7 @@ export default function MultiSelectField({
       placeholder={initialOption ?? placeholder}
       isOptionDisabled={isOptionDisabled}
       styles={customStyles}
+      noOptionsMessage={() => null}
     />
   );
 }

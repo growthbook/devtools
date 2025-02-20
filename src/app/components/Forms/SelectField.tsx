@@ -9,10 +9,11 @@ import { clone } from "lodash";
 export const customStyles = {
   control: (provided: any, state: any) => ({
     ...provided,
-    borderColor: state.isFocused ? "var(--focus-8)" : provided.borderColor,
+    borderColor: state.isFocused ? "var(--focus-8)" : "var(--gray-a7)",
+    borderWidth: "var(--text-field-border-width)",
     boxShadow: state.isFocused ? "0 0 0 1px var(--focus-8)" : "none",
     "&:hover": {
-      borderColor: state.isFocused ? "var(--focus-8)" : provided.borderColor,
+      borderColor: state.isFocused ? "var(--focus-8)" : "var(--gray-a7)",
     },
   }),
   option: (provided: any, state: any) => ({
