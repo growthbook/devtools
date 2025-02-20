@@ -18,17 +18,16 @@ import { useSearch } from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
 import { Link, Switch } from "@radix-ui/themes";
 import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
+import { useResponsiveContext } from "../hooks/useResponsive";
 
 type FeatureDefinitionWithId = FeatureDefinition & { id: string };
 
 export const LEFT_PERCENT = 0.4;
 export const HEADER_H = 40;
 
-export default function FeaturesTab({
-  isResponsive,
-}: {
-  isResponsive: boolean;
-}) {
+export default function FeaturesTab() {
+  const { isResponsive } = useResponsiveContext();
+
   const [features, setFeatures] = useTabState<
     Record<string, FeatureDefinition>
   >("features", {});

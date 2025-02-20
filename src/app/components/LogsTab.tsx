@@ -4,14 +4,11 @@ import useTabState from "../hooks/useTabState";
 import LogsList from "./LogsList";
 import { Link } from "@radix-ui/themes";
 import { MW } from "@/app";
+import { useResponsiveContext } from "../hooks/useResponsive";
 
-export default function LogsTab({
-  isResponsive,
-  isTiny,
-}: {
-  isResponsive: boolean;
-  isTiny: boolean;
-}) {
+export default function LogsTab() {
+  const { isResponsive, isTiny } = useResponsiveContext();
+
   const [currentTab, setCurrentTab] = useTabState("currentTab", "logs");
   const [logEvents] = useTabState<LogUnion[] | undefined>(
     "logEvents",

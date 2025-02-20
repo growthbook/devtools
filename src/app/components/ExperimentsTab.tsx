@@ -22,6 +22,7 @@ import ExperimentDetail, {
 import { getFeatureDetails } from "@/app/components/FeaturesTab";
 import { ValueType } from "@/app/components/ValueField";
 import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
+import { useResponsiveContext } from "../hooks/useResponsive";
 
 export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
   features?: string[];
@@ -31,11 +32,9 @@ export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
 export const LEFT_PERCENT = 0.4;
 export const HEADER_H = 40;
 
-export default function ExperimentsTab({
-  isResponsive,
-}: {
-  isResponsive: boolean;
-}) {
+export default function ExperimentsTab() {
+  const { isResponsive } = useResponsiveContext();
+
   const [experiments, setExperiments] = useTabState<AutoExperiment[]>(
     "experiments",
     [],

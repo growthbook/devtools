@@ -2,24 +2,28 @@ import React, { useEffect, useState } from "react";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
-import {Button, Checkbox, Container, Flex, Link, Text} from "@radix-ui/themes";
-import { Archetype, SDKAttribute } from "../tempGbExports";
+import {
+  Button,
+  Checkbox,
+  Container,
+  Flex,
+  Link,
+  Text,
+} from "@radix-ui/themes";
+import { Archetype, SDKAttribute, SDKAttributeType } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
-import {PiX, PiXBold} from "react-icons/pi";
+import { PiX, PiXBold } from "react-icons/pi";
 import useApi from "../hooks/useApi";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
 import clsx from "clsx";
-import {MW} from "@/app";
+import { MW } from "@/app";
+import { useResponsiveContext } from "../hooks/useResponsive";
 
 export const HEADER_H = 40;
 
-export default function AttributesTab({
-  isResponsive,
-}: {
-  isResponsive: boolean;
-}) {
-
+export default function AttributesTab() {
+  const { isResponsive, isTiny } = useResponsiveContext();
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
   const attributesForm = useForm<Attributes>({ defaultValues: attributes });
   const formAttributes = attributesForm.getValues();
@@ -69,7 +73,7 @@ export default function AttributesTab({
   }, [archetypesLoading, archetypesError, archetypesData]);
 
   const [attributeSchema, setAttributeSchema] = useGlobalState<
-    Record<string, string>
+    Record<string, SDKAttributeType>
   >("attributeSchema", {}, true);
 
   const {
@@ -169,12 +173,14 @@ export default function AttributesTab({
           overflowX: "hidden",
         }}
       >
-
         <div
-          className={clsx("mx-auto fixed w-full flex items-center justify-between border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm", {
-            "pl-4 pr-6": !isResponsive,
-            "pl-2 pr-3": isResponsive,
-          })}
+          className={clsx(
+            "mx-auto fixed w-full flex items-center justify-between border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm",
+            {
+              "pl-4 pr-6": !isResponsive,
+              "pl-2 pr-3": isResponsive,
+            },
+          )}
           style={{
             maxWidth: 700,
             height: HEADER_H,
@@ -186,7 +192,7 @@ export default function AttributesTab({
             weight="medium"
             color="gray"
             size="1"
-            className={clsx("uppercase", {"px-2": isResponsive})}
+            className={clsx("uppercase", { "px-2": isResponsive })}
           >
             User Attributes
           </Text>
@@ -221,8 +227,10 @@ export default function AttributesTab({
         </div>
 
         <div
-          className={clsx("flex justify-between items-top h-[100%] mx-auto", {"px-4": !isResponsive})}
-          style={{maxWidth: 700}}
+          className={clsx("flex justify-between items-top h-[100%] mx-auto", {
+            "px-4": !isResponsive,
+          })}
+          style={{ maxWidth: 700 }}
         >
           <div className="w-full">
             <div
@@ -232,11 +240,12 @@ export default function AttributesTab({
                 "rounded-none": isResponsive,
                 "px-2": isResponsive,
               })}
-              style={{"marginTop": HEADER_H + (!isResponsive ? 12 : 0)}}
+              style={{ marginTop: HEADER_H + (!isResponsive ? 12 : 0) }}
             >
               <Container className="p-3" overflowX="hidden">
                 <AttributesForm
                   form={attributesForm}
+                  isTiny={isTiny}
                   dirty={dirty}
                   setDirty={setDirty}
                   jsonMode={jsonMode}
@@ -249,7 +258,7 @@ export default function AttributesTab({
                 />
               </Container>
             </div>
-            <div className="h-1"/>
+            <div className="h-1" />
           </div>
         </div>
       </div>

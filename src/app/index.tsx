@@ -23,12 +23,11 @@ import {
   PiGearSixFill,
   PiWarningFill,
   PiWarningOctagonFill,
-  PiArrowsClockwise,
 } from "react-icons/pi";
 import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
-import useResizeObserver from "@react-hook/resize-observer";
 import ConditionalWrapper from "@/app/components/ConditionalWrapper";
+import { useResponsiveContext } from "./hooks/useResponsive";
 
 export const MW = 1200; // max-width
 export const RESPONSIVE_W = 570; // small width mode
@@ -39,6 +38,7 @@ export const App = () => {
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  const { isResponsive, isTiny } = useResponsiveContext();
   const [apiKey, setApiKey, apiKeyReady] = useGlobalState(API_KEY, "", true);
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
@@ -71,15 +71,6 @@ export const App = () => {
     }, 400);
   }, []);
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [isResponsive, setIsResponsive] = useState(false);
-  const [isTiny, setIsTiny] = useState(false);
-
-  useResizeObserver(containerRef, (entry) => {
-    setIsResponsive(entry.contentRect.width < RESPONSIVE_W);
-    setIsTiny(entry.contentRect.width < TINY_W);
-  });
-
   return (
     <Theme
       accentColor="violet"
@@ -87,11 +78,7 @@ export const App = () => {
       hasBackground={false}
       style={{ minHeight: "unset" }}
     >
-      <div
-        id="main"
-        className="text-indigo-12 overflow-hidden"
-        ref={containerRef}
-      >
+      <div id="main" className="text-indigo-12 overflow-hidden">
         <div
           className={`shadow-sm px-3 pt-1 w-full relative bg-white z-front`}
           style={{ height: NAV_H }}
@@ -248,15 +235,15 @@ export const App = () => {
           style={{ height: `calc(100vh - ${NAV_H}px)` }}
         >
           {currentTab === "features" ? (
-            <FeaturesTab isResponsive={isResponsive} />
+            <FeaturesTab />
           ) : currentTab === "experiments" ? (
-            <ExperimentsTab isResponsive={isResponsive} />
+            <ExperimentsTab />
           ) : currentTab === "attributes" ? (
-            <AttributesTab isResponsive={isResponsive} />
+            <AttributesTab />
           ) : currentTab === "logs" ? (
-            <LogsTab isResponsive={isResponsive} isTiny={isTiny} />
+            <LogsTab />
           ) : currentTab === "sdkDebug" ? (
-            <SdkTab isResponsive={isResponsive} />
+            <SdkTab />
           ) : null}
         </div>
 

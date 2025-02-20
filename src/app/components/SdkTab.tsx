@@ -12,10 +12,13 @@ import {
   PiXBold,
 } from "react-icons/pi";
 import * as Accordion from "@radix-ui/react-accordion";
+import { useResponsiveContext } from "../hooks/useResponsive";
 
 export const LEFT_PERCENT = 0.5;
 
-export default function SdkTab({ isResponsive }: { isResponsive: boolean }) {
+export default function SdkTab() {
+  const { isResponsive } = useResponsiveContext();
+
   const [selectedItem, setSelectedItem] = useState<string | undefined>(
     !isResponsive ? "status" : undefined,
   );
