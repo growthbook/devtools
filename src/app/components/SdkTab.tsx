@@ -23,12 +23,15 @@ export default function SdkTab() {
     !isResponsive ? "status" : undefined,
   );
 
+  const [activeTabId, setActiveTabId] = useState<number | undefined>(undefined);
+
   const [refreshing, setRefreshing] = useState(false);
   const refresh = () => {
     setRefreshing(true);
     window.setTimeout(() => setRefreshing(false), 500);
     chrome.tabs.query({ currentWindow: true, active: true }, async (tabs) => {
       let activeTab = tabs[0];
+      setActiveTabId(activeTab?.id);
       if (activeTab.id) {
         await chrome.tabs.sendMessage(activeTab.id, {
           type: "GB_REQUEST_REFRESH",
@@ -127,6 +130,29 @@ export default function SdkTab() {
                       Attempting to connect to SDK...
                     </Text>
                   ) : null}
+
+                  <div className="my-3">
+                    {!activeTabId && (
+                      <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-sm mb-3">
+                        DevTools was unable to attach to the current window.
+                        <div className="mt-0.5 text-xs">
+                          Is your DevTools instance docked to the browser window?
+                        </div>
+                      </div>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="2"
+                      onClick={() => {
+                        refresh();
+                      }}
+                      disabled={refreshing}
+                      mt="2"
+                    >
+                      <PiArrowsClockwise/> Refresh DevTools
+                    </Button>
+                  </div>
+
                   <Text as="div" size="2" weight="regular" mb="3">
                     No SDK was found.
                   </Text>
@@ -190,19 +216,6 @@ export default function SdkTab() {
                   )}
                 </>
               )}
-              <div className="mt-6">
-                <Button
-                  variant="outline"
-                  size="2"
-                  onClick={() => {
-                    refresh();
-                  }}
-                  disabled={refreshing}
-                  mt="2"
-                >
-                  <PiArrowsClockwise /> Refresh DevTools
-                </Button>
-              </div>
             </>
           ),
         };
