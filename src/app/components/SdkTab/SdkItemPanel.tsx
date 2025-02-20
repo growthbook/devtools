@@ -33,16 +33,19 @@ const panels: Record<SdkItem, React.FC<SDKHealthCheckResult>> = {
   onFeatureUsage: onFeatureUsagePanel,
 };
 
-const doclinks: Record<SdkItem, string> = {
-  status: "SDK Status",
-  version: "SDK Version",
-  trackingCallback: "Tracking Callback",
-  security: "Payload Security",
-  stickyBucketing: "Sticky Bucketing",
-  streaming: "Streaming",
-  payload: "SDK Payload",
-  logEvent: "Log Event Callback",
-  onFeatureUsage: "On Feature Usage Callback",
+const doclinks: Record<SdkItem, string | undefined> = {
+  status:
+    "https://docs.growthbook.io/quick-start#step-2-integrate-growthbook-into-your-application",
+  version:
+    "https://github.com/growthbook/growthbook/blob/main/packages/shared/src/sdk-versioning/CAPABILITIES.md",
+  trackingCallback:
+    "https://docs.growthbook.io/lib/js#experimentation-ab-testing",
+  security: "https://docs.growthbook.io/lib/js#remote-evaluation",
+  stickyBucketing: "https://docs.growthbook.io/app/sticky-bucketing",
+  streaming: "https://docs.growthbook.io/lib/js#streaming-updates",
+  payload: "https://docs.growthbook.io/lib/js#loading-features-and-experiments",
+  logEvent: undefined,
+  onFeatureUsage: "https://docs.growthbook.io/lib/js#feature-usage-callback",
 };
 
 export default function SdkItemPanel({
@@ -108,9 +111,16 @@ export default function SdkItemPanel({
             >
               <ItemPanel selectedItem={selectedItem} />
             </div>
-            <Link mb="2" size="2" href={doclinks[selectedItem]}>
-              View documentation
-            </Link>
+            {doclinks[selectedItem] && (
+              <Link
+                mb="2"
+                size="2"
+                target="_blank"
+                href={doclinks[selectedItem]}
+              >
+                View documentation
+              </Link>
+            )}
           </Flex>
         </Flex>
       </Flex>
