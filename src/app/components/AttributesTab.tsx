@@ -19,6 +19,7 @@ import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
 import clsx from "clsx";
 import { MW } from "@/app";
 import { useResponsiveContext } from "../hooks/useResponsive";
+import { remove } from "node_modules/@types/lodash";
 
 export const HEADER_H = 40;
 
@@ -41,11 +42,11 @@ export default function AttributesTab() {
 
   const [jsonMode, setJsonMode] = useTabState(
     "attributesForm_useJsonMode",
-    false,
+    false
   );
   const [forcedAttributes, setForcedAttributes] = useTabState<boolean>(
     "forcedAttributes",
-    false,
+    false
   );
   const [newAppliedAttributeIds, setNewAppliedAttributeIds] = useTabState<
     string[]
@@ -56,7 +57,7 @@ export default function AttributesTab() {
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
     "allArchetypes",
     [],
-    true,
+    true
   );
   const {
     isLoading: archetypesLoading,
@@ -73,8 +74,8 @@ export default function AttributesTab() {
           (archetypesData.archetypes || []).map((arch) => ({
             ...arch,
             source: "growthbook",
-          })),
-        ),
+          }))
+        )
     );
   }, [archetypesLoading, archetypesError, archetypesData]);
 
@@ -92,8 +93,8 @@ export default function AttributesTab() {
     if (attributesLoading || attributesError || !attributesData) return;
     setAttributeSchema(
       Object.fromEntries(
-        (attributesData.attributes || []).map((attr) => [attr.property, attr]),
-      ),
+        (attributesData.attributes || []).map((attr) => [attr.property, attr])
+      )
     );
   }, [attributesLoading, attributesError, attributesData]);
 
@@ -102,55 +103,48 @@ export default function AttributesTab() {
 
   const applyAttributes = (newAttributes: Attributes | undefined) => {
     if (!jsonMode) {
-      // check to see if the two objects are the same to avoid unnecessary updates
       newAttributes = newAttributes || (attributesForm.watch() as Attributes);
     } else {
       try {
         newAttributes = JSON.parse(textareaAttributes);
         if (!newAttributes || typeof newAttributes !== "object") {
-          throw new Error("invalid type");
+          throw new Error("Invalid attributes format");
         }
       } catch (e) {
         setTextareaError(true);
         return;
       }
     }
-    const newOverriddenAttributes = Object.fromEntries(
-      Object.keys(newAttributes)
-        .filter((key: string) => {
-          return (
-            JSON.stringify(newAttributes[key]) !==
-            JSON.stringify(attributes[key])
-          );
-        })
-        .map((key: string) => {
-          if (!attributes.hasOwnProperty(key)) {
-            setNewAppliedAttributeIds([...newAppliedAttributeIds, key]);
-          }
-          return [key, newAttributes[key]];
-        }),
-    );
 
-    const removedAttributes= {...attributes};
-    Object.keys(attributes).forEach((key) => {
-      (key: string) => {
-        if (!newAttributes.hasOwnProperty(key)) {
-          setNewAppliedAttributeIds(
-            newAppliedAttributeIds.filter((id) => id !== key),
-          );
-          delete removedAttributes[key];
-        }
-      };
+    const updatedAttributes = { ...attributes };
+    const overriddenAttributes: Record<string, any> = newAttributes || {};
+    const newAppliedIds = new Set(newAppliedAttributeIds);
+
+    Object.keys({ ...attributes, ...newAttributes }).forEach((key) => {
+      const oldValue = attributes[key];
+      const newValue = newAttributes[key];
+
+      if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+        updatedAttributes[key] = newValue;
+        newAppliedIds.add(key);
+      }
+
+      if (!(key in newAttributes)) {
+        delete updatedAttributes[key];
+        newAppliedIds.delete(key);
+      }
     });
-    if (Object.keys(newOverriddenAttributes).length > 0) {
+    setNewAppliedAttributeIds(Array.from(newAppliedIds));
+    if (Object.keys(updatedAttributes).length > 0) {
       setForcedAttributes(true);
       setSelectedArchetype(null);
-      setAttributes({ ...removedAttributes, ...newOverriddenAttributes });
-    } else if (Object.keys(newAttributes).length === 0) {
+      setAttributes(updatedAttributes);
+    } else {
       setSelectedArchetype(null);
       setForcedAttributes(false);
     }
-    attributesForm.reset({ ...removedAttributes, ...newAttributes });
+
+    attributesForm.reset(updatedAttributes);
     setDirty(false);
   };
 
@@ -185,7 +179,7 @@ export default function AttributesTab() {
             {
               "pl-4 pr-6": !isResponsive,
               "pl-2 pr-3": isResponsive,
-            },
+            }
           )}
           style={{
             maxWidth: 700,
