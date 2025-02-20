@@ -122,7 +122,6 @@ export default function AttributesForm({
       form.reset(formAttributes);
     }
     form.setValue(attributeKey, value);
-    console.log("saveAndUpdateAttribute", formAttributes);
     saveOnBlur?.({ [attributeKey]: value });
   }
 
