@@ -12,6 +12,7 @@ import SelectField from "../Forms/SelectField";
 import MultiSelectField from "../Forms/MultiSelectField";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import TextareaAutosize from "react-textarea-autosize";
+import InputFields from "@/app/components/AttributesForm/InputFields";
 
 const arrayAttributeTypes = ["string[]", "number[]", "secureString[]"];
 
@@ -72,7 +73,8 @@ export default function AttributesForm({
   const [newAppliedAttributeIds, setNewAppliedAttributeIds] = useTabState<
     string[]
   >("newAppliedAttributeIds", []);
-  const formAttributes = form.getValues();
+  const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
+  const formAttributes = form.watch();
   const formAttributesString = JSON.stringify(formAttributes, null, 2);
 
   const removeField = (key: string) => {
@@ -81,9 +83,14 @@ export default function AttributesForm({
     }
     setNewAppliedAttributeIds(newAppliedAttributeIds.filter((k) => k !== key));
     setDirty?.(true);
-    const newAttributes = form.getValues();
+    const newAttributes = form.watch();
     delete newAttributes?.[key];
+    // update json to remove the attribute
+    setTextareaAttributes?.(JSON.stringify(newAttributes, null, 2));
     form.reset(newAttributes);
+    const savedAttributes = {...attributes};
+    delete savedAttributes?.[key];
+    setAttributes(savedAttributes);
   };
 
   useEffect(() => {
@@ -109,6 +116,17 @@ export default function AttributesForm({
     );
   }, [formAttributes, newAppliedAttributeIds]);
 
+  const saveAndUpdateAttribute = (attributeKey: string, value: any) => {
+    if(!jsonMode) {
+      resetTextarea();
+      form.reset(formAttributes);
+    }
+    form.setValue(attributeKey, value);
+    console.log("saveAndUpdateAttribute", formAttributes);
+    saveOnBlur?.({ [attributeKey]: value });
+  }
+
+
   return (
     <div>
       <Form.Root className="FormRoot m-0 small">
@@ -119,6 +137,12 @@ export default function AttributesForm({
             ) : (
               <Flex direction="column">
                 {attributesWithoutCustom?.map((attributeKey, i) => {
+                    const attributeType = getAttributeType(
+                      attributeKey,
+                      form.watch(attributeKey),
+                      schema,
+                      customAttrSchema,
+                    );
                   return (
                     <div key={attributeKey}>
                       <Form.Field
@@ -136,14 +160,8 @@ export default function AttributesForm({
                             {attributeKey}
                           </div>
                         </Form.Label>
-                        {renderInputField({
-                          attributeKey,
-                          form,
-                          schema,
-                          customAttrSchema,
-                          setDirty,
-                          saveOnBlur,
-                        })}
+                        <InputFields attributeKey={attributeKey} save={saveAndUpdateAttribute} type={attributeType} schema={schema} value={form.watch(attributeKey)} />
+                        
                       </Form.Field>
                     </div>
                   );
@@ -257,14 +275,14 @@ function renderInputField({
   schema,
   customAttrSchema,
   setDirty,
-  saveOnBlur,
+  save,
 }: {
   attributeKey: string;
   form: UseFormReturn<Attributes>;
   schema: Record<string, SDKAttribute>;
   customAttrSchema: Record<string, SDKAttribute>;
   setDirty?: (b: boolean) => void;
-  saveOnBlur?: (newAttributes: Attributes) => void;
+  save?: (newAttributes: Attributes) => void;
 }) {
   let attributeType = getAttributeType(
     attributeKey,
@@ -293,7 +311,7 @@ function renderInputField({
             checked={form.watch(attributeKey)}
             onCheckedChange={(v: boolean) => {
               form.setValue(attributeKey, v);
-              saveOnBlur?.({ [attributeKey]: v });
+              save?.({ [attributeKey]: v });
               setDirty?.(true);
             }}
           />

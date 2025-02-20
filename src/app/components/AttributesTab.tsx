@@ -26,7 +26,7 @@ export default function AttributesTab() {
   const { isResponsive } = useResponsiveContext();
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
   const attributesForm = useForm<Attributes>({ defaultValues: attributes });
-  const formAttributes = attributesForm.getValues();
+  const formAttributes = attributesForm.watch();
   const formAttributesString = JSON.stringify(formAttributes, null, 2);
   const [textareaAttributes, setTextareaAttributes] =
     useState(formAttributesString);
@@ -99,10 +99,11 @@ export default function AttributesTab() {
 
   const [selectedArchetype, setSelectedArchetype] =
     useTabState<Archetype | null>("selectedArchetype", null);
+
   const applyAttributes = (newAttributes: Attributes | undefined) => {
     if (!jsonMode) {
       // check to see if the two objects are the same to avoid unnecessary updates
-      newAttributes = newAttributes || (formAttributes as Attributes);
+      newAttributes = newAttributes || (attributesForm.watch() as Attributes);
     } else {
       try {
         newAttributes = JSON.parse(textareaAttributes);
@@ -129,25 +130,27 @@ export default function AttributesTab() {
           return [key, newAttributes[key]];
         }),
     );
-    // check if newAttributes has any keys that are removed from attributes
+
+    const removedAttributes= {...attributes};
     Object.keys(attributes).forEach((key) => {
       (key: string) => {
         if (!newAttributes.hasOwnProperty(key)) {
           setNewAppliedAttributeIds(
             newAppliedAttributeIds.filter((id) => id !== key),
           );
+          delete removedAttributes[key];
         }
       };
     });
     if (Object.keys(newOverriddenAttributes).length > 0) {
       setForcedAttributes(true);
       setSelectedArchetype(null);
-      setAttributes({ ...attributes, ...newOverriddenAttributes });
+      setAttributes({ ...removedAttributes, ...newOverriddenAttributes });
     } else if (Object.keys(newAttributes).length === 0) {
       setSelectedArchetype(null);
       setForcedAttributes(false);
     }
-    attributesForm.reset({ ...attributes, ...newAttributes });
+    attributesForm.reset({ ...removedAttributes, ...newAttributes });
     setDirty(false);
   };
 
