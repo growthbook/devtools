@@ -80,7 +80,7 @@ export default function ArchetypesList() {
       </DropdownMenu.Trigger>
       <DropdownMenu.Content variant="soft">
         <DropdownMenu.Label className="font-semibold uppercase text-slate-a10 py-1 h-auto text-xs">
-          Preview
+          Default
         </DropdownMenu.Label>
         <DropdownMenu.Item
           onSelect={() => {
