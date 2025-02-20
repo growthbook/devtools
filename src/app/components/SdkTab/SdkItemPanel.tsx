@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, IconButton, Link, Text } from "@radix-ui/themes";
+import { Button, Flex, IconButton, Link, Text } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
 import { MW, NAV_H } from "@/app";
 import { PiArrowsClockwise, PiCaretRightFill, PiXBold } from "react-icons/pi";
@@ -7,6 +7,7 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { useResponsiveContext } from "@/app/hooks/useResponsive";
 import { SdkItem } from "./index";
 import useSdkData from "@/app/hooks/useSdkData";
+import { SDKHealthCheckResult } from "devtools";
 
 const panelTitles: Record<SdkItem, string> = {
   status: "SDK Status",
@@ -20,7 +21,7 @@ const panelTitles: Record<SdkItem, string> = {
   onFeatureUsage: "On Feature Usage Callback",
 };
 
-const panels: Record<SdkItem, React.FC> = {
+const panels: Record<SdkItem, React.FC<SDKHealthCheckResult>> = {
   status: statusPanel,
   version: versionPanel,
   trackingCallback: trackingCallbackPanel,
@@ -30,6 +31,18 @@ const panels: Record<SdkItem, React.FC> = {
   payload: payloadPanel,
   logEvent: logEventPanel,
   onFeatureUsage: onFeatureUsagePanel,
+};
+
+const doclinks: Record<SdkItem, string> = {
+  status: "SDK Status",
+  version: "SDK Version",
+  trackingCallback: "Tracking Callback",
+  security: "Payload Security",
+  stickyBucketing: "Sticky Bucketing",
+  streaming: "Streaming",
+  payload: "SDK Payload",
+  logEvent: "Log Event Callback",
+  onFeatureUsage: "On Feature Usage Callback",
 };
 
 export default function SdkItemPanel({
@@ -42,8 +55,6 @@ export default function SdkItemPanel({
   widthPercent: number;
 }) {
   const { isResponsive } = useResponsiveContext();
-
-  const ItemPanel = panels[selectedItem];
 
   return (
     <div
@@ -60,7 +71,12 @@ export default function SdkItemPanel({
         pointerEvents: !open ? "none" : undefined,
       }}
     >
-      <div className="featureDetail" key={`selected_${selectedItem}`}>
+      <Flex
+        className="featureDetail"
+        key={`selected_${selectedItem}`}
+        direction="column"
+        height="100%"
+      >
         <div className="header">
           <div className="flex items-start gap-2">
             <h2 className="font-bold flex-1 my-1.5">
@@ -82,19 +98,42 @@ export default function SdkItemPanel({
             )}
           </div>
         </div>
-        <div className="content">
-          <div className="my-2">
-            <ItemPanel />
-          </div>
-        </div>
-      </div>
+        <Flex className="content" flexGrow="1" direction="column">
+          <Flex direction="column" flexGrow="1" justify="between" align="start">
+            <div
+              className="my-2"
+              style={{
+                maxWidth: `calc(${widthPercent * 100}vw - 32px)`,
+              }}
+            >
+              <ItemPanel selectedItem={selectedItem} />
+            </div>
+            <Link mb="2" size="2" href={doclinks[selectedItem]}>
+              View documentation
+            </Link>
+          </Flex>
+        </Flex>
+      </Flex>
     </div>
   );
 }
 
-function statusPanel() {
-  const { sdkFound, canConnect, apiHost, clientKey, errorMessage } =
-    useSdkData();
+function ItemPanel({ selectedItem }: { selectedItem: SdkItem }) {
+  const PanelComponent = panels[selectedItem];
+  const sdkData = useSdkData();
+  if (sdkData.isLoading) {
+    return "Loading...";
+  }
+  return <PanelComponent {...sdkData} />;
+}
+
+function statusPanel({
+  sdkFound,
+  canConnect,
+  apiHost,
+  clientKey,
+  errorMessage,
+}: SDKHealthCheckResult) {
   const [activeTabId, setActiveTabId] = useState<number | undefined>(undefined);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -208,8 +247,7 @@ function statusPanel() {
   );
 }
 
-function versionPanel() {
-  const { hasWindowConfig, version } = useSdkData();
+function versionPanel({ hasWindowConfig, version }: SDKHealthCheckResult) {
   return (
     <Text as="div" size="2" weight="regular">
       {!version ? (
@@ -229,8 +267,10 @@ function versionPanel() {
   );
 }
 
-function trackingCallbackPanel() {
-  const { trackingCallbackParams, hasTrackingCallback } = useSdkData();
+function trackingCallbackPanel({
+  trackingCallbackParams,
+  hasTrackingCallback,
+}: SDKHealthCheckResult) {
   return (
     <Text as="div" size="2" weight="regular">
       {trackingCallbackParams?.length === 2 ? (
@@ -263,8 +303,11 @@ function trackingCallbackPanel() {
   );
 }
 
-function securityPanel() {
-  const { hasDecryptionKey, payloadDecrypted, isRemoteEval } = useSdkData();
+function securityPanel({
+  hasDecryptionKey,
+  payloadDecrypted,
+  isRemoteEval,
+}: SDKHealthCheckResult) {
   return (
     <Text as="div" size="2" weight="regular">
       {hasDecryptionKey
@@ -278,8 +321,10 @@ function securityPanel() {
   );
 }
 
-function stickyBucketingPanel() {
-  const { usingStickyBucketing, stickyBucketAssignmentDocs } = useSdkData();
+function stickyBucketingPanel({
+  usingStickyBucketing,
+  stickyBucketAssignmentDocs,
+}: SDKHealthCheckResult) {
   return (
     <>
       <Text as="div" size="2" weight="regular">
@@ -300,7 +345,7 @@ function stickyBucketingPanel() {
               <ValueField
                 value={Object.values(stickyBucketAssignmentDocs)}
                 valueType="json"
-                maxHeight={null}
+                maxHeight={`calc((100vh - ${NAV_H}px - 64px) / 2)`}
               />
             </Accordion.Content>
           </Accordion.Item>
@@ -310,9 +355,12 @@ function stickyBucketingPanel() {
   );
 }
 
-function streamingPanel() {
-  const { streaming, streamingHost, clientKey, streamingHostRequestHeaders } =
-    useSdkData();
+function streamingPanel({
+  streaming,
+  streamingHost,
+  clientKey,
+  streamingHostRequestHeaders,
+}: SDKHealthCheckResult) {
   return (
     <>
       <Text as="div" size="2" weight="regular" mb="2">
@@ -340,13 +388,17 @@ function streamingPanel() {
   );
 }
 
-function payloadPanel() {
-  const { payload } = useSdkData();
-  return <ValueField value={payload} valueType="json" maxHeight={null} />;
+function payloadPanel({ payload }: SDKHealthCheckResult) {
+  return (
+    <ValueField
+      value={payload}
+      valueType="json"
+      maxHeight={`calc(100vh - ${NAV_H}px - 150px)`}
+    />
+  );
 }
 
-function logEventPanel() {
-  const { usingLogEvent } = useSdkData();
+function logEventPanel({ usingLogEvent }: SDKHealthCheckResult) {
   return (
     <Text as="div" size="2" weight="regular">
       {usingLogEvent ? (
@@ -365,8 +417,7 @@ function logEventPanel() {
   );
 }
 
-function onFeatureUsagePanel() {
-  const { usingOnFeatureUsage } = useSdkData();
+function onFeatureUsagePanel({ usingOnFeatureUsage }: SDKHealthCheckResult) {
   return (
     <Text as="div" size="2" weight="regular">
       {usingOnFeatureUsage ? (

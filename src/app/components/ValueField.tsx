@@ -29,7 +29,7 @@ export default function ValueField({
   value: any;
   valueType?: ValueType;
   jsonStringifySpaces?: number;
-  maxHeight?: number | null;
+  maxHeight?: string | number | null;
   customPrismStyle?: CSSProperties;
   customPrismOuterStyle?: CSSProperties;
   customBooleanStyle?: CSSProperties;
