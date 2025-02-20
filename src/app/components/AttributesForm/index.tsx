@@ -128,7 +128,7 @@ export default function AttributesForm({
                         <Form.Label className="FormLabel mr-2 flex-shrink-0">
                           <div
                             className="inline-block line-clamp-2 leading-4 mt-1.5"
-                            style={{ width: 120 }}
+                            style={{ width: "min(120px, 20vw)" }}
                           >
                             {attributeKey}
                           </div>
@@ -159,7 +159,7 @@ export default function AttributesForm({
                         <Form.Label className="FormLabel mr-2 flex-shrink-0">
                           <div
                             className="inline-block line-clamp-2 leading-4 mt-1.5"
-                            style={{ width: 120 }}
+                            style={{ width: "min(120px, 20vw)" }}
                           >
                             {attributeKey}
                           </div>

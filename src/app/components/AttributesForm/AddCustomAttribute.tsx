@@ -117,9 +117,13 @@ export default function AddCustomAttribute({
             pr={!isResponsive ? "2" : undefined}
             justify="between"
             flexGrow="1"
+            flexShrink="0"
           >
             <Form.Label className="FormLabel text-nowrap text-sm">
-              <div className={clsx("inline-block -mb-1 overflow-hidden overflow-ellipsis", { "mt-1" : isResponsive })}>
+              <div
+                className={clsx("inline-block -mb-1 overflow-hidden overflow-ellipsis", { "mt-1" : isResponsive })}
+                style={{ width: "min(120px, 20vw)" }}
+              >
                 Field Type
               </div>
             </Form.Label>
@@ -153,9 +157,13 @@ export default function AddCustomAttribute({
             direction={isResponsive ? "row" : "column"}
             justify="between"
             flexGrow="1"
+            flexShrink="0"
           >
             <Form.Label className="FormLabel text-nowrap text-sm">
-              <div className={clsx("inline-block -mb-1 overflow-hidden overflow-ellipsis", {"mt-1": isResponsive})}>
+              <div
+                className={clsx("inline-block -mb-1 overflow-hidden overflow-ellipsis", {"mt-1": isResponsive})}
+                style={{ width: "min(120px, 20vw)" }}
+              >
                 Field Name
               </div>
             </Form.Label>
@@ -164,7 +172,6 @@ export default function AddCustomAttribute({
               flexGrow="1"
               ml={isResponsive ? "2" : "0"}
               maxWidth="350px"
-              minWidth="200px"
             >
               {Object.keys(schema || {}).length ? (
               <SelectField
