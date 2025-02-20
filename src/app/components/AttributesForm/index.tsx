@@ -308,7 +308,12 @@ function renderInputField({
               value: entry,
               label: entry,
             }))}
-            onChange={(v) => form.setValue(attributeKey, v)}
+            onChange={(v) =>
+              form.setValue(
+                attributeKey,
+                attributeType === "number[]" ? v.map((n) => parseInt(n)) : v,
+              )
+            }
             formatCreateLabel={(input: string) => `Add "${input}"`}
             validOptionPattern={attributeType === "number[]" ? "^\\d+$" : ".+"}
           />
