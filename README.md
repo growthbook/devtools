@@ -12,7 +12,7 @@ DevTools Features
 - Override targeting attributes to simulate what different users will see
 - Detailed logs explaining exactly why you got assigned a specific value
 
-![DevTools Screenshot](/devtools-screenshot.png)
+![DevTools Screenshot](/devtools-screenshot.jpg)
 
 ## Build and Release
 
@@ -25,7 +25,7 @@ To build and use this extension locally:
    - Remove any existing GrowthBook devtool extensions
    - Click "Load Unpacked Extension" and select the `dist` directory
 4. To enable hot-reloading, run `yarn dev` which will pick up most changes automatically
-5. For changes to certain files (content_script/index), you also need to refresh the extension by right clicking -> manage extension and use the refresh button in the top right corner
+5. For changes to certain files (content_script, background), you also need to refresh the extension by right clicking -> manage extension and use the refresh button in the top right corner
 
 To release a new version of the extension to the Chrome Web Store:
 
