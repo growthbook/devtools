@@ -2,12 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
-import {
-  Checkbox,
-  Container,
-  Link,
-  Text,
-} from "@radix-ui/themes";
+import { Checkbox, Container, Link, Text } from "@radix-ui/themes";
 import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
@@ -97,60 +92,59 @@ export default function AttributesTab() {
   const [selectedArchetype, setSelectedArchetype] =
     useTabState<Archetype | null>("selectedArchetype", null);
 
-    const applyAttributes = (newAttributes: Attributes | undefined) => {
-      if (!jsonMode) {
-        // check to see if the two objects are the same to avoid unnecessary updates
-        newAttributes = newAttributes || (attributesForm.watch() as Attributes);
-      } else {
-        try {
-          newAttributes = JSON.parse(textareaAttributes);
-          if (!newAttributes || typeof newAttributes !== "object") {
-            throw new Error("invalid type");
-          }
-        } catch (e) {
-          setTextareaError(true);
-          return;
+  const applyAttributes = (newAttributes: Attributes | undefined) => {
+    if (!jsonMode) {
+      // check to see if the two objects are the same to avoid unnecessary updates
+      newAttributes = newAttributes || (attributesForm.watch() as Attributes);
+    } else {
+      try {
+        newAttributes = JSON.parse(textareaAttributes);
+        if (!newAttributes || typeof newAttributes !== "object") {
+          throw new Error("invalid type");
         }
+      } catch (e) {
+        setTextareaError(true);
+        return;
       }
-      const newOverriddenAttributes = Object.fromEntries(
-        Object.keys(newAttributes)
-          .filter((key: string) => {
-            return (
-              JSON.stringify(newAttributes[key]) !==
-              JSON.stringify(attributes[key])
-            );
-          })
-          .map((key: string) => {
-            if (!attributes.hasOwnProperty(key)) {
-              setNewAppliedAttributeIds([...newAppliedAttributeIds, key]);
-            }
-            return [key, newAttributes[key]];
-          }),
-      );
-
-      const removedAttributes= {...attributes};
-      Object.keys(attributes).forEach((key) => {
-        (key: string) => {
-          if (!newAttributes.hasOwnProperty(key)) {
-            setNewAppliedAttributeIds(
-              newAppliedAttributeIds.filter((id) => id !== key),
-            );
-            delete removedAttributes[key];
+    }
+    const newOverriddenAttributes = Object.fromEntries(
+      Object.keys(newAttributes)
+        .filter((key: string) => {
+          return (
+            JSON.stringify(newAttributes[key]) !==
+            JSON.stringify(attributes[key])
+          );
+        })
+        .map((key: string) => {
+          if (!attributes.hasOwnProperty(key)) {
+            setNewAppliedAttributeIds([...newAppliedAttributeIds, key]);
           }
-        };
-      });
-      if (Object.keys(newOverriddenAttributes).length > 0) {
-        setForcedAttributes(true);
-        setSelectedArchetype(null);
-        setAttributes({ ...removedAttributes, ...newOverriddenAttributes });
-      } else if (Object.keys(newAttributes).length === 0) {
-        setSelectedArchetype(null);
-        setForcedAttributes(false);
-      }
-      attributesForm.reset({ ...removedAttributes, ...newAttributes });
-      setDirty(false);
-    };
+          return [key, newAttributes[key]];
+        }),
+    );
 
+    const removedAttributes = { ...attributes };
+    Object.keys(attributes).forEach((key) => {
+      (key: string) => {
+        if (!newAttributes.hasOwnProperty(key)) {
+          setNewAppliedAttributeIds(
+            newAppliedAttributeIds.filter((id) => id !== key),
+          );
+          delete removedAttributes[key];
+        }
+      };
+    });
+    if (Object.keys(newOverriddenAttributes).length > 0) {
+      setForcedAttributes(true);
+      setSelectedArchetype(null);
+      setAttributes({ ...removedAttributes, ...newOverriddenAttributes });
+    } else if (Object.keys(newAttributes).length === 0) {
+      setSelectedArchetype(null);
+      setForcedAttributes(false);
+    }
+    attributesForm.reset({ ...removedAttributes, ...newAttributes });
+    setDirty(false);
+  };
 
   const resetAttributesOverride = () => {
     setForcedAttributes(false);

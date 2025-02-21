@@ -4,7 +4,7 @@ import ReactSelect, {
   MenuPlacement,
 } from "react-select";
 import CreatableSelect from "react-select/creatable";
-import {customStyles, SingleValue} from "./SelectField";
+import { customStyles, SingleValue } from "./SelectField";
 import { clone } from "lodash";
 import { isDefined } from "@/app/utils";
 

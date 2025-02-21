@@ -2,13 +2,18 @@ import React, { useState } from "react";
 import { Button, Flex, IconButton, Link, Text } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
 import { MW, NAV_H } from "@/app";
-import {PiArrowsClockwise, PiArrowSquareOut, PiCaretRightFill, PiXBold} from "react-icons/pi";
+import {
+  PiArrowsClockwise,
+  PiArrowSquareOut,
+  PiCaretRightFill,
+  PiXBold,
+} from "react-icons/pi";
 import * as Accordion from "@radix-ui/react-accordion";
 import { useResponsiveContext } from "@/app/hooks/useResponsive";
 import { SdkItem } from "./index";
 import useSdkData from "@/app/hooks/useSdkData";
 import { SDKHealthCheckResult } from "devtools";
-import {getActiveTabId} from "@/app/hooks/useTabState";
+import { getActiveTabId } from "@/app/hooks/useTabState";
 
 const panelTitles: Record<SdkItem, string> = {
   status: "SDK Status",
@@ -113,11 +118,7 @@ export default function SdkItemPanel({
               <ItemPanel selectedItem={selectedItem} />
             </div>
             {doclinks[selectedItem] ? (
-              <Link
-                size="2"
-                target="_blank"
-                href={doclinks[selectedItem]}
-              >
+              <Link size="2" target="_blank" href={doclinks[selectedItem]}>
                 View documentation
                 <PiArrowSquareOut className="inline-block mb-1 ml-0.5" />
               </Link>

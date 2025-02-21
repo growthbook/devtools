@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as Form from "@radix-ui/react-form";
-import {Button, Flex, Link, TextField} from "@radix-ui/themes";
+import { Button, Flex, Link, TextField } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { PiPlusCircleFill } from "react-icons/pi";
 import {
-  attributeDataTypes, primitiveDataTypes,
+  attributeDataTypes,
+  primitiveDataTypes,
   SDKAttribute,
   SDKAttributeType,
 } from "@/app/tempGbExports";
@@ -121,7 +122,10 @@ export default function AddCustomAttribute({
           >
             <Form.Label className="FormLabel text-nowrap text-sm">
               <div
-                className={clsx("inline-block -mb-1 overflow-hidden overflow-ellipsis", { "mt-1" : isResponsive })}
+                className={clsx(
+                  "inline-block -mb-1 overflow-hidden overflow-ellipsis",
+                  { "mt-1": isResponsive },
+                )}
                 style={{ width: "min(120px, 20vw)" }}
               >
                 Field Type
@@ -137,7 +141,10 @@ export default function AddCustomAttribute({
             >
               <SelectField
                 value={addCustomType}
-                options={(Object.keys(schema ?? {}).includes(addCustomId) ? attributeDataTypes : primitiveDataTypes).map((opt) => ({
+                options={(Object.keys(schema ?? {}).includes(addCustomId)
+                  ? attributeDataTypes
+                  : primitiveDataTypes
+                ).map((opt) => ({
                   label: attributeTypeReadable(opt),
                   value: opt,
                 }))}
@@ -161,7 +168,10 @@ export default function AddCustomAttribute({
           >
             <Form.Label className="FormLabel text-nowrap text-sm">
               <div
-                className={clsx("inline-block -mb-1 overflow-hidden overflow-ellipsis", {"mt-1": isResponsive})}
+                className={clsx(
+                  "inline-block -mb-1 overflow-hidden overflow-ellipsis",
+                  { "mt-1": isResponsive },
+                )}
                 style={{ width: "min(120px, 20vw)" }}
               >
                 Field Name
@@ -174,29 +184,33 @@ export default function AddCustomAttribute({
               maxWidth="350px"
             >
               {Object.keys(schema || {}).length ? (
-              <SelectField
-                className="w-full text-sm"
-                creatable
-                isClearable
-                isSearchable
-                options={unusedSchemaAttributes.map((attr) => ({
-                  value: attr,
-                  label: attr,
-                }))}
-                formatOptionLabel={(value) => (
-                  <div className="text-nowrap line-clamp-1">{value.label}</div>
-                )}
-                value={addCustomId}
-                onChange={setAddCustomId}
-                formatCreateLabel={(val) => (
-                  <>
-                    <span className="text-gray-600 text-xs mr-1">Create custom:</span>
-                    {val}
-                  </>
-                )}
-                validOptionPattern=".+"
-                menuPlacement="top"
-              />
+                <SelectField
+                  className="w-full text-sm"
+                  creatable
+                  isClearable
+                  isSearchable
+                  options={unusedSchemaAttributes.map((attr) => ({
+                    value: attr,
+                    label: attr,
+                  }))}
+                  formatOptionLabel={(value) => (
+                    <div className="text-nowrap line-clamp-1">
+                      {value.label}
+                    </div>
+                  )}
+                  value={addCustomId}
+                  onChange={setAddCustomId}
+                  formatCreateLabel={(val) => (
+                    <>
+                      <span className="text-gray-600 text-xs mr-1">
+                        Create custom:
+                      </span>
+                      {val}
+                    </>
+                  )}
+                  validOptionPattern=".+"
+                  menuPlacement="top"
+                />
               ) : (
                 <TextField.Root
                   type="text"
@@ -210,11 +224,7 @@ export default function AddCustomAttribute({
             </Flex>
           </Flex>
         </Form.Field>
-        <Flex
-          my="1"
-          direction={isResponsive ? "row" : "column"}
-          justify="end"
-        >
+        <Flex my="1" direction={isResponsive ? "row" : "column"} justify="end">
           <Flex align="center" gapX="2" ml="3">
             <Link
               href="#"

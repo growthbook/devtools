@@ -1,6 +1,13 @@
 import React, { useEffect, useMemo } from "react";
 import * as Form from "@radix-ui/react-form";
-import {Button, Switch, Flex, TextField, IconButton, Link} from "@radix-ui/themes";
+import {
+  Button,
+  Switch,
+  Flex,
+  TextField,
+  IconButton,
+  Link,
+} from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
 import { PiX } from "react-icons/pi";
@@ -88,7 +95,7 @@ export default function AttributesForm({
     // update json to remove the attribute
     setTextareaAttributes?.(JSON.stringify(newAttributes, null, 2));
     form.reset(newAttributes);
-    const savedAttributes = {...attributes};
+    const savedAttributes = { ...attributes };
     delete savedAttributes?.[key];
     setAttributes(savedAttributes);
   };
@@ -117,14 +124,13 @@ export default function AttributesForm({
   }, [formAttributes, newAppliedAttributeIds]);
 
   const saveAndUpdateAttribute = (attributeKey: string, value: any) => {
-    if(!jsonMode) {
+    if (!jsonMode) {
       resetTextarea();
       form.reset(formAttributes);
     }
     form.setValue(attributeKey, value);
     saveOnBlur?.({ [attributeKey]: value });
-  }
-
+  };
 
   return (
     <div>
@@ -136,12 +142,12 @@ export default function AttributesForm({
             ) : (
               <Flex direction="column">
                 {attributesWithoutCustom?.map((attributeKey, i) => {
-                    const attributeType = getAttributeType(
-                      attributeKey,
-                      form.watch(attributeKey),
-                      schema,
-                      customAttrSchema,
-                    );
+                  const attributeType = getAttributeType(
+                    attributeKey,
+                    form.watch(attributeKey),
+                    schema,
+                    customAttrSchema,
+                  );
                   return (
                     <div key={attributeKey}>
                       <Form.Field
@@ -159,54 +165,61 @@ export default function AttributesForm({
                             {attributeKey}
                           </div>
                         </Form.Label>
-                        <InputFields attributeKey={attributeKey} save={saveAndUpdateAttribute} type={attributeType} schema={schema} value={form.watch(attributeKey)} />
-                        
+                        <InputFields
+                          attributeKey={attributeKey}
+                          save={saveAndUpdateAttribute}
+                          type={attributeType}
+                          schema={schema}
+                          value={form.watch(attributeKey)}
+                        />
                       </Form.Field>
                     </div>
                   );
                 })}
                 <div className="border-t border-gray-200 my-4 h-0" />
-                {customAttributes.length > 0 ? customAttributes?.map((attributeKey, i) => {
-                  return (
-                    <div key={attributeKey}>
-                      <Form.Field
-                        className="FormFieldInline my-1"
-                        name={attributeKey}
-                        onBlur={() => {
-                          saveOnBlur?.();
-                        }}
-                      >
-                        <Form.Label className="FormLabel mr-2 flex-shrink-0">
-                          <div
-                            className="inline-block line-clamp-2 leading-4 mt-1.5"
-                            style={{ width: "min(120px, 20vw)" }}
+                {customAttributes.length > 0
+                  ? customAttributes?.map((attributeKey, i) => {
+                      return (
+                        <div key={attributeKey}>
+                          <Form.Field
+                            className="FormFieldInline my-1"
+                            name={attributeKey}
+                            onBlur={() => {
+                              saveOnBlur?.();
+                            }}
                           >
-                            {attributeKey}
-                          </div>
-                        </Form.Label>
-                        {renderInputField({
-                          attributeKey,
-                          form,
-                          schema,
-                          customAttrSchema,
-                          setDirty,
-                        })}
-                        <IconButton
-                          type="button"
-                          size="2"
-                          variant="ghost"
-                          color="red"
-                          style={{ margin: "0 0 0 8px" }}
-                          onClick={() => removeField(attributeKey)}
-                        >
-                          <PiX />
-                        </IconButton>
-                      </Form.Field>
-                    </div>
-                  );
-                }) : null }
+                            <Form.Label className="FormLabel mr-2 flex-shrink-0">
+                              <div
+                                className="inline-block line-clamp-2 leading-4 mt-1.5"
+                                style={{ width: "min(120px, 20vw)" }}
+                              >
+                                {attributeKey}
+                              </div>
+                            </Form.Label>
+                            {renderInputField({
+                              attributeKey,
+                              form,
+                              schema,
+                              customAttrSchema,
+                              setDirty,
+                            })}
+                            <IconButton
+                              type="button"
+                              size="2"
+                              variant="ghost"
+                              color="red"
+                              style={{ margin: "0 0 0 8px" }}
+                              onClick={() => removeField(attributeKey)}
+                            >
+                              <PiX />
+                            </IconButton>
+                          </Form.Field>
+                        </div>
+                      );
+                    })
+                  : null}
                 {customAttributes.length > 0 && (
-                  <div className="border-t border-gray-200 my-4 h-0"/>
+                  <div className="border-t border-gray-200 my-4 h-0" />
                 )}
               </Flex>
             )
@@ -320,13 +333,15 @@ function renderInputField({
             menuPlacement="top"
             value={form.watch(attributeKey)}
             options={
-              (schema[attributeKey].enum || "")?.split(",")?.map((strSegment) => {
-                const trimmed = strSegment.trim();
-                return {
-                  value: trimmed,
-                  label: trimmed,
-                };
-              }) || []
+              (schema[attributeKey].enum || "")
+                ?.split(",")
+                ?.map((strSegment) => {
+                  const trimmed = strSegment.trim();
+                  return {
+                    value: trimmed,
+                    label: trimmed,
+                  };
+                }) || []
             }
             onChange={(v) => form.setValue(attributeKey, v)}
           />
@@ -336,8 +351,15 @@ function renderInputField({
             placeholder="Add to list..."
             className="text-sm w-full"
             menuPlacement="top"
-            value={Array.isArray(form.watch(attributeKey)) ? form.watch(attributeKey) : []}
-            options={(Array.isArray(form.watch(attributeKey)) ? form.watch(attributeKey) : [])?.map?.((entry: string) => ({
+            value={
+              Array.isArray(form.watch(attributeKey))
+                ? form.watch(attributeKey)
+                : []
+            }
+            options={(Array.isArray(form.watch(attributeKey))
+              ? form.watch(attributeKey)
+              : []
+            )?.map?.((entry: string) => ({
               value: entry,
               label: entry,
             }))}
