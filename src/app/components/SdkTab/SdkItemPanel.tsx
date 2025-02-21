@@ -8,6 +8,7 @@ import { useResponsiveContext } from "@/app/hooks/useResponsive";
 import { SdkItem } from "./index";
 import useSdkData from "@/app/hooks/useSdkData";
 import { SDKHealthCheckResult } from "devtools";
+import {getActiveTabId} from "@/app/hooks/useTabState";
 
 const panelTitles: Record<SdkItem, string> = {
   status: "SDK Status",
@@ -147,18 +148,16 @@ function statusPanel({
   const [activeTabId, setActiveTabId] = useState<number | undefined>(undefined);
   const [refreshing, setRefreshing] = useState(false);
 
-  const refresh = () => {
+  const refresh = async () => {
     setRefreshing(true);
     window.setTimeout(() => setRefreshing(false), 500);
-    chrome.tabs.query({ currentWindow: true, active: true }, async (tabs) => {
-      let activeTab = tabs[0];
-      setActiveTabId(activeTab?.id);
-      if (activeTab.id) {
-        await chrome.tabs.sendMessage(activeTab.id, {
-          type: "GB_REQUEST_REFRESH",
-        });
-      }
-    });
+    const activeTabId = await getActiveTabId();
+    setActiveTabId(activeTabId);
+    if (activeTabId) {
+      await chrome.tabs.sendMessage(activeTabId, {
+        type: "GB_REQUEST_REFRESH",
+      });
+    }
   };
 
   return (
@@ -175,9 +174,6 @@ function statusPanel({
             {!activeTabId && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-sm mb-3">
                 DevTools was unable to attach to the current window.
-                <div className="mt-0.5 text-xs">
-                  Is your DevTools instance docked to the browser window?
-                </div>
               </div>
             )}
             <Button

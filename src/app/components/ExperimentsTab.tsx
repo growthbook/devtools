@@ -267,7 +267,7 @@ export default function ExperimentsTab() {
                 onClick={() => clickExperiment(eid, changeId)}
               >
                 <div
-                  className="title line-clamp-1 pl-2.5 pr-6"
+                  className="title line-clamp-1 pl-2.5 pr-8"
                   style={{ width: fullWidthListView ? col1 : undefined }}
                 >
                   <FeatureExperimentStatusIcon
@@ -285,7 +285,7 @@ export default function ExperimentsTab() {
                   style={fullWidthListView ? { width: col2 } : undefined}
                 >
                   {types ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 pr-0.5">
                       {types.redirect ? (
                         <Tooltip content="URL Redirect experiment">
                           <button>

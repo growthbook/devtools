@@ -2,8 +2,13 @@ import { useState, useEffect } from "react";
 
 type UseStateReturn<T> = [T, (value: T) => void, boolean];
 
-async function getActiveTabId() {
-  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+export async function getActiveTabId() {
+  let tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tabs?.length) {
+    const window = await chrome.windows.getLastFocused();
+    const windowId = window?.id || -1;
+    tabs = await chrome.tabs.query({ active: true, windowId });
+  }
   const activeTab = tabs[0];
   return activeTab?.id;
 }
