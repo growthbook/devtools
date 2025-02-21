@@ -179,6 +179,12 @@ export default function AttributesForm({
                 <div className="border-t border-gray-200 my-4 h-0" />
                 {customAttributes.length > 0
                   ? customAttributes?.map((attributeKey, i) => {
+                    const attributeType = getAttributeType(
+                      attributeKey,
+                      form.watch(attributeKey),
+                      schema,
+                      customAttrSchema,
+                    );
                       return (
                         <div key={attributeKey}>
                           <Form.Field
@@ -196,13 +202,13 @@ export default function AttributesForm({
                                 {attributeKey}
                               </div>
                             </Form.Label>
-                            {renderInputField({
-                              attributeKey,
-                              form,
-                              schema,
-                              customAttrSchema,
-                              setDirty,
-                            })}
+                            <InputFields
+                              attributeKey={attributeKey}
+                              save={saveAndUpdateAttribute}
+                              type={attributeType}
+                              schema={schema}
+                              value={form.watch(attributeKey)}
+                            />
                             <IconButton
                               type="button"
                               size="2"
