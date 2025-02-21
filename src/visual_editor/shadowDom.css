@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+:host {
+  all: initial;
+  * {
+    line-height: 24px;
+  }
+}
+
 * {
   @apply font-sans;
 }

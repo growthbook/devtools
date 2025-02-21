@@ -6,7 +6,7 @@ import {
   EXPERIMENT_URL_PARAMS_KEY,
   AI_ENABLED_PARAMS_KEY,
   API_HOST_PARAMS_KEY,
-} from "../../lib/constants";
+} from "@/visual_editor/lib/constants";
 
 type UseQueryParamsHook = () => {
   params: qs.ParsedQuery;

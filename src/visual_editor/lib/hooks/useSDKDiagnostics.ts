@@ -5,7 +5,7 @@ import {
   Message,
   RefreshMessage,
   SetOverridesMessage,
-} from "../../../../devtools";
+} from "devtools";
 import MessageSender = chrome.runtime.MessageSender;
 
 // technically doesn't have to be the latest version but the most recent version
@@ -62,7 +62,7 @@ const useSDKDiagnostics: UseSDKDiagnosticsHook = ({ experiment }) => {
     window.addEventListener("message", messageHandler);
 
     // send ping to SDK
-    window.postMessage("GB_REQUEST_REFRESH", "*");
+    window.postMessage({ type: "GB_REQUEST_REFRESH" }, "*");
     update();
 
     return () => window.removeEventListener("message", messageHandler);

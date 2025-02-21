@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useEffect, useState } from "react";
 import { clsx } from "clsx";
-import GBLogo from "../../../public/logo192.png";
+import GBLogo from "../../../public/logo128.png";
 
 // used to determine x y delta of mouse movement
 let originX: number | undefined;
@@ -66,15 +66,9 @@ const VisualEditorHeader: FC<{
     >
       <div className="flex px-4 h-12 items-center justify-center rounded-t-xl logo-bg">
         <div className="h-8">
-          <img
-            src={GBLogo}
-            alt="GB Logo"
-            className="w-auto h-full mr-1"
-          />
+          <img src={GBLogo} alt="GB Logo" className="w-auto h-full mr-1" />
         </div>
-        <div className="font-semibold text-white">
-          GrowthBook Visual Editor
-        </div>
+        <div className="font-semibold text-white">GrowthBook Visual Editor</div>
       </div>
     </div>
   );

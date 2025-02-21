@@ -1,0 +1,263 @@
+@import "@radix-ui/themes/styles.css";
+@import "@radix-ui/colors/violet.css";
+@import "@radix-ui/colors/violet-alpha.css";
+@import "forms.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-weight-light: 200;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+
+  --color-background: var(--accent-2);
+  --color-panel-solid: #ffffff;
+  --color-panel-translucent: rgba(255, 255, 255, 0.7);
+  --color-surface: rgba(255, 255, 255, 0.85);
+  --color-overlay: var(--black-a6);
+  --color-landmark: var(--indigo-12);
+  --color-text-high: var(--indigo-12);
+  --color-text-mid: rgba(31, 45, 92, 0.85);
+  --color-text-low: rgba(31, 45, 92, 0.65);
+  --color-text-disabled: rgba(31, 45, 92, 0.45);
+
+  /*--color-violet-surface: */
+}
+
+.radix-themes {
+  --cursor-button: pointer;
+}
+
+.label {
+  font-size: var(--font-size-3);
+  @apply text-gray-800;
+}
+.label.lg {
+  font-size: var(--font-size-4);
+  @apply font-semibold text-gray-800;
+}
+.text-2xs {
+  font-size: 9px;
+  line-height: 12px;
+}
+.text-2xs-important {
+  font-size: 9px !important;
+  line-height: 12px !important;
+}
+.ModalBody {
+  max-width: 400px;
+}
+.mono {
+  font-family: monospace;
+}
+
+.box {
+  @apply px-3 py-2 border border-slate-a3 rounded-md bg-white;
+}
+
+.featureCard {
+  @apply py-1 border-t border-slate-a3 relative items-center cursor-pointer overflow-hidden select-none;
+  height: 48px;
+}
+.featureCard:first-of-type {
+  @apply border-t-transparent;
+}
+.featureCard:last-of-type {
+  @apply border-b;
+}
+.featureCard:not(.selected):hover {
+  @apply bg-violet-1;
+}
+.featureCard.selected {
+  @apply border-t-violet-2 bg-violet-2;
+}
+.featureCard .title{
+  @apply text-sm font-semibold;
+  transition: 100ms all;
+}
+.featureCard .value {
+  @apply text-indigo-12 text-xs break-all;
+}
+
+.itemCard {
+  @apply my-2 mx-4 py-1 rounded-md relative items-center cursor-pointer select-none;
+  min-height: 40px;
+}
+.itemCard:not(.selected):hover {
+  @apply bg-violet-1;
+}
+.itemCard.selected {
+  @apply bg-violet-2;
+}
+.itemCard .title{
+  @apply text-sm font-semibold;
+  transition: 100ms all;
+}
+
+.featureDetailWrapper {
+  @apply bg-violet-2;
+  transition: 150ms all;
+}
+.featureDetail .header {
+  @apply w-full sticky top-0 z-center px-6 pt-3 pb-2 bg-violet-2 shadow-sm;
+}
+.featureDetail .content {
+  @apply px-6 py-2 mb-3;
+}
+
+.rule {
+  @apply pt-4 pb-2 pl-2.5 pr-4 my-5 text-2xs bg-white rounded-md border border-l-[3px] border-slate-a3;
+}
+.rule .inner {
+  @apply flex items-start pb-2;
+}
+.condition {
+  @apply leading-[1.3rem];
+}
+.conditionValue {
+  @apply px-1 border border-slate-a3 rounded-sm bg-gray-50 break-all;
+}
+.conditionOperator {
+  @apply text-gray-600 mx-1;
+}
+/*rule statuses*/
+.rule.skipped, .rule.unreachable {
+  @apply border-l-slate-300;
+  .status {
+    @apply text-slate-700 bg-slate-200;
+  }
+}
+.rule.matches, .rule.gates {
+  @apply border-l-green-600;
+  .status {
+    @apply text-green-900 bg-green-200;
+  }
+}
+.rule.overridden {
+  @apply border-l-amber-300;
+  .status {
+    @apply text-amber-700 bg-amber-200;
+  }
+}
+
+.attributesForm {
+  @apply mb-2 py-2 bg-violet-2;
+}
+
+.accordion .trigger {
+  cursor: pointer;
+}
+.accordionChevron {
+  @apply text-violet-400;
+  transition: transform 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+.accordion .trigger[data-state="open"] .chevron {
+  transform: rotate(180deg);
+}
+@keyframes slideDown {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+@keyframes slideUp {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+.accordion .accordionInner[data-state="open"],
+.accordionCard .accordionInner[data-state="open"] {
+  animation: slideDown 150ms cubic-bezier(0.87, 0, 0.13, 1) forwards;
+}
+.accordion .accordionInner[data-state="closed"],
+.accordionCard .accordionInner[data-state="closed"] {
+  animation: slideUp 150ms cubic-bezier(0.87, 0, 0.13, 1) forwards;
+}
+.caret {
+  display: inline-block;
+  transition: 75ms transform;
+}
+.accordion .trigger[data-state="open"] .caret {
+  transform: rotate(90deg);
+}
+.caret.open {
+  transform: rotate(90deg);
+}
+
+.accordionCard.selected {
+  @apply border-violet-400;
+}
+.accordionCard.active {
+  @apply border-orange-500 bg-orange-200 bg-opacity-50;
+}
+
+.searchBar {
+  @apply border-b border-b-slate-a4 flex items-center justify-between flex-shrink;
+}
+.searchBar input {
+  @apply border-0 px-1 py-0.5 w-full;
+}
+.searchBar .clear {
+  margin: 0 2px;
+}
+
+.shadow-sm {
+  --tw-shadow: 0 2px 2px -1px rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 2px 2px -1px var(--tw-shadow-color);
+}
+
+.shadow-sm-up {
+  --tw-shadow: 0 -1px 2px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 -1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.rt-SwitchRoot::before {
+  transition-duration: 60ms, 50ms, 50ms, 50ms !important;
+  cursor: unset;
+}
+.rt-SwitchThumb {
+  transition:
+    transform 50ms cubic-bezier(0.45, 0.05, 0.55, 0.95),
+    box-shadow 50ms ease-in-out;
+}
+
+/* Prevent modal jumping when inner content changes shape and weird scroll bar */
+.rt-BaseDialogScroll {
+  position: relative;
+}
+
+/* Fix Radix modal flicker bug (https://github.com/radix-ui/primitives/issues/3286) */
+.rt-BaseDialogOverlay {
+  &:where([data-state="closed"]) {
+    animation: rt-dialog-overlay-no-op 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  &:where([data-state="open"])::before {
+    animation: rt-fade-in 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  &:where([data-state="closed"])::before {
+    opacity: 0;
+    animation: rt-fade-out 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+}
+.rt-BaseDialogContent {
+  &:where([data-state="open"]) {
+    animation: rt-dialog-content-show 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  &:where([data-state="closed"]) {
+    opacity: 0;
+    animation: rt-dialog-content-hide 100ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+}
+.textInput {
+  @apply border border-slate-a4 rounded-md;
+}

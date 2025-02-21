@@ -40,10 +40,7 @@ const AddClassNameInput: FC<{ onAdd: (className: string) => void }> = ({
             </button>
           </div>
         ) : (
-          <button
-            className="text-slate-200"
-            onClick={() => setIsAdding(true)}
-          >
+          <button className="text-slate-200" onClick={() => setIsAdding(true)}>
             <RxPlus className="w-4 h-4" />
           </button>
         )}

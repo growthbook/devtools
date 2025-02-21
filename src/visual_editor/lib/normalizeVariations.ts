@@ -4,7 +4,7 @@ import {
   APIVisualChange,
   APIVisualChangeset,
   VisualEditorVariation,
-} from "../../../devtools";
+} from "devtools";
 const normalizeVariations = ({
   experiment,
   visualChangeset,

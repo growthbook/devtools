@@ -49,14 +49,11 @@ const ToolbarButton = ({
   return (
     <button
       title={title}
-      className={clsx(
-        "flex-1 p-4 h-full flex justify-center text-white",
-        {
-          "hover:bg-slate-600/75": !disabled,
-          "bg-slate-700": !disabled && isActive,
-          "cursor-not-allowed": disabled,
-        },
-      )}
+      className={clsx("flex-1 p-4 h-full flex justify-center text-white", {
+        "hover:bg-slate-600/75": !disabled,
+        "bg-slate-700": !disabled && isActive,
+        "cursor-not-allowed": disabled,
+      })}
       onClick={disabled ? () => {} : isActive ? deactivate : activate}
     >
       <Icon />
