@@ -3,23 +3,19 @@ import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
 import {
-  Button,
   Checkbox,
   Container,
-  Flex,
   Link,
   Text,
 } from "@radix-ui/themes";
-import { Archetype, SDKAttribute, SDKAttributeType } from "../tempGbExports";
+import { Archetype, SDKAttribute } from "../tempGbExports";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
-import { PiX, PiXBold } from "react-icons/pi";
+import { PiXBold } from "react-icons/pi";
 import useApi from "../hooks/useApi";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
 import clsx from "clsx";
-import { MW } from "@/app";
 import { useResponsiveContext } from "../hooks/useResponsive";
-import { remove } from "node_modules/@types/lodash";
 
 export const HEADER_H = 40;
 
@@ -131,7 +127,7 @@ export default function AttributesTab() {
             return [key, newAttributes[key]];
           }),
       );
-  
+
       const removedAttributes= {...attributes};
       Object.keys(attributes).forEach((key) => {
         (key: string) => {
@@ -154,21 +150,19 @@ export default function AttributesTab() {
       attributesForm.reset({ ...removedAttributes, ...newAttributes });
       setDirty(false);
     };
-  
+
 
   const resetAttributesOverride = () => {
     setForcedAttributes(false);
     setNewAppliedAttributeIds([]);
     setSelectedArchetype(null);
     setAttributes({});
-    console.log("resetAttributesOverride", attributes);
     setDirty(false); // we want to wait for the next render to reset with the initial attributes
   };
 
   // listen to SDK changes to set attributes form
   useEffect(() => {
-    console.log("useEffect", attributes);
-      attributesForm.reset(attributes);
+    attributesForm.reset(attributes);
   }, [JSON.stringify(attributes)]);
 
   return (

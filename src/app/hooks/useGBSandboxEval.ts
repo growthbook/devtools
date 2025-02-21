@@ -89,6 +89,8 @@ export default function useGBSandboxEval() {
           ? new SandboxStickyBucketService()
           : undefined,
         stickyBucketAssignmentDocs,
+        navigate: (url) => {},
+        applyDomChangesCallback: (changes) => () => {},
       });
       growthbook.setForcedFeatures(forcedFeaturesMap);
       await growthbook.init({ payload });

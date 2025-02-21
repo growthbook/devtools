@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Flex, IconButton, Link, Text } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
 import { MW, NAV_H } from "@/app";
-import { PiArrowsClockwise, PiCaretRightFill, PiXBold } from "react-icons/pi";
+import {PiArrowsClockwise, PiArrowSquareOut, PiCaretRightFill, PiXBold} from "react-icons/pi";
 import * as Accordion from "@radix-ui/react-accordion";
 import { useResponsiveContext } from "@/app/hooks/useResponsive";
 import { SdkItem } from "./index";
@@ -111,16 +111,16 @@ export default function SdkItemPanel({
             >
               <ItemPanel selectedItem={selectedItem} />
             </div>
-            {doclinks[selectedItem] && (
+            {doclinks[selectedItem] ? (
               <Link
-                mb="2"
                 size="2"
                 target="_blank"
                 href={doclinks[selectedItem]}
               >
                 View documentation
+                <PiArrowSquareOut className="inline-block mb-1 ml-0.5" />
               </Link>
-            )}
+            ) : null}
           </Flex>
         </Flex>
       </Flex>
@@ -326,7 +326,7 @@ function securityPanel({
           : "The SDK is using a decryption key and the payload is being decrypted."
         : isRemoteEval
           ? "The SDK is using remote evaluation."
-          : "The SDK is not using a decryption key or remote evaluation. The payload is in plain text."}
+          : "The SDK is not using a decryption key nor remote evaluation. The payload is in plain text."}
     </Text>
   );
 }
