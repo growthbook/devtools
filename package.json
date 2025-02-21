@@ -19,7 +19,7 @@
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
-    "@growthbook/growthbook": "^1.4.0",
+    "@growthbook/growthbook": "^1.4.1",
     "@medv/finder": "^3.2.0",
     "@phosphor-icons/react": "^2.1.7",
     "@radix-ui/colors": "^3.0.0",
