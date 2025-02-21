@@ -4,9 +4,7 @@ import { TextField, Switch } from "@radix-ui/themes";
 import * as Form from "@radix-ui/react-form";
 
 import React, { useEffect, useState } from "react";
-import { time } from "node_modules/framer-motion/dist";
-import { set } from "node_modules/@types/lodash";
-import { SDKAttribute } from "@/app/tempGbExports";
+import { SDKAttribute } from "@/app/gbTypes";
 
 type Props = {
   attributeKey: string;

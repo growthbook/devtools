@@ -3,7 +3,7 @@ import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
 import { Checkbox, Container, Link, Text } from "@radix-ui/themes";
-import { Archetype, SDKAttribute } from "../tempGbExports";
+import { Archetype, SDKAttribute } from "../gbTypes";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
 import { PiXBold } from "react-icons/pi";

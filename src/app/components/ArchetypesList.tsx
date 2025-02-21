@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Archetype } from "../tempGbExports";
+import { Archetype } from "../gbTypes";
 import { Text, DropdownMenu, Link, Flex } from "@radix-ui/themes";
 import {
   PiCaretDownFill,

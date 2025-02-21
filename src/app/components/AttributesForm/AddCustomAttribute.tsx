@@ -8,7 +8,7 @@ import {
   primitiveDataTypes,
   SDKAttribute,
   SDKAttributeType,
-} from "@/app/tempGbExports";
+} from "@/app/gbTypes";
 import { useResponsiveContext } from "@/app/hooks/useResponsive";
 import SelectField from "../Forms/SelectField";
 import clsx from "clsx";

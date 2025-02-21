@@ -2,9 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import * as Form from "@radix-ui/react-form";
 import {
   Button,
-  Switch,
   Flex,
-  TextField,
   IconButton,
   Link,
 } from "@radix-ui/themes";
@@ -13,13 +11,11 @@ import { UseFormReturn } from "react-hook-form";
 import { PiX } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import clsx from "clsx";
-import { SDKAttribute, SDKAttributeType } from "@/app/tempGbExports";
+import { SDKAttribute, SDKAttributeType } from "@/app/gbTypes";
 import AddCustomAttribute from "./AddCustomAttribute";
-import SelectField from "../Forms/SelectField";
-import MultiSelectField from "../Forms/MultiSelectField";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import TextareaAutosize from "react-textarea-autosize";
-import InputFields from "@/app/components/AttributesForm/InputFields";
+import InputField from "@/app/components/AttributesForm/InputFields";
 
 const arrayAttributeTypes = ["string[]", "number[]", "secureString[]"];
 
@@ -138,7 +134,9 @@ export default function AttributesForm({
         <div>
           {!jsonMode ? (
             !Object.keys(formAttributes).length ? (
-              <em className="text-2xs">No attributes found</em>
+              <div className="mb-2">
+                <em>No attributes found.</em>
+              </div>
             ) : (
               <Flex direction="column">
                 {attributesWithoutCustom?.map((attributeKey, i) => {
@@ -165,7 +163,7 @@ export default function AttributesForm({
                             {attributeKey}
                           </div>
                         </Form.Label>
-                        <InputFields
+                        <InputField
                           attributeKey={attributeKey}
                           save={saveAndUpdateAttribute}
                           type={attributeType}
@@ -202,7 +200,7 @@ export default function AttributesForm({
                                 {attributeKey}
                               </div>
                             </Form.Label>
-                            <InputFields
+                            <InputField
                               attributeKey={attributeKey}
                               save={saveAndUpdateAttribute}
                               type={attributeType}
@@ -283,117 +281,6 @@ export default function AttributesForm({
           addCustomField={addCustomField}
         />
       )}
-    </div>
-  );
-}
-
-function renderInputField({
-  attributeKey,
-  form,
-  schema,
-  customAttrSchema,
-  setDirty,
-  save,
-}: {
-  attributeKey: string;
-  form: UseFormReturn<Attributes>;
-  schema: Record<string, SDKAttribute>;
-  customAttrSchema: Record<string, SDKAttribute>;
-  setDirty?: (b: boolean) => void;
-  save?: (newAttributes: Attributes) => void;
-}) {
-  let attributeType = getAttributeType(
-    attributeKey,
-    form.watch(attributeKey),
-    schema,
-    customAttrSchema,
-  );
-
-  return (
-    <div className="w-full flex items-center">
-      <Form.Control asChild>
-        {attributeType === "number" ? (
-          <TextField.Root
-            type="number"
-            onChange={(e) => {
-              form.setValue(attributeKey, Number(e.target.value));
-              setDirty?.(true);
-            }}
-            value={form.watch(attributeKey)}
-            className="w-full"
-          />
-        ) : attributeType === "boolean" ? (
-          <Switch
-            size="1"
-            className="Switch"
-            checked={form.watch(attributeKey)}
-            onCheckedChange={(v: boolean) => {
-              form.setValue(attributeKey, v);
-              save?.({ [attributeKey]: v });
-              setDirty?.(true);
-            }}
-          />
-        ) : attributeType === "enum" ? (
-          <div className="text-sm w-full">
-            <SelectField
-              menuPlacement="top"
-              value={form.watch(attributeKey)}
-              options={
-                (schema[attributeKey].enum || "")
-                  ?.split(",")
-                  ?.map((strSegment) => {
-                    const trimmed = strSegment.trim();
-                    return {
-                      value: trimmed,
-                      label: trimmed,
-                    };
-                  }) || []
-              }
-              onChange={(v) => form.setValue(attributeKey, v)}
-            />
-          </div>
-        ) : arrayAttributeTypes.includes(attributeType) ? (
-          <div className="text-sm w-full">
-            <MultiSelectField
-              creatable
-              placeholder="Add to list..."
-              menuPlacement="top"
-              value={
-                Array.isArray(form.watch(attributeKey))
-                  ? form.watch(attributeKey)
-                  : []
-              }
-              options={(Array.isArray(form.watch(attributeKey))
-                ? form.watch(attributeKey)
-                : []
-              )?.map?.((entry: string) => ({
-                value: entry,
-                label: entry,
-              }))}
-              onChange={(v) =>
-                form.setValue(
-                  attributeKey,
-                  attributeType === "number[]" ? v?.map((n) => parseInt(n)) : v,
-                )
-              }
-              formatCreateLabel={(input: string) => `Add "${input}"`}
-              validOptionPattern={
-                attributeType === "number[]" ? "^\\d+$" : ".+"
-              }
-            />
-          </div>
-        ) : (
-          <TextField.Root
-            type="text"
-            onChange={(e) => {
-              form.setValue(attributeKey, e.target.value);
-              setDirty?.(true);
-            }}
-            value={form.watch(attributeKey)}
-            className="w-full"
-          />
-        )}
-      </Form.Control>
     </div>
   );
 }

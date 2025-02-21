@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { Button, Flex, IconButton, Link, Text } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
 import { MW, NAV_H } from "@/app";
@@ -118,7 +118,7 @@ export default function SdkItemPanel({
               <ItemPanel selectedItem={selectedItem} />
             </div>
             {doclinks[selectedItem] ? (
-              <Link size="2" target="_blank" href={doclinks[selectedItem]}>
+              <Link size="2" target="_blank" href={doclinks[selectedItem]} mt="3" mb="2">
                 View documentation
                 <PiArrowSquareOut className="inline-block mb-1 ml-0.5" />
               </Link>
@@ -133,9 +133,6 @@ export default function SdkItemPanel({
 function ItemPanel({ selectedItem }: { selectedItem: SdkItem }) {
   const PanelComponent = panels[selectedItem];
   const sdkData = useSdkData();
-  if (sdkData.isLoading) {
-    return "Loading...";
-  }
   return <PanelComponent {...sdkData} />;
 }
 
@@ -147,7 +144,7 @@ function statusPanel({
   errorMessage,
 }: SDKHealthCheckResult) {
   const [activeTabId, setActiveTabId] = useState<number | undefined>(undefined);
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState<boolean>(true);
 
   const refresh = async () => {
     setRefreshing(true);
@@ -161,6 +158,10 @@ function statusPanel({
     }
   };
 
+  useEffect(() => {
+    refresh();
+  }, []);
+
   return (
     <>
       {!sdkFound ? (
@@ -171,9 +172,9 @@ function statusPanel({
             </Text>
           ) : null}
 
-          <div className="my-3">
-            {!activeTabId && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-sm mb-3">
+          <div className="mt-2 mb-4">
+            {(!activeTabId && !refreshing) && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-sm mb-4">
                 DevTools was unable to attach to the current window.
               </div>
             )}
@@ -184,7 +185,6 @@ function statusPanel({
                 refresh();
               }}
               disabled={refreshing}
-              mt="2"
             >
               <PiArrowsClockwise /> Refresh DevTools
             </Button>
