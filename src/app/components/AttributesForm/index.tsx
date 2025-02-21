@@ -328,50 +328,54 @@ function renderInputField({
             }}
           />
         ) : attributeType === "enum" ? (
-          <SelectField
-            className="text-sm w-full"
-            menuPlacement="top"
-            value={form.watch(attributeKey)}
-            options={
-              (schema[attributeKey].enum || "")
-                ?.split(",")
-                ?.map((strSegment) => {
-                  const trimmed = strSegment.trim();
-                  return {
-                    value: trimmed,
-                    label: trimmed,
-                  };
-                }) || []
-            }
-            onChange={(v) => form.setValue(attributeKey, v)}
-          />
+          <div className="text-sm w-full">
+            <SelectField
+              menuPlacement="top"
+              value={form.watch(attributeKey)}
+              options={
+                (schema[attributeKey].enum || "")
+                  ?.split(",")
+                  ?.map((strSegment) => {
+                    const trimmed = strSegment.trim();
+                    return {
+                      value: trimmed,
+                      label: trimmed,
+                    };
+                  }) || []
+              }
+              onChange={(v) => form.setValue(attributeKey, v)}
+            />
+          </div>
         ) : arrayAttributeTypes.includes(attributeType) ? (
-          <MultiSelectField
-            creatable
-            placeholder="Add to list..."
-            className="text-sm w-full"
-            menuPlacement="top"
-            value={
-              Array.isArray(form.watch(attributeKey))
+          <div className="text-sm w-full">
+            <MultiSelectField
+              creatable
+              placeholder="Add to list..."
+              menuPlacement="top"
+              value={
+                Array.isArray(form.watch(attributeKey))
+                  ? form.watch(attributeKey)
+                  : []
+              }
+              options={(Array.isArray(form.watch(attributeKey))
                 ? form.watch(attributeKey)
                 : []
-            }
-            options={(Array.isArray(form.watch(attributeKey))
-              ? form.watch(attributeKey)
-              : []
-            )?.map?.((entry: string) => ({
-              value: entry,
-              label: entry,
-            }))}
-            onChange={(v) =>
-              form.setValue(
-                attributeKey,
-                attributeType === "number[]" ? v?.map((n) => parseInt(n)) : v,
-              )
-            }
-            formatCreateLabel={(input: string) => `Add "${input}"`}
-            validOptionPattern={attributeType === "number[]" ? "^\\d+$" : ".+"}
-          />
+              )?.map?.((entry: string) => ({
+                value: entry,
+                label: entry,
+              }))}
+              onChange={(v) =>
+                form.setValue(
+                  attributeKey,
+                  attributeType === "number[]" ? v?.map((n) => parseInt(n)) : v,
+                )
+              }
+              formatCreateLabel={(input: string) => `Add "${input}"`}
+              validOptionPattern={
+                attributeType === "number[]" ? "^\\d+$" : ".+"
+              }
+            />
+          </div>
         ) : (
           <TextField.Root
             type="text"

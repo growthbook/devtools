@@ -63,59 +63,61 @@ export default function InputFields({
             }}
           />
         ) : type === "enum" ? (
-          <SelectField
-            className="text-sm w-full"
-            menuPlacement="top"
-            value={inputValue}
-            options={
-              schema[attributeKey].enum?.split(",")?.map((strSegment) => {
-                const trimmed = strSegment.trim();
-                return {
-                  value: trimmed,
-                  label: trimmed,
-                };
-              }) || []
-            }
-            onChange={(v) => {
-              setDirty(true);
-              setInputValue(v);
-              timeoutId && clearTimeout(timeoutId);
-              setTimeoutId(
-                setTimeout(() => {
-                  save(attributeKey, v);
-                  setDirty(false);
-                }, 500),
-              );
-            }}
-          />
+          <div className="text-sm w-full">
+            <SelectField
+              menuPlacement="top"
+              value={inputValue}
+              options={
+                schema[attributeKey].enum?.split(",")?.map((strSegment) => {
+                  const trimmed = strSegment.trim();
+                  return {
+                    value: trimmed,
+                    label: trimmed,
+                  };
+                }) || []
+              }
+              onChange={(v) => {
+                setDirty(true);
+                setInputValue(v);
+                timeoutId && clearTimeout(timeoutId);
+                setTimeoutId(
+                  setTimeout(() => {
+                    save(attributeKey, v);
+                    setDirty(false);
+                  }, 500),
+                );
+              }}
+            />
+          </div>
         ) : ARRAY_ATTRIBUTE_TYPES.includes(type) ? (
-          <MultiSelectField
-            creatable
-            placeholder="Add to list..."
-            className="text-sm w-full"
-            menuPlacement="top"
-            value={inputValue}
-            options={(inputValue || [])?.map((entry: string) => ({
-              value: entry,
-              label: entry,
-            }))}
-            onChange={(v) => {
-              setDirty(true);
-              setInputValue(v);
-              timeoutId && clearTimeout(timeoutId);
-              setTimeoutId(
-                setTimeout(() => {
-                  save(
-                    attributeKey,
-                    type === "number[]" ? v?.map((n) => parseInt(n)) : v,
-                  );
-                  setDirty(false);
-                }, 500),
-              );
-            }}
-            formatCreateLabel={(input: string) => `Add "${input}"`}
-            validOptionPattern={type === "number[]" ? "^\\d+$" : ".+"}
-          />
+          <div className="text-sm w-full">
+            <MultiSelectField
+              creatable
+              placeholder="Add to list..."
+              menuPlacement="top"
+              value={inputValue}
+              options={(inputValue || [])?.map((entry: string) => ({
+                value: entry,
+                label: entry,
+              }))}
+              onChange={(v) => {
+                setDirty(true);
+                setInputValue(v);
+                timeoutId && clearTimeout(timeoutId);
+                setTimeoutId(
+                  setTimeout(() => {
+                    save(
+                      attributeKey,
+                      type === "number[]" ? v?.map((n) => parseInt(n)) : v,
+                    );
+                    setDirty(false);
+                  }, 500),
+                );
+              }}
+              formatCreateLabel={(input: string) => `Add "${input}"`}
+              validOptionPattern={type === "number[]" ? "^\\d+$" : ".+"}
+            />
+          </div>
         ) : (
           <TextField.Root
             type="text"
