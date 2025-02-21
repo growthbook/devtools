@@ -161,14 +161,14 @@ export default function AttributesTab() {
     setNewAppliedAttributeIds([]);
     setSelectedArchetype(null);
     setAttributes({});
+    console.log("resetAttributesOverride", attributes);
     setDirty(false); // we want to wait for the next render to reset with the initial attributes
   };
 
   // listen to SDK changes to set attributes form
   useEffect(() => {
-    if (!dirty) {
+    console.log("useEffect", attributes);
       attributesForm.reset(attributes);
-    }
   }, [JSON.stringify(attributes)]);
 
   return (

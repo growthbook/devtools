@@ -3,7 +3,7 @@ import SelectField from '@/app/components/Forms/SelectField';
 import { TextField, Switch } from '@radix-ui/themes';
 import * as Form from "@radix-ui/react-form";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { time } from 'node_modules/framer-motion/dist';
 import { set } from 'node_modules/@types/lodash';
 import { SDKAttribute } from '@/app/tempGbExports';
@@ -25,9 +25,14 @@ export default function InputFields(
         schema,
     }: Props
 ) {
-    // const [isDirty, setDirty] = useState(false);
+    const [isDirty, setDirty] = useState(false);
     const [inputValue, setInputValue] = useState(value);
     const [timeoutId, setTimeoutId] = useState<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => {
+      if(!isDirty){
+        setInputValue(value);
+      }
+    }, [isDirty, value]);
   return (
     <div className="w-full flex items-center">
       <Form.Control asChild>
@@ -35,12 +40,12 @@ export default function InputFields(
           <TextField.Root
             type="number"
             onChange={(e) => {
-            //  setDirty(true);
+             setDirty(true);
             setInputValue(e.target.value);
              timeoutId && clearTimeout(timeoutId);
             setTimeoutId(setTimeout(() => {
                 save(attributeKey, parseInt(e.target.value));
-                // setDirty(false);
+                setDirty(false);
             }, 500));
             }}
             value={parseInt(inputValue)}
@@ -52,11 +57,7 @@ export default function InputFields(
             className="Switch"
             checked={inputValue}
             onCheckedChange={(v: boolean) => {
-                setInputValue(v);
-                timeoutId && clearTimeout(timeoutId);
-                setTimeoutId(setTimeout(() => {
-                    save(attributeKey, v);
-                }, 500));
+                  save(attributeKey, v);
             }}
           />
         ) : type === "enum" ? (
@@ -74,10 +75,12 @@ export default function InputFields(
               }) || []
             }
             onChange={(v) =>{
+              setDirty(true);
                 setInputValue(v);
                 timeoutId && clearTimeout(timeoutId);
                 setTimeoutId(setTimeout(() => {
                     save(attributeKey, v);
+                    setDirty(false);
                 }, 500));
             }}
           />
@@ -94,10 +97,12 @@ export default function InputFields(
             }))}
             onChange={(v) =>
                 {
+                    setDirty(true);
                     setInputValue(v);
                     timeoutId && clearTimeout(timeoutId);
                     setTimeoutId(setTimeout(() => {
                         save(attributeKey, type === "number[]" ? v?.map((n) => parseInt(n)) : v);
+                        setDirty(false);
                     }, 500));
             }}
             formatCreateLabel={(input: string) => `Add "${input}"`}
@@ -107,10 +112,12 @@ export default function InputFields(
           <TextField.Root
             type="text"
             onChange={(e) => {
+              setDirty(true);
                 setInputValue(e.target.value);
                 timeoutId && clearTimeout(timeoutId);
                 setTimeoutId(setTimeout(() => {
                     save(attributeKey, e.target.value);
+                    setDirty(false);
                 }, 500));
             }}
             value={inputValue}
