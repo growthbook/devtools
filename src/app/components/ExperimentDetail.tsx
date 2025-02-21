@@ -290,8 +290,8 @@ export default function ExperimentDetail({
                 Visual Editor
               </div>
             ) : null}
-            {types?.features?.map((fid) => (
-              <div>
+            {types?.features?.map((fid, i) => (
+              <div key={i}>
                 <Link
                   size="2"
                   role="button"
