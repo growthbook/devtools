@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Flex, IconButton, Link, Text } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
 import { MW, NAV_H } from "@/app";
@@ -118,7 +118,13 @@ export default function SdkItemPanel({
               <ItemPanel selectedItem={selectedItem} />
             </div>
             {doclinks[selectedItem] ? (
-              <Link size="2" target="_blank" href={doclinks[selectedItem]} mt="3" mb="2">
+              <Link
+                size="2"
+                target="_blank"
+                href={doclinks[selectedItem]}
+                mt="3"
+                mb="2"
+              >
                 View documentation
                 <PiArrowSquareOut className="inline-block mb-1 ml-0.5" />
               </Link>
@@ -173,7 +179,7 @@ function statusPanel({
           ) : null}
 
           <div className="mt-2 mb-4">
-            {(!activeTabId && !refreshing) && (
+            {!activeTabId && !refreshing && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-sm mb-4">
                 DevTools was unable to attach to the current window.
               </div>

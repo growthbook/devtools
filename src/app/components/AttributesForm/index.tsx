@@ -1,11 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import * as Form from "@radix-ui/react-form";
-import {
-  Button,
-  Flex,
-  IconButton,
-  Link,
-} from "@radix-ui/themes";
+import { Button, Flex, IconButton, Link } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
 import { PiX } from "react-icons/pi";
@@ -177,12 +172,12 @@ export default function AttributesForm({
                 <div className="border-t border-gray-200 my-4 h-0" />
                 {customAttributes.length > 0
                   ? customAttributes?.map((attributeKey, i) => {
-                    const attributeType = getAttributeType(
-                      attributeKey,
-                      form.watch(attributeKey),
-                      schema,
-                      customAttrSchema,
-                    );
+                      const attributeType = getAttributeType(
+                        attributeKey,
+                        form.watch(attributeKey),
+                        schema,
+                        customAttrSchema,
+                      );
                       return (
                         <div key={attributeKey}>
                           <Form.Field
