@@ -72,7 +72,7 @@ export default function EditableValueField({
     <div>
       {valueType === "number" ? (
         <input
-          className="Input mb-2 px-2 py-1 bg-white"
+          className="Input mb-2 px-2 py-1 bg-surface"
           type="number"
           value={editedValue}
           onChange={(e) => {
@@ -104,7 +104,7 @@ export default function EditableValueField({
         </div>
       ) : (
         <TextareaAutosize
-          className={clsx("Textarea bg-white mono mt-1", {
+          className={clsx("Textarea bg-surface mono mt-1", {
             "border-red-700": textareaError,
           })}
           name={"__JSON_attributes__"}

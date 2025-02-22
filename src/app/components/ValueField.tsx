@@ -2,7 +2,11 @@ import clsx from "clsx";
 import { PiCircleFill } from "react-icons/pi";
 import React, { CSSProperties } from "react";
 import { Prism } from "react-syntax-highlighter";
-import { ghcolors as codeTheme } from "react-syntax-highlighter/dist/esm/styles/prism";
+import {
+  ghcolors as codeThemeLight,
+  a11yDark as codeThemeDark,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
+import useGlobalState from "@/app/hooks/useGlobalState";
 
 export type ValueType = "string" | "number" | "boolean" | "json";
 
@@ -36,6 +40,8 @@ export default function ValueField({
   stringAsCode?: boolean;
   formatDefaultTypeAsConditionValue?: boolean;
 }) {
+  const [dark, setDark] = useGlobalState("dark", true, true);
+
   const formattedValue =
     value !== undefined
       ? JSON.stringify(value, null, jsonStringifySpaces)
@@ -45,16 +51,21 @@ export default function ValueField({
     <>
       {(stringAsCode ? ["json", "string"] : ["json"]).includes(valueType) ? (
         <div
-          className="border border-gray-200 rounded-md bg-gray-50"
+          className="bg-field border border-slate-a3 rounded-md"
           style={customPrismOuterStyle}
         >
           <Prism
             language="json"
-            style={codeTheme}
+            style={!dark ? codeThemeLight : codeThemeDark}
             customStyle={{
               ...customTheme,
               maxHeight: maxHeight ?? undefined,
               ...customPrismStyle,
+              background: "unset",
+              backgroundColor: "unset",
+              fontFamily: `Consolas, "Bitstream Vera Sans Mono", "Courier New", Courier, monospace`,
+              fontSize: "0.9em",
+              lineHeight: "12px",
             }}
             codeTagProps={{
               className: "text-2xs-important !whitespace-pre-wrap",
@@ -88,7 +99,7 @@ export default function ValueField({
           {formattedValue}
         </span>
       ) : (
-        <code className="text-slate-700 text-sm whitespace-pre-wrap">
+        <code className="text-slate-a10 text-sm whitespace-pre-wrap">
           {formattedValue}
         </code>
       )}

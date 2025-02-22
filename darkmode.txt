@@ -1,0 +1,213 @@
+diff --git a/src/app/components/AttributesTab.tsx b/src/app/components/AttributesTab.tsx
+index 5c12411..683f724 100644
+--- a/src/app/components/AttributesTab.tsx
++++ b/src/app/components/AttributesTab.tsx
+@@ -177,7 +177,7 @@ export default function AttributesTab() {
+       >
+         <div
+           className={clsx(
+-            "mx-auto fixed w-full flex items-center justify-between border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm",
++            "mx-auto fixed w-full flex items-center justify-between border-b border-b-slate-4 bg-surface text-xs font-semibold shadow-sm",
+             {
+               "pl-4 pr-6": !isResponsive,
+               "pl-2 pr-3": isResponsive,
+diff --git a/src/app/components/EditableValueField.tsx b/src/app/components/EditableValueField.tsx
+index 402e3f4..7d2b68c 100644
+--- a/src/app/components/EditableValueField.tsx
++++ b/src/app/components/EditableValueField.tsx
+@@ -72,7 +72,7 @@ export default function EditableValueField({
+     <div>
+       {valueType === "number" ? (
+         <input
+-          className="Input mb-2 px-2 py-1 bg-white"
++          className="Input mb-2 px-2 py-1 bg-surface"
+           type="number"
+           value={editedValue}
+           onChange={(e) => {
+@@ -104,7 +104,7 @@ export default function EditableValueField({
+         </div>
+       ) : (
+         <TextareaAutosize
+-          className={clsx("Textarea bg-white mono mt-1", {
++          className={clsx("Textarea bg-surface mono mt-1", {
+             "border-red-700": textareaError,
+           })}
+           name={"__JSON_attributes__"}
+diff --git a/src/app/components/ExperimentsTab.tsx b/src/app/components/ExperimentsTab.tsx
+index d902478..7d3eeb9 100644
+--- a/src/app/components/ExperimentsTab.tsx
++++ b/src/app/components/ExperimentsTab.tsx
+@@ -184,7 +184,7 @@ export default function ExperimentsTab() {
+         }}
+       >
+         <div
+-          className="fixed w-full flex items-center gap-4 px-3 border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm"
++          className="fixed w-full flex items-center gap-4 px-3 border-b border-b-slate-4 bg-surface text-xs font-semibold shadow-sm"
+           style={{
+             maxWidth: MW,
+             height: HEADER_H,
+diff --git a/src/app/components/FeaturesTab.tsx b/src/app/components/FeaturesTab.tsx
+index 1db4d0a..d6e00e5 100644
+--- a/src/app/components/FeaturesTab.tsx
++++ b/src/app/components/FeaturesTab.tsx
+@@ -135,7 +135,7 @@ export default function FeaturesTab() {
+         }}
+       >
+         <div
+-          className="fixed w-full flex items-center gap-4 px-3 border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm"
++          className="fixed w-full flex items-center gap-4 px-3 border-b border-b-slate-4 bg-surface text-xs font-semibold shadow-sm"
+           style={{
+             maxWidth: MW,
+             height: HEADER_H,
+diff --git a/src/app/components/LogsList.tsx b/src/app/components/LogsList.tsx
+index 50b30be..3a47c9d 100644
+--- a/src/app/components/LogsList.tsx
++++ b/src/app/components/LogsList.tsx
+@@ -75,7 +75,7 @@ export default function LogsList({
+   return (
+     <div className="flex flex-col w-full h-full">
+       <div
+-        className="w-full flex items-center justify-between gap-4 px-3 border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm"
++        className="w-full flex items-center justify-between gap-4 px-3 border-b border-b-slate-4 bg-surface text-xs font-semibold shadow-sm"
+         style={{
+           height: HEADER_H,
+           zIndex: 2000,
+diff --git a/src/app/css/index.css b/src/app/css/index.css
+index 5a30c8c..0bdbdba 100644
+--- a/src/app/css/index.css
++++ b/src/app/css/index.css
+@@ -7,30 +7,17 @@
+ @tailwind components;
+ @tailwind utilities;
+
+-:root {
+-  --font-weight-light: 200;
+-  --font-weight-regular: 400;
+-  --font-weight-medium: 500;
+-  --font-weight-bold: 600;
+-
+-  --color-background: var(--accent-2);
+-  --color-panel-solid: #ffffff;
+-  --color-panel-translucent: rgba(255, 255, 255, 0.7);
+-  --color-surface: rgba(255, 255, 255, 0.85);
+-  --color-overlay: var(--black-a6);
+-  --color-landmark: var(--indigo-12);
+-  --color-text-high: var(--indigo-12);
+-  --color-text-mid: rgba(31, 45, 92, 0.85);
+-  --color-text-low: rgba(31, 45, 92, 0.65);
+-  --color-text-disabled: rgba(31, 45, 92, 0.45);
+-
+-  /*--color-violet-surface: */
+-}
+-
+ .radix-themes {
+   --cursor-button: pointer;
+ }
+
++.bg-surface {
++  @apply bg-white dark:bg-[#10172e];
++}
++.bg-panel {
++  @apply bg-violet-2 dark:bg-[#1a2036];
++}
++
+ .label {
+   font-size: var(--font-size-3);
+   @apply text-gray-800;
+@@ -55,7 +42,7 @@
+ }
+
+ .box {
+-  @apply px-3 py-2 border border-slate-a3 rounded-md bg-white;
++  @apply px-3 py-2 border border-slate-a3 rounded-md bg-surface;
+ }
+
+ .featureCard {
+@@ -72,7 +59,7 @@
+   @apply bg-violet-1;
+ }
+ .featureCard.selected {
+-  @apply border-t-violet-2 bg-violet-2;
++  @apply border-t-violet-2 bg-panel;
+ }
+ .featureCard .title{
+   @apply text-sm font-semibold;
+@@ -90,7 +77,7 @@
+   @apply bg-violet-1;
+ }
+ .itemCard.selected {
+-  @apply bg-violet-2;
++  @apply bg-panel;
+ }
+ .itemCard .title{
+   @apply text-sm font-semibold;
+@@ -98,18 +85,18 @@
+ }
+
+ .featureDetailWrapper {
+-  @apply bg-violet-2;
++  @apply bg-panel;
+   transition: 150ms all;
+ }
+ .featureDetail .header {
+-  @apply w-full sticky top-0 z-center px-6 pt-3 pb-2 bg-violet-2 shadow-sm;
++  @apply w-full sticky top-0 z-center px-6 pt-3 pb-2 bg-panel shadow-sm;
+ }
+ .featureDetail .content {
+   @apply px-6 py-2 mb-3;
+ }
+
+ .rule {
+-  @apply pt-4 pb-2 pl-2.5 pr-4 my-5 text-2xs bg-white rounded-md border border-l-[3px] border-slate-a3;
++  @apply pt-4 pb-2 pl-2.5 pr-4 my-5 text-2xs bg-surface rounded-md border border-l-[3px] border-slate-a3;
+ }
+ .rule .inner {
+   @apply flex items-start pb-2;
+@@ -144,7 +131,7 @@
+ }
+
+ .attributesForm {
+-  @apply mb-2 py-2 bg-violet-2;
++  @apply mb-2 py-2 bg-panel;
+ }
+
+ .accordion .trigger {
+diff --git a/src/app/index.tsx b/src/app/index.tsx
+index 110bfe0..f2d8836 100644
+--- a/src/app/index.tsx
++++ b/src/app/index.tsx
+@@ -77,10 +77,12 @@ export const App = () => {
+       grayColor="slate"
+       hasBackground={false}
+       style={{ minHeight: "unset" }}
++      appearance="dark"
++      className="dark"
+     >
+       <div id="main" className="text-indigo-12 overflow-hidden">
+         <div
+-          className={`shadow-sm px-3 pt-1 w-full relative bg-white z-front`}
++          className="shadow-sm px-3 pt-1 w-full relative bg-surface z-front"
+           style={{ height: NAV_H }}
+         >
+           <div
+@@ -231,7 +233,7 @@ export const App = () => {
+
+         <div
+           id="pageBody"
+-          className="overflow-y-auto"
++          className="overflow-y-auto bg-surface"
+           style={{ height: `calc(100vh - ${NAV_H}px)` }}
+         >
+           {currentTab === "features" ? (
+diff --git a/tailwind.config.js b/tailwind.config.js
+index 6e15459..6110929 100644
+--- a/tailwind.config.js
++++ b/tailwind.config.js
+@@ -1,6 +1,7 @@
+ /** @type {import('tailwindcss').Config} */
+ module.exports = {
+   content: ["./src/**/*.{js,ts,jsx,tsx}"],
++  darkMode: "class",
+   theme: {
+     fontSize: {
+       xs: "12px",

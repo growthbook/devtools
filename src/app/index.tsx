@@ -22,7 +22,7 @@ import {
   PiCircleFill,
   PiGearSixFill,
   PiWarningFill,
-  PiWarningOctagonFill,
+  PiWarningOctagonFill, PiSunDimBold, PiMoonBold,
 } from "react-icons/pi";
 import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
@@ -39,6 +39,8 @@ export const App = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { isResponsive, isTiny } = useResponsiveContext();
+  const [dark, setDark] = useGlobalState("dark", true, true);
+
   const [apiKey, setApiKey, apiKeyReady] = useGlobalState(API_KEY, "", true);
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
@@ -77,10 +79,12 @@ export const App = () => {
       grayColor="slate"
       hasBackground={false}
       style={{ minHeight: "unset" }}
+      appearance={dark ? "dark" : "light"}
+      className={dark ? "dark" : "light"}
     >
       <div id="main" className="text-indigo-12 overflow-hidden">
         <div
-          className={`shadow-sm px-3 pt-1 w-full relative bg-white z-front`}
+          className="shadow-sm px-3 pt-1 w-full relative bg-surface z-front"
           style={{ height: NAV_H }}
         >
           <div
@@ -131,7 +135,8 @@ export const App = () => {
                     <NavLabel type="sdkDebug" sdkStatus={sdkStatus} />
                   </Tabs.Trigger>
                   <div className="flex-1" />
-                  <div className="flex items-center gap-3 flex-grow-0 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-grow-0 flex-shrink-0">
+                    <ThemeButton />
                     <SettingsButton
                       apiKeyReady={apiKeyReady}
                       apiKey={apiKey}
@@ -218,7 +223,8 @@ export const App = () => {
                   </Select.Item>
                 </Select.Content>
               </Select.Root>
-              <div className="flex items-center gap-3 flex-grow-0 flex-shrink-0">
+              <div className="flex items-center gap-2 flex-grow-0 flex-shrink-0">
+                <ThemeButton />
                 <SettingsButton
                   apiKeyReady={apiKeyReady}
                   apiKey={apiKey}
@@ -231,7 +237,7 @@ export const App = () => {
 
         <div
           id="pageBody"
-          className="overflow-y-auto"
+          className="overflow-y-auto bg-surface"
           style={{ height: `calc(100vh - ${NAV_H}px)` }}
         >
           {currentTab === "features" ? (
@@ -414,7 +420,7 @@ function SettingsButton({
       >
         <PiCircleFill
           size={9}
-          className="absolute text-red-600 bg-white rounded-full border border-white"
+          className="absolute text-red-600 bg-surface rounded-full border border-white"
           style={{ right: 1, top: 1 }}
         />
         <PiGearSixFill size={17} />
@@ -427,6 +433,20 @@ function SettingsButton({
       onClick={() => setSettingsOpen(true)}
     >
       <PiGearSixFill size={17} />
+    </IconButton>
+  );
+}
+
+function ThemeButton() {
+  const [dark, setDark] = useGlobalState("dark", true, true);
+  return (
+    <IconButton
+      variant="ghost"
+      style={{ margin: 0 }}
+      size="1"
+      onClick={() => setDark(!dark)}
+    >
+      {!dark ? <PiSunDimBold /> : <PiMoonBold />}
     </IconButton>
   );
 }

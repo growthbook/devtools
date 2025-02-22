@@ -83,7 +83,7 @@ export default function DebugPanel({
         <div className="text-white">
           <ul className="ml-4 list-disc">
             <li>
-              <code className="text-xs inline-block max-w-full whitespace-nowrap text-ellipsis overflow-hidden bg-white text-red-600 rounded px-1">
+              <code className="text-xs inline-block max-w-full whitespace-nowrap text-ellipsis overflow-hidden bg-surface text-red-600 rounded px-1">
                 {hashAttribute ? hashAttribute : ""}
               </code>
             </li>
@@ -107,7 +107,7 @@ export default function DebugPanel({
         {visualChangeset?.urlPatterns.map((pattern, i) => (
           <div key={i} className="my-2 text-white">
             <Tooltip label={pattern.pattern}>
-              <code className="text-xs inline-block max-w-full whitespace-nowrap text-ellipsis overflow-hidden bg-white text-red-600 rounded px-1">
+              <code className="text-xs inline-block max-w-full whitespace-nowrap text-ellipsis overflow-hidden bg-surface text-red-600 rounded px-1">
                 {pattern.pattern}
               </code>
             </Tooltip>

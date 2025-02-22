@@ -8,10 +8,9 @@ import { upperFirst } from "lodash";
 import ValueField, { ValueType } from "@/app/components/ValueField";
 import { Checkbox, Link, Progress } from "@radix-ui/themes";
 import useTabState from "@/app/hooks/useTabState";
-import { PiCaretRightFill, PiFlagFill, PiFlaskFill } from "react-icons/pi";
+import { PiFlagFill, PiFlaskFill } from "react-icons/pi";
 import { EvaluatedFeature } from "@/app/hooks/useGBSandboxEval";
 import { DebugLog } from "devtools";
-import * as Accordion from "@radix-ui/react-accordion";
 import DebugLogger from "@/app/components/DebugLogger";
 
 type RuleType = "force" | "rollout" | "experiment" | "prerequisite";
@@ -114,10 +113,9 @@ export default function Rule({
     hashAttribute,
     coverage,
     namespace,
-    ...other
   } = rule;
   const key = rule.key ?? fid;
-  let ruleType: RuleType = rule.variations
+  let ruleType: RuleType = variations
     ? "experiment"
     : "coverage" in rule
       ? "rollout"
@@ -129,7 +127,7 @@ export default function Rule({
   return (
     <div className={`rule ${status}`}>
       <div className="inner">
-        <div className="bg-slate-4 text-xs -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">
+        <div className="bg-slate-6 text-xs -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">
           {i + 1}
         </div>
         <div className="w-full">
@@ -171,11 +169,11 @@ export default function Rule({
           </div>
           {!jsonMode && (
             <>
-              {rule.condition || rule.parentConditions ? (
+              {condition || parentConditions ? (
                 <div className="my-2 text-xs">
                   <ConditionDisplay
-                    condition={rule.condition}
-                    parentConditions={rule.parentConditions}
+                    condition={condition}
+                    parentConditions={parentConditions}
                     ruleType={ruleType}
                   />
                 </div>
@@ -201,10 +199,10 @@ export default function Rule({
                     <Progress
                       size="3"
                       radius="small"
-                      value={(rule.coverage || 0) * 100}
+                      value={(coverage || 0) * 100}
                     />
                     <span className="conditionValue flex-shrink-0 py-0.5">
-                      {(rule.coverage || 0) * 100}%
+                      {(coverage || 0) * 100}%
                     </span>
                   </div>
                 </>
@@ -213,7 +211,7 @@ export default function Rule({
                 <div className="my-2 text-xs">
                   <span className="mr-2 font-semibold">SERVE</span>
                   <ValueField
-                    value={rule.force}
+                    value={force}
                     valueType={valueType}
                     maxHeight={60}
                     customPrismStyle={{ padding: "2px" }}
@@ -241,7 +239,7 @@ export default function Rule({
           }}
         />
       )}
-      <div className="pt-1 border-t border-t-slate-200">
+      <div className="pt-1 border-t border-t-slate-a6">
         <DebugLogger startCollapsed={true} logs={debugForRule} />
       </div>
     </div>
