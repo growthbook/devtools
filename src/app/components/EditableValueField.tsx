@@ -71,16 +71,18 @@ export default function EditableValueField({
   return (
     <div>
       {valueType === "number" ? (
-        <input
-          className="Input mb-2 px-2 py-1 bg-surface"
-          type="number"
-          value={editedValue}
-          onChange={(e) => {
-            const v = e.target.value;
-            setEditedValue(v);
-            setDirty(true);
-          }}
-        />
+        <div className="rt-TextFieldRoot rt-r-size-2 rt-variant-surface mb-2">
+          <input
+            className="rt-reset rt-TextFieldInput"
+            type="number"
+            value={editedValue}
+            onChange={(e) => {
+              const v = e.target.value;
+              setEditedValue(v);
+              setDirty(true);
+            }}
+          />
+        </div>
       ) : valueType === "boolean" ? (
         // booleans set the value directly without going through save step
         <div className="box">
@@ -103,21 +105,26 @@ export default function EditableValueField({
           </RadioGroup.Root>
         </div>
       ) : (
-        <TextareaAutosize
-          className={clsx("Textarea bg-surface mono mt-1", {
-            "border-red-700": textareaError,
-          })}
-          name={"__JSON_attributes__"}
-          value={editedValue}
-          onChange={(e) => {
-            const v = e.target.value;
-            setEditedValue(v);
-            setTextareaError(false);
-            setDirty(true);
-          }}
-          style={{ fontSize: "12px", lineHeight: "16px", padding: "6px 6px" }}
-          maxRows={valueType === "json" ? 10 : 3}
-        />
+        <div
+          className="rt-TextAreaRoot rt-r-size-2 rt-variant-surface mb-2"
+          style={{ minHeight: "unset !important" }}
+        >
+          <TextareaAutosize
+            className={clsx("rt-reset rt-TextAreaInput mono", {
+              "border-red-700": textareaError,
+            })}
+            name={"__JSON_attributes__"}
+            value={editedValue}
+            onChange={(e) => {
+              const v = e.target.value;
+              setEditedValue(v);
+              setTextareaError(false);
+              setDirty(true);
+            }}
+            style={{fontSize: "12px", lineHeight: "16px", padding: "6px 6px"}}
+            maxRows={valueType === "json" ? 10 : 3}
+          />
+        </div>
       )}
 
       {valueType !== "boolean" && (dirty || valueType === "json") && (

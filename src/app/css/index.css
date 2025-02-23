@@ -14,14 +14,16 @@
   --color-light: var(--slate-1);
   --color-field: var(--slate-a2);
   --color-console-back: #fbfafa;
+  --tw-shadow-override: 0 2px 2px -1px rgb(0 0 0 / 0.05);
 }
 .dark {
   --color-surface: #10172e;
   --color-panel-violet: #1a2036;
   --color-panel-hover: #1c2339;
-  --color-light: var(--slate-a3);
-  --color-field: #141723aa;
+  --color-light: var(--slate-a2);
+  --color-field: #1b1f2e7f;
   --color-console-back: #141723;
+  --tw-shadow-override: 0 2px 2px -1px rgb(0 0 0 / 0.25);
 }
 
 .bg-surface {
@@ -142,7 +144,7 @@
 }
 /*rule statuses*/
 .rule.skipped, .rule.unreachable {
-  @apply border-l-slate-300 dark:border-l-orange-200/50;
+  @apply border-l-slate-300 dark:border-l-orange-200/40;
   .status {
     @apply text-slate-700 bg-slate-200 dark:text-black dark:bg-orange-100/50;
   }
@@ -218,15 +220,8 @@
 }
 
 .shadow-sm {
-  --tw-shadow: 0 2px 2px -1px rgb(0 0 0 / 0.05);
-  --tw-shadow-colored: 0 2px 2px -1px var(--tw-shadow-color);
-}
-
-.shadow-sm-up {
-  --tw-shadow: 0 -1px 2px 0 rgb(0 0 0 / 0.05);
-  --tw-shadow-colored: 0 -1px 2px 0 var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
-    var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+  var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow-override);
 }
 
 .rt-SwitchRoot::before {

@@ -35,6 +35,7 @@ textarea {
   background-color: var(--gray-a2);
   border: 1px solid var(--black-a5);
   transition: 150ms box-shadow;
+  @apply border border-slate-a3;
 }
 
 .Input:focus,
