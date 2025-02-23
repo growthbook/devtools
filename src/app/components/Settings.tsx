@@ -69,7 +69,12 @@ const SettingsForm = ({ close }: { close?: () => void }) => {
       <Form.Field className="FormField" name={API_KEY}>
         <Form.Label className="FormLabel">GrowthBook Access Token</Form.Label>
         <Form.Control asChild>
-          <input className="Input" {...form.register("apiKey")} />
+          <div className="rt-TextFieldRoot rt-r-size-2 rt-variant-surface">
+            <input
+              className="rt-reset rt-TextFieldInput"
+              {...form.register("apiKey")}
+            />
+          </div>
         </Form.Control>
         <div className="mt-1 text-slate-11 text-xs">
           Add an{" "}
@@ -85,7 +90,7 @@ const SettingsForm = ({ close }: { close?: () => void }) => {
         </div>
       </Form.Field>
 
-      <Form.Field className="FormFieldInline" name="isCloud">
+      <Form.Field className="FormFieldInline my-4" name="isCloud">
         <Form.Control asChild>
           <Checkbox
             checked={form.watch("isCloud")}
@@ -110,21 +115,31 @@ const SettingsForm = ({ close }: { close?: () => void }) => {
           <Form.Field className="FormField" name={API_HOST}>
             <Form.Label className="FormLabel">GrowthBook API Host</Form.Label>
             <Form.Control asChild>
-              <input className="Input" {...form.register("apiHost")} />
+              <div className="rt-TextFieldRoot rt-r-size-2 rt-variant-surface">
+                <input
+                  className="rt-reset rt-TextFieldInput"
+                  {...form.register("apiHost")}
+                />
+              </div>
             </Form.Control>
           </Form.Field>
 
           <Form.Field className="FormField" name={APP_ORIGIN}>
             <Form.Label className="FormLabel">GrowthBook App Origin</Form.Label>
             <Form.Control asChild>
-              <input className="Input" {...form.register("appOrigin")} />
+              <div className="rt-TextFieldRoot rt-r-size-2 rt-variant-surface">
+                <input
+                  className="rt-reset rt-TextFieldInput"
+                  {...form.register("appOrigin")}
+                />
+              </div>
             </Form.Control>
           </Form.Field>
         </>
-      )}
+        )}
 
       <div className="mt-8">
-        <Form.Submit asChild>
+      <Form.Submit asChild>
           <Button size="3" className="w-full">
             Save
           </Button>

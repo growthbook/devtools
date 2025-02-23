@@ -201,7 +201,7 @@ function statusPanel({
           </Text>
           <Text as="div" size="2" weight="regular" mb="3">
             Ensure that{" "}
-            <code className="text-pink-800">enableDevMode: true</code> is set
+            <code className="text-pink-600">enableDevMode: true</code> is set
             when creating your GrowthBook SDK instance (JavaScript and React
             only).
           </Text>
@@ -243,11 +243,11 @@ function statusPanel({
           </Text>
           <Text as="div" size="2" weight="regular" mb="2">
             <div className="font-semibold mb-0.5">Host:</div>
-            <code className="text-pink-800">{apiHost ?? "None"}</code>
+            <code className="text-pink-600">{apiHost ?? "None"}</code>
           </Text>
           <Text as="div" size="2" weight="regular" mb="2">
             <div className="font-semibold mb-0.5">Client Key:</div>
-            <code className="text-pink-800">{clientKey ?? "None"}</code>
+            <code className="text-pink-600">{clientKey ?? "None"}</code>
           </Text>
           {errorMessage && (
             <Text as="div" size="2" weight="light">
@@ -289,18 +289,18 @@ function trackingCallbackPanel({
       {trackingCallbackParams?.length === 2 ? (
         <>
           The SDK is using a{" "}
-          <code className="text-pink-800">trackingCallback</code>.
+          <code className="text-pink-600">trackingCallback</code>.
         </>
       ) : !hasTrackingCallback ? (
         <>
           The SDK is not using a{" "}
-          <code className="text-pink-800">trackingCallback</code>. You will need
+          <code className="text-pink-600">trackingCallback</code>. You will need
           to add one to track experiment exposure to your data warehouse.
         </>
       ) : (
         <>
           The SDK is using a{" "}
-          <code className="text-pink-800">trackingCallback</code> with{" "}
+          <code className="text-pink-600">trackingCallback</code> with{" "}
           {trackingCallbackParams?.length ? (
             <em className="text-amber-600">{trackingCallbackParams.length}</em>
           ) : (
@@ -383,16 +383,16 @@ function streamingPanel({
       </Text>
       <Text as="div" size="2" weight="regular" mb="2">
         <div className="font-semibold mb-0.5">Streaming host:</div>
-        <code className="text-pink-800">{streamingHost ?? "None"}</code>
+        <code className="text-pink-600">{streamingHost ?? "None"}</code>
       </Text>
       <Text as="div" size="2" weight="regular">
         <div className="font-semibold mb-0.5">Client Key:</div>
-        <code className="text-pink-800">{clientKey ?? "None"}</code>
+        <code className="text-pink-600">{clientKey ?? "None"}</code>
       </Text>
       <Text as="div" size="2" weight="regular" mt="2">
         <div className="font-semibold">Streaming host request headers:</div>
         <div>
-          <code className="text-pink-800">
+          <code className="text-pink-600">
             {JSON.stringify(streamingHostRequestHeaders) ?? "None"}
           </code>
         </div>
@@ -416,12 +416,12 @@ function logEventPanel({ usingLogEvent }: SDKHealthCheckResult) {
     <Text as="div" size="2" weight="regular">
       {usingLogEvent ? (
         <>
-          The SDK is using a <code className="text-pink-800">logEvent</code>{" "}
+          The SDK is using a <code className="text-pink-600">logEvent</code>{" "}
           callback.
         </>
       ) : (
         <>
-          The SDK is not using a <code className="text-pink-800">logEvent</code>{" "}
+          The SDK is not using a <code className="text-pink-600">logEvent</code>{" "}
           callback. This optional callback allows you to track events to a data
           warehouse directly from the SDK.
         </>
@@ -436,12 +436,12 @@ function onFeatureUsagePanel({ usingOnFeatureUsage }: SDKHealthCheckResult) {
       {usingOnFeatureUsage ? (
         <>
           The SDK is using an{" "}
-          <code className="text-pink-800">onFeatureUsage</code> callback.
+          <code className="text-pink-600">onFeatureUsage</code> callback.
         </>
       ) : (
         <>
           The SDK is not using a{" "}
-          <code className="text-pink-800">onFeatureUsage</code> callback. This
+          <code className="text-pink-600">onFeatureUsage</code> callback. This
           optional callback allows you to track feature flag telemetry to a data
           warehouse.
         </>

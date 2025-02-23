@@ -9,6 +9,7 @@ import {
 } from "@radix-ui/themes";
 import React, { useEffect, useRef, useState } from "react";
 import logo from "./logo.svg";
+import logoWhite from "./logo-white.svg";
 import useTabState from "@/app/hooks/useTabState";
 import SdkTab, { getSdkStatus } from "./components/SdkTab";
 import AttributesTab from "./components/AttributesTab";
@@ -92,7 +93,7 @@ export const App = () => {
             style={{ maxWidth: MW - 32, height: 30 }}
           >
             <img
-              src={logo}
+              src={!dark ? logo: logoWhite}
               alt="GrowthBook"
               className="inline-block mb-1 flex-shrink-0 mt-0.5 -mr-2"
               style={{ width: 120 }}

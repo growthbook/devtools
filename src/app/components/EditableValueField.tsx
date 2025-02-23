@@ -113,7 +113,7 @@ export default function EditableValueField({
             className={clsx("rt-reset rt-TextAreaInput mono", {
               "border-red-700": textareaError,
             })}
-            name={"__JSON_attributes__"}
+            name={"__JSON_value__"}
             value={editedValue}
             onChange={(e) => {
               const v = e.target.value;

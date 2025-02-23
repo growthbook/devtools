@@ -23,10 +23,11 @@ export default function SearchBar({
     <Container {...containerProps}>
       <div className="searchBar">
         <PiMagnifyingGlassBold
-          className="inline-block mx-1 text-slate-8"
+          className="inline-block mx-1 text-slate-8 flex-shrink-0"
           size={16}
         />
         <input
+          className="bg-transparent focus:ring-0 focus:outline-none"
           autoFocus={autoFocus}
           placeholder={placeholder}
           type="text"
@@ -34,17 +35,17 @@ export default function SearchBar({
         />
         {clear && searchInputProps?.value?.length ? (
           <IconButton
-            className="clear"
+            className="clear flex-shrink-0"
             size="1"
             variant="ghost"
             radius="full"
             color="gray"
             onClick={clear}
           >
-            <PiXBold />
+            <PiXBold/>
           </IconButton>
         ) : null}
-      </div>
+        </div>
     </Container>
-  );
+);
 }
