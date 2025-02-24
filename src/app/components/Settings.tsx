@@ -76,7 +76,7 @@ const SettingsForm = ({ close }: { close?: () => void }) => {
             />
           </div>
         </Form.Control>
-        <div className="mt-1 text-slate-11 text-xs">
+        <div className="mt-1 text-gray-11 text-xs">
           Add an{" "}
           <Link
             size="1"

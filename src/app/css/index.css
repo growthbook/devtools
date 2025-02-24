@@ -11,8 +11,8 @@
   --color-surface: white;
   --color-panel-violet: var(--violet-2);
   --color-panel-hover: var(--violet-1);
-  --color-light: var(--slate-1);
-  --color-field: var(--slate-a2);
+  --color-light: var(--gray-1);
+  --color-field: var(--gray-a2);
   --color-console-back: #fbfafa;
   --tw-shadow-override: 0 2px 2px -1px rgb(0 0 0 / 0.05);
 }
@@ -20,7 +20,7 @@
   --color-surface: #10172e;
   --color-panel-violet: #1a2036;
   --color-panel-hover: #1c2339;
-  --color-light: var(--slate-a2);
+  --color-light: var(--gray-a2);
   --color-field: #1b1f2e7f;
   --color-console-back: #141723;
   --tw-shadow-override: 0 2px 2px -1px rgb(0 0 0 / 0.25);
@@ -73,11 +73,11 @@
 }
 
 .box {
-  @apply px-3 py-2 border border-slate-a3 rounded-md bg-light;
+  @apply px-3 py-2 border border-gray-a3 rounded-md bg-light;
 }
 
 .featureCard {
-  @apply py-1 border-t border-slate-a3 relative items-center cursor-pointer overflow-hidden select-none;
+  @apply py-1 border-t border-gray-a3 relative items-center cursor-pointer overflow-hidden select-none;
   height: 48px;
 }
 .featureCard:first-of-type {
@@ -128,7 +128,7 @@
 }
 
 .rule {
-  @apply pt-4 pb-2 pl-2.5 pr-4 my-5 text-2xs bg-light rounded-md border border-l-[3px] border-slate-a3;
+  @apply pt-4 pb-2 pl-2.5 pr-4 my-5 text-2xs bg-light rounded-md border border-l-[3px] border-gray-a3;
 }
 .rule .inner {
   @apply flex items-start pb-2;
@@ -137,16 +137,16 @@
   @apply leading-[1.3rem];
 }
 .conditionValue {
-  @apply px-1 border border-slate-a3 rounded-sm bg-light break-all;
+  @apply px-1 border border-gray-a3 rounded-sm bg-light break-all;
 }
 .conditionOperator {
-  @apply text-slate-11 mx-1;
+  @apply text-gray-11 mx-1;
 }
 /*rule statuses*/
 .rule.skipped, .rule.unreachable {
-  @apply border-l-slate-300 dark:border-l-orange-200/40;
+  @apply border-l-gray-300 dark:border-l-orange-200/40;
   .status {
-    @apply text-slate-700 bg-slate-200 dark:text-black dark:bg-orange-100/50;
+    @apply text-gray-700 bg-gray-200 dark:text-black dark:bg-orange-100/50;
   }
 }
 .rule.matches, .rule.gates {
@@ -210,7 +210,7 @@
 }
 
 .searchBar {
-  @apply border-b border-b-slate-a4 flex items-center justify-between flex-shrink;
+  @apply border-b border-b-gray-a4 flex items-center justify-between flex-shrink;
 }
 .searchBar input {
   @apply border-0 px-1 py-0.5 w-full;
@@ -262,5 +262,5 @@
   }
 }
 .textInput {
-  @apply border border-slate-a4 rounded-md;
+  @apply border border-gray-a4 rounded-md;
 }

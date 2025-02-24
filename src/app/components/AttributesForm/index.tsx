@@ -169,7 +169,7 @@ export default function AttributesForm({
                     </div>
                   );
                 })}
-                <div className="border-t border-slate-a6 my-4 h-0" />
+                <div className="border-t border-gray-a6 my-4 h-0" />
                 {customAttributes.length > 0
                   ? customAttributes?.map((attributeKey, i) => {
                       const attributeType = getAttributeType(
@@ -218,7 +218,7 @@ export default function AttributesForm({
                     })
                   : null}
                 {customAttributes.length > 0 && (
-                  <div className="border-t border-slate-a6 my-4 h-0" />
+                  <div className="border-t border-gray-a6 my-4 h-0" />
                 )}
               </Flex>
             )

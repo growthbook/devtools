@@ -174,7 +174,7 @@ export default function ExperimentDetail({
                 </div>
               )}
               {lastDebugLog !== "In experiment" && (
-                <div className="border border-slate-a3 rounded-sm bg-console pt-1 px-2 mt-1">
+                <div className="border border-gray-a3 rounded-sm bg-console pt-1 px-2 mt-1">
                   <DebugLogAccordion
                     log={[lastDebugLog, {}]}
                     showContext={false}

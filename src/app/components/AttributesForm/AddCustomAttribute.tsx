@@ -202,7 +202,7 @@ export default function AddCustomAttribute({
                   onChange={setAddCustomId}
                   formatCreateLabel={(val) => (
                     <>
-                      <span className="text-slate-a11 text-xs mr-1">
+                      <span className="text-gray-a11 text-xs mr-1">
                         Create custom:
                       </span>
                       {val}

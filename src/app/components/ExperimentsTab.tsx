@@ -184,7 +184,7 @@ export default function ExperimentsTab() {
         }}
       >
         <div
-          className="fixed w-full flex items-center gap-4 px-3 border-b border-b-slate-4 bg-surface text-xs font-semibold shadow-sm"
+          className="fixed w-full flex items-center gap-4 px-3 border-b border-b-gray-4 bg-surface text-xs font-semibold shadow-sm"
           style={{
             maxWidth: MW,
             height: HEADER_H,
@@ -327,7 +327,7 @@ export default function ExperimentsTab() {
                         {getVariationSummary({ experiment, i })}
                       </div>
                     ) : (
-                      <div className="text-slate-9">Inactive</div>
+                      <div className="text-gray-9">Inactive</div>
                     )}
                   </div>
                 )}

@@ -51,7 +51,7 @@ export default function ValueField({
     <>
       {(stringAsCode ? ["json", "string"] : ["json"]).includes(valueType) ? (
         <div
-          className="bg-field border border-slate-a3 rounded-md"
+          className="bg-field border border-gray-a3 rounded-md"
           style={customPrismOuterStyle}
         >
           <Prism
@@ -80,7 +80,7 @@ export default function ValueField({
             <PiCircleFill
               size={10}
               className={clsx("inline-block mr-0.5 -mt-0.5", {
-                "text-slate-a7": formattedValue === "false",
+                "text-gray-a7": formattedValue === "false",
                 "text-teal-600": formattedValue === "true",
               })}
             />
@@ -99,7 +99,7 @@ export default function ValueField({
           {formattedValue}
         </span>
       ) : (
-        <code className="text-slate-a10 text-sm whitespace-pre-wrap">
+        <code className="text-gray-a10 text-sm whitespace-pre-wrap">
           {formattedValue}
         </code>
       )}

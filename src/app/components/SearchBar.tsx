@@ -23,7 +23,7 @@ export default function SearchBar({
     <Container {...containerProps}>
       <div className="searchBar">
         <PiMagnifyingGlassBold
-          className="inline-block mx-1 text-slate-8 flex-shrink-0"
+          className="inline-block mx-1 text-gray-8 flex-shrink-0"
           size={16}
         />
         <input

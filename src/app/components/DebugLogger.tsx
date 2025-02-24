@@ -37,7 +37,7 @@ export default function DebugLogger({
         </Link>
       </div>
       {!collapsed && (
-        <div className="text-xs border border-slate-a3 rounded-sm bg-console pt-1 px-2">
+        <div className="text-xs border border-gray-a3 rounded-sm bg-console pt-1 px-2">
           {logs?.length ? (
             logs.map((log, i) => (
               <DebugLogAccordion key={i} log={log} showContext={showContext} />
@@ -63,7 +63,7 @@ export function DebugLogAccordion({
   const disableAccordion = !showContext || !Object.keys(log?.[1] || {}).length;
   return (
     <div className="my-0.5">
-      <div className="py-0.5 mb-1 pl-2 text-2xs border-l-2 border-l-slate-a7">
+      <div className="py-0.5 mb-1 pl-2 text-2xs border-l-2 border-l-gray-a7">
         <Accordion.Root
           className="accordion"
           type="single"
@@ -95,7 +95,7 @@ export function DebugLogAccordion({
               )}
               <span
                 className={clsx(
-                  "font-mono text-semibold text-slate-12 text-xs",
+                  "font-mono text-semibold text-gray-12 text-xs",
                   logMessageClassName,
                 )}
               >

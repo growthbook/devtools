@@ -127,7 +127,7 @@ export default function Rule({
   return (
     <div className={`rule ${status}`}>
       <div className="inner">
-        <div className="bg-slate-6 text-xs -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">
+        <div className="bg-gray-6 text-xs -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">
           {i + 1}
         </div>
         <div className="w-full">
@@ -239,7 +239,7 @@ export default function Rule({
           }}
         />
       )}
-      <div className="pt-1 border-t border-t-slate-a6">
+      <div className="pt-1 border-t border-t-gray-a6">
         <DebugLogger startCollapsed={true} logs={debugForRule} />
       </div>
     </div>
@@ -295,7 +295,7 @@ export function ExperimentRule({
         </span>
       </div>
       {nsRange ? (
-        <div className="leading-3">
+        <div className="leading-3 text-gray-11">
           ({nsRange * 100}% namespace, {(coverage ?? 1) * 100}% exposure)
         </div>
       ) : null}

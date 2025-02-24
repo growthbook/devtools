@@ -77,7 +77,7 @@ export const App = () => {
   return (
     <Theme
       accentColor="violet"
-      grayColor="slate"
+      grayColor={!dark ? "gray" : "mauve"}
       hasBackground={false}
       style={{ minHeight: "unset" }}
       appearance={dark ? "dark" : "light"}
@@ -152,7 +152,7 @@ export const App = () => {
             <div className="flex items-center justify-between">
               <Select.Root value={currentTab} onValueChange={setCurrentTab}>
                 <Select.Trigger
-                  className="!shadow-none !outline-none hover:bg-slate-a3 rounded-none"
+                  className="!shadow-none !outline-none hover:bg-gray-a3 rounded-none"
                   style={{ borderBottom: "2px solid var(--violet-a11)" }}
                 >
                   <div style={{ width: 100 }}>

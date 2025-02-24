@@ -58,7 +58,7 @@ module.exports = {
       colors: {
         violet: generateRadixScale("violet"),
         indigo: generateRadixScale("indigo"),
-        slate: generateRadixScale("slate"),
+        gray: generateRadixScale("gray"),
       },
       zIndex: {
         max: "2147483647",

@@ -58,7 +58,7 @@ export default function FeatureExperimentStatusIcon({
     );
   } else {
     return (
-      <PiCheckCircleThin className="inline-block mr-1.5 mb-0.5 text-slate-a5" />
+      <PiCheckCircleThin className="inline-block mr-1.5 mb-0.5 text-gray-a5" />
     );
   }
 }
