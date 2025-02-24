@@ -23,7 +23,9 @@ import {
   PiCircleFill,
   PiGearSixFill,
   PiWarningFill,
-  PiWarningOctagonFill, PiSunBold, PiMoonBold,
+  PiWarningOctagonFill,
+  PiSunBold,
+  PiMoonBold,
 } from "react-icons/pi";
 import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
@@ -93,7 +95,7 @@ export const App = () => {
             style={{ maxWidth: MW - 32, height: 30 }}
           >
             <img
-              src={!dark ? logo: logoWhite}
+              src={!dark ? logo : logoWhite}
               alt="GrowthBook"
               className="inline-block mb-1 flex-shrink-0 mt-0.5 -mr-2"
               style={{ width: 120 }}

@@ -81,9 +81,8 @@ export function DebugLogAccordion({
                       marginLeft: 12,
                     }
                   : {
-                      pointerEvents: "none"
-                    }
-                  ),
+                      pointerEvents: "none",
+                    }),
               }}
             >
               {!disableAccordion && (

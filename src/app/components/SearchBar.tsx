@@ -42,10 +42,10 @@ export default function SearchBar({
             color="gray"
             onClick={clear}
           >
-            <PiXBold/>
+            <PiXBold />
           </IconButton>
         ) : null}
-        </div>
+      </div>
     </Container>
-);
+  );
 }

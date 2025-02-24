@@ -226,7 +226,7 @@ export default function AttributesForm({
             <>
               <div
                 className="rt-TextAreaRoot rt-r-size-2 rt-variant-surface mb-2"
-                style={{minHeight: "unset !important"}}
+                style={{ minHeight: "unset !important" }}
               >
                 <TextareaAutosize
                   className={clsx("rt-reset rt-TextAreaInput mono", {
@@ -240,7 +240,11 @@ export default function AttributesForm({
                     setTextareaError?.(false);
                     setDirty?.(true);
                   }}
-                  style={{fontSize: "12px", lineHeight: "16px", padding: "6px 6px"}}
+                  style={{
+                    fontSize: "12px",
+                    lineHeight: "16px",
+                    padding: "6px 6px",
+                  }}
                   minRows={15}
                 />
               </div>

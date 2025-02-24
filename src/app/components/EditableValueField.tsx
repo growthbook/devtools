@@ -121,7 +121,7 @@ export default function EditableValueField({
               setTextareaError(false);
               setDirty(true);
             }}
-            style={{fontSize: "12px", lineHeight: "16px", padding: "6px 6px"}}
+            style={{ fontSize: "12px", lineHeight: "16px", padding: "6px 6px" }}
             maxRows={valueType === "json" ? 10 : 3}
           />
         </div>

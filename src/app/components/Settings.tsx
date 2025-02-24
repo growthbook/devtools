@@ -136,10 +136,10 @@ const SettingsForm = ({ close }: { close?: () => void }) => {
             </Form.Control>
           </Form.Field>
         </>
-        )}
+      )}
 
       <div className="mt-8">
-      <Form.Submit asChild>
+        <Form.Submit asChild>
           <Button size="3" className="w-full">
             Save
           </Button>

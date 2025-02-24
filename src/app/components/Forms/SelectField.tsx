@@ -20,7 +20,7 @@ export const customStyles = {
   }),
   menu: (provided: any) => ({
     ...provided,
-    background: "var(--color-surface-override)"
+    background: "var(--color-surface-override)",
   }),
   option: (provided: any, state: any) => ({
     ...provided,
@@ -61,8 +61,8 @@ export const customStyles = {
     "&:hover": {
       backgroundColor: "var(--red-a4)",
       color: "var(--red-10)",
-    }
-  })
+    },
+  }),
 };
 
 export type SingleValue = { label: string; value: string; tooltip?: string };
