@@ -135,7 +135,7 @@ export default function FeaturesTab() {
         }}
       >
         <div
-          className="fixed w-full flex items-center gap-4 px-3 border-b border-b-gray-4 bg-surface text-xs font-semibold shadow-sm"
+          className="fixed w-full flex items-center gap-4 px-3 border-b border-b-gray-a4 bg-surface text-xs font-semibold shadow-sm"
           style={{
             maxWidth: MW,
             height: HEADER_H,

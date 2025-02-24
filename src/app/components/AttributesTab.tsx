@@ -171,7 +171,7 @@ export default function AttributesTab() {
       >
         <div
           className={clsx(
-            "mx-auto fixed w-full flex items-center justify-between border-b border-b-gray-4 bg-surface text-xs font-semibold shadow-sm",
+            "mx-auto fixed w-full flex items-center justify-between border-b border-b-gray-a4 bg-surface text-xs font-semibold shadow-sm",
             {
               "pl-4 pr-6": !isResponsive,
               "pl-2 pr-3": isResponsive,

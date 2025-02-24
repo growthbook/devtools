@@ -75,7 +75,7 @@ export default function LogsList({
   return (
     <div className="flex flex-col w-full h-full">
       <div
-        className="w-full flex items-center justify-between gap-4 px-3 border-b border-b-gray-4 bg-surface text-xs font-semibold shadow-sm"
+        className="w-full flex items-center justify-between gap-4 px-3 border-b border-b-gray-a4 bg-surface text-xs font-semibold shadow-sm"
         style={{
           height: HEADER_H,
           zIndex: 2000,

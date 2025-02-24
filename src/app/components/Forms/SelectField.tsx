@@ -16,11 +16,11 @@ export const customStyles = {
       borderColor: state.isFocused ? "var(--focus-8)" : "var(--gray-a7)",
     },
     color: "var(--gray-12)",
-    backgroundColor: "var(--color-surface)",
+    backgroundColor: "var(--color-surface-override)",
   }),
   menu: (provided: any) => ({
     ...provided,
-    background: "var(--color-surface)"
+    background: "var(--color-surface-override)"
   }),
   option: (provided: any, state: any) => ({
     ...provided,

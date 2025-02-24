@@ -8,7 +8,7 @@
 @tailwind utilities;
 
 :root {
-  --color-surface: white;
+  --color-surface-override: white;
   --color-panel-violet: var(--violet-2);
   --color-panel-hover: var(--violet-1);
   --color-light: var(--gray-1);
@@ -17,7 +17,7 @@
   --tw-shadow-override: 0 2px 2px -1px rgb(0 0 0 / 0.05);
 }
 .dark {
-  --color-surface: #10172e;
+  --color-surface-override: #10172e;
   --color-panel-violet: #1a2036;
   --color-panel-hover: #1c2339;
   --color-light: var(--gray-a2);
@@ -27,7 +27,7 @@
 }
 
 .bg-surface {
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-override);
 }
 .bg-panel {
   background-color: var(--color-panel-violet);

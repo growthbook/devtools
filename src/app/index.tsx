@@ -23,7 +23,7 @@ import {
   PiCircleFill,
   PiGearSixFill,
   PiWarningFill,
-  PiWarningOctagonFill, PiSunDimBold, PiMoonBold,
+  PiWarningOctagonFill, PiSunBold, PiMoonBold,
 } from "react-icons/pi";
 import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
@@ -77,7 +77,7 @@ export const App = () => {
   return (
     <Theme
       accentColor="violet"
-      grayColor={!dark ? "gray" : "mauve"}
+      grayColor="slate"
       hasBackground={false}
       style={{ minHeight: "unset" }}
       appearance={dark ? "dark" : "light"}
@@ -447,7 +447,7 @@ function ThemeButton() {
       size="1"
       onClick={() => setDark(!dark)}
     >
-      {!dark ? <PiSunDimBold /> : <PiMoonBold />}
+      {!dark ? <PiSunBold /> : <PiMoonBold />}
     </IconButton>
   );
 }
