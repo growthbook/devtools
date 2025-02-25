@@ -13,7 +13,7 @@ import { EvaluatedFeature } from "@/app/hooks/useGBSandboxEval";
 import { DebugLog } from "devtools";
 import DebugLogger from "@/app/components/DebugLogger";
 import useGlobalState from "@/app/hooks/useGlobalState";
-import {isDark} from "@/app";
+import { isDark } from "@/app";
 
 type RuleType = "force" | "rollout" | "experiment" | "prerequisite";
 
@@ -58,7 +58,7 @@ export default function Rule({
     const d: DebugLog[] = [];
     let r = 0; // current parent rule number
     debug.forEach((item, itemNo) => {
-      const nextItem = debug?.[itemNo+1];
+      const nextItem = debug?.[itemNo + 1];
       // Skip tracking callbacks
       // if (item?.[0].startsWith("Tracking callback")) return;
       // If the log id matches our feature's id, assume we can rely on the log's

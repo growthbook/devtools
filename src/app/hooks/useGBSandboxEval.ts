@@ -92,13 +92,13 @@ export default function useGBSandboxEval() {
         navigate: (url) => {},
         applyDomChangesCallback: (changes) => () => {},
         disableExperimentsOnLoad: true,
-        trackingCallback: ((exp, res) => {
-          log.push([`Tracking callback: ${exp.key}`, {exp, res}]);
+        trackingCallback: (exp, res) => {
+          log.push([`Tracking callback: ${exp.key}`, { exp, res }]);
           // @ts-ignore allow multiple tracks of the same exp
           growthbook._trackedExperiments = new Set();
           // @ts-ignore allow multiple tracks of the same exp
           growthbook._completedChangeIds = new Set();
-        })
+        },
       });
       growthbook.setForcedFeatures(forcedFeaturesMap);
       await growthbook.init({ payload });

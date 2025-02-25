@@ -32,7 +32,7 @@ import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import ConditionalWrapper from "@/app/components/ConditionalWrapper";
 import { useResponsiveContext } from "./hooks/useResponsive";
-import {Archetype} from "@/app/gbTypes";
+import { Archetype } from "@/app/gbTypes";
 
 export const MW = 1200; // max-width
 export const RESPONSIVE_W = 570; // small width mode
@@ -372,7 +372,11 @@ function NavLabel({
       >
         <span
           className={
-            !isDropdown ? (forcedAttributes && !selectedArchetype ? "pr-3" : "px-1.5") : "pr-1"
+            !isDropdown
+              ? forcedAttributes && !selectedArchetype
+                ? "pr-3"
+                : "px-1.5"
+              : "pr-1"
           }
         >
           Attributes
