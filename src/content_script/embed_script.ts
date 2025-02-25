@@ -79,16 +79,16 @@ function pushAppUpdates() {
     pushSDKUpdate(gb);
     if (gb) {
       subscribeToSdkChanges(gb);
-      updateTabState("features", gb.getFeatures());
-      updateTabState("experiments", gb.getExperiments());
+      updateTabState("features", gb.getFeatures?.());
+      updateTabState("experiments", gb.getExperiments?.());
 
       if (Object.keys(gb.getAttributes()).length) {
         updateTabState("attributes", gb.getAttributes());
       }
-      if (Object.keys(gb.getForcedFeatures()).length) {
+      if (Object.keys(gb.getForcedFeatures?.()).length) {
         updateTabState("forcedFeatures", gb.getForcedFeatures());
       }
-      if (Object.keys(gb.getForcedVariations()).length) {
+      if (Object.keys(gb.getForcedVariations?.()).length) {
         updateTabState("forcedVariations", gb.getForcedVariations());
       }
     }
@@ -132,8 +132,8 @@ function setupListeners() {
 function updateAttributes(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (typeof data === "object" && data !== null) {
-      gb.setAttributeOverrides(data as Attributes); // {} to reset
-      updateTabState("attributes", gb.getAttributes()); // so that when we reset it will reset back to the original attributes
+      gb.setAttributeOverrides?.(data as Attributes); // {} to reset
+      updateTabState("attributes", gb.getAttributes?.() || {}); // so that when we reset it will reset back to the original attributes
     } else {
       // todo: do something with these messages or remove them
       const msg: ErrorMessage = {
@@ -147,7 +147,7 @@ function updateAttributes(data: unknown) {
 function updateFeatures(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (data) {
-      gb.setForcedFeatures(
+      gb.setForcedFeatures?.(
         new Map(Object.entries(data as Record<string, any>)),
       );
     } else {
@@ -163,13 +163,7 @@ function updateFeatures(data: unknown) {
 function updateExperiments(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (data) {
-      gb.setForcedVariations(data as Record<string, number>);
-    } else {
-      // todo: do something with these messages or remove them
-      const msg: ErrorMessage = {
-        type: "GB_ERROR",
-        error: "Invalid experiments data",
-      };
+      gb.setForcedVariations?.(data as Record<string, number>);
     }
   });
 }
@@ -363,20 +357,20 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   // @ts-expect-error
   const gbContext = gb.context;
 
-  const devModeEnabled = gbContext.enableDevMode;
+  const devModeEnabled = gbContext?.enableDevMode;
 
   const [apiHost, clientKey] = gb.getApiInfo();
 
   const payload = gb.getDecryptedPayload?.() || {
-    features: gb.getFeatures(),
-    experiments: gb.getExperiments(),
+    features: gb.getFeatures?.(),
+    experiments: gb.getExperiments?.(),
   };
   const hasPayload =
     !!gb.getDecryptedPayload?.() ||
-    (Object.keys(gb.getFeatures()).length > 0 &&
-      gb.getExperiments().length > 0);
+    (Object.keys(gb.getFeatures?.()).length > 0 &&
+      gb.getExperiments?.().length > 0);
   // check if payload was decrypted
-  const hasDecryptionKey = !!gbContext.decryptionKey;
+  const hasDecryptionKey = !!gbContext?.decryptionKey;
   let payloadDecrypted = true;
   try {
     JSON.stringify(payload);
@@ -384,7 +378,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     payloadDecrypted = false;
   }
 
-  const _trackingCallback = gbContext.trackingCallback;
+  const _trackingCallback = gbContext?.trackingCallback;
   const hasTrackingCallback =
     typeof _trackingCallback === "function" &&
     !_trackingCallback.isNoopCallback;
@@ -392,16 +386,16 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     ? _trackingCallback.originalParams
     : undefined;
 
-  const usingLogEvent = typeof gbContext.eventLogger === "function";
+  const usingLogEvent = typeof gbContext?.eventLogger === "function";
 
-  const usingOnFeatureUsage = typeof gbContext.onFeatureUsage === "function";
+  const usingOnFeatureUsage = typeof gbContext?.onFeatureUsage === "function";
 
-  const isRemoteEval = gb.isRemoteEval();
+  const isRemoteEval = !!gb.isRemoteEval?.();
 
-  const usingStickyBucketing = gbContext.stickyBucketService !== undefined;
-  const stickyBucketAssignmentDocs = gbContext.stickyBucketAssignmentDocs;
+  const usingStickyBucketing = gbContext?.stickyBucketService !== undefined;
+  const stickyBucketAssignmentDocs = gbContext?.stickyBucketAssignmentDocs;
 
-  const apiRequestHeaders = gbContext.apiRequestHeaders;
+  const apiRequestHeaders = gbContext?.apiRequestHeaders;
   let res;
   try {
     res =
@@ -417,8 +411,8 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   }
 
   const streaming = !!gbContext.backgroundSync;
-  const streamingHost = gbContext.streamingHost || apiHost;
-  const streamingHostRequestHeaders = gbContext.streamingHostRequestHeaders;
+  const streamingHost = gbContext?.streamingHost || apiHost;
+  const streamingHostRequestHeaders = gbContext?.streamingHostRequestHeaders;
   let streamingRes = undefined;
   if (streaming) {
     const options = {
