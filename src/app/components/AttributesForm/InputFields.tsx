@@ -93,7 +93,7 @@ export default function InputFields({
               creatable
               placeholder="Add to list..."
               menuPlacement="top"
-              value={inputValue}
+              value={inputValue || []}
               options={(inputValue || [])?.map((entry: string) => ({
                 value: entry,
                 label: entry,
