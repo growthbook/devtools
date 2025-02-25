@@ -26,6 +26,7 @@ import {
   PiWarningOctagonFill,
   PiSunBold,
   PiMoonBold,
+  PiCircleHalfBold,
 } from "react-icons/pi";
 import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
@@ -37,12 +38,29 @@ export const RESPONSIVE_W = 570; // small width mode
 export const TINY_W = 420;
 export const NAV_H = 75;
 
+export type Theme = "system" | "light" | "dark";
+export function isDark(theme: Theme): boolean {
+  return theme === "system"
+    ? (window?.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false)
+    : theme === "dark";
+}
+
 export const App = () => {
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { isResponsive, isTiny } = useResponsiveContext();
-  const [dark, setDark] = useGlobalState("dark", true, true);
+  const [theme, setTheme, themeReady] = useGlobalState<Theme>(
+    "theme",
+    "system",
+    true,
+  );
+  const [dark, setDark] = useGlobalState("dark", isDark(theme));
+  useEffect(() => {
+    if (themeReady && dark !== isDark(theme)) {
+      setDark(isDark(theme));
+    }
+  }, [theme, themeReady, dark]);
 
   const [apiKey, setApiKey, apiKeyReady] = useGlobalState(API_KEY, "", true);
 
@@ -441,15 +459,40 @@ function SettingsButton({
 }
 
 function ThemeButton() {
-  const [dark, setDark] = useGlobalState("dark", true, true);
+  const [theme, setTheme] = useGlobalState<Theme>("theme", "system", true);
   return (
-    <IconButton
-      variant="ghost"
-      style={{ margin: 0 }}
-      size="1"
-      onClick={() => setDark(!dark)}
+    <Tooltip
+      side="bottom"
+      content={`Theme: ${
+        theme === "system"
+          ? "System default"
+          : theme === "dark"
+            ? "Dark"
+            : "Light"
+      }`}
     >
-      {!dark ? <PiSunBold /> : <PiMoonBold />}
-    </IconButton>
+      <IconButton
+        variant="ghost"
+        style={{ margin: 0 }}
+        size="1"
+        onClick={() =>
+          setTheme(
+            theme === "system"
+              ? "light"
+              : theme === "light"
+                ? "dark"
+                : "system",
+          )
+        }
+      >
+        {theme === "system" ? (
+          <PiCircleHalfBold />
+        ) : theme === "dark" ? (
+          <PiMoonBold />
+        ) : (
+          <PiSunBold />
+        )}
+      </IconButton>
+    </Tooltip>
   );
 }
