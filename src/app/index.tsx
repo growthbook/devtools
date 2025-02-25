@@ -32,6 +32,7 @@ import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import ConditionalWrapper from "@/app/components/ConditionalWrapper";
 import { useResponsiveContext } from "./hooks/useResponsive";
+import {Archetype} from "@/app/gbTypes";
 
 export const MW = 1200; // max-width
 export const RESPONSIVE_W = 570; // small width mode
@@ -314,6 +315,9 @@ function NavLabel({
   forcedAttributes?: boolean;
   sdkStatus?: string;
 }) {
+  const [selectedArchetype, setSelectedArchetype] =
+    useTabState<Archetype | null>("selectedArchetype", null);
+
   if (type === "features") {
     const count = Object.keys(forcedFeatures || {}).length;
     return (
@@ -368,12 +372,12 @@ function NavLabel({
       >
         <span
           className={
-            !isDropdown ? (forcedAttributes ? "pr-3" : "px-1.5") : "pr-1"
+            !isDropdown ? (forcedAttributes && !selectedArchetype ? "pr-3" : "px-1.5") : "pr-1"
           }
         >
           Attributes
         </span>
-        {forcedAttributes ? (
+        {forcedAttributes && !selectedArchetype ? (
           <div className={!isDropdown ? "absolute right-0" : undefined}>
             <Tooltip content="Has attribute overrides">
               <div className="p-1">

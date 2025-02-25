@@ -40,7 +40,7 @@ export default function ValueField({
   stringAsCode?: boolean;
   formatDefaultTypeAsConditionValue?: boolean;
 }) {
-  const [dark, setDark] = useGlobalState("dark", true, true);
+  const [dark, setDark] = useGlobalState("dark", false, true);
 
   const formattedValue =
     value !== undefined

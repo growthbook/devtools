@@ -169,7 +169,7 @@ export default function FeatureDetail({
           {!hideInactiveRules || defaultValueStatus === "matches" ? (
             <div
               className={`rule ${defaultValueStatus}`}
-              style={{ padding: "12px 8px 12px 12px" }}
+              style={{ padding: "12px 8px 12px 14px" }}
             >
               <div className="text-sm font-semibold mb-2">
                 Default value
@@ -193,6 +193,7 @@ export default function FeatureDetail({
                   <Rule
                     key={i}
                     rule={rule}
+                    rules={selectedFeature.feature.rules || []}
                     i={i}
                     fid={selectedFid}
                     valueType={selectedFeature.valueType}

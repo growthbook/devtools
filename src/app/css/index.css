@@ -22,7 +22,7 @@
   --color-panel-hover: #1c2339;
   --color-light: var(--gray-a2);
   --color-field: #1b1f2e7f;
-  --color-console-back: #141723;
+  --color-console-back: #1b1f2e;
   --tw-shadow-override: 0 2px 2px -1px rgb(0 0 0 / 0.25);
 }
 
@@ -128,7 +128,16 @@
 }
 
 .rule {
-  @apply pt-4 pb-2 pl-2.5 pr-4 my-5 text-2xs bg-light rounded-md border border-l-[3px] border-gray-a3;
+  @apply pt-4 pb-2 pl-3.5 pr-4 my-5 text-2xs bg-light rounded-md border border-l-0 border-gray-a3 relative overflow-hidden;
+  &::before {
+    @apply bg-gray-a3;
+    content: "";
+    position: absolute;
+    width: 3px;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
 }
 .rule .inner {
   @apply flex items-start pb-2;
@@ -144,19 +153,25 @@
 }
 /*rule statuses*/
 .rule.skipped, .rule.unreachable {
-  @apply border-l-gray-300 dark:border-l-orange-200/40;
+  &::before {
+    @apply bg-gray-7;
+  }
   .status {
-    @apply text-gray-700 bg-gray-200 dark:text-black dark:bg-orange-100/50;
+    @apply text-gray-700 bg-gray-200 dark:text-white dark:bg-gray-7;
   }
 }
 .rule.matches, .rule.gates {
-  @apply border-l-green-600;
+  &::before {
+    @apply bg-green-500 dark:bg-green-700;
+  }
   .status {
     @apply text-green-900 bg-green-200 dark:text-white dark:bg-green-600/75;
   }
 }
 .rule.overridden {
-  @apply border-l-amber-300 dark:border-l-amber-300/80;
+  &::before {
+    @apply bg-amber-300 dark:bg-amber-300/80;
+  }
   .status {
     @apply text-amber-700 bg-amber-200 dark:text-amber-950 dark:bg-amber-400;
   }

@@ -12,6 +12,8 @@ import { PiFlagFill, PiFlaskFill } from "react-icons/pi";
 import { EvaluatedFeature } from "@/app/hooks/useGBSandboxEval";
 import { DebugLog } from "devtools";
 import DebugLogger from "@/app/components/DebugLogger";
+import useGlobalState from "@/app/hooks/useGlobalState";
+import {isDark} from "@/app";
 
 type RuleType = "force" | "rollout" | "experiment" | "prerequisite";
 
@@ -26,6 +28,7 @@ export const GLOBAL_OVERRIDE = "Global override"; // FF override
 
 export default function Rule({
   rule,
+  rules,
   i,
   fid,
   valueType = "string",
@@ -33,6 +36,7 @@ export default function Rule({
   hideInactive = false,
 }: {
   rule: FeatureRule;
+  rules: FeatureRule[];
   i: number;
   fid: string;
   valueType?: ValueType;
@@ -54,6 +58,9 @@ export default function Rule({
     const d: DebugLog[] = [];
     let r = 0; // current parent rule number
     debug.forEach((item, itemNo) => {
+      const nextItem = debug?.[itemNo+1];
+      // Skip tracking callbacks
+      // if (item?.[0].startsWith("Tracking callback")) return;
       // If the log id matches our feature's id, assume we can rely on the log's
       // rule number (i).
       if (item?.[1]?.id === fid && item?.[1]?.rule?.i !== undefined) {
@@ -65,7 +72,10 @@ export default function Rule({
         !item?.[1]?.rule &&
         item?.[1]?.id &&
         item[1].id !== fid &&
-        itemNo > 0
+        itemNo > 0 &&
+        // these get lumped in the wrong rule otherwise
+        !nextItem?.[0]?.startsWith("Skip rule because prerequisite") &&
+        !nextItem?.[0]?.startsWith("Feature blocked")
       ) {
         r++;
       }
@@ -261,6 +271,8 @@ export function ExperimentRule({
   namespace?: [string, number, number] | undefined;
   valueType?: ValueType;
 }) {
+  const [dark] = useGlobalState("dark", false, true);
+
   let appliedCoverage = coverage;
   let nsRange: number | undefined;
   if (namespace) {
@@ -350,6 +362,7 @@ export function ExperimentRule({
                 borderLeft: "0.5px solid #fff6",
                 borderRight: "0.5px solid #fff6",
                 boxSizing: "border-box",
+                filter: dark ? "saturate(0.7)" : undefined,
               }}
             >
               {w * (appliedCoverage ?? 1) >= 0.15 && (
