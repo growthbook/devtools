@@ -363,20 +363,20 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   // @ts-expect-error
   const gbContext = gb.context;
 
-  const devModeEnabled = gbContext.enableDevMode;
+  const devModeEnabled = gbContext?.enableDevMode;
 
   const [apiHost, clientKey] = gb.getApiInfo();
 
   const payload = gb.getDecryptedPayload?.() || {
-    features: gb.getFeatures(),
-    experiments: gb.getExperiments(),
+    features: gb.getFeatures?.(),
+    experiments: gb.getExperiments?.(),
   };
   const hasPayload =
     !!gb.getDecryptedPayload?.() ||
     (Object.keys(gb.getFeatures()).length > 0 &&
       gb.getExperiments().length > 0);
   // check if payload was decrypted
-  const hasDecryptionKey = !!gbContext.decryptionKey;
+  const hasDecryptionKey = !!gbContext?.decryptionKey;
   let payloadDecrypted = true;
   try {
     JSON.stringify(payload);
@@ -384,7 +384,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     payloadDecrypted = false;
   }
 
-  const _trackingCallback = gbContext.trackingCallback;
+  const _trackingCallback = gbContext?.trackingCallback;
   const hasTrackingCallback =
     typeof _trackingCallback === "function" &&
     !_trackingCallback.isNoopCallback;
@@ -392,16 +392,16 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     ? _trackingCallback.originalParams
     : undefined;
 
-  const usingLogEvent = typeof gbContext.eventLogger === "function";
+  const usingLogEvent = typeof gbContext?.eventLogger === "function";
 
-  const usingOnFeatureUsage = typeof gbContext.onFeatureUsage === "function";
+  const usingOnFeatureUsage = typeof gbContext?.onFeatureUsage === "function";
 
-  const isRemoteEval = gb.isRemoteEval();
+  const isRemoteEval = !!gb.isRemoteEval?.();
 
-  const usingStickyBucketing = gbContext.stickyBucketService !== undefined;
-  const stickyBucketAssignmentDocs = gbContext.stickyBucketAssignmentDocs;
+  const usingStickyBucketing = gbContext?.stickyBucketService !== undefined;
+  const stickyBucketAssignmentDocs = gbContext?.stickyBucketAssignmentDocs;
 
-  const apiRequestHeaders = gbContext.apiRequestHeaders;
+  const apiRequestHeaders = gbContext?.apiRequestHeaders;
   let res;
   try {
     res =
@@ -417,8 +417,8 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   }
 
   const streaming = !!gbContext.backgroundSync;
-  const streamingHost = gbContext.streamingHost || apiHost;
-  const streamingHostRequestHeaders = gbContext.streamingHostRequestHeaders;
+  const streamingHost = gbContext?.streamingHost || apiHost;
+  const streamingHostRequestHeaders = gbContext?.streamingHostRequestHeaders;
   let streamingRes = undefined;
   if (streaming) {
     const options = {
