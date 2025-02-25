@@ -8,24 +8,43 @@
 @tailwind utilities;
 
 :root {
-  --font-weight-light: 200;
-  --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-bold: 600;
-
-  --color-background: var(--accent-2);
-  --color-panel-solid: #ffffff;
-  --color-panel-translucent: rgba(255, 255, 255, 0.7);
-  --color-surface: rgba(255, 255, 255, 0.85);
-  --color-overlay: var(--black-a6);
-  --color-landmark: var(--indigo-12);
-  --color-text-high: var(--indigo-12);
-  --color-text-mid: rgba(31, 45, 92, 0.85);
-  --color-text-low: rgba(31, 45, 92, 0.65);
-  --color-text-disabled: rgba(31, 45, 92, 0.45);
-
-  /*--color-violet-surface: */
+  --color-surface-override: white;
+  --color-panel-violet: var(--violet-2);
+  --color-panel-hover: var(--violet-1);
+  --color-light: var(--gray-1);
+  --color-field: var(--gray-a2);
+  --color-console-back: #fbfafa;
+  --tw-shadow-override: 0 2px 2px -1px rgb(0 0 0 / 0.05);
 }
+.dark {
+  --color-surface-override: #10172e;
+  --color-panel-violet: #1a2036;
+  --color-panel-hover: #1c2339;
+  --color-light: var(--gray-a2);
+  --color-field: #1b1f2e7f;
+  --color-console-back: #1b1f2e;
+  --tw-shadow-override: 0 2px 2px -1px rgb(0 0 0 / 0.25);
+}
+
+.bg-surface {
+  background-color: var(--color-surface-override);
+}
+.bg-panel {
+  background-color: var(--color-panel-violet);
+}
+.bg-panel-hover {
+  background-color: var(--color-panel-hover);
+}
+.bg-light {
+  background-color: var(--color-light);
+}
+.bg-field {
+  background-color: var(--color-field);
+}
+.bg-console {
+  background-color: var(--color-console-back);
+}
+
 
 .radix-themes {
   --cursor-button: pointer;
@@ -33,11 +52,10 @@
 
 .label {
   font-size: var(--font-size-3);
-  @apply text-gray-800;
 }
 .label.lg {
   font-size: var(--font-size-4);
-  @apply font-semibold text-gray-800;
+  @apply font-semibold;
 }
 .text-2xs {
   font-size: 9px;
@@ -55,11 +73,11 @@
 }
 
 .box {
-  @apply px-3 py-2 border border-slate-a3 rounded-md bg-white;
+  @apply px-3 py-2 border border-gray-a3 rounded-md bg-light;
 }
 
 .featureCard {
-  @apply py-1 border-t border-slate-a3 relative items-center cursor-pointer overflow-hidden select-none;
+  @apply py-1 border-t border-gray-a3 relative items-center cursor-pointer overflow-hidden select-none;
   height: 48px;
 }
 .featureCard:first-of-type {
@@ -69,10 +87,11 @@
   @apply border-b;
 }
 .featureCard:not(.selected):hover {
-  @apply bg-violet-1;
+  @apply bg-panel-hover;
 }
 .featureCard.selected {
-  @apply border-t-violet-2 bg-violet-2;
+  @apply bg-panel;
+  border-top-color: var(--color-panel-violet);
 }
 .featureCard .title{
   @apply text-sm font-semibold;
@@ -87,10 +106,10 @@
   min-height: 40px;
 }
 .itemCard:not(.selected):hover {
-  @apply bg-violet-1;
+  @apply bg-panel-hover;
 }
 .itemCard.selected {
-  @apply bg-violet-2;
+  @apply bg-panel;
 }
 .itemCard .title{
   @apply text-sm font-semibold;
@@ -98,18 +117,27 @@
 }
 
 .featureDetailWrapper {
-  @apply bg-violet-2;
+  @apply bg-panel;
   transition: 150ms all;
 }
 .featureDetail .header {
-  @apply w-full sticky top-0 z-center px-6 pt-3 pb-2 bg-violet-2 shadow-sm;
+  @apply w-full sticky top-0 z-center px-6 pt-3 pb-2 bg-panel shadow-sm;
 }
 .featureDetail .content {
   @apply px-6 py-2 mb-3;
 }
 
 .rule {
-  @apply pt-4 pb-2 pl-2.5 pr-4 my-5 text-2xs bg-white rounded-md border border-l-[3px] border-slate-a3;
+  @apply pt-4 pb-2 pl-3.5 pr-4 my-5 text-2xs bg-light rounded-md border border-l-0 border-gray-a3 relative overflow-hidden;
+  &::before {
+    @apply bg-gray-a3;
+    content: "";
+    position: absolute;
+    width: 3px;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
 }
 .rule .inner {
   @apply flex items-start pb-2;
@@ -118,33 +146,39 @@
   @apply leading-[1.3rem];
 }
 .conditionValue {
-  @apply px-1 border border-slate-a3 rounded-sm bg-gray-50 break-all;
+  @apply px-1 border border-gray-a3 rounded-sm bg-light break-all;
 }
 .conditionOperator {
-  @apply text-gray-600 mx-1;
+  @apply text-gray-11 mx-1;
 }
 /*rule statuses*/
 .rule.skipped, .rule.unreachable {
-  @apply border-l-slate-300;
+  &::before {
+    @apply bg-gray-7;
+  }
   .status {
-    @apply text-slate-700 bg-slate-200;
+    @apply text-gray-700 bg-gray-200 dark:text-white dark:bg-gray-7;
   }
 }
 .rule.matches, .rule.gates {
-  @apply border-l-green-600;
+  &::before {
+    @apply bg-green-500 dark:bg-green-700;
+  }
   .status {
-    @apply text-green-900 bg-green-200;
+    @apply text-green-900 bg-green-200 dark:text-white dark:bg-green-600/75;
   }
 }
 .rule.overridden {
-  @apply border-l-amber-300;
+  &::before {
+    @apply bg-amber-300 dark:bg-amber-300/80;
+  }
   .status {
-    @apply text-amber-700 bg-amber-200;
+    @apply text-amber-700 bg-amber-200 dark:text-amber-950 dark:bg-amber-400;
   }
 }
 
 .attributesForm {
-  @apply mb-2 py-2 bg-violet-2;
+  @apply mb-2 py-2 bg-panel;
 }
 
 .accordion .trigger {
@@ -173,12 +207,10 @@
     height: 0;
   }
 }
-.accordion .accordionInner[data-state="open"],
-.accordionCard .accordionInner[data-state="open"] {
+.accordion .accordionInner[data-state="open"] {
   animation: slideDown 150ms cubic-bezier(0.87, 0, 0.13, 1) forwards;
 }
-.accordion .accordionInner[data-state="closed"],
-.accordionCard .accordionInner[data-state="closed"] {
+.accordion .accordionInner[data-state="closed"] {
   animation: slideUp 150ms cubic-bezier(0.87, 0, 0.13, 1) forwards;
 }
 .caret {
@@ -192,15 +224,8 @@
   transform: rotate(90deg);
 }
 
-.accordionCard.selected {
-  @apply border-violet-400;
-}
-.accordionCard.active {
-  @apply border-orange-500 bg-orange-200 bg-opacity-50;
-}
-
 .searchBar {
-  @apply border-b border-b-slate-a4 flex items-center justify-between flex-shrink;
+  @apply border-b border-b-gray-a4 flex items-center justify-between flex-shrink;
 }
 .searchBar input {
   @apply border-0 px-1 py-0.5 w-full;
@@ -210,15 +235,8 @@
 }
 
 .shadow-sm {
-  --tw-shadow: 0 2px 2px -1px rgb(0 0 0 / 0.05);
-  --tw-shadow-colored: 0 2px 2px -1px var(--tw-shadow-color);
-}
-
-.shadow-sm-up {
-  --tw-shadow: 0 -1px 2px 0 rgb(0 0 0 / 0.05);
-  --tw-shadow-colored: 0 -1px 2px 0 var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
-    var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+  var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow-override);
 }
 
 .rt-SwitchRoot::before {
@@ -259,5 +277,5 @@
   }
 }
 .textInput {
-  @apply border border-slate-a4 rounded-md;
+  @apply border border-gray-a4 rounded-md;
 }

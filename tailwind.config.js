@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  darkMode: "class",
   theme: {
     fontSize: {
       xs: "12px",
@@ -57,7 +58,7 @@ module.exports = {
       colors: {
         violet: generateRadixScale("violet"),
         indigo: generateRadixScale("indigo"),
-        slate: generateRadixScale("slate"),
+        gray: generateRadixScale("gray"),
       },
       zIndex: {
         max: "2147483647",

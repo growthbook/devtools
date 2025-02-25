@@ -165,16 +165,16 @@ export default function ExperimentDetail({
             <div className="mt-2 mb-3">
               <div className="label font-semibold">Enrollment Status</div>
               {selectedExperiment?.evaluatedExperiment?.result?.inExperiment ? (
-                <div className="text-green-700 font-semibold text-sm">
+                <div className="text-green-700 dark:text-green-500 font-semibold text-sm">
                   In experiment
                 </div>
               ) : (
-                <div className="text-red-900 font-semibold text-sm">
+                <div className="text-red-900 dark:text-red-400 font-semibold text-sm">
                   Inactive
                 </div>
               )}
               {lastDebugLog !== "In experiment" && (
-                <div className="border border-slate-a3 rounded-sm bg-neutral-50 py-1 px-2 mt-1">
+                <div className="border border-gray-a3 rounded-sm bg-console pt-1 px-2 mt-1">
                   <DebugLogAccordion
                     log={[lastDebugLog, {}]}
                     showContext={false}
@@ -328,11 +328,11 @@ export default function ExperimentDetail({
                     )}
                     <div>
                       {isURLTargeted(url, [pattern]) ? (
-                        <div className="text-green-900 bg-green-200 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                        <div className="text-green-900 bg-green-200 dark:text-white dark:bg-green-600/75 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
                           Current URL targeted
                         </div>
                       ) : (
-                        <div className="text-red-500 bg-red-100 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                        <div className="text-red-500 bg-red-100 dark:text-white dark:bg-red-700/50 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
                           Current URL excluded
                         </div>
                       )}

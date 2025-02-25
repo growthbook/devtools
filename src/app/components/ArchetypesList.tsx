@@ -79,7 +79,7 @@ export default function ArchetypesList() {
         </div>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content variant="soft">
-        <DropdownMenu.Label className="font-semibold uppercase text-slate-a10 py-1 h-auto text-xs">
+        <DropdownMenu.Label className="font-semibold uppercase text-gray-a10 py-1 h-auto text-xs">
           Default
         </DropdownMenu.Label>
         <DropdownMenu.Item
@@ -96,7 +96,7 @@ export default function ArchetypesList() {
           </Flex>
         </DropdownMenu.Item>
         <DropdownMenu.Separator />
-        <DropdownMenu.Label className="font-semibold uppercase text-slate-a10 py-1 h-auto text-xs">
+        <DropdownMenu.Label className="font-semibold uppercase text-gray-a10 py-1 h-auto text-xs">
           Archetypes
         </DropdownMenu.Label>
         {archetypes.map((arch) => (

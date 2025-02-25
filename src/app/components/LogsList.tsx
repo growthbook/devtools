@@ -75,7 +75,7 @@ export default function LogsList({
   return (
     <div className="flex flex-col w-full h-full">
       <div
-        className="w-full flex items-center justify-between gap-4 px-3 border-b border-b-slate-4 bg-white text-xs font-semibold shadow-sm"
+        className="w-full flex items-center justify-between gap-4 px-3 border-b border-b-gray-a4 bg-surface text-xs font-semibold shadow-sm"
         style={{
           height: HEADER_H,
           zIndex: 2000,
@@ -109,7 +109,7 @@ export default function LogsList({
       </div>
       <Flex
         className={clsx(
-          "w-full items-center bg-slate-a2 shadow-sm uppercase text-slate-11 font-semibold",
+          "w-full items-center bg-gray-a2 shadow-sm uppercase text-gray-11 font-semibold",
           xsTextSizeClass,
         )}
         style={{ height: 35 }}
@@ -154,7 +154,7 @@ export default function LogsList({
                 <Accordion.Trigger className="trigger w-full mb-0.5">
                   <Flex
                     className={clsx("w-full py-1", {
-                      "border-t border-t-slate-200": i > 0,
+                      "border-t border-t-gray-4": i > 0,
                       smTextSizeClass,
                     })}
                   >
@@ -196,7 +196,7 @@ export default function LogsList({
                       <div className="w-[40%] px-2 text-left">
                         <Text
                           className={clsx(
-                            "text-nowrap text-slate-9 inline-block w-full overflow-auto",
+                            "text-nowrap text-gray-10 inline-block w-full overflow-auto",
                             xsTextSizeClass,
                           )}
                           style={{ scrollbarWidth: "none" }}

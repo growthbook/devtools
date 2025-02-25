@@ -9,6 +9,7 @@ import {
 } from "@radix-ui/themes";
 import React, { useEffect, useRef, useState } from "react";
 import logo from "./logo.svg";
+import logoWhite from "./logo-white.svg";
 import useTabState from "@/app/hooks/useTabState";
 import SdkTab, { getSdkStatus } from "./components/SdkTab";
 import AttributesTab from "./components/AttributesTab";
@@ -23,22 +24,45 @@ import {
   PiGearSixFill,
   PiWarningFill,
   PiWarningOctagonFill,
+  PiSunBold,
+  PiMoonBold,
+  PiCircleHalfBold,
 } from "react-icons/pi";
 import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import ConditionalWrapper from "@/app/components/ConditionalWrapper";
 import { useResponsiveContext } from "./hooks/useResponsive";
+import {Archetype} from "@/app/gbTypes";
 
 export const MW = 1200; // max-width
 export const RESPONSIVE_W = 570; // small width mode
 export const TINY_W = 420;
 export const NAV_H = 75;
 
+export type Theme = "system" | "light" | "dark";
+export function isDark(theme: Theme): boolean {
+  return theme === "system"
+    ? (window?.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false)
+    : theme === "dark";
+}
+
 export const App = () => {
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { isResponsive, isTiny } = useResponsiveContext();
+  const [theme, setTheme, themeReady] = useGlobalState<Theme>(
+    "theme",
+    "system",
+    true,
+  );
+  const [dark, setDark] = useGlobalState("dark", isDark(theme));
+  useEffect(() => {
+    if (themeReady && dark !== isDark(theme)) {
+      setDark(isDark(theme));
+    }
+  }, [theme, themeReady, dark]);
+
   const [apiKey, setApiKey, apiKeyReady] = useGlobalState(API_KEY, "", true);
 
   const [sdkFound, setSdkFound] = useTabState<boolean | undefined>(
@@ -77,10 +101,12 @@ export const App = () => {
       grayColor="slate"
       hasBackground={false}
       style={{ minHeight: "unset" }}
+      appearance={dark ? "dark" : "light"}
+      className={dark ? "dark" : "light"}
     >
       <div id="main" className="text-indigo-12 overflow-hidden">
         <div
-          className={`shadow-sm px-3 pt-1 w-full relative bg-white z-front`}
+          className="shadow-sm px-3 pt-1 w-full relative bg-surface z-front"
           style={{ height: NAV_H }}
         >
           <div
@@ -88,7 +114,7 @@ export const App = () => {
             style={{ maxWidth: MW - 32, height: 30 }}
           >
             <img
-              src={logo}
+              src={!dark ? logo : logoWhite}
               alt="GrowthBook"
               className="inline-block mb-1 flex-shrink-0 mt-0.5 -mr-2"
               style={{ width: 120 }}
@@ -131,7 +157,8 @@ export const App = () => {
                     <NavLabel type="sdkDebug" sdkStatus={sdkStatus} />
                   </Tabs.Trigger>
                   <div className="flex-1" />
-                  <div className="flex items-center gap-3 flex-grow-0 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-grow-0 flex-shrink-0">
+                    <ThemeButton />
                     <SettingsButton
                       apiKeyReady={apiKeyReady}
                       apiKey={apiKey}
@@ -146,7 +173,7 @@ export const App = () => {
             <div className="flex items-center justify-between">
               <Select.Root value={currentTab} onValueChange={setCurrentTab}>
                 <Select.Trigger
-                  className="!shadow-none !outline-none hover:bg-slate-a3 rounded-none"
+                  className="!shadow-none !outline-none hover:bg-gray-a3 rounded-none"
                   style={{ borderBottom: "2px solid var(--violet-a11)" }}
                 >
                   <div style={{ width: 100 }}>
@@ -218,7 +245,8 @@ export const App = () => {
                   </Select.Item>
                 </Select.Content>
               </Select.Root>
-              <div className="flex items-center gap-3 flex-grow-0 flex-shrink-0">
+              <div className="flex items-center gap-2 flex-grow-0 flex-shrink-0">
+                <ThemeButton />
                 <SettingsButton
                   apiKeyReady={apiKeyReady}
                   apiKey={apiKey}
@@ -231,7 +259,7 @@ export const App = () => {
 
         <div
           id="pageBody"
-          className="overflow-y-auto"
+          className="overflow-y-auto bg-surface"
           style={{ height: `calc(100vh - ${NAV_H}px)` }}
         >
           {currentTab === "features" ? (
@@ -287,6 +315,9 @@ function NavLabel({
   forcedAttributes?: boolean;
   sdkStatus?: string;
 }) {
+  const [selectedArchetype, setSelectedArchetype] =
+    useTabState<Archetype | null>("selectedArchetype", null);
+
   if (type === "features") {
     const count = Object.keys(forcedFeatures || {}).length;
     return (
@@ -341,12 +372,12 @@ function NavLabel({
       >
         <span
           className={
-            !isDropdown ? (forcedAttributes ? "pr-3" : "px-1.5") : "pr-1"
+            !isDropdown ? (forcedAttributes && !selectedArchetype ? "pr-3" : "px-1.5") : "pr-1"
           }
         >
           Attributes
         </span>
-        {forcedAttributes ? (
+        {forcedAttributes && !selectedArchetype ? (
           <div className={!isDropdown ? "absolute right-0" : undefined}>
             <Tooltip content="Has attribute overrides">
               <div className="p-1">
@@ -414,7 +445,7 @@ function SettingsButton({
       >
         <PiCircleFill
           size={9}
-          className="absolute text-red-600 bg-white rounded-full border border-white"
+          className="absolute text-red-600 bg-surface rounded-full border border-white"
           style={{ right: 1, top: 1 }}
         />
         <PiGearSixFill size={17} />
@@ -428,5 +459,44 @@ function SettingsButton({
     >
       <PiGearSixFill size={17} />
     </IconButton>
+  );
+}
+
+function ThemeButton() {
+  const [theme, setTheme] = useGlobalState<Theme>("theme", "system", true);
+  return (
+    <Tooltip
+      side="bottom"
+      content={`Theme: ${
+        theme === "system"
+          ? "System default"
+          : theme === "dark"
+            ? "Dark"
+            : "Light"
+      }`}
+    >
+      <IconButton
+        variant="ghost"
+        style={{ margin: 0 }}
+        size="1"
+        onClick={() =>
+          setTheme(
+            theme === "system"
+              ? "light"
+              : theme === "light"
+                ? "dark"
+                : "system",
+          )
+        }
+      >
+        {theme === "system" ? (
+          <PiCircleHalfBold />
+        ) : theme === "dark" ? (
+          <PiMoonBold />
+        ) : (
+          <PiSunBold />
+        )}
+      </IconButton>
+    </Tooltip>
   );
 }

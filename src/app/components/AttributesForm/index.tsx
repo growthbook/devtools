@@ -169,7 +169,7 @@ export default function AttributesForm({
                     </div>
                   );
                 })}
-                <div className="border-t border-gray-200 my-4 h-0" />
+                <div className="border-t border-gray-a6 my-4 h-0" />
                 {customAttributes.length > 0
                   ? customAttributes?.map((attributeKey, i) => {
                       const attributeType = getAttributeType(
@@ -218,27 +218,36 @@ export default function AttributesForm({
                     })
                   : null}
                 {customAttributes.length > 0 && (
-                  <div className="border-t border-gray-200 my-4 h-0" />
+                  <div className="border-t border-gray-a6 my-4 h-0" />
                 )}
               </Flex>
             )
           ) : (
             <>
-              <TextareaAutosize
-                className={clsx("Textarea mono mt-1", {
-                  "border-red-700": textareaError,
-                })}
-                name={"__JSON_attributes__"}
-                value={textareaAttributes}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setTextareaAttributes?.(v);
-                  setTextareaError?.(false);
-                  setDirty?.(true);
-                }}
-                style={{ fontSize: "10px", lineHeight: "15px" }}
-                minRows={15}
-              />
+              <div
+                className="rt-TextAreaRoot rt-r-size-2 rt-variant-surface mb-2"
+                style={{ minHeight: "unset !important" }}
+              >
+                <TextareaAutosize
+                  className={clsx("rt-reset rt-TextAreaInput mono", {
+                    "border-red-700": textareaError,
+                  })}
+                  name={"__JSON_attributes__"}
+                  value={textareaAttributes}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setTextareaAttributes?.(v);
+                    setTextareaError?.(false);
+                    setDirty?.(true);
+                  }}
+                  style={{
+                    fontSize: "12px",
+                    lineHeight: "16px",
+                    padding: "6px 6px",
+                  }}
+                  minRows={15}
+                />
+              </div>
               <div className="flex items-center justify-end mt-2 gap-3">
                 {dirty && (
                   <Link

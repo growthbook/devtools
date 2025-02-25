@@ -8,11 +8,12 @@ import { upperFirst } from "lodash";
 import ValueField, { ValueType } from "@/app/components/ValueField";
 import { Checkbox, Link, Progress } from "@radix-ui/themes";
 import useTabState from "@/app/hooks/useTabState";
-import { PiCaretRightFill, PiFlagFill, PiFlaskFill } from "react-icons/pi";
+import { PiFlagFill, PiFlaskFill } from "react-icons/pi";
 import { EvaluatedFeature } from "@/app/hooks/useGBSandboxEval";
 import { DebugLog } from "devtools";
-import * as Accordion from "@radix-ui/react-accordion";
 import DebugLogger from "@/app/components/DebugLogger";
+import useGlobalState from "@/app/hooks/useGlobalState";
+import {isDark} from "@/app";
 
 type RuleType = "force" | "rollout" | "experiment" | "prerequisite";
 
@@ -27,6 +28,7 @@ export const GLOBAL_OVERRIDE = "Global override"; // FF override
 
 export default function Rule({
   rule,
+  rules,
   i,
   fid,
   valueType = "string",
@@ -34,6 +36,7 @@ export default function Rule({
   hideInactive = false,
 }: {
   rule: FeatureRule;
+  rules: FeatureRule[];
   i: number;
   fid: string;
   valueType?: ValueType;
@@ -55,6 +58,9 @@ export default function Rule({
     const d: DebugLog[] = [];
     let r = 0; // current parent rule number
     debug.forEach((item, itemNo) => {
+      const nextItem = debug?.[itemNo+1];
+      // Skip tracking callbacks
+      // if (item?.[0].startsWith("Tracking callback")) return;
       // If the log id matches our feature's id, assume we can rely on the log's
       // rule number (i).
       if (item?.[1]?.id === fid && item?.[1]?.rule?.i !== undefined) {
@@ -66,7 +72,10 @@ export default function Rule({
         !item?.[1]?.rule &&
         item?.[1]?.id &&
         item[1].id !== fid &&
-        itemNo > 0
+        itemNo > 0 &&
+        // these get lumped in the wrong rule otherwise
+        !nextItem?.[0]?.startsWith("Skip rule because prerequisite") &&
+        !nextItem?.[0]?.startsWith("Feature blocked")
       ) {
         r++;
       }
@@ -114,10 +123,9 @@ export default function Rule({
     hashAttribute,
     coverage,
     namespace,
-    ...other
   } = rule;
   const key = rule.key ?? fid;
-  let ruleType: RuleType = rule.variations
+  let ruleType: RuleType = variations
     ? "experiment"
     : "coverage" in rule
       ? "rollout"
@@ -129,7 +137,7 @@ export default function Rule({
   return (
     <div className={`rule ${status}`}>
       <div className="inner">
-        <div className="bg-slate-4 text-xs -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">
+        <div className="bg-gray-6 text-xs -mt-0.5 px-1 py-0.5 rounded-full mr-2 flex-shrink-0">
           {i + 1}
         </div>
         <div className="w-full">
@@ -171,11 +179,11 @@ export default function Rule({
           </div>
           {!jsonMode && (
             <>
-              {rule.condition || rule.parentConditions ? (
+              {condition || parentConditions ? (
                 <div className="my-2 text-xs">
                   <ConditionDisplay
-                    condition={rule.condition}
-                    parentConditions={rule.parentConditions}
+                    condition={condition}
+                    parentConditions={parentConditions}
                     ruleType={ruleType}
                   />
                 </div>
@@ -201,10 +209,10 @@ export default function Rule({
                     <Progress
                       size="3"
                       radius="small"
-                      value={(rule.coverage || 0) * 100}
+                      value={(coverage || 0) * 100}
                     />
                     <span className="conditionValue flex-shrink-0 py-0.5">
-                      {(rule.coverage || 0) * 100}%
+                      {(coverage || 0) * 100}%
                     </span>
                   </div>
                 </>
@@ -213,7 +221,7 @@ export default function Rule({
                 <div className="my-2 text-xs">
                   <span className="mr-2 font-semibold">SERVE</span>
                   <ValueField
-                    value={rule.force}
+                    value={force}
                     valueType={valueType}
                     maxHeight={60}
                     customPrismStyle={{ padding: "2px" }}
@@ -241,7 +249,7 @@ export default function Rule({
           }}
         />
       )}
-      <div className="pt-1 border-t border-t-slate-200">
+      <div className="pt-1 border-t border-t-gray-a6">
         <DebugLogger startCollapsed={true} logs={debugForRule} />
       </div>
     </div>
@@ -263,6 +271,8 @@ export function ExperimentRule({
   namespace?: [string, number, number] | undefined;
   valueType?: ValueType;
 }) {
+  const [dark] = useGlobalState("dark", false, true);
+
   let appliedCoverage = coverage;
   let nsRange: number | undefined;
   if (namespace) {
@@ -297,7 +307,7 @@ export function ExperimentRule({
         </span>
       </div>
       {nsRange ? (
-        <div className="leading-3">
+        <div className="leading-3 text-gray-11">
           ({nsRange * 100}% namespace, {(coverage ?? 1) * 100}% exposure)
         </div>
       ) : null}
@@ -352,6 +362,7 @@ export function ExperimentRule({
                 borderLeft: "0.5px solid #fff6",
                 borderRight: "0.5px solid #fff6",
                 boxSizing: "border-box",
+                filter: dark ? "saturate(0.7)" : undefined,
               }}
             >
               {w * (appliedCoverage ?? 1) >= 0.15 && (

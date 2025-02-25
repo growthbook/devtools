@@ -15,6 +15,12 @@ export const customStyles = {
     "&:hover": {
       borderColor: state.isFocused ? "var(--focus-8)" : "var(--gray-a7)",
     },
+    color: "var(--gray-12)",
+    backgroundColor: "var(--color-surface-override)",
+  }),
+  menu: (provided: any) => ({
+    ...provided,
+    background: "var(--color-surface-override)",
   }),
   option: (provided: any, state: any) => ({
     ...provided,
@@ -32,6 +38,30 @@ export const customStyles = {
     display: "flex",
     alignItems: "center",
     padding: "0 12px",
+  }),
+  input: (provided: any) => ({
+    ...provided,
+    color: "var(--text-gray-12)",
+  }),
+  singleValue: (provided: any) => ({
+    ...provided,
+    color: "var(--text-gray-12)",
+  }),
+  multiValue: (provided: any) => ({
+    ...provided,
+    color: "var(--text-gray-12)",
+    backgroundColor: "var(--violet-a4)",
+  }),
+  multiValueLabel: (provided: any) => ({
+    ...provided,
+    color: "var(--gray-12)",
+  }),
+  multiValueRemove: (provided: any) => ({
+    ...provided,
+    "&:hover": {
+      backgroundColor: "var(--red-a4)",
+      color: "var(--red-10)",
+    },
   }),
 };
 
