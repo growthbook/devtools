@@ -1,7 +1,8 @@
 import type {
   Experiment,
   FeatureDefinition,
-  ExperimentOverride, StickyAssignmentsDocument,
+  ExperimentOverride,
+  StickyAssignmentsDocument,
 } from "@growthbook/growthbook";
 import {
   FetchVisualChangesetPayload,
@@ -162,6 +163,10 @@ type UpdateTabState = {
   };
 };
 
+type PullOverrides = {
+  type: "GB_REQUEST_OVERRIDES";
+};
+
 // Messages sent to content script
 export type Message =
   | RequestRefreshMessage
@@ -176,7 +181,8 @@ export type Message =
   | UpdateVisualChangesetResponseMessage
   | TransformCopyRequestMessage
   | TransformCopyResponseMessage
-  | UpdateTabState;
+  | UpdateTabState
+  | PullOverrides;
 
 export type BGLoadVisualChangsetMessage = {
   type: "BG_LOAD_VISUAL_CHANGESET";
@@ -217,7 +223,7 @@ type SDKHealthCheckResult = {
   hasTrackingCallback?: boolean;
   trackingCallbackParams?: string[];
   hasDecryptionKey?: boolean;
-  payloadDecrypted?:boolean;
+  payloadDecrypted?: boolean;
   usingLogEvent?: boolean;
   usingOnFeatureUsage?: boolean;
   isRemoteEval?: boolean;
