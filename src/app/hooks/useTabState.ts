@@ -3,6 +3,16 @@ import { useState, useEffect } from "react";
 type UseStateReturn<T> = [T, (value: T) => void, boolean];
 
 export async function getActiveTabId() {
+  try {
+    // @ts-ignore Firefox
+    if (browser?.devtools?.inspectedWindow?.tabId) {
+      // @ts-ignore Firefox
+      return browser.devtools.inspectedWindow.tabId;
+    }
+  } catch(e) {
+    // ignore
+  }
+
   let tabs = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tabs?.length) {
     const window = await chrome.windows.getLastFocused();
@@ -27,10 +37,17 @@ export default function useTabState<T>(
       const activeTabId = await getActiveTabId();
       if (!activeTabId) return;
       try {
-        await chrome.tabs.sendMessage(activeTabId, {
-          type: "getState",
-          property,
-        });
+        if (chrome?.tabs) {
+          await chrome.tabs.sendMessage(activeTabId, {
+            type: "getTabState",
+            property,
+          });
+        } else {
+          await chrome.runtime.sendMessage({
+            type: "getTabState",
+            property,
+          });
+        }
       } catch (error) {
         console.error("Error fetching state from content script", error);
       }
@@ -59,11 +76,19 @@ export default function useTabState<T>(
     const activeTabId = await getActiveTabId();
     if (!activeTabId) return;
     try {
-      await chrome.tabs.sendMessage(activeTabId, {
-        type: "setState",
-        property,
-        value,
-      });
+      if (chrome?.tabs) {
+        await chrome.tabs.sendMessage(activeTabId, {
+          type: "setTabState",
+          property,
+          value,
+        });
+      } else {
+        await chrome.runtime.sendMessage({
+          type: "setTabState",
+          property,
+          value,
+        });
+      }
     } catch (error) {
       console.error("Error setting tab state in content script", error);
     }

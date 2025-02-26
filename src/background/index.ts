@@ -63,6 +63,7 @@ async function setState(
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   (async () => {
     try {
+      // Standard global state i/o
       if (message.type === "getState") {
         const result = await getState(message.property, message.persist);
         const { state: stateValue, success } = result;
@@ -83,6 +84,16 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
       if (message.type === "setState") {
         await setState(message.property, message.value, message.persist);
         sendResponse({ success: true });
+      }
+
+      // Firefox: Proxied tab state messages (UI -> background -> content_script)
+      if (message.type === "getTabState" || message.type === "setTabState") {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          const activeTabId = tabs[0]?.id;
+          if (activeTabId) {
+            chrome.tabs.sendMessage(activeTabId, message);
+          }
+        });
       }
     } catch (error) {
       console.error("Error resolving global state", error);
@@ -128,6 +139,10 @@ chrome.runtime.onMessage.addListener(
         );
         break;
       default:
+        if (navigator.userAgent.includes("Firefox")) {
+          // Firefox: Proxied tab state messages (content_script -> background -> UI)
+          chrome.runtime.sendMessage(message);
+        }
         sendResponse();
         break;
     }

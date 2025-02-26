@@ -76,8 +76,9 @@ export default function FeaturesTab() {
   });
   const sortedFilteredFeatures = useMemo(
     () =>
-      [...filteredFeatures].sort((feature) =>
-        pageEvaluatedFeatures.has(feature.id) ? -1 : 1,
+      [...filteredFeatures].sort((a, b) =>
+        pageEvaluatedFeatures.has(a.id) === pageEvaluatedFeatures.has(b.id) ? 0 :
+          pageEvaluatedFeatures.has(a.id) ? -1 : 1
       ),
     [filteredFeatures, pageEvaluatedFeatures],
   );

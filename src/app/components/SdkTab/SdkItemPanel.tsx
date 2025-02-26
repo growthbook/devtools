@@ -158,9 +158,15 @@ function statusPanel({
     const activeTabId = await getActiveTabId();
     setActiveTabId(activeTabId);
     if (activeTabId) {
-      await chrome.tabs.sendMessage(activeTabId, {
-        type: "GB_REQUEST_REFRESH",
-      });
+      if (chrome?.tabs) {
+        await chrome.tabs.sendMessage(activeTabId, {
+          type: "GB_REQUEST_REFRESH",
+        });
+      } else {
+        await chrome.runtime.sendMessage({
+          type: "GB_REQUEST_REFRESH",
+        })
+      }
     }
   };
 
