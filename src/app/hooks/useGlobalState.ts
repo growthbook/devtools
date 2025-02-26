@@ -16,7 +16,7 @@ export default function useGlobalState<T>(
     const fetchState = async () => {
       try {
         await chrome.runtime.sendMessage({
-          type: "getState",
+          type: "getGlobalState",
           property,
           persist,
         });
@@ -53,7 +53,7 @@ export default function useGlobalState<T>(
     setState(value); // Optimistic update
     try {
       await chrome.runtime.sendMessage({
-        type: "setState",
+        type: "setGlobalState",
         property,
         value,
         persist,

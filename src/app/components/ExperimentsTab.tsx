@@ -115,8 +115,12 @@ export default function ExperimentsTab() {
   const sortedFilteredExperiments = useMemo(
     () =>
       [...filteredExperiments].sort((a, b) =>
-        pageEvaluatedExperiments.has(a.key) === pageEvaluatedExperiments.has(b.key) ? 0 :
-          pageEvaluatedExperiments.has(a.key) ? -1 : 1
+        pageEvaluatedExperiments.has(a.key) ===
+        pageEvaluatedExperiments.has(b.key)
+          ? 0
+          : pageEvaluatedExperiments.has(a.key)
+            ? -1
+            : 1,
       ),
     [filteredExperiments, pageEvaluatedExperiments],
   );

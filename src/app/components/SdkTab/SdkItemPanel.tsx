@@ -165,7 +165,7 @@ function statusPanel({
       } else {
         await chrome.runtime.sendMessage({
           type: "GB_REQUEST_REFRESH",
-        })
+        });
       }
     }
   };

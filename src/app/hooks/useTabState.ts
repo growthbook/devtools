@@ -9,7 +9,7 @@ export async function getActiveTabId() {
       // @ts-ignore Firefox
       return browser.devtools.inspectedWindow.tabId;
     }
-  } catch(e) {
+  } catch (e) {
     // ignore
   }
 

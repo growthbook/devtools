@@ -64,7 +64,7 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   (async () => {
     try {
       // Standard global state i/o
-      if (message.type === "getState") {
+      if (message.type === "getGlobalState") {
         const result = await getState(message.property, message.persist);
         const { state: stateValue, success } = result;
         if (success) {
@@ -81,7 +81,7 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
           });
         }
       }
-      if (message.type === "setState") {
+      if (message.type === "setGlobalState") {
         await setState(message.property, message.value, message.persist);
         sendResponse({ success: true });
       }
