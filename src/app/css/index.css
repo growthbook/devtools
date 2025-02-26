@@ -29,6 +29,10 @@
 .bg-surface {
   background-color: var(--color-surface-override);
 }
+.border-surface {
+  --tw-border-opacity: 1;
+  border-color: var(--color-surface-override);
+}
 .bg-panel {
   background-color: var(--color-panel-violet);
 }

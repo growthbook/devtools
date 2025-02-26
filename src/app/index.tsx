@@ -449,7 +449,7 @@ function SettingsButton({
       >
         <PiCircleFill
           size={9}
-          className="absolute text-red-600 bg-surface rounded-full border border-white"
+          className="absolute text-red-600 bg-surface rounded-full border border-surface"
           style={{ right: 1, top: 1 }}
         />
         <PiGearSixFill size={17} />

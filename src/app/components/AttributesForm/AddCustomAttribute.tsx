@@ -89,6 +89,7 @@ export default function AddCustomAttribute({
         color="violet"
         variant="ghost"
         size="2"
+        style={{ margin: 0 }}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -245,7 +246,7 @@ export default function AddCustomAttribute({
               className="flex-shrink-0"
               ml="2"
             >
-              Add field
+              Add Field
             </Button>
           </Flex>
         </Flex>
