@@ -11,7 +11,7 @@ const forceLoadVisualEditor = false;
 export const SESSION_STORAGE_TAB_STATE_KEY = "growthbook-devtools-tab-state";
 
 // Special state variables will push their updates to the embed script / SDK when changed:
-const propertiesWithCustomMessage = {
+const propertiesWithCustomMessage: Record<string, string> = {
   attributes: "GB_UPDATE_ATTRIBUTES", // setAttributes
   forcedFeatures: "GB_UPDATE_FEATURES", // setForcedFeatures
   forcedVariations: "GB_UPDATE_EXPERIMENTS", // setForcedVariations
@@ -84,6 +84,18 @@ function setState(property: string, value: any, skipPostMessage?: boolean) {
   }
 }
 
+function pushAllOverrides() {
+  Object.keys(propertiesWithCustomMessage).forEach((stateProp) => {
+    const { state: stateValue, success } = getState(stateProp);
+    if (success) {
+      window.postMessage(
+        { type: propertiesWithCustomMessage[stateProp], data: stateValue },
+        window.location.origin,
+      );
+    }
+  });
+}
+
 // Listen for messages from the App
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   try {
@@ -136,6 +148,9 @@ window.addEventListener(
       case "GB_SDK_UPDATED":
         // passthrough to background worker
         chrome.runtime.sendMessage(data);
+        break;
+      case "GB_REQUEST_OVERRIDES":
+        pushAllOverrides();
         break;
       default:
         break;
