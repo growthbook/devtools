@@ -196,7 +196,7 @@ export default function LogsList({
                       <div className="w-[40%] px-2 text-left">
                         <Text
                           className={clsx(
-                            "text-nowrap text-gray-10 inline-block w-full overflow-auto",
+                            "text-nowrap text-gray-10 inline-block w-full overflow-auto mt-1",
                             xsTextSizeClass,
                           )}
                           style={{ scrollbarWidth: "none" }}

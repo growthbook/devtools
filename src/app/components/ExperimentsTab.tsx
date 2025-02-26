@@ -114,8 +114,13 @@ export default function ExperimentsTab() {
   });
   const sortedFilteredExperiments = useMemo(
     () =>
-      [...filteredExperiments].sort((exp) =>
-        pageEvaluatedExperiments.has(exp.key) ? -1 : 1,
+      [...filteredExperiments].sort((a, b) =>
+        pageEvaluatedExperiments.has(a.key) ===
+        pageEvaluatedExperiments.has(b.key)
+          ? 0
+          : pageEvaluatedExperiments.has(a.key)
+            ? -1
+            : 1,
       ),
     [filteredExperiments, pageEvaluatedExperiments],
   );

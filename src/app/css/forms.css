@@ -18,6 +18,7 @@
 
 .gb-multi-select__control {
   min-height: 32px !important;
+  border-width: 1px !important;
 }
 .gb-multi-select__value-container {
   padding: 0 4px !important;

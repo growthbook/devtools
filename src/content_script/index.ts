@@ -99,7 +99,7 @@ function pushAllOverrides() {
 // Listen for messages from the App
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   try {
-    if (message.type === "getState") {
+    if (message.type === "getTabState") {
       const result = getState(message.property); // Get state based on property
       const { state: stateValue, success } = result;
       if (success) {
@@ -116,7 +116,7 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
         });
       }
     }
-    if (message.type === "setState") {
+    if (message.type === "setTabState") {
       setState(message.property, message.value); // Update the state property
       sendResponse({ success: true });
     }
@@ -146,7 +146,7 @@ window.addEventListener(
         break;
       case "GB_ERROR":
       case "GB_SDK_UPDATED":
-        // passthrough to background worker:nvm
+        // passthrough to background worker
         chrome.runtime.sendMessage(data);
         break;
       case "GB_REQUEST_OVERRIDES":

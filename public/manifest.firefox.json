@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+
+  "name": "GrowthBook DevTools",
+  "description": "GrowthBook DevTools helps you debug feature flags and experiments and design A/B tests visually — all from your browser.",
+  "version": "1.0.1",
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "info@growthbook.io",
+      "strict_min_version": "128.0"
+    }
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["js/content_script.js"]
+    }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "matches": ["<all_urls>"],
+
+      "resources": [
+        "js/devtools_embed_script.js",
+        "js/visual_editor.js",
+        "js/logo128.png",
+        "js/logo128-connected.png",
+        "js/logo128-problem.png"
+      ]
+    }
+  ],
+
+  "background": {
+    "scripts": ["js/background.js"]
+  },
+
+  "permissions": ["storage"],
+
+  "host_permissions": ["<all_urls>"],
+
+  "icons": {
+    "16": "logo128.png",
+    "48": "logo128.png",
+    "128": "logo128.png"
+  },
+
+  "devtools_page": "devtools.html",
+
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

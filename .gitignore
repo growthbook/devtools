@@ -10,7 +10,7 @@
 
 # production
 /build
-build.zip
+build*.zip
 
 # misc
 .idea
