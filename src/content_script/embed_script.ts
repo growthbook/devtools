@@ -66,6 +66,7 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
 function init() {
   setupListeners();
   pushAppUpdates();
+  pullOverrides();
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
       pushAppUpdates();
@@ -188,6 +189,16 @@ function updateTabState(property: string, value: unknown, append = false) {
         value,
       },
       append,
+    },
+    window.location.origin,
+  );
+}
+
+// Prompt the content script to send the existing overrides on pageload
+function pullOverrides() {
+  window.postMessage(
+    {
+      type: "GB_REQUEST_OVERRIDES",
     },
     window.location.origin,
   );
