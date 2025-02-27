@@ -443,8 +443,8 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       cachedStreamingHostRes = streamingRes;
     }
   }
-  const canConnect = !!res && (res?.status === 200 || streamingRes?.status === 200);
-  
+  const canConnect = !!(res?.status === 200 || streamingRes?.status === 200);
+
   return {
     canConnect,
     hasClientKey: !!clientKey,
