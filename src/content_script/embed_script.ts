@@ -406,6 +406,30 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   const usingStickyBucketing = gbContext?.stickyBucketService !== undefined;
   const stickyBucketAssignmentDocs = gbContext?.stickyBucketAssignmentDocs;
 
+  if (!clientKey) {
+    return {
+      canConnect: false,
+      hasClientKey: false,
+      sdkFound: true,
+      devModeEnabled,
+      version: gb?.version,
+      hasWindowConfig: !!window?.growthbook_config,
+      hasPayload,
+      payload,
+      hasDecryptionKey,
+      payloadDecrypted,
+      hasTrackingCallback,
+      trackingCallbackParams,
+      usingLogEvent,
+      usingOnFeatureUsage,
+      isRemoteEval,
+      usingStickyBucketing,
+      stickyBucketAssignmentDocs,
+      apiHost,
+      errorMessage: "No Client Key was found",
+    };
+  }
+
   const apiRequestHeaders = gbContext?.apiRequestHeaders;
   let res;
   try {
