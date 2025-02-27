@@ -64,9 +64,9 @@ Some notes
 
 ## Changelog
 
-*1.0.2* (2025-02-26)
+*1.0.2* (2025-02-27)
 - DevTools + Visual Editor for Firefox
-- Bug fixes (persist overrides across navigations, etc)
+- Bug fixes (persist overrides between page loads, better handling of missing API keys)
 
 *1.0.1* (2025-02-24)
 - Dark mode
