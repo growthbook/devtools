@@ -111,7 +111,7 @@ export default function FeaturesTab() {
     if (selectedFid) {
       const container = document.querySelector("#pageBody");
       const el = document.querySelector(
-        `#featuresTab_featureList_${selectedFid}`,
+        CSS.escape(`#featuresTab_featureList_${selectedFid}`),
       );
       const y =
         (el?.getBoundingClientRect()?.top || 0) + (container?.scrollTop || 0);
