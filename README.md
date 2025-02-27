@@ -64,6 +64,9 @@ Some notes
 
 ## Changelog
 
+*1.0.3* (2025-02-27)
+- Fix bug: CSS-escape element selectors to sanitize feature/experiment keys 
+
 *1.0.2* (2025-02-27)
 - DevTools + Visual Editor for Firefox
 - Bug fixes (persist overrides between page loads, better handling of missing API keys)
