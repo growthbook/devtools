@@ -80,16 +80,16 @@ function pushAppUpdates() {
     pushSDKUpdate(gb);
     if (gb) {
       subscribeToSdkChanges(gb);
-      updateTabState("features", gb.getFeatures?.());
-      updateTabState("experiments", gb.getExperiments?.());
+      updateTabState("features", gb.getFeatures?.() || {});
+      updateTabState("experiments", gb.getExperiments?.() || []);
 
-      if (Object.keys(gb.getAttributes()).length) {
-        updateTabState("attributes", gb.getAttributes());
+      if (Object.keys(gb.getAttributes() || {}).length) {
+        updateTabState("attributes", gb.getAttributes() || {});
       }
-      if (Object.keys(gb.getForcedFeatures?.()).length) {
-        updateTabState("forcedFeatures", gb.getForcedFeatures());
+      if (Object.keys(gb.getForcedFeatures?.() || {}).length) {
+        updateTabState("forcedFeatures", Object.fromEntries(gb.getForcedFeatures?.() || new Map()));
       }
-      if (Object.keys(gb.getForcedVariations?.()).length) {
+      if (Object.keys(gb.getForcedVariations?.() || {}).length) {
         updateTabState("forcedVariations", gb.getForcedVariations());
       }
     }
@@ -135,12 +135,6 @@ function updateAttributes(data: unknown) {
     if (typeof data === "object" && data !== null) {
       gb.setAttributeOverrides?.(data as Attributes); // {} to reset
       updateTabState("attributes", gb.getAttributes?.() || {}); // so that when we reset it will reset back to the original attributes
-    } else {
-      // todo: do something with these messages or remove them
-      const msg: ErrorMessage = {
-        type: "GB_ERROR",
-        error: "Invalid attributes data",
-      };
     }
   });
 }
@@ -151,12 +145,6 @@ function updateFeatures(data: unknown) {
       gb.setForcedFeatures?.(
         new Map(Object.entries(data as Record<string, any>)),
       );
-    } else {
-      // todo: do something with these messages or remove them
-      const msg: ErrorMessage = {
-        type: "GB_ERROR",
-        error: "Invalid features data",
-      };
     }
   });
 }
@@ -216,21 +204,21 @@ function subscribeToSdkChanges(
   gb.context.enableDevMode = true;
   const _setAttributes = gb.setAttributes;
   gb.setAttributes = async (attributes: Attributes) => {
-    await _setAttributes.call(gb, attributes);
+    await _setAttributes?.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
   };
 
   if (gb.updateAttributes) {
     const _updateAttributes = gb.updateAttributes;
     gb.updateAttributes = async (attributes: Attributes) => {
-      await _updateAttributes.call(gb, attributes);
+      await _updateAttributes?.call(gb, attributes);
       updateTabState("attributes", gb.getAttributes());
     };
   }
 
   const _setAttributeOverrides = gb.setAttributeOverrides;
   gb.setAttributeOverrides = async (attributes: Attributes) => {
-    await _setAttributeOverrides.call(gb, attributes);
+    await _setAttributeOverrides?.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
   };
 
@@ -274,7 +262,7 @@ function subscribeToSdkChanges(
         timestamp: Date.now().toString(),
         logType: "event",
       });
-      _logEvent.call(gb, eventName, properties);
+      _logEvent?.call(gb, eventName, properties);
     };
   }
 
@@ -295,7 +283,7 @@ function subscribeToSdkChanges(
         });
       }
       if ("isNoopCallback" in callback && callback.isNoopCallback) {
-        gb.setDeferredTrackingCalls([
+        gb.setDeferredTrackingCalls?.([
           ...gb.getDeferredTrackingCalls(),
           { experiment, result },
         ]);
@@ -378,8 +366,8 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   };
   const hasPayload =
     !!gb.getDecryptedPayload?.() ||
-    (Object.keys(gb.getFeatures?.()).length > 0 &&
-      gb.getExperiments?.().length > 0);
+    (Object.keys(gb.getFeatures?.() || {}).length > 0 &&
+      (gb.getExperiments?.() || []).length > 0);
   // check if payload was decrypted
   const hasDecryptionKey = !!gbContext?.decryptionKey;
   let payloadDecrypted = true;
