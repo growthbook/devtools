@@ -64,7 +64,7 @@ Some notes
 
 ## Changelog
 
-*1.0.3* (2025-02-27)
+*1.0.3* (2025-02-28)
 - Bug fixes (special chars in feature keys, legacy SDK support, type safety)
 - Warn when using outdated SDK version
 
