@@ -7,6 +7,13 @@ import { PiCaretRight } from "react-icons/pi";
 import { useResponsiveContext } from "@/app/hooks/useResponsive";
 import SdkItemPanel from "./SdkItemPanel";
 import useSdkData from "@/app/hooks/useSdkData";
+import { paddedVersionString } from "@growthbook/growthbook";
+import packageJson from "@growthbook/growthbook/package.json";
+
+const latestSdkVersion = packageJson.version;
+const latestSdkParts = latestSdkVersion.split(".");
+latestSdkParts[2] = "0";
+const latestMinorSdkVersion = latestSdkParts.join(".");
 
 export const LEFT_PERCENT = 0.5;
 
@@ -77,6 +84,14 @@ export default function SdkTab() {
     : hasPayload
       ? "orange"
       : "red";
+  const versionStatusColor = !version
+    ? "red"
+    : paddedVersionString(version) < paddedVersionString("0.23.0")
+      ? "red"
+      : paddedVersionString(version) <
+          paddedVersionString(latestMinorSdkVersion)
+        ? "orange"
+        : "green";
 
   const fullWidthListView = !selectedItem;
   const leftPercent = fullWidthListView ? 1 : LEFT_PERCENT;
@@ -122,8 +137,13 @@ export default function SdkTab() {
             >
               <ItemStatus
                 title="Version"
-                status={version}
-                color="gray"
+                status={
+                  (version ? version : "unknown") +
+                  (version && versionStatusColor !== "green"
+                    ? " (outdated)"
+                    : "")
+                }
+                color={versionStatusColor}
                 showCaret={isResponsive}
               />
             </div>
@@ -240,6 +260,8 @@ export default function SdkTab() {
           selectedItem={selectedItem}
           unsetSelectedItem={() => setSelectedItem(undefined)}
           widthPercent={rightPercent}
+          latestSdkVersion={latestSdkVersion}
+          latestMinorSdkVersion={latestMinorSdkVersion}
         />
       )}
     </div>
@@ -278,13 +300,21 @@ function ItemStatus({
 export function getSdkStatus(
   sdkData: SDKHealthCheckResult,
 ): "green" | "yellow" | "red" {
-  if (!sdkData.canConnect) {
+  if (
+    !sdkData.canConnect ||
+    (sdkData.version &&
+      paddedVersionString(sdkData.version) < paddedVersionString("0.23.0"))
+  ) {
     return "red";
   }
   if (
     !sdkData.hasPayload ||
     sdkData.trackingCallbackParams?.length !== 2 ||
-    !sdkData.payloadDecrypted
+    !sdkData.payloadDecrypted ||
+    !sdkData.version ||
+    (sdkData.version &&
+      paddedVersionString(sdkData.version) <
+        paddedVersionString(latestMinorSdkVersion))
   ) {
     return "yellow";
   }

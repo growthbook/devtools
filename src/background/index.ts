@@ -18,6 +18,13 @@ import {
   handleTransformCopy,
   handleUpdateVisualChangeset,
 } from "@/background/visualEditorHandlers";
+import packageJson from "@growthbook/growthbook/package.json";
+import { paddedVersionString } from "@growthbook/growthbook";
+
+const latestSdkVersion = packageJson.version;
+const latestSdkParts = latestSdkVersion.split(".");
+latestSdkParts[2] = "0";
+const latestMinorSdkVersion = latestSdkParts.join(".");
 
 // Global state store
 // Has an optional sync with chrome.storage via "persist" flag
@@ -182,13 +189,32 @@ const UpdateTabIconBasedOnSDK = (
           (data.trackingCallbackParams?.length !== 2
             ? "Tracking callback issues\n"
             : "") +
-          (!data.payloadDecrypted ? "Decryption issues" : ""));
+          (!data.payloadDecrypted ? "Decryption issues\n" : "")) +
+        (!data.version
+          ? "Unknown SDK version"
+          : data.version &&
+              paddedVersionString(data.version) <
+                paddedVersionString(latestMinorSdkVersion)
+            ? "Outdated SDK version"
+            : "");
     } else {
       chrome.action.setIcon({
         tabId,
-        path: chrome.runtime.getURL("/logo128.png"),
+        path: data.canConnect
+          ? chrome.runtime.getURL("/logo128-problem.png")
+          : chrome.runtime.getURL("/logo128.png"),
       });
-      title = "GrowthBook DevTools\n🔴 SDK not connected";
+      title =
+        "GrowthBook DevTools\n🔴 " +
+        (!data.canConnect ? "SDK not connected\n" : "") +
+        (data.canConnect && !data.version
+          ? "Unknown SDK version"
+          : data.canConnect &&
+              data.version &&
+              paddedVersionString(data.version) <
+                paddedVersionString(latestMinorSdkVersion)
+            ? "Outdated SDK version"
+            : "");
     }
   } else {
     chrome.action.setIcon({
@@ -252,13 +278,21 @@ export const isSameOrigin = (url: string, origin: string) => {
 export function getSdkStatus(
   sdkData: SDKHealthCheckResult,
 ): "green" | "yellow" | "red" {
-  if (!sdkData.canConnect) {
+  if (
+    !sdkData.canConnect ||
+    (sdkData.version &&
+      paddedVersionString(sdkData.version) < paddedVersionString("0.23.0"))
+  ) {
     return "red";
   }
   if (
     !sdkData.hasPayload ||
     sdkData.trackingCallbackParams?.length !== 2 ||
-    !sdkData.payloadDecrypted
+    !sdkData.payloadDecrypted ||
+    !sdkData.version ||
+    (sdkData.version &&
+      paddedVersionString(sdkData.version) <
+        paddedVersionString(latestMinorSdkVersion))
   ) {
     return "yellow";
   }

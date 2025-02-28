@@ -87,7 +87,10 @@ function pushAppUpdates() {
         updateTabState("attributes", gb.getAttributes() || {});
       }
       if (Object.keys(gb.getForcedFeatures?.() || {}).length) {
-        updateTabState("forcedFeatures", Object.fromEntries(gb.getForcedFeatures?.() || new Map()));
+        updateTabState(
+          "forcedFeatures",
+          Object.fromEntries(gb.getForcedFeatures?.() || new Map()),
+        );
       }
       if (Object.keys(gb.getForcedVariations?.() || {}).length) {
         updateTabState("forcedVariations", gb.getForcedVariations());

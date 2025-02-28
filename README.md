@@ -66,6 +66,7 @@ Some notes
 
 *1.0.3* (2025-02-27)
 - Bug fixes (special chars in feature keys, legacy SDK support, type safety)
+- Warn when using outdated SDK version
 
 *1.0.2* (2025-02-27)
 - DevTools + Visual Editor for Firefox

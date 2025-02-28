@@ -14,6 +14,7 @@ import { SdkItem } from "./index";
 import useSdkData from "@/app/hooks/useSdkData";
 import { SDKHealthCheckResult } from "devtools";
 import { getActiveTabId } from "@/app/hooks/useTabState";
+import { paddedVersionString } from "@growthbook/growthbook";
 
 const panelTitles: Record<SdkItem, string> = {
   status: "SDK Status",
@@ -27,7 +28,15 @@ const panelTitles: Record<SdkItem, string> = {
   onFeatureUsage: "On Feature Usage Callback",
 };
 
-const panels: Record<SdkItem, React.FC<SDKHealthCheckResult>> = {
+const panels: Record<
+  SdkItem,
+  React.FC<
+    SDKHealthCheckResult & {
+      latestSdkVersion: string;
+      latestMinorSdkVersion: string;
+    }
+  >
+> = {
   status: statusPanel,
   version: versionPanel,
   trackingCallback: trackingCallbackPanel,
@@ -58,10 +67,14 @@ export default function SdkItemPanel({
   selectedItem,
   unsetSelectedItem,
   widthPercent,
+  latestSdkVersion,
+  latestMinorSdkVersion,
 }: {
   selectedItem: SdkItem;
   unsetSelectedItem: () => void;
   widthPercent: number;
+  latestSdkVersion: string;
+  latestMinorSdkVersion: string;
 }) {
   const { isResponsive } = useResponsiveContext();
 
@@ -115,7 +128,11 @@ export default function SdkItemPanel({
                 maxWidth: `calc(${widthPercent * 100}vw - 32px)`,
               }}
             >
-              <ItemPanel selectedItem={selectedItem} />
+              <ItemPanel
+                selectedItem={selectedItem}
+                latestSdkVersion={latestSdkVersion}
+                latestMinorSdkVersion={latestMinorSdkVersion}
+              />
             </div>
             {doclinks[selectedItem] ? (
               <Link
@@ -136,10 +153,24 @@ export default function SdkItemPanel({
   );
 }
 
-function ItemPanel({ selectedItem }: { selectedItem: SdkItem }) {
+function ItemPanel({
+  selectedItem,
+  latestSdkVersion,
+  latestMinorSdkVersion,
+}: {
+  selectedItem: SdkItem;
+  latestSdkVersion: string;
+  latestMinorSdkVersion: string;
+}) {
   const PanelComponent = panels[selectedItem];
   const sdkData = useSdkData();
-  return <PanelComponent {...sdkData} />;
+  return (
+    <PanelComponent
+      {...sdkData}
+      latestSdkVersion={latestSdkVersion}
+      latestMinorSdkVersion={latestMinorSdkVersion}
+    />
+  );
 }
 
 function statusPanel({
@@ -179,12 +210,12 @@ function statusPanel({
       {!sdkFound ? (
         <>
           {sdkFound === undefined ? (
-            <Text as="div" size="2" weight="regular" mb="4" color="gray">
+            <Text as="div" size="2" weight="regular" mb="2" color="gray">
               Attempting to connect to SDK...
             </Text>
           ) : null}
 
-          <div className="mt-2 mb-4">
+          <div className="mb-4">
             {!activeTabId && !refreshing && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-sm mb-4">
                 DevTools was unable to attach to the current window.
@@ -202,7 +233,7 @@ function statusPanel({
             </Button>
           </div>
 
-          <Text as="div" size="2" weight="regular" mb="3">
+          <Text as="div" size="2" weight="regular" mb="3" color="red">
             No SDK was found.
           </Text>
           <Text as="div" size="2" weight="regular" mb="3">
@@ -221,20 +252,20 @@ function statusPanel({
               Read more
             </Link>
           </Text>
-          <Text as="div" size="2" weight="regular" mb="2">
+          <Text as="div" size="2" weight="regular" mb="1">
             See our SDK implementation guides:
           </Text>
-          <div className="py-0.5">
+          <div>
             <Link size="2" href="https://docs.growthbook.io/lib/script-tag">
               HTML Script Tag SDK
             </Link>
           </div>
-          <div className="py-0.5">
+          <div>
             <Link size="2" href="https://docs.growthbook.io/lib/js">
               JavaScript SDK
             </Link>
           </div>
-          <div className="py-0.5">
+          <div>
             <Link size="2" href="https://docs.growthbook.io/lib/react">
               React SDK
             </Link>
@@ -266,7 +297,15 @@ function statusPanel({
   );
 }
 
-function versionPanel({ hasWindowConfig, version }: SDKHealthCheckResult) {
+function versionPanel({
+  hasWindowConfig,
+  version,
+  latestSdkVersion,
+  latestMinorSdkVersion,
+}: SDKHealthCheckResult & {
+  latestSdkVersion: string;
+  latestMinorSdkVersion: string;
+}) {
   return (
     <Text as="div" size="2" weight="regular">
       {!version ? (
@@ -280,6 +319,25 @@ function versionPanel({ hasWindowConfig, version }: SDKHealthCheckResult) {
             Detected version <strong>{version}</strong> of the JavaScript SDK.
             {hasWindowConfig ? " Embedded via the HTML Script Tag." : null}
           </Text>
+          {paddedVersionString(version) < paddedVersionString("0.23.0") ? (
+            <div className="mt-4">
+              <Text color="red">
+                Using an unsupported legacy version of the SDK ({version}).
+              </Text>{" "}
+              <Text>
+                Versions prior to 0.23.0 are considered unstable. Consider
+                updating to the latest version.
+              </Text>
+            </div>
+          ) : paddedVersionString(version) <
+            paddedVersionString(latestMinorSdkVersion) ? (
+            <div className="mt-4">
+              <Text color="orange">
+                Using an outdated version of the SDK ({version}).
+              </Text>{" "}
+              <Text>Consider updating to the latest version.</Text>
+            </div>
+          ) : null}
         </>
       )}
     </Text>

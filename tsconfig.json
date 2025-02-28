@@ -4,6 +4,7 @@
     "module": "es6",
     "moduleResolution": "node",
     "target": "es6",
+    "resolveJsonModule": true,
     "esModuleInterop": true,
     "sourceMap": false,
     "jsx": "react",

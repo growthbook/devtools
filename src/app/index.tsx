@@ -33,6 +33,12 @@ import useGlobalState from "@/app/hooks/useGlobalState";
 import ConditionalWrapper from "@/app/components/ConditionalWrapper";
 import { useResponsiveContext } from "./hooks/useResponsive";
 import { Archetype } from "@/app/gbTypes";
+import packageJson from "@growthbook/growthbook/package.json";
+
+const latestSdkVersion = packageJson.version;
+const latestSdkParts = latestSdkVersion.split(".");
+latestSdkParts[2] = "0";
+const latestMinorSdkVersion = latestSdkParts.join(".");
 
 export const MW = 1200; // max-width
 export const RESPONSIVE_W = 570; // small width mode
