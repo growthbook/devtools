@@ -341,6 +341,8 @@ export function getFeatureDetails({
   let valueType: ValueType;
   if (meta?.valueType) {
     valueType = meta?.valueType;
+  } else if (feature?.defaultValue === null) {
+    valueType = "json";
   } else {
     valueType =
       (typeof (feature?.defaultValue ?? "string") as ValueType) || "object";
