@@ -1,6 +1,12 @@
 import { MW, NAV_H } from "@/app";
-import { Button, IconButton, Link, Switch } from "@radix-ui/themes";
-import { PiArrowSquareOut, PiCaretRightFill, PiXBold } from "react-icons/pi";
+import { Button, IconButton, Link, Switch, Tooltip } from "@radix-ui/themes";
+import {
+  PiArrowSquareOut,
+  PiCaretRightFill,
+  PiInfo,
+  PiTimerBold,
+  PiXBold,
+} from "react-icons/pi";
 import EditableValueField from "@/app/components/EditableValueField";
 import ValueField from "@/app/components/ValueField";
 import Rule, { USE_PREVIOUS_LOG_IF_MATCH } from "@/app/components/Rule";
@@ -105,17 +111,28 @@ export default function FeatureDetail({
                   <PiXBold />
                 </IconButton>
               </div>
-              <Link
-                size="2"
-                href={`${appOrigin}/features/${selectedFid}`}
-                target="_blank"
-              >
-                GrowthBook
-                <PiArrowSquareOut
-                  size={16}
-                  className="inline-block mb-1 ml-0.5"
-                />
-              </Link>
+              {!selectedFeature?.feature?.noDefinition ? (
+                <Link
+                  size="2"
+                  href={`${appOrigin}/features/${selectedFid}`}
+                  target="_blank"
+                >
+                  GrowthBook
+                  <PiArrowSquareOut
+                    size={16}
+                    className="inline-block mb-1 ml-0.5"
+                  />
+                </Link>
+              ) : (
+                <div className="text-sm text-gray-a10">
+                  <Tooltip content="This feature id is not in your SDK payload yet was still evaluated. This may indicate a stale reference in your codebase or an unpublished feature.">
+                    <span>
+                      <PiTimerBold className="inline-block mr-1 mb-0.5" />
+                      Not in SDK payload
+                    </span>
+                  </Tooltip>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -154,82 +171,97 @@ export default function FeatureDetail({
             ) : null}
           </div>
 
-          <div className="flex justify-between items-end mt-6 mb-2 py-1 text-md font-semibold border-b border-gray-a6">
-            <span>Rules and Values</span>
-            <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer">
-              <span>Hide inactive</span>
-              <Switch
-                size="1"
-                checked={hideInactiveRules}
-                onCheckedChange={(b) => setHideInactiveRules(b)}
-              />
-            </label>
-          </div>
-
-          {!hideInactiveRules || defaultValueStatus === "matches" ? (
-            <div
-              className={`rule ${defaultValueStatus}`}
-              style={{ padding: "12px 8px 12px 14px" }}
-            >
-              <div className="text-sm font-semibold mb-2">
-                Default value
-                <div className="inline-block ml-3 status capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
-                  {defaultValueStatus === "matches" ? "Active" : "Inactive"}
-                </div>
-              </div>
-              <ValueField
-                value={selectedFeature?.feature?.defaultValue}
-                valueType={selectedFeature?.valueType}
-              />
-            </div>
-          ) : null}
-
-          {selectedFid &&
-          selectedFeature &&
-          (selectedFeature?.feature?.rules ?? []).length ? (
+          {!selectedFeature?.feature?.noDefinition ? (
             <>
-              {selectedFeature?.feature?.rules?.map((rule, i) => {
-                return (
-                  <Rule
-                    key={i}
-                    rule={rule}
-                    rules={selectedFeature.feature.rules || []}
-                    i={i}
-                    fid={selectedFid}
-                    valueType={selectedFeature.valueType}
-                    evaluatedFeature={selectedFeature.evaluatedFeature}
-                    hideInactive={hideInactiveRules}
+              <div className="flex justify-between items-end mt-6 mb-2 py-1 text-md font-semibold border-b border-gray-a6">
+                <span>Rules and Values</span>
+                <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer">
+                  <span>Hide inactive</span>
+                  <Switch
+                    size="1"
+                    checked={hideInactiveRules}
+                    onCheckedChange={(b) => setHideInactiveRules(b)}
                   />
-                );
-              })}
+                </label>
+              </div>
+
+              {!hideInactiveRules || defaultValueStatus === "matches" ? (
+                <div
+                  className={`rule ${defaultValueStatus}`}
+                  style={{ padding: "12px 8px 12px 14px" }}
+                >
+                  <div className="text-sm font-semibold mb-2">
+                    Default value
+                    <div className="inline-block ml-3 status capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                      {defaultValueStatus === "matches" ? "Active" : "Inactive"}
+                    </div>
+                  </div>
+                  <ValueField
+                    value={selectedFeature?.feature?.defaultValue}
+                    valueType={selectedFeature?.valueType}
+                  />
+                </div>
+              ) : null}
+
+              {selectedFid &&
+              selectedFeature &&
+              (selectedFeature?.feature?.rules ?? []).length ? (
+                <>
+                  {selectedFeature?.feature?.rules?.map((rule, i) => {
+                    return (
+                      <Rule
+                        key={i}
+                        rule={rule}
+                        rules={selectedFeature.feature.rules || []}
+                        i={i}
+                        fid={selectedFid}
+                        valueType={selectedFeature.valueType}
+                        evaluatedFeature={selectedFeature.evaluatedFeature}
+                        hideInactive={hideInactiveRules}
+                      />
+                    );
+                  })}
+                </>
+              ) : null}
+
+              {selectedFeature ? (
+                <div className="mt-3 mb-1">
+                  {debugLog ? <DebugLogger logs={debugLog} /> : null}
+
+                  <Accordion.Root
+                    className="accordion mt-2"
+                    type="single"
+                    collapsible
+                  >
+                    <Accordion.Item value="feature-definition">
+                      <Accordion.Trigger className="trigger mb-0.5">
+                        <Link
+                          size="2"
+                          role="button"
+                          className="hover:underline"
+                        >
+                          <PiCaretRightFill
+                            className="caret mr-0.5"
+                            size={12}
+                          />
+                          Full feature definition
+                        </Link>
+                      </Accordion.Trigger>
+                      <Accordion.Content className="accordionInner overflow-hidden w-full">
+                        <ValueField
+                          value={selectedFeature.feature}
+                          valueType="json"
+                          maxHeight={null}
+                        />
+                      </Accordion.Content>
+                    </Accordion.Item>
+                  </Accordion.Root>
+                </div>
+              ) : null}
             </>
-          ) : null}
-
-          {selectedFeature ? (
-            <div className="mt-3 mb-1">
-              {debugLog ? <DebugLogger logs={debugLog} /> : null}
-
-              <Accordion.Root
-                className="accordion mt-2"
-                type="single"
-                collapsible
-              >
-                <Accordion.Item value="feature-definition">
-                  <Accordion.Trigger className="trigger mb-0.5">
-                    <Link size="2" role="button" className="hover:underline">
-                      <PiCaretRightFill className="caret mr-0.5" size={12} />
-                      Full feature definition
-                    </Link>
-                  </Accordion.Trigger>
-                  <Accordion.Content className="accordionInner overflow-hidden w-full">
-                    <ValueField
-                      value={selectedFeature.feature}
-                      valueType="json"
-                      maxHeight={null}
-                    />
-                  </Accordion.Content>
-                </Accordion.Item>
-              </Accordion.Root>
+          ) : debugLog ? (
+            <div className="mt-4 mb-1">
+              <DebugLogger logs={debugLog} startCollapsed={false} />
             </div>
           ) : null}
         </div>

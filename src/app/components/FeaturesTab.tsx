@@ -9,18 +9,27 @@ import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedFeature,
 } from "@/app/hooks/useGBSandboxEval";
-import { PiCircleFill, PiFlaskFill, PiXBold } from "react-icons/pi";
+import {
+  PiCircleFill,
+  PiFlaskFill,
+  PiPlusCircleFill,
+  PiTimerBold,
+  PiXBold,
+} from "react-icons/pi";
 import clsx from "clsx";
 import { MW, NAV_H } from "@/app";
 import { ValueType } from "./ValueField";
 import FeatureDetail from "@/app/components/FeatureDetail";
 import { useSearch } from "@/app/hooks/useSearch";
 import SearchBar from "@/app/components/SearchBar";
-import { Box, Link, Switch } from "@radix-ui/themes";
+import { Box, Button, Link, Switch, Tooltip } from "@radix-ui/themes";
 import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
 import { useResponsiveContext } from "../hooks/useResponsive";
 
-type FeatureDefinitionWithId = FeatureDefinition & { id: string };
+export type FeatureDefinitionWithId = FeatureDefinition & {
+  id: string;
+  noDefinition?: boolean;
+};
 
 export const LEFT_PERCENT = 0.4;
 export const HEADER_H = 40;
@@ -34,6 +43,16 @@ export default function FeaturesTab() {
     Record<string, FeatureDefinition>
   >("features", {});
 
+  const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
+    "forcedFeatures",
+    {},
+  );
+
+  const [logEvents] = useTabState<LogUnion[] | undefined>(
+    "logEvents",
+    undefined,
+  );
+
   const reshapedFeatures = useMemo(
     () =>
       Object.entries(features).map(([key, val]) => ({
@@ -43,17 +62,31 @@ export default function FeaturesTab() {
     [features],
   );
 
-  const [forcedFeatures, setForcedFeatures] = useTabState<Record<string, any>>(
-    "forcedFeatures",
-    {},
-  );
+  const allFeatures = useMemo(() => {
+    let ret = [...reshapedFeatures];
+    Object.entries(forcedFeatures).forEach(([key, val]) => {
+      if (!ret.find((f) => f.id === key)) {
+        ret.push({
+          id: key,
+          noDefinition: true,
+        });
+      }
+    });
+    (logEvents || [])
+      .filter((log) => log.logType === "feature")
+      .forEach((log) => {
+        if (log.featureKey && !ret.find((f) => f.id === log.featureKey)) {
+          ret.push({
+            id: log.featureKey,
+            noDefinition: true,
+          });
+        }
+      });
+    return ret;
+  }, [reshapedFeatures, forcedFeatures, logEvents]);
 
   const { evaluatedFeatures } = useGBSandboxEval();
 
-  const [logEvents] = useTabState<LogUnion[] | undefined>(
-    "logEvents",
-    undefined,
-  );
   const pageEvaluatedFeatures = useMemo(() => {
     return new Set(
       (logEvents || [])
@@ -71,12 +104,13 @@ export default function FeaturesTab() {
     searchInputProps,
     clear: clearSearch,
   } = useSearch({
-    items: reshapedFeatures,
+    items: allFeatures,
     defaultSortField: "id",
   });
+
   const sortedFilteredFeatures = useMemo(
     () =>
-      [...filteredFeatures].sort((a, b) =>
+      [...allFeatures].sort((a, b) =>
         pageEvaluatedFeatures.has(a.id) === pageEvaluatedFeatures.has(b.id)
           ? 0
           : pageEvaluatedFeatures.has(a.id)
@@ -93,6 +127,7 @@ export default function FeaturesTab() {
   const selectedFeature = selectedFid
     ? getFeatureDetails({
         fid: selectedFid,
+        feature: allFeatures.find((feature) => feature.id === selectedFid),
         features,
         evaluatedFeatures,
         forcedFeatures,
@@ -195,6 +230,7 @@ export default function FeaturesTab() {
             const { evaluatedFeature, isForced, linkedExperiments } =
               getFeatureDetails({
                 fid,
+                feature,
                 features,
                 evaluatedFeatures,
                 forcedFeatures,
@@ -228,7 +264,7 @@ export default function FeaturesTab() {
                 >
                   <div
                     className={clsx("title absolute line-clamp-1 pl-2.5 pr-3", {
-                      "top-1": !fullWidthListView,
+                      "top-[4px]": !fullWidthListView,
                       "top-[13px]": fullWidthListView,
                     })}
                     style={{ width: fullWidthListView ? col1 : undefined }}
@@ -251,6 +287,13 @@ export default function FeaturesTab() {
                         <PiFlaskFill />
                         {linkedExperiments.length}
                       </>
+                    ) : null}
+                    {feature.noDefinition ? (
+                      <Tooltip content="Not in SDK payload">
+                        <span>
+                          <PiTimerBold className="inline-block mr-1 mb-0.5" />
+                        </span>
+                      </Tooltip>
                     ) : null}
                   </div>
                 )}
@@ -314,7 +357,7 @@ export default function FeaturesTab() {
 
 export type SelectedFeature = {
   fid: string;
-  feature: FeatureDefinition;
+  feature: FeatureDefinitionWithId;
   valueType: ValueType;
   meta?: any;
   linkedExperiments: (Experiment<any> | AutoExperiment)[];
@@ -324,18 +367,24 @@ export type SelectedFeature = {
 
 export function getFeatureDetails({
   fid,
+  feature: _featureDef,
   features,
   featuresMeta,
   evaluatedFeatures,
   forcedFeatures,
 }: {
   fid: string;
+  feature?: FeatureDefinitionWithId;
   features: Record<string, FeatureDefinition>;
   featuresMeta?: Record<string, any>;
   evaluatedFeatures?: Record<string, EvaluatedFeature>;
   forcedFeatures?: Record<string, any>;
 }): SelectedFeature {
-  const feature = features?.[fid];
+  const feature: FeatureDefinitionWithId = {
+    ...features?.[fid],
+    id: fid,
+    ..._featureDef,
+  };
   const meta = featuresMeta?.[fid];
 
   let valueType: ValueType;
@@ -343,13 +392,15 @@ export function getFeatureDetails({
     valueType = meta?.valueType;
   } else if (feature?.defaultValue === null) {
     valueType = "json";
-  } else {
+  } else if ("defaultValue" in feature) {
     valueType =
       (typeof (feature?.defaultValue ?? "string") as ValueType) || "object";
     // @ts-ignore
     if (valueType === "object") {
       valueType = "json";
     }
+  } else {
+    valueType = "unknown";
   }
 
   const linkedExperiments = (feature?.rules || [])

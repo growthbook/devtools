@@ -225,6 +225,21 @@ function subscribeToSdkChanges(
     updateTabState("attributes", gb.getAttributes());
   };
 
+  const _setForcedFeatures = gb.setForcedFeatures;
+  gb.setForcedFeatures = (map: Map<string, any>) => {
+    _setForcedFeatures?.call(gb, map);
+    updateTabState(
+      "forcedFeatures",
+      Object.fromEntries(gb.getForcedFeatures?.() || new Map()),
+    );
+  };
+
+  const _setForcedVariations = gb.setForcedVariations;
+  gb.setForcedVariations = async (vars: Record<string, number>) => {
+    await _setForcedVariations?.call(gb, vars);
+    updateTabState("forcedVariations", gb.getForcedVariations?.() || {});
+  };
+
   const _setPayload = gb.setPayload;
   if (!_setPayload) {
     // legacy SDK, start polling

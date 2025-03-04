@@ -5,6 +5,7 @@ import {
   FeatureDefinition,
   FeatureResult,
   GrowthBook,
+  LogUnion,
   Result,
   StickyAssignmentsDocument,
   StickyBucketService,
@@ -13,6 +14,7 @@ import useTabState from "@/app/hooks/useTabState";
 import { DebugLog } from "devtools";
 import { getFeatureExperiments } from "@/app/components/ExperimentsTab";
 import useSdkData from "./useSdkData";
+import { FeatureDefinitionWithId } from "@/app/components/FeaturesTab";
 
 export type EvaluatedFeature = {
   result: FeatureResult;
@@ -51,6 +53,33 @@ export default function useGBSandboxEval() {
     () => new Map(Object.entries(forcedFeatures)),
     [forcedFeatures],
   );
+  const [logEvents] = useTabState<LogUnion[] | undefined>(
+    "logEvents",
+    undefined,
+  );
+
+  const allFeatures = useMemo(() => {
+    let ret = { ...features };
+    Object.entries(forcedFeatures).forEach(([key, val]) => {
+      if (!(key in features)) {
+        ret[key] = {
+          id: key,
+          noDefinition: true,
+        } as FeatureDefinitionWithId;
+      }
+    });
+    (logEvents || [])
+      .filter((log) => log.logType === "feature")
+      .forEach((log) => {
+        if (log.featureKey && !ret?.[log.featureKey]) {
+          ret[log.featureKey] = {
+            id: log.featureKey,
+            noDefinition: true,
+          } as FeatureDefinitionWithId;
+        }
+      });
+    return ret;
+  }, [features, forcedFeatures, logEvents]);
 
   const [evaluatedData, setEvaluatedData] = useState<{
     evaluatedFeatures: Record<string, EvaluatedFeature>;
@@ -106,7 +135,7 @@ export default function useGBSandboxEval() {
       const evaluatedFeatures: Record<string, EvaluatedFeature> = {};
       const evaluatedExperiments: EvaluatedExperiment[] = [];
 
-      for (const fid in features) {
+      for (const fid in allFeatures) {
         growthbook.debug = true;
         const result = growthbook.evalFeature(fid);
         growthbook.debug = false;

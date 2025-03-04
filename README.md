@@ -64,7 +64,9 @@ Some notes
 
 ## Changelog
 
-*1.0.3* (2025-02-28)
+*1.0.3* (2025-03-03)
+- Allow inspecting & overriding features not in the SDK payload (stale or unpublished features)
+- Allow overriding feature value types
 - Bug fixes (special chars in feature keys, legacy SDK support, type safety)
 - Warn when using outdated SDK version
 

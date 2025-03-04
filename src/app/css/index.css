@@ -115,7 +115,7 @@
 .itemCard.selected {
   @apply bg-panel;
 }
-.itemCard .title{
+.itemCard .title {
   @apply text-sm font-semibold;
   transition: 100ms all;
 }

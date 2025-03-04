@@ -8,7 +8,7 @@ import {
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import useGlobalState from "@/app/hooks/useGlobalState";
 
-export type ValueType = "string" | "number" | "boolean" | "json";
+export type ValueType = "string" | "number" | "boolean" | "json" | "unknown";
 
 const customTheme = {
   padding: "5px",
