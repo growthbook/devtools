@@ -86,13 +86,19 @@ function pushAppUpdates() {
       if (Object.keys(gb.getAttributes() || {}).length) {
         updateTabState("attributes", gb.getAttributes() || {});
       }
-      if (Object.keys(gb.getForcedFeatures?.() || {}).length) {
+      if (
+        gb.getForcedFeatures &&
+        Object.keys(gb.getForcedFeatures() || {}).length
+      ) {
         updateTabState(
           "forcedFeatures",
           Object.fromEntries(gb.getForcedFeatures?.() || new Map()),
         );
       }
-      if (Object.keys(gb.getForcedVariations?.() || {}).length) {
+      if (
+        gb.getForcedVariations &&
+        Object.keys(gb.getForcedVariations() || {}).length
+      ) {
         updateTabState("forcedVariations", gb.getForcedVariations());
       }
     }
