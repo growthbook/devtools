@@ -161,9 +161,10 @@ export default function ExperimentsTab() {
     if (selectedEid) {
       const container = document.querySelector("#pageBody");
       const el = document.querySelector(
-        CSS.escape(
-          `#experimentsTab_experimentList_${selectedEid}_${selectedChangeId}`,
-        ),
+        "#" +
+          CSS.escape(
+            `experimentsTab_experimentList_${selectedEid}_${selectedChangeId}`,
+          ),
       );
       const y =
         (el?.getBoundingClientRect()?.top || 0) + (container?.scrollTop || 0);

@@ -225,13 +225,15 @@ export default function AttributesForm({
           ) : (
             <>
               <div
-                className="rt-TextAreaRoot rt-r-size-2 rt-variant-surface mb-2"
+                className={clsx(
+                  "rt-TextAreaRoot rt-r-size-2 rt-variant-surface mb-2",
+                  {
+                    "border border-red-700": textareaError,
+                  },
+                )}
                 style={{ minHeight: "unset !important" }}
               >
                 <TextareaAutosize
-                  className={clsx("rt-reset rt-TextAreaInput mono", {
-                    "border-red-700": textareaError,
-                  })}
                   name={"__JSON_attributes__"}
                   value={textareaAttributes}
                   onChange={(e) => {
@@ -240,6 +242,7 @@ export default function AttributesForm({
                     setTextareaError?.(false);
                     setDirty?.(true);
                   }}
+                  className="rt-reset rt-TextAreaInput mono"
                   style={{
                     fontSize: "12px",
                     lineHeight: "16px",

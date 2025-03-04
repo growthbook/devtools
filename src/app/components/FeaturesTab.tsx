@@ -134,6 +134,15 @@ export default function FeaturesTab() {
       })
     : undefined;
 
+  useEffect(() => {
+    if (
+      selectedFid &&
+      !allFeatures.find((feature) => feature.id === selectedFid)
+    ) {
+      setSelectedFid(undefined);
+    }
+  }, [selectedFid, allFeatures]);
+
   const clickFeature = (fid: string) =>
     setSelectedFid(selectedFid !== fid ? fid : undefined);
 
@@ -146,7 +155,7 @@ export default function FeaturesTab() {
     if (selectedFid) {
       const container = document.querySelector("#pageBody");
       const el = document.querySelector(
-        CSS.escape(`#featuresTab_featureList_${selectedFid}`),
+        "#" + CSS.escape(`featuresTab_featureList_${selectedFid}`),
       );
       const y =
         (el?.getBoundingClientRect()?.top || 0) + (container?.scrollTop || 0);

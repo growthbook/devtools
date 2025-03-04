@@ -23,23 +23,45 @@ export default function EditableValueField({
     valueType !== "json" && value !== null && value !== undefined,
   );
   const [dirty, setDirty] = useState(false);
+
+  // try to infer sensible type when type is "unknown"
+  useEffect(() => {
+    if (valueType === "unknown") {
+      if (value === null || value === undefined) {
+        setForcedValueType("json");
+      } else {
+        let vt = (typeof (value ?? "string") as ValueType) || "object";
+        // @ts-ignore
+        if (vt === "object") {
+          vt = "json";
+        }
+        setForcedValueType(vt);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (!editing) {
       setEditedValue(formattedValue);
     }
   }, [value]);
 
+  useEffect(() => {
+    setEditedValue(formattedValue);
+    setTextareaError(false);
+  }, [forcedValueType]);
+
   const submit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     let newValue: any;
-    if (valueType === "json") {
+    if (forcedValueType === "json") {
       try {
         newValue = JSON.parse(editedValue);
       } catch (e) {
         setTextareaError(true);
         return;
       }
-    } else if (valueType === "number") {
+    } else if (forcedValueType === "number") {
       try {
         newValue = JSON.parse(editedValue);
       } catch (e) {
@@ -133,13 +155,15 @@ export default function EditableValueField({
         </div>
       ) : (
         <div
-          className="rt-TextAreaRoot rt-r-size-2 rt-variant-surface mb-2"
+          className={clsx(
+            "rt-TextAreaRoot rt-r-size-2 rt-variant-surface mb-2",
+            {
+              "border border-red-700": textareaError,
+            },
+          )}
           style={{ minHeight: "unset !important" }}
         >
           <TextareaAutosize
-            className={clsx("rt-reset rt-TextAreaInput mono", {
-              "border-red-700": textareaError,
-            })}
             name={"__JSON_value__"}
             value={editedValue}
             onChange={(e) => {
@@ -148,6 +172,7 @@ export default function EditableValueField({
               setTextareaError(false);
               setDirty(true);
             }}
+            className="rt-reset rt-TextAreaInput mono"
             style={{ fontSize: "12px", lineHeight: "16px", padding: "6px 6px" }}
             maxRows={forcedValueType === "json" ? 10 : 3}
           />
