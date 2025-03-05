@@ -1,5 +1,12 @@
 import { MW, NAV_H } from "@/app";
-import { Button, IconButton, Link, Switch, Tooltip } from "@radix-ui/themes";
+import {
+  Button,
+  Callout,
+  IconButton,
+  Link,
+  Switch,
+  Tooltip,
+} from "@radix-ui/themes";
 import {
   PiArrowSquareOut,
   PiCaretRightFill,
@@ -111,33 +118,37 @@ export default function FeatureDetail({
                   <PiXBold />
                 </IconButton>
               </div>
-              {!selectedFeature?.feature?.noDefinition ? (
-                <Link
-                  size="2"
-                  href={`${appOrigin}/features/${selectedFid}`}
-                  target="_blank"
-                >
-                  GrowthBook
-                  <PiArrowSquareOut
-                    size={16}
-                    className="inline-block mb-1 ml-0.5"
-                  />
-                </Link>
-              ) : (
-                <div className="text-sm text-gray-a10">
-                  <Tooltip content="This feature id is not in your SDK payload yet was still evaluated. This may indicate a stale reference in your codebase or an unpublished feature.">
-                    <span>
-                      <PiTimerBold className="inline-block mr-1 mb-0.5" />
-                      Not in SDK payload
-                    </span>
-                  </Tooltip>
-                </div>
-              )}
+              <Link
+                size="2"
+                href={`${appOrigin}/features/${selectedFid}`}
+                target="_blank"
+              >
+                GrowthBook
+                <PiArrowSquareOut
+                  size={16}
+                  className="inline-block mb-1 ml-0.5"
+                />
+              </Link>
             </>
           )}
         </div>
 
         <div className="content">
+          {selectedFeature?.feature?.noDefinition ? (
+            <Callout.Root
+              color="amber"
+              size="1"
+              className="py-1.5 px-2 mt-2 mb-4"
+            >
+              <Tooltip content="This feature id is not in your SDK payload yet was still evaluated. This may indicate a stale reference in your codebase or an unpublished feature.">
+                <span className="text-sm">
+                  <PiTimerBold className="inline-block mr-1 mb-0.5" />
+                  Not in SDK payload
+                </span>
+              </Tooltip>
+            </Callout.Root>
+          ) : null}
+
           <div className="my-1">
             <div className="flex items-center justify-between my-2">
               <div className="label font-semibold">Current value</div>

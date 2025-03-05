@@ -266,6 +266,7 @@ export default function ExperimentDetail({
           <ValueField
             value={selectedExperiment?.evaluatedExperiment?.result?.value}
             valueType={valueType}
+            customPrismOuterStyle={{ marginTop: 4 }}
           />
 
           <div className="mt-4 mb-1 text-md font-semibold">
