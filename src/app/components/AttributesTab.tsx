@@ -144,7 +144,6 @@ export default function AttributesTab() {
       setForcedAttributes(false);
     }
     setDirty(false);
-    // attributesForm.reset({ ...removedAttributes, ...newAttributes });
   };
 
   const resetAttributesOverride = () => {
