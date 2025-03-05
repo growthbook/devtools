@@ -94,10 +94,12 @@ export default function InputFields({
               placeholder="Add to list..."
               menuPlacement="top"
               value={Array.isArray(inputValue) ? inputValue : []}
-              options={(Array.isArray(inputValue) ? inputValue : [])?.map((entry: string) => ({
-                value: entry,
-                label: entry,
-              }))}
+              options={(Array.isArray(inputValue) ? inputValue : [])?.map(
+                (entry: string) => ({
+                  value: entry,
+                  label: entry,
+                }),
+              )}
               onChange={(v) => {
                 setDirty(true);
                 setInputValue(v);
@@ -106,7 +108,9 @@ export default function InputFields({
                   setTimeout(() => {
                     save(
                       attributeKey,
-                      type === "number[]" ? (Array.isArray(v) ? v : [])?.map((n) => parseInt(n)) : v,
+                      type === "number[]"
+                        ? (Array.isArray(v) ? v : [])?.map((n) => parseInt(n))
+                        : v,
                     );
                     setDirty(false);
                   }, 500),
