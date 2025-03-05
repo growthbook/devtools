@@ -17,7 +17,8 @@ export const HEADER_H = 40;
 export default function AttributesTab() {
   const { isResponsive } = useResponsiveContext();
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
-  const [overriddenAttributes, setOverriddenAttributes] = useTabState<Attributes>("overriddenAttributes", {});
+  const [overriddenAttributes, setOverriddenAttributes] =
+    useTabState<Attributes>("overriddenAttributes", {});
   const attributesForm = useForm<Attributes>({ defaultValues: attributes });
   const formAttributes = attributesForm.watch();
   const formAttributesString = JSON.stringify(formAttributes, null, 2);
@@ -138,7 +139,10 @@ export default function AttributesTab() {
     if (Object.keys(newOverriddenAttributes).length > 0) {
       setForcedAttributes(true);
       setSelectedArchetype(null);
-      setOverriddenAttributes({ ...removedAttributes, ...newOverriddenAttributes });
+      setOverriddenAttributes({
+        ...removedAttributes,
+        ...newOverriddenAttributes,
+      });
     } else if (Object.keys(newAttributes).length === 0) {
       setSelectedArchetype(null);
       setForcedAttributes(false);
@@ -156,7 +160,7 @@ export default function AttributesTab() {
 
   // listen to SDK changes to set attributes form
   useEffect(() => {
-    if(dirty) return
+    if (dirty) return;
     attributesForm.reset(attributes);
   }, [JSON.stringify(attributes)]);
   return (
@@ -193,22 +197,23 @@ export default function AttributesTab() {
             User Attributes
           </Text>
           <div className="flex flex-shrink-1 items-center justify-end gap-3">
-            {Object.keys(overriddenAttributes || {}).length > 0 && !selectedArchetype && (
-              <Link
-                href="#"
-                role="button"
-                color="amber"
-                size="1"
-                onClick={(e) => {
-                  e.preventDefault();
-                  resetAttributesOverride();
-                }}
-                className="flex gap-1 items-center font-normal leading-3 text-right"
-              >
-                Clear overrides
-                <PiXBold className="flex-shrink-0" />
-              </Link>
-            )}
+            {Object.keys(overriddenAttributes || {}).length > 0 &&
+              !selectedArchetype && (
+                <Link
+                  href="#"
+                  role="button"
+                  color="amber"
+                  size="1"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    resetAttributesOverride();
+                  }}
+                  className="flex gap-1 items-center font-normal leading-3 text-right"
+                >
+                  Clear overrides
+                  <PiXBold className="flex-shrink-0" />
+                </Link>
+              )}
             <label className="flex flex-shrink-1 items-center text-xs cursor-pointer leading-3 select-none">
               <Checkbox
                 checked={jsonMode}
