@@ -3,7 +3,7 @@ import * as Form from "@radix-ui/react-form";
 import { Button, Flex, IconButton, Link } from "@radix-ui/themes";
 import { Attributes } from "@growthbook/growthbook";
 import { UseFormReturn } from "react-hook-form";
-import { PiX } from "react-icons/pi";
+import { PiArrowCounterClockwise, PiX } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import clsx from "clsx";
 import { SDKAttribute, SDKAttributeType } from "@/app/gbTypes";
@@ -42,13 +42,14 @@ export default function AttributesForm({
   const [customAttrSchema, setCustomAttrSchema] = useGlobalState<
     Record<string, SDKAttribute>
   >("customAttributeSchema", {}, true);
- const [overriddenAttributes, setOverriddenAttributes] = useTabState<Attributes>("overriddenAttributes", {});
+  const [overriddenAttributes, setOverriddenAttributes] =
+    useTabState<Attributes>("overriddenAttributes", {});
   const addCustomField = (
     customAttrId: string,
-    customAttrType: SDKAttributeType,
+    customAttrType: SDKAttributeType
   ) => {
     setDirty?.(true);
-    if(attributes[customAttrId]) {
+    if (attributes[customAttrId]) {
       return;
     }
     const newAttributes = form.getValues();
@@ -68,10 +69,22 @@ export default function AttributesForm({
         datatype: customAttrType,
       },
     });
-    setOverriddenAttributes({...overriddenAttributes, [customAttrId]: newAttributes[customAttrId]});
+    setOverriddenAttributes({
+      ...overriddenAttributes,
+      [customAttrId]: newAttributes[customAttrId],
+    });
     form.reset(newAttributes);
   };
 
+  const resetAttribute = (key: string) => {
+    setDirty?.(true);
+    if (overriddenAttributes.hasOwnProperty(key)) {
+      const overriddenAttributesCopy = { ...overriddenAttributes };
+      delete overriddenAttributesCopy[key];
+      setOverriddenAttributes(overriddenAttributesCopy);
+    }
+    setDirty?.(false);
+  }
   const [newAppliedAttributeIds, setNewAppliedAttributeIds] = useTabState<
     string[]
   >("newAppliedAttributeIds", []);
@@ -114,7 +127,7 @@ export default function AttributesForm({
 
   const attributesWithoutCustom = useMemo(() => {
     return Object.keys(formAttributes).filter(
-      (key) => !newAppliedAttributeIds.includes(key),
+      (key) => !newAppliedAttributeIds.includes(key)
     );
   }, [formAttributes, newAppliedAttributeIds]);
 
@@ -143,7 +156,7 @@ export default function AttributesForm({
                     attributeKey,
                     form.watch(attributeKey),
                     schema,
-                    customAttrSchema,
+                    customAttrSchema
                   );
                   return (
                     <div key={attributeKey}>
@@ -169,6 +182,20 @@ export default function AttributesForm({
                           schema={schema}
                           value={form.watch(attributeKey)}
                         />
+                        <div style={{width: 50}}>
+                        { overriddenAttributes.hasOwnProperty(attributeKey) &&(
+                        <IconButton
+                          type="button"
+                          size="2"
+                          variant="ghost"
+                          color="orange"
+                          style={{ margin: "0 0 0 8px" }}
+                          onClick={() => resetAttribute(attributeKey)}
+                        >
+                          <PiArrowCounterClockwise />
+                        </IconButton>
+                      )}
+                      </div>
                       </Form.Field>
                     </div>
                   );
@@ -180,7 +207,7 @@ export default function AttributesForm({
                         attributeKey,
                         form.watch(attributeKey),
                         schema,
-                        customAttrSchema,
+                        customAttrSchema
                       );
                       return (
                         <div key={attributeKey}>
@@ -297,7 +324,7 @@ function getAttributeType(
   a: string,
   v: any,
   schema: Record<string, SDKAttribute>,
-  customAttrSchema: Record<string, SDKAttribute>,
+  customAttrSchema: Record<string, SDKAttribute>
 ) {
   if (schema[a]) return schema[a].datatype;
   if (customAttrSchema[a]) return customAttrSchema[a].datatype;

@@ -17,7 +17,7 @@ export const HEADER_H = 40;
 export default function AttributesTab() {
   const { isResponsive } = useResponsiveContext();
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
-  const [_overriddenAttributes, setOverriddenAttributes] = useTabState<Attributes>("overriddenAttributes", {});
+  const [overriddenAttributes, setOverriddenAttributes] = useTabState<Attributes>("overriddenAttributes", {});
   const attributesForm = useForm<Attributes>({ defaultValues: attributes });
   const formAttributes = attributesForm.watch();
   const formAttributesString = JSON.stringify(formAttributes, null, 2);
@@ -124,7 +124,7 @@ export default function AttributesTab() {
         }),
     );
 
-    const removedAttributes = { ..._overriddenAttributes };
+    const removedAttributes = { ...overriddenAttributes };
     Object.keys(attributes).forEach((key) => {
       (key: string) => {
         if (!newAttributes.hasOwnProperty(key)) {
@@ -159,7 +159,6 @@ export default function AttributesTab() {
     if(dirty) return
     attributesForm.reset(attributes);
   }, [JSON.stringify(attributes)]);
-
   return (
     <>
       <div
@@ -194,7 +193,7 @@ export default function AttributesTab() {
             User Attributes
           </Text>
           <div className="flex flex-shrink-1 items-center justify-end gap-3">
-            {forcedAttributes && !selectedArchetype && (
+            {Object.keys(overriddenAttributes || {}).length > 0 && !selectedArchetype && (
               <Link
                 href="#"
                 role="button"
