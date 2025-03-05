@@ -73,6 +73,9 @@ function init() {
 }
 
 function pushAppUpdates() {
+  const urlState = getQueryState();
+  console.log({urlState});
+  
   updateTabState("url", window.location.href || "");
   onGrowthBookLoad((gb) => {
     pushSDKUpdate(gb);
@@ -488,6 +491,21 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     errorMessage:
       res?.error || !!clientKey ? undefined : "No Client Key was found",
   };
+}
+
+export function getQueryState() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const state = params.get("_gbdebug");
+    if (!state) return null;
+    const data = JSON.parse(decodeURIComponent(state));
+    params.delete("_gbdebug");
+    window.history.replaceState(null, "", window.location.pathname + (params.toString() ? "?" + params.toString() : ""));
+    return data;
+  } catch (e) {
+    console.error("Failed to parse query state", e);
+    return null;
+  }
 }
 
 // start running
