@@ -19,7 +19,7 @@ export default function InputFields({
   save,
   type,
   value,
-  schema,
+  schema
 }: Props) {
   const [isDirty, setDirty] = useState(false);
   const [inputValue, setInputValue] = useState(value);
