@@ -10,9 +10,6 @@ import type {
 } from "@growthbook/growthbook";
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import { Attributes } from "@growthbook/growthbook";
-import { jsx } from "node_modules/@types/react/jsx-runtime";
-import { decrypt } from "node_modules/@growthbook/growthbook/dist/util";
-import { get } from "node_modules/@types/lodash";
 
 declare global {
   interface Window {
