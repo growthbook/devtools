@@ -112,6 +112,7 @@ export default function ExperimentsTab() {
     items: allExperiments,
     defaultSortField: "key",
   });
+
   const sortedFilteredExperiments = useMemo(
     () =>
       [...filteredExperiments].sort((a, b) =>

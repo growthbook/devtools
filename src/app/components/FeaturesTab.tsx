@@ -110,7 +110,7 @@ export default function FeaturesTab() {
 
   const sortedFilteredFeatures = useMemo(
     () =>
-      [...allFeatures].sort((a, b) =>
+      [...filteredFeatures].sort((a, b) =>
         pageEvaluatedFeatures.has(a.id) === pageEvaluatedFeatures.has(b.id)
           ? 0
           : pageEvaluatedFeatures.has(a.id)
