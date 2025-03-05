@@ -12,6 +12,7 @@ import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import { Attributes } from "@growthbook/growthbook";
 import { jsx } from "node_modules/@types/react/jsx-runtime";
 import { decrypt } from "node_modules/@growthbook/growthbook/dist/util";
+import { get } from "node_modules/@types/lodash";
 
 declare global {
   interface Window {
@@ -216,7 +217,13 @@ function subscribeToSdkChanges(
     await _setAttributes?.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
   };
-
+  if(gb.setAttributes){
+    const _setAttributes = gb.setAttributes;
+    gb.setAttributes = async (attributes: Attributes) => {
+      await _setAttributes?.call(gb, attributes);
+      updateTabState("attributes", gb.getAttributes());
+    };
+  }
   if (gb.updateAttributes) {
     const _updateAttributes = gb.updateAttributes;
     gb.updateAttributes = async (attributes: Attributes) => {
