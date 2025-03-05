@@ -93,8 +93,8 @@ export default function InputFields({
               creatable
               placeholder="Add to list..."
               menuPlacement="top"
-              value={inputValue || []}
-              options={(inputValue || [])?.map((entry: string) => ({
+              value={Array.isArray(inputValue) ? inputValue : []}
+              options={(Array.isArray(inputValue) ? inputValue : [])?.map((entry: string) => ({
                 value: entry,
                 label: entry,
               }))}
@@ -106,7 +106,7 @@ export default function InputFields({
                   setTimeout(() => {
                     save(
                       attributeKey,
-                      type === "number[]" ? v?.map((n) => parseInt(n)) : v,
+                      type === "number[]" ? (Array.isArray(v) ? v : [])?.map((n) => parseInt(n)) : v,
                     );
                     setDirty(false);
                   }, 500),
