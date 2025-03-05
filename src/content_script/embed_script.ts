@@ -216,7 +216,13 @@ function subscribeToSdkChanges(
     await _setAttributes?.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
   };
-
+  if(gb.setAttributes){
+    const _setAttributes = gb.setAttributes;
+    gb.setAttributes = async (attributes: Attributes) => {
+      await _setAttributes?.call(gb, attributes);
+      updateTabState("attributes", gb.getAttributes());
+    };
+  }
   if (gb.updateAttributes) {
     const _updateAttributes = gb.updateAttributes;
     gb.updateAttributes = async (attributes: Attributes) => {

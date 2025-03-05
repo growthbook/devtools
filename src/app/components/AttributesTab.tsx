@@ -17,6 +17,7 @@ export const HEADER_H = 40;
 export default function AttributesTab() {
   const { isResponsive } = useResponsiveContext();
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
+  const [_overriddenAttributes, setOverriddenAttributes] = useTabState<Attributes>("overriddenAttributes", {});
   const attributesForm = useForm<Attributes>({ defaultValues: attributes });
   const formAttributes = attributesForm.watch();
   const formAttributesString = JSON.stringify(formAttributes, null, 2);
@@ -123,7 +124,7 @@ export default function AttributesTab() {
         }),
     );
 
-    const removedAttributes = { ...attributes };
+    const removedAttributes = { ..._overriddenAttributes };
     Object.keys(attributes).forEach((key) => {
       (key: string) => {
         if (!newAttributes.hasOwnProperty(key)) {
@@ -137,12 +138,11 @@ export default function AttributesTab() {
     if (Object.keys(newOverriddenAttributes).length > 0) {
       setForcedAttributes(true);
       setSelectedArchetype(null);
-      setAttributes({ ...removedAttributes, ...newOverriddenAttributes });
+      setOverriddenAttributes({ ...removedAttributes, ...newOverriddenAttributes });
     } else if (Object.keys(newAttributes).length === 0) {
       setSelectedArchetype(null);
       setForcedAttributes(false);
     }
-    attributesForm.reset({ ...removedAttributes, ...newAttributes });
     setDirty(false);
   };
 
@@ -150,12 +150,12 @@ export default function AttributesTab() {
     setForcedAttributes(false);
     setNewAppliedAttributeIds([]);
     setSelectedArchetype(null);
-    setAttributes({});
-    setDirty(false); // we want to wait for the next render to reset with the initial attributes
+    setOverriddenAttributes({});
   };
 
   // listen to SDK changes to set attributes form
   useEffect(() => {
+    if(dirty) return
     attributesForm.reset(attributes);
   }, [JSON.stringify(attributes)]);
 

@@ -42,12 +42,15 @@ export default function AttributesForm({
   const [customAttrSchema, setCustomAttrSchema] = useGlobalState<
     Record<string, SDKAttribute>
   >("customAttributeSchema", {}, true);
-
+ const [overriddenAttributes, setOverriddenAttributes] = useTabState<Attributes>("overriddenAttributes", {});
   const addCustomField = (
     customAttrId: string,
     customAttrType: SDKAttributeType,
   ) => {
     setDirty?.(true);
+    if(attributes[customAttrId]) {
+      return;
+    }
     const newAttributes = form.getValues();
     newAttributes[customAttrId] =
       customAttrType === "number"
@@ -65,6 +68,7 @@ export default function AttributesForm({
         datatype: customAttrType,
       },
     });
+    setOverriddenAttributes({...overriddenAttributes, [customAttrId]: newAttributes[customAttrId]});
     form.reset(newAttributes);
   };
 
@@ -225,15 +229,13 @@ export default function AttributesForm({
           ) : (
             <>
               <div
-                className={clsx(
-                  "rt-TextAreaRoot rt-r-size-2 rt-variant-surface mb-2",
-                  {
-                    "border border-red-700": textareaError,
-                  },
-                )}
+                className="rt-TextAreaRoot rt-r-size-2 rt-variant-surface mb-2"
                 style={{ minHeight: "unset !important" }}
               >
                 <TextareaAutosize
+                  className={clsx("rt-reset rt-TextAreaInput mono", {
+                    "border-red-700": textareaError,
+                  })}
                   name={"__JSON_attributes__"}
                   value={textareaAttributes}
                   onChange={(e) => {
@@ -242,7 +244,6 @@ export default function AttributesForm({
                     setTextareaError?.(false);
                     setDirty?.(true);
                   }}
-                  className="rt-reset rt-TextAreaInput mono"
                   style={{
                     fontSize: "12px",
                     lineHeight: "16px",

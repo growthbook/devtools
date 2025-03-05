@@ -12,7 +12,7 @@ export const SESSION_STORAGE_TAB_STATE_KEY = "growthbook-devtools-tab-state";
 
 // Special state variables will push their updates to the embed script / SDK when changed:
 const propertiesWithCustomMessage: Record<string, string> = {
-  attributes: "GB_UPDATE_ATTRIBUTES", // setAttributes
+  overriddenAttributes: "GB_UPDATE_ATTRIBUTES", // setOverriddenAttributes
   forcedFeatures: "GB_UPDATE_FEATURES", // setForcedFeatures
   forcedVariations: "GB_UPDATE_EXPERIMENTS", // setForcedVariations
 };
