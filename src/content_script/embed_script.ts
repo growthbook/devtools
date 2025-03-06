@@ -78,7 +78,7 @@ function hydrateApp() {
     pullOverrides();
     return;
   }
-  
+
   onGrowthBookLoad((gb) => {
     if (hydratedState?.attributes && Object.keys(hydratedState?.attributes || {}).length) {
       gb?.setAttributeOverrides?.(hydratedState.attributes);

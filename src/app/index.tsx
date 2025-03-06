@@ -26,7 +26,7 @@ import {
   PiWarningOctagonFill,
   PiSunBold,
   PiMoonBold,
-  PiCircleHalfBold,
+  PiCircleHalfBold, PiLinkBold,
 } from "react-icons/pi";
 import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
@@ -165,6 +165,7 @@ export const App = () => {
                   <div className="flex-1" />
                   <div className="flex items-center gap-2 flex-grow-0 flex-shrink-0">
                     <ThemeButton />
+                    <LinkButton />
                     <SettingsButton
                       apiKeyReady={apiKeyReady}
                       apiKey={apiKey}
@@ -253,6 +254,7 @@ export const App = () => {
               </Select.Root>
               <div className="flex items-center gap-2 flex-grow-0 flex-shrink-0">
                 <ThemeButton />
+                <LinkButton />
                 <SettingsButton
                   apiKeyReady={apiKeyReady}
                   apiKey={apiKey}
@@ -507,6 +509,21 @@ function ThemeButton() {
         ) : (
           <PiSunBold />
         )}
+      </IconButton>
+    </Tooltip>
+  );
+}
+
+function LinkButton() {
+  return (
+    <Tooltip content="Share DevTools state">
+      <IconButton
+        className="relative"
+        variant="outline"
+        size="1"
+        onClick={() => {}}
+      >
+        <PiLinkBold size={17}/>
       </IconButton>
     </Tooltip>
   );
