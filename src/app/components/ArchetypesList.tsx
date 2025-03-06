@@ -12,6 +12,7 @@ import useApi from "@/app/hooks/useApi";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import useTabState from "@/app/hooks/useTabState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
+import { Attributes } from "@growthbook/growthbook";
 
 export default function ArchetypesList() {
   const [archetypes, setArchetypes] = useGlobalState<Archetype[]>(
@@ -35,17 +36,14 @@ export default function ArchetypesList() {
     "attributes",
     {},
   );
-  const [forcedAttributes, setForcedAttributes] = useTabState<boolean>(
-    "forcedAttributes",
-    false,
-  );
+  const [overriddenAttributes, setOverriddenAttributes] =
+    useTabState<Attributes>("overriddenAttributes", {});
 
   const [selectedArchetype, setSelectedArchetype] =
     useTabState<Archetype | null>("selectedArchetype", null);
 
   const updateArchetype = (arch: Archetype) => {
     setAttributes({ ...arch.attributes });
-    setForcedAttributes(true);
     setSelectedArchetype(arch);
   };
   useEffect(() => {
@@ -85,7 +83,7 @@ export default function ArchetypesList() {
         <DropdownMenu.Item
           onSelect={() => {
             setAttributes({});
-            setForcedAttributes(false);
+            setOverriddenAttributes({});
             setSelectedArchetype(null);
           }}
           disabled={!selectedArchetype}

@@ -34,6 +34,7 @@ import ConditionalWrapper from "@/app/components/ConditionalWrapper";
 import { useResponsiveContext } from "./hooks/useResponsive";
 import { Archetype } from "@/app/gbTypes";
 import packageJson from "@growthbook/growthbook/package.json";
+import { Attributes } from "@growthbook/growthbook";
 
 const latestSdkVersion = packageJson.version;
 const latestSdkParts = latestSdkVersion.split(".");
@@ -83,10 +84,9 @@ export const App = () => {
     Record<string, any>
   >("forcedVariations", {});
 
-  const [forcedAttributes, _setForcedAttributes] = useTabState<boolean>(
-    "forcedAttributes",
-    false,
-  );
+  const [overriddenAttributes, setOverriddenAttributes] =
+    useTabState<Attributes>("overriddenAttributes", {});
+
   const sdkData = useSdkData();
   let sdkStatus = getSdkStatus(sdkData);
 
@@ -153,7 +153,7 @@ export const App = () => {
                   <Tabs.Trigger value="attributes">
                     <NavLabel
                       type="attributes"
-                      forcedAttributes={forcedAttributes}
+                      overriddenAttributes={overriddenAttributes}
                     />
                   </Tabs.Trigger>
                   <Tabs.Trigger value="logs">
@@ -198,7 +198,7 @@ export const App = () => {
                     ) : currentTab === "attributes" ? (
                       <NavLabel
                         type="attributes"
-                        forcedAttributes={forcedAttributes}
+                        overriddenAttributes={overriddenAttributes}
                         isDropdown
                       />
                     ) : currentTab === "logs" ? (
@@ -235,7 +235,7 @@ export const App = () => {
                   <Select.Item value="attributes">
                     <NavLabel
                       type="attributes"
-                      forcedAttributes={forcedAttributes}
+                      overriddenAttributes={overriddenAttributes}
                       isDropdown
                     />
                   </Select.Item>
@@ -311,14 +311,14 @@ function NavLabel({
   isDropdown = false,
   forcedFeatures,
   forcedVariations,
-  forcedAttributes,
+  overriddenAttributes,
   sdkStatus,
 }: {
   type: "features" | "experiments" | "attributes" | "logs" | "sdkDebug";
   isDropdown?: boolean;
   forcedFeatures?: Record<string, any>;
   forcedVariations?: Record<string, any>;
-  forcedAttributes?: boolean;
+  overriddenAttributes?: Record<string, any>;
   sdkStatus?: string;
 }) {
   const [selectedArchetype, setSelectedArchetype] =
@@ -371,6 +371,7 @@ function NavLabel({
   }
 
   if (type === "attributes") {
+    const count = Object.keys(overriddenAttributes || {}).length;
     return (
       <ConditionalWrapper
         condition={isDropdown}
@@ -379,7 +380,7 @@ function NavLabel({
         <span
           className={
             !isDropdown
-              ? forcedAttributes && !selectedArchetype
+              ? count > 0 && !selectedArchetype
                 ? "pr-3"
                 : "px-1.5"
               : "pr-1"
@@ -387,7 +388,7 @@ function NavLabel({
         >
           Attributes
         </span>
-        {forcedAttributes && !selectedArchetype ? (
+        {count > 0 && !selectedArchetype ? (
           <div className={!isDropdown ? "absolute right-0" : undefined}>
             <Tooltip content="Has attribute overrides">
               <div className="p-1">

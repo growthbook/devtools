@@ -37,10 +37,6 @@ export default function AttributesTab() {
     "attributesForm_useJsonMode",
     false,
   );
-  const [forcedAttributes, setForcedAttributes] = useTabState<boolean>(
-    "forcedAttributes",
-    false,
-  );
   const [newAppliedAttributeIds, setNewAppliedAttributeIds] = useTabState<
     string[]
   >("newAppliedAttributeIds", []);
@@ -137,7 +133,6 @@ export default function AttributesTab() {
       };
     });
     if (Object.keys(newOverriddenAttributes).length > 0) {
-      setForcedAttributes(true);
       setSelectedArchetype(null);
       setOverriddenAttributes({
         ...removedAttributes,
@@ -145,14 +140,12 @@ export default function AttributesTab() {
       });
     } else if (Object.keys(newAttributes).length === 0) {
       setSelectedArchetype(null);
-      setForcedAttributes(false);
     }
     setDirty(false);
     // attributesForm.reset({ ...removedAttributes, ...newAttributes });
   };
 
   const resetAttributesOverride = () => {
-    setForcedAttributes(false);
     setNewAppliedAttributeIds([]);
     setSelectedArchetype(null);
     setOverriddenAttributes({});
