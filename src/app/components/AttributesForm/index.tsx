@@ -46,7 +46,7 @@ export default function AttributesForm({
     useTabState<Attributes>("overriddenAttributes", {});
   const addCustomField = (
     customAttrId: string,
-    customAttrType: SDKAttributeType
+    customAttrType: SDKAttributeType,
   ) => {
     setDirty?.(true);
     if (attributes[customAttrId]) {
@@ -84,7 +84,7 @@ export default function AttributesForm({
       setOverriddenAttributes(overriddenAttributesCopy);
     }
     setDirty?.(false);
-  }
+  };
   const [newAppliedAttributeIds, setNewAppliedAttributeIds] = useTabState<
     string[]
   >("newAppliedAttributeIds", []);
@@ -127,7 +127,7 @@ export default function AttributesForm({
 
   const attributesWithoutCustom = useMemo(() => {
     return Object.keys(formAttributes).filter(
-      (key) => !newAppliedAttributeIds.includes(key)
+      (key) => !newAppliedAttributeIds.includes(key),
     );
   }, [formAttributes, newAppliedAttributeIds]);
 
@@ -156,7 +156,7 @@ export default function AttributesForm({
                     attributeKey,
                     form.watch(attributeKey),
                     schema,
-                    customAttrSchema
+                    customAttrSchema,
                   );
                   return (
                     <div key={attributeKey}>
@@ -182,20 +182,22 @@ export default function AttributesForm({
                           schema={schema}
                           value={form.watch(attributeKey)}
                         />
-                        <div style={{width: 50}}>
-                        { overriddenAttributes.hasOwnProperty(attributeKey) &&(
-                        <IconButton
-                          type="button"
-                          size="2"
-                          variant="ghost"
-                          color="orange"
-                          style={{ margin: "0 0 0 8px" }}
-                          onClick={() => resetAttribute(attributeKey)}
-                        >
-                          <PiArrowCounterClockwise />
-                        </IconButton>
-                      )}
-                      </div>
+                        <div style={{ width: 50 }}>
+                          {overriddenAttributes.hasOwnProperty(
+                            attributeKey,
+                          ) && (
+                            <IconButton
+                              type="button"
+                              size="2"
+                              variant="ghost"
+                              color="orange"
+                              style={{ margin: "0 0 0 8px" }}
+                              onClick={() => resetAttribute(attributeKey)}
+                            >
+                              <PiArrowCounterClockwise />
+                            </IconButton>
+                          )}
+                        </div>
                       </Form.Field>
                     </div>
                   );
@@ -207,7 +209,7 @@ export default function AttributesForm({
                         attributeKey,
                         form.watch(attributeKey),
                         schema,
-                        customAttrSchema
+                        customAttrSchema,
                       );
                       return (
                         <div key={attributeKey}>
@@ -324,7 +326,7 @@ function getAttributeType(
   a: string,
   v: any,
   schema: Record<string, SDKAttribute>,
-  customAttrSchema: Record<string, SDKAttribute>
+  customAttrSchema: Record<string, SDKAttribute>,
 ) {
   if (schema[a]) return schema[a].datatype;
   if (customAttrSchema[a]) return customAttrSchema[a].datatype;

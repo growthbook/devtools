@@ -65,7 +65,8 @@ Some notes
 ## Changelog
 
 *1.0.4* (2025-03-05)
-- Bug fixes
+- Ability to clear individual attribute overrides
+- Bug fixes (legacy SDK support, prevent attribute caching, search)
 
 *1.0.3* (2025-03-03)
 - Allow inspecting & overriding features not in the SDK payload (stale or unpublished features)

@@ -93,7 +93,7 @@ export default function FeatureDetail({
         width: `${rightPercent * 100}vw`,
         maxWidth: MW * rightPercent,
         right: open
-          ? `calc(max((100vw - ${MW}px)/2 + 8px, 0px))`
+          ? `calc(max((100vw - ${MW}px)/2, 0px))`
           : `-${rightPercent * 100}vw`,
         zIndex: 1000,
         pointerEvents: !open ? "none" : undefined,

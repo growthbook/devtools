@@ -19,7 +19,7 @@ export default function InputFields({
   save,
   type,
   value,
-  schema
+  schema,
 }: Props) {
   const [isDirty, setDirty] = useState(false);
   const [inputValue, setInputValue] = useState(value);
@@ -93,11 +93,13 @@ export default function InputFields({
               creatable
               placeholder="Add to list..."
               menuPlacement="top"
-              value={inputValue || []}
-              options={(inputValue || [])?.map((entry: string) => ({
-                value: entry,
-                label: entry,
-              }))}
+              value={Array.isArray(inputValue) ? inputValue : []}
+              options={(Array.isArray(inputValue) ? inputValue : [])?.map(
+                (entry: string) => ({
+                  value: entry,
+                  label: entry,
+                }),
+              )}
               onChange={(v) => {
                 setDirty(true);
                 setInputValue(v);
@@ -106,7 +108,9 @@ export default function InputFields({
                   setTimeout(() => {
                     save(
                       attributeKey,
-                      type === "number[]" ? v?.map((n) => parseInt(n)) : v,
+                      type === "number[]"
+                        ? (Array.isArray(v) ? v : [])?.map((n) => parseInt(n))
+                        : v,
                     );
                     setDirty(false);
                   }, 500),
