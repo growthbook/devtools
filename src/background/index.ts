@@ -185,16 +185,12 @@ const UpdateTabIconBasedOnSDK = (
       title =
         "GrowthBook DevTools\n🟡 SDK connected\n" +
         ((!data.hasPayload ? "No SDK payload\n" : "") +
-          (!data.hasPayload ? "No SDK payload\n" : "") +
           (data.trackingCallbackParams?.length !== 2
             ? "Tracking callback issues\n"
             : "") +
           (!data.payloadDecrypted ? "Decryption issues\n" : "")) +
-        (!data.version
-          ? "Unknown SDK version"
-          : data.version &&
-              paddedVersionString(data.version) <
-                paddedVersionString(latestMinorSdkVersion)
+        (paddedVersionString(data.version) <
+           paddedVersionString(latestMinorSdkVersion)
             ? "Outdated SDK version"
             : "");
     } else {
@@ -210,9 +206,8 @@ const UpdateTabIconBasedOnSDK = (
         (data.canConnect && !data.version
           ? "Unknown SDK version"
           : data.canConnect &&
-              data.version &&
-              paddedVersionString(data.version) <
-                paddedVersionString(latestMinorSdkVersion)
+            paddedVersionString(data.version) <
+              paddedVersionString(latestMinorSdkVersion)
             ? "Outdated SDK version"
             : "");
     }
@@ -280,8 +275,9 @@ export function getSdkStatus(
 ): "green" | "yellow" | "red" {
   if (
     !sdkData.canConnect ||
+    !sdkData.version ||
     (sdkData.version &&
-      paddedVersionString(sdkData.version) < paddedVersionString("0.23.0"))
+      paddedVersionString(sdkData.version) < paddedVersionString("0.30.0"))
   ) {
     return "red";
   }
@@ -289,10 +285,7 @@ export function getSdkStatus(
     !sdkData.hasPayload ||
     sdkData.trackingCallbackParams?.length !== 2 ||
     !sdkData.payloadDecrypted ||
-    !sdkData.version ||
-    (sdkData.version &&
-      paddedVersionString(sdkData.version) <
-        paddedVersionString(latestMinorSdkVersion))
+    paddedVersionString(sdkData.version) < paddedVersionString(latestMinorSdkVersion)
   ) {
     return "yellow";
   }

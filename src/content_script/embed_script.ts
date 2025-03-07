@@ -394,7 +394,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   };
   const hasPayload =
     !!gb.getDecryptedPayload?.() ||
-    (Object.keys(gb.getFeatures?.() || {}).length > 0 &&
+    (Object.keys(gb.getFeatures?.() || {}).length > 0 ||
       (gb.getExperiments?.() || []).length > 0);
   // check if payload was decrypted
   const hasDecryptionKey = !!gbContext?.decryptionKey;

@@ -98,7 +98,7 @@ export const App = () => {
   useEffect(() => {
     window.setTimeout(() => {
       if (!sdkDataRef.current.sdkFound) setCurrentTab("sdkDebug");
-    }, 400);
+    }, 800);
   }, []);
 
   return (

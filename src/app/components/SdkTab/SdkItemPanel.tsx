@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Button, Flex, IconButton, Link, Text } from "@radix-ui/themes";
+import { Button, Callout, Flex, IconButton, Link, Text } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
 import { MW, NAV_H } from "@/app";
 import {
   PiArrowsClockwise,
   PiArrowSquareOut,
-  PiCaretRightFill,
+  PiCaretRightFill, PiWarningFill, PiWarningOctagonFill,
   PiXBold,
 } from "react-icons/pi";
 import * as Accordion from "@radix-ui/react-accordion";
@@ -34,6 +34,7 @@ const panels: Record<
     SDKHealthCheckResult & {
       latestSdkVersion: string;
       latestMinorSdkVersion: string;
+      hasPayload: boolean;
     }
   >
 > = {
@@ -69,12 +70,14 @@ export default function SdkItemPanel({
   widthPercent,
   latestSdkVersion,
   latestMinorSdkVersion,
+  hasPayload,
 }: {
   selectedItem: SdkItem;
   unsetSelectedItem: () => void;
   widthPercent: number;
   latestSdkVersion: string;
   latestMinorSdkVersion: string;
+  hasPayload: boolean;
 }) {
   const { isResponsive } = useResponsiveContext();
 
@@ -216,11 +219,20 @@ function statusPanel({
           ) : null}
 
           <div className="mb-4">
-            {!activeTabId && !refreshing && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-sm mb-4">
-                DevTools was unable to attach to the current window.
-              </div>
-            )}
+            {!activeTabId && !refreshing ? (
+              <Callout.Root
+                color="red"
+                size="1"
+                className="mb-4"
+              >
+                <Callout.Icon>
+                  <PiWarningOctagonFill />
+                </Callout.Icon>
+                <Callout.Text>
+                  DevTools was unable to attach to the current window.
+                </Callout.Text>
+              </Callout.Root>
+            ) : null}
             <Button
               variant="outline"
               size="2"
@@ -309,23 +321,51 @@ function versionPanel({
   return (
     <Text as="div" size="2" weight="regular">
       {!version ? (
-        <Text>
-          Unable to find your SDK version. You might be using an old version of
-          the SDK. Consider updating to the latest version.
-        </Text>
+        <>
+          <Text>
+            Unable to find your SDK version. This may indicate a version prior to 0.30.0.
+          </Text>
+          <div className="mt-4">
+            <Callout.Root
+              color="red"
+              size="1"
+              className="mt-2 mb-4"
+            >
+              <Callout.Icon>
+                <PiWarningOctagonFill />
+              </Callout.Icon>
+              <Callout.Text>
+                Possibly using an unsupported legacy version of the SDK (&lt;0.30.0)
+              </Callout.Text>
+            </Callout.Root>
+            <Text>
+              Versions prior to 0.30.0 are unsupported in DevTools. Additionally, versions prior to
+              0.23.0 are considered unstable. Consider updating to the latest version.
+            </Text>
+          </div>
+        </>
       ) : (
         <>
           <Text>
             Detected version <strong>{version}</strong> of the JavaScript SDK.
             {hasWindowConfig ? " Embedded via the HTML Script Tag." : null}
           </Text>
-          {paddedVersionString(version) < paddedVersionString("0.23.0") ? (
+          {paddedVersionString(version) < paddedVersionString("0.30.0") ? (
             <div className="mt-4">
-              <Text color="red">
-                Using an unsupported legacy version of the SDK ({version}).
-              </Text>{" "}
+              <Callout.Root
+                color="red"
+                size="1"
+                className="mt-2 mb-4"
+              >
+                <Callout.Icon>
+                  <PiWarningOctagonFill />
+                </Callout.Icon>
+                <Callout.Text>
+                  Using an unsupported legacy version of the SDK ({version}).
+                </Callout.Text>
+              </Callout.Root>
               <Text>
-                Versions prior to 0.23.0 are considered unstable. Consider
+                Versions prior to 0.30.0 are unsupported in DevTools. Consider
                 updating to the latest version.
               </Text>
             </div>
@@ -465,13 +505,35 @@ function streamingPanel({
   );
 }
 
-function payloadPanel({ payload }: SDKHealthCheckResult) {
+function payloadPanel({ hasPayload, payload }: SDKHealthCheckResult) {
   return (
-    <ValueField
-      value={payload}
-      valueType="json"
-      maxHeight={`calc(100vh - ${NAV_H}px - 150px)`}
-    />
+    <>
+      {!hasPayload ? (
+        <>
+          <Callout.Root
+            color="amber"
+            size="1"
+            className="mb-4"
+          >
+            <Callout.Icon>
+              <PiWarningFill />
+            </Callout.Icon>
+            <Callout.Text>
+              No payload present in your SDK
+            </Callout.Text>
+          </Callout.Root>
+          <Text as="div" size="2" weight="regular">
+            Please check your implementation.
+          </Text>
+        </>
+      ) : (
+        <ValueField
+          value={payload}
+          valueType="json"
+          maxHeight={`calc(100vh - ${NAV_H}px - 150px)`}
+        />
+      )}
+    </>
   );
 }
 

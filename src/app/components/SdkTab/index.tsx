@@ -86,7 +86,7 @@ export default function SdkTab() {
       : "red";
   const versionStatusColor = !version
     ? "red"
-    : paddedVersionString(version) < paddedVersionString("0.23.0")
+    : paddedVersionString(version) < paddedVersionString("0.30.0")
       ? "red"
       : paddedVersionString(version) <
           paddedVersionString(latestMinorSdkVersion)
@@ -262,6 +262,7 @@ export default function SdkTab() {
           widthPercent={rightPercent}
           latestSdkVersion={latestSdkVersion}
           latestMinorSdkVersion={latestMinorSdkVersion}
+          hasPayload={hasPayload}
         />
       )}
     </div>
@@ -302,8 +303,9 @@ export function getSdkStatus(
 ): "green" | "yellow" | "red" {
   if (
     !sdkData.canConnect ||
+    !sdkData.version ||
     (sdkData.version &&
-      paddedVersionString(sdkData.version) < paddedVersionString("0.23.0"))
+      paddedVersionString(sdkData.version) < paddedVersionString("0.30.0"))
   ) {
     return "red";
   }
@@ -311,7 +313,6 @@ export function getSdkStatus(
     !sdkData.hasPayload ||
     sdkData.trackingCallbackParams?.length !== 2 ||
     !sdkData.payloadDecrypted ||
-    !sdkData.version ||
     (sdkData.version &&
       paddedVersionString(sdkData.version) <
         paddedVersionString(latestMinorSdkVersion))
