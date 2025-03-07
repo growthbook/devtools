@@ -333,7 +333,7 @@ export default function ExperimentsTab() {
                     {evaluatedExperiment?.result?.inExperiment ? (
                       <div className="line-clamp-1">
                         <VariationIcon i={value} size={14} className="mr-1" />
-                        {getVariationSummary({ experiment, i })}
+                        {getVariationSummary({ experiment, i: value })}
                       </div>
                     ) : (
                       <div className="text-gray-9">Inactive</div>

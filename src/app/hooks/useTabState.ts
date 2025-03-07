@@ -55,8 +55,10 @@ export default function useTabState<T>(
     fetchState();
 
     // Listener for content script state changes
-    const listener = (message: any) => {
-      if (message.type === "tabStateChanged" && message.property === property) {
+    const listener = async (message: any, sender: any) => {
+      const activeTabId = await getActiveTabId();
+      const shouldListen = activeTabId && sender?.tab?.id ? activeTabId === sender.tab.id : false;
+      if (shouldListen && message.type === "tabStateChanged" && message.property === property) {
         // Missing value indicates no state found in tab store, keep default value
         if ("value" in message) {
           setState(message.value);
