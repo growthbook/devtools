@@ -355,6 +355,10 @@ function subscribeToSdkChanges(
       onFeatureUsage(key, result);
     }
   };
+  if (!onFeatureUsage || typeof onFeatureUsage !== "function") {
+    // @ts-expect-error
+    gb.context.onFeatureUsage.isNoopCallback = true;
+  }
 
   // Watch for incoming log events and send to tabstate
   updateTabState("logEvents", []);
@@ -415,7 +419,10 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
 
   const usingLogEvent = typeof gbContext?.eventLogger === "function";
 
-  const usingOnFeatureUsage = typeof gbContext?.onFeatureUsage === "function";
+  const onFeatureUsage = gbContext?.onFeatureUsage;
+  const usingOnFeatureUsage =
+    typeof onFeatureUsage === "function" &&
+    !onFeatureUsage.isNoopCallback;
 
   const isRemoteEval = !!gb.isRemoteEval?.();
 
