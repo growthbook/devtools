@@ -64,10 +64,31 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
 function init() {
   setupListeners();
   pushAppUpdates();
-  pullOverrides();
+  hydrateApp();
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
       pushAppUpdates();
+    }
+  });
+}
+
+function hydrateApp() {
+  const hydratedState = getQueryState();
+  if (!hydratedState) {
+    pullOverrides();
+    return;
+  }
+
+  onGrowthBookLoad((gb) => {
+    if (hydratedState?.attributes && Object.keys(hydratedState?.attributes || {}).length) {
+      gb?.setAttributeOverrides?.(hydratedState.attributes);
+    }
+    if (hydratedState?.forcedFeatures && Object.keys(hydratedState?.forcedFeatures || {}).length) {
+      let forcedFeaturesMap = new Map(Object.entries(hydratedState.forcedFeatures));
+      gb?.setForcedFeatures?.(forcedFeaturesMap);
+    }
+    if (hydratedState?.forcedVariations && Object.keys(hydratedState?.forcedVariations || {}).length) {
+      gb?.setForcedVariations?.(hydratedState.forcedVariations);
     }
   });
 }
@@ -130,6 +151,12 @@ function setupListeners() {
         break;
       case "GB_REQUEST_REFRESH":
         pushAppUpdates();
+        break;
+      case "COPY_TO_CLIPBOARD":
+        if (message.value) {
+          window.focus();
+          navigator.clipboard.writeText(message.value);
+        }
         break;
       default:
         return;
@@ -233,6 +260,7 @@ function subscribeToSdkChanges(
   gb.setAttributeOverrides = async (attributes: Attributes) => {
     await _setAttributeOverrides?.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
+    updateTabState("overriddenAttributes", attributes);
   };
 
   const _setForcedFeatures = gb.setForcedFeatures;
@@ -495,6 +523,22 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     errorMessage:
       res?.error || !!clientKey ? undefined : "No Client Key was found",
   };
+}
+
+export function getQueryState() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const state = params.get("_gbdebug");
+    if (!state) return null;
+    const decoded = decodeURIComponent(state);
+    const data = JSON.parse(decoded);
+    params.delete("_gbdebug");
+    window.history.replaceState(null, "", window.location.pathname + (params.toString() ? "?" + params.toString() : ""));
+    return data;
+  } catch (e) {
+    console.error("Failed to parse query state", e);
+    return null;
+  }
 }
 
 // start running

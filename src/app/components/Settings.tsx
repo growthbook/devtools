@@ -12,7 +12,7 @@ export const API_KEY = `${NAMESPACE}-${VERSION}-api-key`;
 export const CLOUD_API_HOST = "https://api.growthbook.io";
 export const CLOUD_APP_ORIGIN = "https://app.growthbook.io";
 
-const SettingsForm = ({ close }: { close?: () => void }) => {
+const SettingsForm = ({ close }: { close: () => void; }) => {
   const [apiHost, setApiHost, apiHostReady] = useGlobalState(
     API_HOST,
     CLOUD_API_HOST,
@@ -40,7 +40,7 @@ const SettingsForm = ({ close }: { close?: () => void }) => {
     setApiHost(values.apiHost);
     setAppOrigin(values.appOrigin);
     setApiKey(values.apiKey);
-    close?.();
+    close();
   };
 
   useEffect(() => {
