@@ -94,11 +94,11 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
       }
 
       // Firefox: Proxied tab state messages (UI -> background -> content_script)
-      if (message.type === "getTabState" || message.type === "setTabState") {
+      if (["getTabState", "setTabState", "COPY_TO_CLIPBOARD"].includes(message.type)) {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           const activeTabId = tabs[0]?.id;
           if (activeTabId) {
-            chrome.tabs.sendMessage(activeTabId, message);
+            chrome.tabs.sendMessage(activeTabId, {...message, tabId: activeTabId});
           }
         });
       }
@@ -291,3 +291,16 @@ export function getSdkStatus(
   }
   return "green";
 }
+
+// Firefox: return tabId if asked by content_script
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.action === "GET_TAB_ID") {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const activeTabId = tabs[0]?.id;
+      if (activeTabId) {
+        chrome.tabs.sendMessage(activeTabId, {type: "SET_TAB_ID", tabId: activeTabId});
+      }
+    });
+  }
+  return true;
+});

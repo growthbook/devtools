@@ -17,6 +17,7 @@ export function AppMenu({
   setTheme,
   setSettingsOpen,
   setShareOpen,
+  setImportOpen,
 }: {
   apiKeyReady: boolean,
   apiKey: string,
@@ -24,6 +25,7 @@ export function AppMenu({
   setTheme: (t: Theme) => void;
   setSettingsOpen: (b: boolean) => void;
   setShareOpen: (b: boolean) => void;
+  setImportOpen: (b: boolean) => void;
 }) {
   return <DropdownMenu.Root>
     <DropdownMenu.Trigger>
@@ -36,7 +38,7 @@ export function AppMenu({
                 className="absolute text-red-600 bg-surface rounded-full border border-surface"
                 style={{right: -4, top: -4}}
               />
-              <PiDotsThreeVerticalBold/>
+              <PiDotsThreeVerticalBold />
             </IconButton>
           </Tooltip>
         </div>
@@ -77,7 +79,7 @@ export function AppMenu({
         <PiLinkBold />
         Share...
       </DropdownMenu.Item>
-      <DropdownMenu.Item>
+      <DropdownMenu.Item onSelect={() => setImportOpen(true)}>
         <PiDownloadSimpleBold />
         Import / Export
       </DropdownMenu.Item>

@@ -152,6 +152,12 @@ function setupListeners() {
       case "GB_REQUEST_REFRESH":
         pushAppUpdates();
         break;
+      case "COPY_TO_CLIPBOARD":
+        if (message.value) {
+          window.focus();
+          navigator.clipboard.writeText(message.value);
+        }
+        break;
       default:
         return;
     }

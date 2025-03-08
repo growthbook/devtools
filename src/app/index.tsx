@@ -19,6 +19,7 @@ import {useResponsiveContext} from "./hooks/useResponsive";
 import {Archetype} from "@/app/gbTypes";
 import {Attributes} from "@growthbook/growthbook";
 import {AppMenu} from "@/app/components/AppMenu";
+import Share from "@/app/components/Share";
 
 export const MW = 1200; // max-width
 export const RESPONSIVE_W = 570; // small width mode
@@ -36,6 +37,7 @@ export const App = () => {
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const { isResponsive, isTiny } = useResponsiveContext();
   const [theme, setTheme, themeReady] = useGlobalState<Theme>(
@@ -151,6 +153,7 @@ export const App = () => {
                       setTheme={setTheme}
                       setSettingsOpen={setSettingsOpen}
                       setShareOpen={setShareOpen}
+                      setImportOpen={setImportOpen}
                     />
                   </div>
                   <div className="mx-2"/>
@@ -241,6 +244,7 @@ export const App = () => {
                   setTheme={setTheme}
                   setSettingsOpen={setSettingsOpen}
                   setShareOpen={setShareOpen}
+                  setImportOpen={setImportOpen}
                 />
               </div>
             </div>
@@ -291,7 +295,28 @@ export const App = () => {
           onOpenChange={(o) => setShareOpen(o)}
         >
           <Dialog.Content className="ModalBody">
-            <Dialog.Title>Share or Import State</Dialog.Title>
+            <Dialog.Title>Share DevTools State</Dialog.Title>
+            <Share close={() => setShareOpen(false)} />
+            <Dialog.Close style={{ position: "absolute", top: 5, right: 5 }}>
+              <IconButton
+                color="gray"
+                highContrast
+                size="1"
+                variant="outline"
+                radius="full"
+              >
+                <PiX size={20} />
+              </IconButton>
+            </Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Root>
+
+        <Dialog.Root
+          open={importOpen}
+          onOpenChange={(o) => setImportOpen(o)}
+        >
+          <Dialog.Content className="ModalBody">
+            <Dialog.Title>Import / Export DevTools State</Dialog.Title>
             <Dialog.Close style={{ position: "absolute", top: 5, right: 5 }}>
               <IconButton
                 color="gray"
