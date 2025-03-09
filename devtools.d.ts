@@ -167,6 +167,11 @@ type PullOverrides = {
   type: "GB_REQUEST_OVERRIDES";
 };
 
+type CopyToClipboard = {
+  type: "COPY_TO_CLIPBOARD";
+  value: string;
+};
+
 // Messages sent to content script
 export type Message =
   | RequestRefreshMessage
@@ -182,7 +187,8 @@ export type Message =
   | TransformCopyRequestMessage
   | TransformCopyResponseMessage
   | UpdateTabState
-  | PullOverrides;
+  | PullOverrides
+  | CopyToClipboard;
 
 export type BGLoadVisualChangsetMessage = {
   type: "BG_LOAD_VISUAL_CHANGESET";

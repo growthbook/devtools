@@ -13,7 +13,7 @@ import { EvaluatedFeature } from "@/app/hooks/useGBSandboxEval";
 import { DebugLog } from "devtools";
 import DebugLogger from "@/app/components/DebugLogger";
 import useGlobalState from "@/app/hooks/useGlobalState";
-import { isDark } from "@/app";
+import { isDark, Theme } from "@/app";
 
 type RuleType = "force" | "rollout" | "experiment" | "prerequisite";
 
@@ -271,7 +271,14 @@ export function ExperimentRule({
   namespace?: [string, number, number] | undefined;
   valueType?: ValueType;
 }) {
-  const [dark] = useGlobalState("dark", false, true);
+  const [theme, setTheme, themeReady] = useGlobalState<Theme>(
+    "theme",
+    "system",
+    true,
+  );
+  const dark = useMemo(() => {
+    return isDark(theme);
+  }, [theme, themeReady]);
 
   let appliedCoverage = coverage;
   let nsRange: number | undefined;
