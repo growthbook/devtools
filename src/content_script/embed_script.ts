@@ -80,15 +80,24 @@ function hydrateApp() {
   }
 
   onGrowthBookLoad((gb) => {
-    if (hydratedState?.attributes && Object.keys(hydratedState?.attributes || {}).length) {
+    if (
+      hydratedState?.attributes &&
+      Object.keys(hydratedState?.attributes || {}).length
+    ) {
       gb?.setAttributeOverrides?.(hydratedState.attributes);
     }
-    if (hydratedState?.forcedFeatures && Object.keys(hydratedState?.forcedFeatures || {}).length) {
-      let forcedFeaturesMap = new Map(Object.entries(hydratedState.forcedFeatures));
+    if (
+      hydratedState?.features &&
+      Object.keys(hydratedState?.features || {}).length
+    ) {
+      let forcedFeaturesMap = new Map(Object.entries(hydratedState.features));
       gb?.setForcedFeatures?.(forcedFeaturesMap);
     }
-    if (hydratedState?.forcedVariations && Object.keys(hydratedState?.forcedVariations || {}).length) {
-      gb?.setForcedVariations?.(hydratedState.forcedVariations);
+    if (
+      hydratedState?.experiments &&
+      Object.keys(hydratedState?.experiments || {}).length
+    ) {
+      gb?.setForcedVariations?.(hydratedState.experiments);
     }
   });
 }
@@ -426,8 +435,8 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   };
   const hasPayload =
     !!gb.getDecryptedPayload?.() ||
-    (Object.keys(gb.getFeatures?.() || {}).length > 0 ||
-      (gb.getExperiments?.() || []).length > 0);
+    Object.keys(gb.getFeatures?.() || {}).length > 0 ||
+    (gb.getExperiments?.() || []).length > 0;
   // check if payload was decrypted
   const hasDecryptionKey = !!gbContext?.decryptionKey;
   let payloadDecrypted = true;
@@ -449,8 +458,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
 
   const onFeatureUsage = gbContext?.onFeatureUsage;
   const usingOnFeatureUsage =
-    typeof onFeatureUsage === "function" &&
-    !onFeatureUsage.isNoopCallback;
+    typeof onFeatureUsage === "function" && !onFeatureUsage.isNoopCallback;
 
   const isRemoteEval = !!gb.isRemoteEval?.();
 
@@ -533,7 +541,12 @@ export function getQueryState() {
     const decoded = decodeURIComponent(state);
     const data = JSON.parse(decoded);
     params.delete("_gbdebug");
-    window.history.replaceState(null, "", window.location.pathname + (params.toString() ? "?" + params.toString() : ""));
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname +
+        (params.toString() ? "?" + params.toString() : ""),
+    );
     return data;
   } catch (e) {
     console.error("Failed to parse query state", e);

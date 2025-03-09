@@ -94,11 +94,18 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
       }
 
       // Firefox: Proxied tab state messages (UI -> background -> content_script)
-      if (["getTabState", "setTabState", "COPY_TO_CLIPBOARD"].includes(message.type)) {
+      if (
+        ["getTabState", "setTabState", "COPY_TO_CLIPBOARD"].includes(
+          message.type,
+        )
+      ) {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           const activeTabId = tabs[0]?.id;
           if (activeTabId) {
-            chrome.tabs.sendMessage(activeTabId, {...message, tabId: activeTabId});
+            chrome.tabs.sendMessage(activeTabId, {
+              ...message,
+              tabId: activeTabId,
+            });
           }
         });
       }
@@ -190,9 +197,9 @@ const UpdateTabIconBasedOnSDK = (
             : "") +
           (!data.payloadDecrypted ? "Decryption issues\n" : "")) +
         (paddedVersionString(data.version) <
-           paddedVersionString(latestMinorSdkVersion)
-            ? "Outdated SDK version"
-            : "");
+        paddedVersionString(latestMinorSdkVersion)
+          ? "Outdated SDK version"
+          : "");
     } else {
       chrome.action.setIcon({
         tabId,
@@ -206,8 +213,8 @@ const UpdateTabIconBasedOnSDK = (
         (data.canConnect && !data.version
           ? "Unknown SDK version"
           : data.canConnect &&
-            paddedVersionString(data.version) <
-              paddedVersionString(latestMinorSdkVersion)
+              paddedVersionString(data.version) <
+                paddedVersionString(latestMinorSdkVersion)
             ? "Outdated SDK version"
             : "");
     }
@@ -285,7 +292,8 @@ export function getSdkStatus(
     !sdkData.hasPayload ||
     sdkData.trackingCallbackParams?.length !== 2 ||
     !sdkData.payloadDecrypted ||
-    paddedVersionString(sdkData.version) < paddedVersionString(latestMinorSdkVersion)
+    paddedVersionString(sdkData.version) <
+      paddedVersionString(latestMinorSdkVersion)
   ) {
     return "yellow";
   }
@@ -298,7 +306,10 @@ chrome.runtime.onMessage.addListener((message) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const activeTabId = tabs[0]?.id;
       if (activeTabId) {
-        chrome.tabs.sendMessage(activeTabId, {type: "SET_TAB_ID", tabId: activeTabId});
+        chrome.tabs.sendMessage(activeTabId, {
+          type: "SET_TAB_ID",
+          tabId: activeTabId,
+        });
       }
     });
   }

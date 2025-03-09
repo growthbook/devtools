@@ -1,23 +1,35 @@
-import React, {useEffect, useMemo, useState} from "react";
-import {Badge, Button, Switch} from "@radix-ui/themes";
-import {useCopyToClipboard} from "@/app/hooks/useCopyToClipboard";
-import {PiCheckBold, PiLinkBold} from "react-icons/pi";
+import React, { useEffect, useMemo, useState } from "react";
+import { Badge, Button, Checkbox, Switch } from "@radix-ui/themes";
+import { useCopyToClipboard } from "@/app/hooks/useCopyToClipboard";
+import { PiCheckBold, PiLinkBold } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
-import {Attributes} from "@growthbook/growthbook";
+import { Attributes } from "@growthbook/growthbook";
+import { getOS } from "@/app/utils";
 
 type StatePayload = {
   features?: Record<string, any>;
   experiments?: Record<string, number>;
   attributes?: Record<string, any>;
-}
+};
 
-const Share = ({ close }: { close: () => void; }) => {
-  const isDevtoolsPanel = useMemo(() => document.querySelector("#root")?.getAttribute("data-is-devtools") === "1", []);
+const Share = ({ close }: { close: () => void }) => {
+  const isDevtoolsPanel = useMemo(
+    () =>
+      document.querySelector("#root")?.getAttribute("data-is-devtools") === "1",
+    [],
+  );
   const isFirefox = navigator.userAgent.includes("Firefox");
 
-  const [forcedFeatures, setForcedFeatures, forcedFeaturesReady] = useTabState<Record<string, any>>("forcedFeatures", {});
-  const [forcedVariations, setForcedVariations, forcedVariationsReady] = useTabState<Record<string, any>>("forcedVariations", {});
-  const [overriddenAttributes, setOverriddenAttributes, overriddenAttributesReady] = useTabState<Attributes>("overriddenAttributes", {});
+  const [forcedFeatures, setForcedFeatures, forcedFeaturesReady] = useTabState<
+    Record<string, any>
+  >("forcedFeatures", {});
+  const [forcedVariations, setForcedVariations, forcedVariationsReady] =
+    useTabState<Record<string, any>>("forcedVariations", {});
+  const [
+    overriddenAttributes,
+    setOverriddenAttributes,
+    overriddenAttributesReady,
+  ] = useTabState<Attributes>("overriddenAttributes", {});
   const [url] = useTabState<string>("url", "");
 
   const numForcedFeatures = Object.keys(forcedFeatures || {}).length;
@@ -25,16 +37,31 @@ const Share = ({ close }: { close: () => void; }) => {
   const numAttributeOverrides = Object.keys(overriddenAttributes || {}).length;
 
   const [includeFeatures, setIncludeFeatures] = useState(numForcedFeatures > 0);
-  const [includeExperiments, setIncludeExperiments] = useState(numForcedVariations > 0);
-  const [includeAttributes, setIncludeAttributes] = useState(numAttributeOverrides > 0);
+  const [includeExperiments, setIncludeExperiments] = useState(
+    numForcedVariations > 0,
+  );
+  const [includeAttributes, setIncludeAttributes] = useState(
+    numAttributeOverrides > 0,
+  );
 
   useEffect(() => {
-    if (forcedFeaturesReady && forcedVariationsReady && overriddenAttributesReady) {
+    if (
+      forcedFeaturesReady &&
+      forcedVariationsReady &&
+      overriddenAttributesReady
+    ) {
       setIncludeFeatures(numForcedFeatures > 0);
       setIncludeExperiments(numForcedVariations > 0);
       setIncludeAttributes(numAttributeOverrides > 0);
     }
-  }, [numForcedFeatures, numForcedVariations, numAttributeOverrides, forcedFeaturesReady, forcedVariationsReady, overriddenAttributesReady]);
+  }, [
+    numForcedFeatures,
+    numForcedVariations,
+    numAttributeOverrides,
+    forcedFeaturesReady,
+    forcedVariationsReady,
+    overriddenAttributesReady,
+  ]);
 
   const shareableLink = useMemo(() => {
     if (!url) return "";
@@ -50,10 +77,18 @@ const Share = ({ close }: { close: () => void; }) => {
       urlObj.searchParams.set("_gbdebug", encodeURIComponent(payload));
       u = urlObj.href;
     } catch (e) {
-      console.error("Unable to create link", {url, payloadObj});
+      console.error("Unable to create link", { url, payloadObj });
     }
     return u;
-  }, [includeFeatures, includeExperiments, includeAttributes, forcedFeatures, forcedVariations, overriddenAttributes, url])
+  }, [
+    includeFeatures,
+    includeExperiments,
+    includeAttributes,
+    forcedFeatures,
+    forcedVariations,
+    overriddenAttributes,
+    url,
+  ]);
 
   const { performCopy, copySuccess } = useCopyToClipboard({
     timeout: 1500,
@@ -64,63 +99,102 @@ const Share = ({ close }: { close: () => void; }) => {
     }
   }, [copySuccess]);
 
+  useEffect(() => {
+    setTimeout(
+      () => (document.querySelector("#shareLinkField") as HTMLElement)?.focus(),
+      100,
+    );
+  }, []);
+
   return (
     <div>
       <div className="mt-1 text-gray-12 text-xs">
-        Get a shareable link for your current DevTools session.
-        Recipient must have GrowthBook DevTools installed.
+        Get a shareable link for your current DevTools session. Recipient must
+        have GrowthBook DevTools installed.
       </div>
 
       <div className="my-4">
-        <div className="text-md mb-2">
-          Share overrides for...
-        </div>
+        <div className="text-md mb-2">Share overrides for...</div>
         <div className="box">
-        <label className="my-1 flex gap-2 text-sm items-center select-none cursor-pointer">
-          <Switch
-            size="1"
-            checked={includeFeatures}
-            onCheckedChange={(b) => setIncludeFeatures(b)}
-          />
-          <span>Features</span>{" "}
-          {numForcedFeatures > 0 ? (
-            <Badge color="amber" radius="full">{numForcedFeatures}</Badge>
-          ): (
-            <Badge color="gray" radius="full" variant="soft" className="text-2xs">none</Badge>
-          )}
-        </label>
-        <label className="my-1 flex gap-2 text-sm items-center select-none cursor-pointer">
-          <Switch
-            size="1"
-            checked={includeExperiments}
-            onCheckedChange={(b) => setIncludeExperiments(b)}
-          />
-          <span>Experiments</span>{" "}
-          {numForcedVariations > 0 ? (
-            <Badge color="amber" radius="full">{numForcedVariations}</Badge>
-          ): (
-            <Badge color="gray" radius="full" variant="soft" className="text-2xs">none</Badge>
-          )}
-        </label>
-        <label className="my-1 flex gap-2 text-sm items-center select-none cursor-pointer">
-          <Switch
-            size="1"
-            checked={includeAttributes}
-            onCheckedChange={(b) => setIncludeAttributes(b)}
-          />
-          <span>Attributes</span>{" "}
-          {numAttributeOverrides > 0 ? (
-            <Badge color="amber" radius="full">{numAttributeOverrides}</Badge>
-          ): (
-            <Badge color="gray" radius="full" variant="soft" className="text-2xs">none</Badge>
-          )}
-        </label>
+          <div className="my-1">
+            <label className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11 hover:underline decoration-violet-a6">
+              <Checkbox
+                size="1"
+                checked={includeFeatures}
+                onCheckedChange={(b) => setIncludeFeatures(!!b)}
+              />
+              <span>Features</span>{" "}
+              {numForcedFeatures > 0 ? (
+                <Badge color="amber" radius="full">
+                  {numForcedFeatures}
+                </Badge>
+              ) : (
+                <Badge
+                  color="gray"
+                  radius="full"
+                  variant="soft"
+                  className="text-2xs"
+                >
+                  none
+                </Badge>
+              )}
+            </label>
+          </div>
+          <div className="my-1">
+            <label className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11 hover:underline decoration-violet-a6">
+              <Checkbox
+                size="1"
+                checked={includeExperiments}
+                onCheckedChange={(b) => setIncludeExperiments(!!b)}
+              />
+              <span>Experiments</span>{" "}
+              {numForcedVariations > 0 ? (
+                <Badge color="amber" radius="full">
+                  {numForcedVariations}
+                </Badge>
+              ) : (
+                <Badge
+                  color="gray"
+                  radius="full"
+                  variant="soft"
+                  className="text-2xs"
+                >
+                  none
+                </Badge>
+              )}
+            </label>
+          </div>
+          <div className="my-1">
+            <label className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11 hover:underline decoration-violet-a6">
+              <Checkbox
+                size="1"
+                checked={includeAttributes}
+                onCheckedChange={(b) => setIncludeAttributes(!!b)}
+              />
+              <span>Attributes</span>{" "}
+              {numAttributeOverrides > 0 ? (
+                <Badge color="amber" radius="full">
+                  {numAttributeOverrides}
+                </Badge>
+              ) : (
+                <Badge
+                  color="gray"
+                  radius="full"
+                  variant="soft"
+                  className="text-2xs"
+                >
+                  none
+                </Badge>
+              )}
+            </label>
+          </div>
         </div>
       </div>
 
       <div>
         <div className="rt-TextFieldRoot rt-r-size-2 rt-variant-surface">
           <input
+            id="shareLinkField"
             className="rt-reset rt-TextFieldInput text-xs"
             type="text"
             value={shareableLink}
@@ -128,7 +202,9 @@ const Share = ({ close }: { close: () => void; }) => {
           />
         </div>
         {isDevtoolsPanel && !isFirefox ? (
-          <div className="text-gray-11 text-xs">Copy this link to share</div>
+          <div className="text-gray-11 text-xs">
+            Copy this link to share ({getOS() === "Mac" ? "⌘ + C" : "Ctrl + C"})
+          </div>
         ) : null}
       </div>
 
@@ -137,10 +213,9 @@ const Share = ({ close }: { close: () => void; }) => {
           <Button size="3" className="w-full" variant="soft" onClick={close}>
             Close
           </Button>
-        ) :
-        copySuccess ? (
+        ) : copySuccess ? (
           <Button size="3" className="w-full">
-            <PiCheckBold/>
+            <PiCheckBold />
             Link copied
           </Button>
         ) : (
@@ -151,12 +226,11 @@ const Share = ({ close }: { close: () => void; }) => {
               if (!copySuccess) performCopy(shareableLink);
             }}
           >
-            <PiLinkBold/>
+            <PiLinkBold />
             Copy Link
           </Button>
         )}
       </div>
-
     </div>
   );
 };

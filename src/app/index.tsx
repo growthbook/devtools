@@ -1,24 +1,36 @@
 import "@/app/css/index.css";
-import {Dialog, IconButton, Select, Tabs, Theme, Tooltip,} from "@radix-ui/themes";
-import React, {useEffect, useRef, useState} from "react";
+import {
+  Dialog,
+  IconButton,
+  Select,
+  Tabs,
+  Theme,
+  Tooltip,
+} from "@radix-ui/themes";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import logo from "./logo.svg";
 import logoWhite from "./logo-white.svg";
 import useTabState from "@/app/hooks/useTabState";
-import SdkTab, {getSdkStatus} from "./components/SdkTab";
+import SdkTab, { getSdkStatus } from "./components/SdkTab";
 import AttributesTab from "./components/AttributesTab";
 import ExperimentsTab from "./components/ExperimentsTab";
 import FeaturesTab from "./components/FeaturesTab";
 import LogsTab from "./components/LogsTab";
-import SettingsForm, {API_KEY} from "@/app/components/Settings";
+import SettingsForm, { API_KEY } from "@/app/components/Settings";
 import useSdkData from "@/app/hooks/useSdkData";
-import {PiCircleFill, PiWarningFill, PiWarningOctagonFill, PiX,} from "react-icons/pi";
+import {
+  PiCircleFill,
+  PiWarningFill,
+  PiWarningOctagonFill,
+  PiX,
+} from "react-icons/pi";
 import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import ConditionalWrapper from "@/app/components/ConditionalWrapper";
-import {useResponsiveContext} from "./hooks/useResponsive";
-import {Archetype} from "@/app/gbTypes";
-import {Attributes} from "@growthbook/growthbook";
-import {AppMenu} from "@/app/components/AppMenu";
+import { useResponsiveContext } from "./hooks/useResponsive";
+import { Archetype } from "@/app/gbTypes";
+import { Attributes } from "@growthbook/growthbook";
+import { AppMenu } from "@/app/components/AppMenu";
 import Share from "@/app/components/Share";
 
 export const MW = 1200; // max-width
@@ -45,12 +57,9 @@ export const App = () => {
     "system",
     true,
   );
-  const [dark, setDark] = useGlobalState("dark", isDark(theme));
-  useEffect(() => {
-    if (themeReady && dark !== isDark(theme)) {
-      setDark(isDark(theme));
-    }
-  }, [theme, themeReady, dark]);
+  const dark = useMemo(() => {
+    return isDark(theme);
+  }, [theme, themeReady]);
 
   const [apiKey, setApiKey, apiKeyReady] = useGlobalState(API_KEY, "", true);
 
@@ -120,11 +129,11 @@ export const App = () => {
               <Tabs.List>
                 <div
                   className="flex items-center mx-auto w-full"
-                  style={{maxWidth: MW}}
+                  style={{ maxWidth: MW }}
                 >
-                  <div className="mx-2"/>
+                  <div className="mx-2" />
                   <Tabs.Trigger value="features">
-                    <NavLabel type="features" forcedFeatures={forcedFeatures}/>
+                    <NavLabel type="features" forcedFeatures={forcedFeatures} />
                   </Tabs.Trigger>
                   <Tabs.Trigger value="experiments">
                     <NavLabel
@@ -139,12 +148,12 @@ export const App = () => {
                     />
                   </Tabs.Trigger>
                   <Tabs.Trigger value="logs">
-                    <NavLabel type="logs"/>
+                    <NavLabel type="logs" />
                   </Tabs.Trigger>
                   <Tabs.Trigger value="sdkDebug">
-                    <NavLabel type="sdkDebug" sdkStatus={sdkStatus}/>
+                    <NavLabel type="sdkDebug" sdkStatus={sdkStatus} />
                   </Tabs.Trigger>
-                  <div className="flex-1"/>
+                  <div className="flex-1" />
                   <div className="flex items-center gap-2 flex-grow-0 flex-shrink-0">
                     <AppMenu
                       apiKeyReady={apiKeyReady}
@@ -156,7 +165,7 @@ export const App = () => {
                       setImportOpen={setImportOpen}
                     />
                   </div>
-                  <div className="mx-2"/>
+                  <div className="mx-2" />
                 </div>
               </Tabs.List>
             </Tabs.Root>
@@ -290,10 +299,7 @@ export const App = () => {
           </Dialog.Content>
         </Dialog.Root>
 
-        <Dialog.Root
-          open={shareOpen}
-          onOpenChange={(o) => setShareOpen(o)}
-        >
+        <Dialog.Root open={shareOpen} onOpenChange={(o) => setShareOpen(o)}>
           <Dialog.Content className="ModalBody">
             <Dialog.Title>Share DevTools State</Dialog.Title>
             <Share close={() => setShareOpen(false)} />
@@ -311,10 +317,7 @@ export const App = () => {
           </Dialog.Content>
         </Dialog.Root>
 
-        <Dialog.Root
-          open={importOpen}
-          onOpenChange={(o) => setImportOpen(o)}
-        >
+        <Dialog.Root open={importOpen} onOpenChange={(o) => setImportOpen(o)}>
           <Dialog.Content className="ModalBody">
             <Dialog.Title>Import / Export DevTools State</Dialog.Title>
             <Dialog.Close style={{ position: "absolute", top: 5, right: 5 }}>

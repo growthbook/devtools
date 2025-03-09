@@ -231,5 +231,5 @@ if (navigator.userAgent.includes("Firefox")) {
       tabId = message.tabId;
     }
   });
-  chrome.runtime.sendMessage({action: "GET_TAB_ID"});
+  chrome.runtime.sendMessage({ action: "GET_TAB_ID" });
 }
