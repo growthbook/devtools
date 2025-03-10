@@ -81,21 +81,18 @@ function hydrateApp() {
 
   onGrowthBookLoad((gb) => {
     if (
-      hydratedState?.attributes &&
-      Object.keys(hydratedState?.attributes || {}).length
+      hydratedState?.attributes && typeof hydratedState.attributes === "object"
     ) {
       gb?.setAttributeOverrides?.(hydratedState.attributes);
     }
     if (
-      hydratedState?.features &&
-      Object.keys(hydratedState?.features || {}).length
+      hydratedState?.features && typeof hydratedState.features === "object"
     ) {
       let forcedFeaturesMap = new Map(Object.entries(hydratedState.features));
       gb?.setForcedFeatures?.(forcedFeaturesMap);
     }
     if (
-      hydratedState?.experiments &&
-      Object.keys(hydratedState?.experiments || {}).length
+      hydratedState?.experiments && typeof hydratedState.experiments === "object"
     ) {
       gb?.setForcedVariations?.(hydratedState.experiments);
     }

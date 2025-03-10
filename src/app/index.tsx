@@ -32,6 +32,7 @@ import { Archetype } from "@/app/gbTypes";
 import { Attributes } from "@growthbook/growthbook";
 import { AppMenu } from "@/app/components/AppMenu";
 import Share from "@/app/components/Share";
+import ImportExport from "@/app/components/ImportExport";
 
 export const MW = 1200; // max-width
 export const RESPONSIVE_W = 570; // small width mode
@@ -49,7 +50,7 @@ export const App = () => {
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const [importOpen, setImportOpen] = useState(false);
+  const [importExportOpen, setImportExportOpen] = useState(false);
 
   const { isResponsive, isTiny } = useResponsiveContext();
   const [theme, setTheme, themeReady] = useGlobalState<Theme>(
@@ -162,7 +163,7 @@ export const App = () => {
                       setTheme={setTheme}
                       setSettingsOpen={setSettingsOpen}
                       setShareOpen={setShareOpen}
-                      setImportOpen={setImportOpen}
+                      setImportExportOpen={setImportExportOpen}
                     />
                   </div>
                   <div className="mx-2" />
@@ -253,7 +254,7 @@ export const App = () => {
                   setTheme={setTheme}
                   setSettingsOpen={setSettingsOpen}
                   setShareOpen={setShareOpen}
-                  setImportOpen={setImportOpen}
+                  setImportExportOpen={setImportExportOpen}
                 />
               </div>
             </div>
@@ -317,9 +318,10 @@ export const App = () => {
           </Dialog.Content>
         </Dialog.Root>
 
-        <Dialog.Root open={importOpen} onOpenChange={(o) => setImportOpen(o)}>
+        <Dialog.Root open={importExportOpen} onOpenChange={(o) => setImportExportOpen(o)}>
           <Dialog.Content className="ModalBody">
             <Dialog.Title>Import / Export DevTools State</Dialog.Title>
+            <ImportExport close={() => setImportExportOpen(false)} />
             <Dialog.Close style={{ position: "absolute", top: 5, right: 5 }}>
               <IconButton
                 color="gray"

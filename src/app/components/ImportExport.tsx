@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {Badge, Button, Checkbox, Link, Switch} from "@radix-ui/themes";
 import { useCopyToClipboard } from "@/app/hooks/useCopyToClipboard";
-import {PiCaretRightFill, PiCheckBold, PiLinkBold} from "react-icons/pi";
+import {PiCaretRightFill, PiCheckBold, PiDownloadSimpleBold, PiLinkBold, PiUploadSimpleBold} from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import { Attributes } from "@growthbook/growthbook";
 import { getOS } from "@/app/utils";
+import clsx from "clsx";
+import TextareaAutosize from "react-textarea-autosize";
 import * as Accordion from "@radix-ui/react-accordion";
-import ValueField from "@/app/components/ValueField";
-import {NAV_H} from "@/app";
 
 type StatePayload = {
   features?: Record<string, any>;
@@ -15,7 +15,7 @@ type StatePayload = {
   attributes?: Record<string, any>;
 };
 
-const Share = ({ close }: { close: () => void }) => {
+const ImportExport = ({ close }: { close: () => void }) => {
   const isDevtoolsPanel = useMemo(
     () =>
       document.querySelector("#root")?.getAttribute("data-is-devtools") === "1",
@@ -33,7 +33,10 @@ const Share = ({ close }: { close: () => void }) => {
     setOverriddenAttributes,
     overriddenAttributesReady,
   ] = useTabState<Attributes>("overriddenAttributes", {});
-  const [url] = useTabState<string>("url", "");
+
+  const [formValue, setformValue] = useState("");
+  const [textareaError, setTextareaError] = useState(false);
+  const [dirty, setDirty] = useState(false);
 
   const numForcedFeatures = Object.keys(forcedFeatures || {}).length;
   const numForcedVariations = Object.keys(forcedVariations || {}).length;
@@ -66,23 +69,13 @@ const Share = ({ close }: { close: () => void }) => {
     overriddenAttributesReady,
   ]);
 
-  const shareableLink = useMemo(() => {
-    if (!url) return "";
+  const statePayload = useMemo(() => {
     const payloadObj: StatePayload = {
       ...(includeFeatures ? { features: forcedFeatures } : {}),
       ...(includeExperiments ? { experiments: forcedVariations } : {}),
       ...(includeAttributes ? { attributes: overriddenAttributes } : {}),
     };
-    const payload = JSON.stringify(payloadObj);
-    let u = url;
-    try {
-      const urlObj = new URL(url);
-      urlObj.searchParams.set("_gbdebug", encodeURIComponent(payload));
-      u = urlObj.href;
-    } catch (e) {
-      console.error("Unable to create link", { url, payloadObj });
-    }
-    return u;
+    return JSON.stringify(payloadObj);
   }, [
     includeFeatures,
     includeExperiments,
@@ -90,7 +83,6 @@ const Share = ({ close }: { close: () => void }) => {
     forcedFeatures,
     forcedVariations,
     overriddenAttributes,
-    url,
   ]);
 
   const overridesText = useMemo(() => {
@@ -102,18 +94,45 @@ const Share = ({ close }: { close: () => void }) => {
     return parts.join(", ");
   }, [includeFeatures, includeExperiments, includeAttributes]);
 
+  useEffect(() => {
+    if (!dirty) {
+      setformValue(statePayload);
+    }
+  }, [statePayload, dirty]);
+
+  const importState = () => {
+    try {
+      const payload = JSON.parse(formValue);
+      if (payload?.attributes && typeof payload.attributes === "object") {
+        setOverriddenAttributes(payload.attributes);
+      }
+      if (payload?.features && typeof payload.features === "object") {
+        setForcedFeatures(payload.features);
+      }
+      if (payload?.experiments && typeof payload.experiments === "object") {
+        setForcedVariations(payload.experiments);
+      }
+
+      setTextareaError(false);
+      setDirty(false);
+    } catch (e) {
+      console.error("Failed to parse imported state", e);
+      setTextareaError(true);
+    }
+  };
+
+  const cancelImport = () => {
+    setDirty(false);
+    setTextareaError(false);
+  };
+
   const { performCopy, copySuccess } = useCopyToClipboard({
     timeout: 1500,
   });
-  useEffect(() => {
-    if (copySuccess) {
-      setTimeout(close, 1000);
-    }
-  }, [copySuccess]);
 
   useEffect(() => {
     setTimeout(
-      () => (document.querySelector("#shareLinkField") as HTMLElement)?.focus(),
+      () => (document.querySelector("#stateField") as HTMLElement)?.focus(),
       100,
     );
   }, []);
@@ -121,20 +140,35 @@ const Share = ({ close }: { close: () => void }) => {
   return (
     <div>
       <div className="mt-1 text-gray-12 text-xs">
-        Get a shareable link for your current DevTools session. Recipient must
-        have GrowthBook DevTools installed.
+        Import or export a DevTools session by copying and pasting the following data.
       </div>
 
       <div className="my-4">
-        <Accordion.Root className="accordion" type="single" collapsible>
+        <Accordion.Root
+          className="accordion"
+          type="single"
+          collapsible
+        >
           <Accordion.Item value="advanced">
             <Accordion.Trigger className="trigger mb-0.5">
-              <Link size="2" role="button" className="text-left leading-3 hover:underline">
+              <Link
+                size="2"
+                role="button"
+                className={clsx("text-left leading-3", {
+                  "hover:underline": !dirty,
+                  "opacity-50": dirty,
+                })}
+                color={dirty ? "gray" : undefined}
+              >
                 <PiCaretRightFill className="caret mr-0.5" size={12} />
-                Share overrides <span className="text-xs">({overridesText})</span>
+                Export overrides <span className="text-xs">({overridesText})</span>
               </Link>
             </Accordion.Trigger>
-            <Accordion.Content className="accordionInner overflow-hidden w-full">
+            <Accordion.Content
+              className={clsx("accordionInner overflow-hidden w-full", {
+                "opacity-50": dirty,
+              })}
+            >
               <div className="box py-1">
                 <div className="my-1">
                   <label
@@ -214,48 +248,98 @@ const Share = ({ close }: { close: () => void }) => {
         </Accordion.Root>
       </div>
 
-      <div>
-        <div className="rt-TextFieldRoot rt-r-size-2 rt-variant-surface">
-          <input
-            id="shareLinkField"
-            className="rt-reset rt-TextFieldInput text-xs"
-            type="text"
-            value={shareableLink}
+      <div className="my-4">
+        <h2>{!dirty ? (
+          <>
+            Current State{" "}
+            <span className="text-xs">(Paste to import)</span>
+          </>
+        ) : "Import State"}</h2>
+        <div
+          className={clsx(
+            "rt-TextAreaRoot rt-r-size-2 rt-variant-surface mt-1 mb-2",
+            {
+              "border border-red-700": textareaError,
+            },
+          )}
+          style={{minHeight: "unset !important"}}
+        >
+          <TextareaAutosize
+            className="rt-reset rt-TextAreaInput mono"
+            style={{fontSize: "12px", lineHeight: "16px", padding: "6px 6px"}}
+            id="stateField"
+            name={"__stateField__"}
+            value={formValue}
+            onChange={(e) => {
+              setformValue(e.target.value);
+              setDirty(true);
+            }}
             onFocus={(e) => e.target.select()}
+            maxRows={4}
+            minRows={2}
           />
         </div>
-        {isDevtoolsPanel && !isFirefox ? (
-          <div className="text-gray-11 text-xs">
-            Copy this link to share ({getOS() === "Mac" ? "⌘ + C" : "Ctrl + C"})
-          </div>
-        ) : null}
+          {dirty ? (
+            <div className="flex items-center justify-end gap-3">
+              <Link
+                href="#"
+                size="2"
+                role="button"
+                onClick={cancelImport}
+              >
+                Cancel
+              </Link>
+              <Button
+                type="button"
+                size="2"
+                onClick={importState}
+                disabled={!dirty}
+              >
+                <PiDownloadSimpleBold />
+                Import
+              </Button>
+            </div>
+          ) : (
+            <>
+              {isDevtoolsPanel && !isFirefox ? (
+                <div className="text-gray-11 text-xs">
+                  Copy this data to export ({getOS() === "Mac" ? "⌘ + C" : "Ctrl + C"})
+                </div>
+              ) : (
+                <div className="flex items-center justify-end gap-3">
+                  {copySuccess ? (
+                    <Button
+                      size="2"
+                      className="w-[145px]"
+                    >
+                      <PiCheckBold/>
+                      Copied
+                    </Button>
+                  ) : (
+                    <Button
+                      size="2"
+                      className="w-[145px]"
+                      onClick={() => {
+                        if (!copySuccess) performCopy(formValue);
+                      }}
+                    >
+                      <PiUploadSimpleBold />
+                      Export (Copy)
+                    </Button>
+                  )}
+                </div>
+              )}
+            </>
+          )}
       </div>
 
       <div className="mt-8">
-        {isDevtoolsPanel && !isFirefox ? (
-          <Button size="3" className="w-full" variant="soft" onClick={close}>
-            Close
-          </Button>
-        ) : copySuccess ? (
-          <Button size="3" className="w-full">
-            <PiCheckBold/>
-            Link copied
-          </Button>
-        ) : (
-          <Button
-            size="3"
-            className="w-full"
-            onClick={() => {
-              if (!copySuccess) performCopy(shareableLink);
-            }}
-          >
-            <PiLinkBold/>
-            Copy Link
-          </Button>
-        )}
+        <Button size="3" className="w-full" variant="soft" onClick={close}>
+          Close
+        </Button>
       </div>
     </div>
   );
 };
 
-export default Share;
+export default ImportExport;

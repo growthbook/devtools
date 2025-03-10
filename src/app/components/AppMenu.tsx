@@ -20,7 +20,7 @@ export function AppMenu({
   setTheme,
   setSettingsOpen,
   setShareOpen,
-  setImportOpen,
+  setImportExportOpen,
 }: {
   apiKeyReady: boolean;
   apiKey: string;
@@ -28,7 +28,7 @@ export function AppMenu({
   setTheme: (t: Theme) => void;
   setSettingsOpen: (b: boolean) => void;
   setShareOpen: (b: boolean) => void;
-  setImportOpen: (b: boolean) => void;
+  setImportExportOpen: (b: boolean) => void;
 }) {
   return (
     <DropdownMenu.Root>
@@ -88,7 +88,7 @@ export function AppMenu({
           <PiLinkBold />
           Share...
         </DropdownMenu.Item>
-        <DropdownMenu.Item onSelect={() => setImportOpen(true)}>
+        <DropdownMenu.Item onSelect={() => setImportExportOpen(true)}>
           <PiDownloadSimpleBold />
           Import / Export
         </DropdownMenu.Item>
