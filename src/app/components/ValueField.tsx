@@ -1,12 +1,13 @@
 import clsx from "clsx";
 import { PiCircleFill } from "react-icons/pi";
-import React, { CSSProperties } from "react";
+import React, { CSSProperties, useMemo } from "react";
 import { Prism } from "react-syntax-highlighter";
 import {
   ghcolors as codeThemeLight,
   a11yDark as codeThemeDark,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import useGlobalState from "@/app/hooks/useGlobalState";
+import { isDark, Theme } from "@/app";
 
 export type ValueType = "string" | "number" | "boolean" | "json" | "unknown";
 
@@ -40,7 +41,14 @@ export default function ValueField({
   stringAsCode?: boolean;
   formatDefaultTypeAsConditionValue?: boolean;
 }) {
-  const [dark, setDark] = useGlobalState("dark", false, true);
+  const [theme, setTheme, themeReady] = useGlobalState<Theme>(
+    "theme",
+    "system",
+    true,
+  );
+  const dark = useMemo(() => {
+    return isDark(theme);
+  }, [theme, themeReady]);
 
   const formattedValue =
     value !== undefined

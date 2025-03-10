@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Button, Callout, Flex, IconButton, Link, Text } from "@radix-ui/themes";
+import {
+  Button,
+  Callout,
+  Flex,
+  IconButton,
+  Link,
+  Text,
+} from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
 import { MW, NAV_H } from "@/app";
 import {
   PiArrowsClockwise,
   PiArrowSquareOut,
-  PiCaretRightFill, PiWarningFill, PiWarningOctagonFill,
+  PiCaretRightFill,
+  PiWarningFill,
+  PiWarningOctagonFill,
   PiXBold,
 } from "react-icons/pi";
 import * as Accordion from "@radix-ui/react-accordion";
@@ -220,11 +229,7 @@ function statusPanel({
 
           <div className="mb-4">
             {!activeTabId && !refreshing ? (
-              <Callout.Root
-                color="red"
-                size="1"
-                className="mb-4"
-              >
+              <Callout.Root color="red" size="1" className="mb-4">
                 <Callout.Icon>
                   <PiWarningOctagonFill />
                 </Callout.Icon>
@@ -323,24 +328,23 @@ function versionPanel({
       {!version ? (
         <>
           <Text>
-            Unable to find your SDK version. This may indicate a version prior to 0.30.0.
+            Unable to find your SDK version. This may indicate a version prior
+            to 0.30.0.
           </Text>
           <div className="mt-4">
-            <Callout.Root
-              color="red"
-              size="1"
-              className="mt-2 mb-4"
-            >
+            <Callout.Root color="red" size="1" className="mt-2 mb-4">
               <Callout.Icon>
                 <PiWarningOctagonFill />
               </Callout.Icon>
               <Callout.Text>
-                Possibly using an unsupported legacy version of the SDK (&lt;0.30.0)
+                Possibly using an unsupported legacy version of the SDK
+                (&lt;0.30.0)
               </Callout.Text>
             </Callout.Root>
             <Text>
-              Versions prior to 0.30.0 are unsupported in DevTools. Additionally, versions prior to
-              0.23.0 are considered unstable. Consider updating to the latest version.
+              Versions prior to 0.30.0 are unsupported in DevTools.
+              Additionally, versions prior to 0.23.0 are considered unstable.
+              Consider updating to the latest version.
             </Text>
           </div>
         </>
@@ -352,11 +356,7 @@ function versionPanel({
           </Text>
           {paddedVersionString(version) < paddedVersionString("0.30.0") ? (
             <div className="mt-4">
-              <Callout.Root
-                color="red"
-                size="1"
-                className="mt-2 mb-4"
-              >
+              <Callout.Root color="red" size="1" className="mt-2 mb-4">
                 <Callout.Icon>
                   <PiWarningOctagonFill />
                 </Callout.Icon>
@@ -510,17 +510,11 @@ function payloadPanel({ hasPayload, payload }: SDKHealthCheckResult) {
     <>
       {!hasPayload ? (
         <>
-          <Callout.Root
-            color="amber"
-            size="1"
-            className="mb-4"
-          >
+          <Callout.Root color="amber" size="1" className="mb-4">
             <Callout.Icon>
               <PiWarningFill />
             </Callout.Icon>
-            <Callout.Text>
-              No payload present in your SDK
-            </Callout.Text>
+            <Callout.Text>No payload present in your SDK</Callout.Text>
           </Callout.Root>
           <Text as="div" size="2" weight="regular">
             Please check your implementation.
