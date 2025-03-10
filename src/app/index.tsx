@@ -318,7 +318,10 @@ export const App = () => {
           </Dialog.Content>
         </Dialog.Root>
 
-        <Dialog.Root open={importExportOpen} onOpenChange={(o) => setImportExportOpen(o)}>
+        <Dialog.Root
+          open={importExportOpen}
+          onOpenChange={(o) => setImportExportOpen(o)}
+        >
           <Dialog.Content className="ModalBody">
             <Dialog.Title>Import / Export DevTools State</Dialog.Title>
             <ImportExport close={() => setImportExportOpen(false)} />

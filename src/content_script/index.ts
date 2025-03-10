@@ -43,9 +43,13 @@ window.addEventListener(
         (Array.isArray(currentValue) || currentValue === undefined || !success)
       ) {
         if (currentValue === undefined || !success) {
-          setState(property, [value], true);
+          setState(property, Array.isArray(value) ? value : [value], true);
         } else {
-          setState(property, [...currentValue, value], true);
+          setState(
+            property,
+            [...currentValue, ...(Array.isArray(value) ? value : [value])],
+            true,
+          );
         }
       } else {
         setState(property, value, true);

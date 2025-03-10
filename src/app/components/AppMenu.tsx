@@ -1,13 +1,13 @@
-import { DropdownMenu, Flex, IconButton, Tooltip } from "@radix-ui/themes";
+import { Button, DropdownMenu, Flex, Tooltip } from "@radix-ui/themes";
 import {
+  PiArrowSquareInBold,
   PiBellFill,
   PiCircleFill,
   PiCircleHalfBold,
-  PiDotsThreeVerticalBold,
-  PiDownloadSimpleBold,
   PiGearSixFill,
-  PiLinkBold,
+  PiList,
   PiMoonBold,
+  PiShareBold,
   PiSunBold,
 } from "react-icons/pi";
 import React from "react";
@@ -36,25 +36,34 @@ export function AppMenu({
         {apiKeyReady && !apiKey ? (
           <div>
             <Tooltip content="Enter an Access Token for improved functionality">
-              <IconButton
-                className="relative"
-                variant="outline"
+              <Button
+                variant="ghost"
                 radius="small"
-                size="1"
+                size="2"
+                style={{ marginRight: 0 }}
               >
-                <PiCircleFill
-                  size={11}
-                  className="absolute text-red-600 bg-surface rounded-full border border-surface"
-                  style={{ right: -4, top: -4 }}
-                />
-                <PiDotsThreeVerticalBold />
-              </IconButton>
+                <div className="relative mr-1">
+                  <PiCircleFill
+                    size={11}
+                    className="absolute text-red-600 bg-surface rounded-full border border-surface"
+                    style={{ right: -4, top: -4 }}
+                  />
+                  <PiList size={18} />
+                </div>
+                Menu
+              </Button>
             </Tooltip>
           </div>
         ) : (
-          <IconButton variant="outline" radius="small" size="1">
-            <PiDotsThreeVerticalBold />
-          </IconButton>
+          <Button
+            variant="ghost"
+            radius="small"
+            size="2"
+            style={{ marginRight: 0 }}
+          >
+            <PiList size={18} className="mr-1" />
+            Menu
+          </Button>
         )}
       </DropdownMenu.Trigger>
       <DropdownMenu.Content variant="soft">
@@ -85,11 +94,11 @@ export function AppMenu({
           </DropdownMenu.SubContent>
         </DropdownMenu.Sub>
         <DropdownMenu.Item onSelect={() => setShareOpen(true)}>
-          <PiLinkBold />
+          <PiShareBold />
           Share...
         </DropdownMenu.Item>
         <DropdownMenu.Item onSelect={() => setImportExportOpen(true)}>
-          <PiDownloadSimpleBold />
+          <PiArrowSquareInBold />
           Import / Export
         </DropdownMenu.Item>
         <DropdownMenu.Separator />

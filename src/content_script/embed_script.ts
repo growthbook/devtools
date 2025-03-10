@@ -81,20 +81,59 @@ function hydrateApp() {
 
   onGrowthBookLoad((gb) => {
     if (
-      hydratedState?.attributes && typeof hydratedState.attributes === "object"
+      hydratedState?.attributes &&
+      typeof hydratedState.attributes === "object"
     ) {
       gb?.setAttributeOverrides?.(hydratedState.attributes);
     }
-    if (
-      hydratedState?.features && typeof hydratedState.features === "object"
-    ) {
+
+    if (hydratedState?.features && typeof hydratedState.features === "object") {
       let forcedFeaturesMap = new Map(Object.entries(hydratedState.features));
       gb?.setForcedFeatures?.(forcedFeaturesMap);
     }
+
     if (
-      hydratedState?.experiments && typeof hydratedState.experiments === "object"
+      hydratedState?.experiments &&
+      typeof hydratedState.experiments === "object"
     ) {
       gb?.setForcedVariations?.(hydratedState.experiments);
+    }
+
+    if (
+      hydratedState?.payload &&
+      typeof hydratedState.payload === "object" &&
+      gb?.setPayload
+    ) {
+      gb?.setPayload(hydratedState.payload);
+    }
+
+    if (
+      hydratedState?.payloadPatch &&
+      typeof hydratedState?.payloadPatch === "object" &&
+      gb?.setPayload
+    ) {
+      const payload = gb.getDecryptedPayload?.() || {
+        features: gb.getFeatures?.(),
+        experiments: gb.getExperiments?.(),
+      };
+      Object.keys(hydratedState.payloadPatch as FeatureApiResponse).forEach(
+        (key) => {
+          const k = key as keyof FeatureApiResponse;
+          if (!payload[k]) {
+            payload[k] = hydratedState.payloadPatch[k];
+          } else {
+            if (typeof payload[k] === "object") {
+              payload[k] = { ...payload[k], ...hydratedState.payloadPatch[k] };
+            }
+          }
+        },
+      );
+      gb?.setPayload(payload);
+    }
+
+    // logs are imported by hydration only
+    if (hydratedState?.logs && Array.isArray(hydratedState.logs)) {
+      updateTabState("logEvents", hydratedState.logs, true);
     }
   });
 }

@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
-import {Badge, Button, Checkbox, Link, Switch} from "@radix-ui/themes";
+import { Badge, Button, Checkbox, Link, Switch } from "@radix-ui/themes";
 import { useCopyToClipboard } from "@/app/hooks/useCopyToClipboard";
-import {PiCaretRightFill, PiCheckBold, PiLinkBold} from "react-icons/pi";
+import { PiCaretRightFill, PiCheckBold, PiLinkBold } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import { Attributes } from "@growthbook/growthbook";
 import { getOS } from "@/app/utils";
 import * as Accordion from "@radix-ui/react-accordion";
 import ValueField from "@/app/components/ValueField";
-import {NAV_H} from "@/app";
+import { NAV_H } from "@/app";
 
 type StatePayload = {
   features?: Record<string, any>;
@@ -114,31 +114,34 @@ const Share = ({ close }: { close: () => void }) => {
   useEffect(() => {
     setTimeout(
       () => (document.querySelector("#shareLinkField") as HTMLElement)?.focus(),
-      100,
+      400,
     );
   }, []);
 
   return (
     <div>
-      <div className="mt-1 text-gray-12 text-xs">
-        Get a shareable link for your current DevTools session. Recipient must
-        have GrowthBook DevTools installed.
+      <div className="mt-1 text-gray-12 text-sm">
+        Share your current session with other DevTools users
       </div>
 
       <div className="my-4">
         <Accordion.Root className="accordion" type="single" collapsible>
           <Accordion.Item value="advanced">
             <Accordion.Trigger className="trigger mb-0.5">
-              <Link size="2" role="button" className="text-left leading-3 hover:underline">
+              <Link
+                size="2"
+                role="button"
+                className="text-left leading-3 hover:underline"
+              >
                 <PiCaretRightFill className="caret mr-0.5" size={12} />
-                Share overrides <span className="text-xs">({overridesText})</span>
+                Share overrides{" "}
+                <span className="text-xs">({overridesText})</span>
               </Link>
             </Accordion.Trigger>
             <Accordion.Content className="accordionInner overflow-hidden w-full">
               <div className="box py-1">
                 <div className="my-1">
-                  <label
-                    className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11">
+                  <label className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11">
                     <Checkbox
                       size="1"
                       checked={includeFeatures}
@@ -150,19 +153,14 @@ const Share = ({ close }: { close: () => void }) => {
                         {numForcedFeatures}
                       </Badge>
                     ) : (
-                      <Badge
-                        color="gray"
-                        radius="full"
-                        variant="soft"
-                      >
+                      <Badge color="gray" radius="full" variant="soft">
                         none
                       </Badge>
                     )}
                   </label>
                 </div>
                 <div className="my-1">
-                  <label
-                    className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11">
+                  <label className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11">
                     <Checkbox
                       size="1"
                       checked={includeExperiments}
@@ -174,19 +172,14 @@ const Share = ({ close }: { close: () => void }) => {
                         {numForcedVariations}
                       </Badge>
                     ) : (
-                      <Badge
-                        color="gray"
-                        radius="full"
-                        variant="soft"
-                      >
+                      <Badge color="gray" radius="full" variant="soft">
                         none
                       </Badge>
                     )}
                   </label>
                 </div>
                 <div className="my-1">
-                  <label
-                    className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11">
+                  <label className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11">
                     <Checkbox
                       size="1"
                       checked={includeAttributes}
@@ -198,11 +191,7 @@ const Share = ({ close }: { close: () => void }) => {
                         {numAttributeOverrides}
                       </Badge>
                     ) : (
-                      <Badge
-                        color="gray"
-                        radius="full"
-                        variant="soft"
-                      >
+                      <Badge color="gray" radius="full" variant="soft">
                         none
                       </Badge>
                     )}
@@ -231,29 +220,27 @@ const Share = ({ close }: { close: () => void }) => {
         ) : null}
       </div>
 
-      <div className="mt-8">
-        {isDevtoolsPanel && !isFirefox ? (
-          <Button size="3" className="w-full" variant="soft" onClick={close}>
-            Close
-          </Button>
-        ) : copySuccess ? (
-          <Button size="3" className="w-full">
-            <PiCheckBold/>
-            Link copied
-          </Button>
-        ) : (
-          <Button
-            size="3"
-            className="w-full"
-            onClick={() => {
-              if (!copySuccess) performCopy(shareableLink);
-            }}
-          >
-            <PiLinkBold/>
-            Copy Link
-          </Button>
-        )}
-      </div>
+      {!isDevtoolsPanel || isFirefox ? (
+        <div className="mt-8">
+          {copySuccess ? (
+            <Button size="3" className="w-full">
+              <PiCheckBold />
+              Link copied
+            </Button>
+          ) : (
+            <Button
+              size="3"
+              className="w-full"
+              onClick={() => {
+                if (!copySuccess) performCopy(shareableLink);
+              }}
+            >
+              <PiLinkBold />
+              Copy Link
+            </Button>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 };

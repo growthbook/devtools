@@ -264,7 +264,7 @@ export default function AttributesForm({
                     "border border-red-700": textareaError,
                   },
                 )}
-                style={{minHeight: "unset !important"}}
+                style={{ minHeight: "unset !important" }}
               >
                 <TextareaAutosize
                   className="rt-reset rt-TextAreaInput mono"
