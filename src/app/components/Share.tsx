@@ -18,7 +18,7 @@ type StatePayload = {
 const Share = ({ close }: { close: () => void }) => {
   const isDevtoolsPanel = useMemo(
     () =>
-      document.querySelector("#root")?.getAttribute("data-is-devtools") === "1",
+      document.querySelector("#root")?.getAttribute("data-is-devtools-panel") === "1",
     [],
   );
   const isFirefox = navigator.userAgent.includes("Firefox");
