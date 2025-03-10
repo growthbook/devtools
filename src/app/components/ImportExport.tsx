@@ -108,15 +108,27 @@ const ImportExport = ({ close }: { close: () => void }) => {
 
   const importState = () => {
     try {
-      const payload = JSON.parse(formValue);
-      if (payload?.attributes && typeof payload.attributes === "object") {
-        setOverriddenAttributes(payload.attributes);
+      const data = JSON.parse(formValue);
+      if (data?.attributes && typeof data.attributes === "object") {
+        setOverriddenAttributes(data.attributes);
       }
-      if (payload?.features && typeof payload.features === "object") {
-        setForcedFeatures(payload.features);
+      if (data?.features && typeof data.features === "object") {
+        setForcedFeatures(data.features);
       }
-      if (payload?.experiments && typeof payload.experiments === "object") {
-        setForcedVariations(payload.experiments);
+      if (data?.experiments && typeof data.experiments === "object") {
+        setForcedVariations(data.experiments);
+      }
+      if (
+        data?.payload &&
+        typeof data.payload === "object"
+      ) {
+        chrome.runtime.sendMessage({ type: "SET_PAYLOAD", data: data.payload });
+      }
+      if (
+        data?.patchPayload &&
+        typeof data.patchPayload === "object"
+      ) {
+        chrome.runtime.sendMessage({ type: "PATCH_PAYLOAD", data: data.patchPayload });
       }
 
       setTextareaError(false);

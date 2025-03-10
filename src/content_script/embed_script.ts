@@ -101,34 +101,16 @@ function hydrateApp() {
 
     if (
       hydratedState?.payload &&
-      typeof hydratedState.payload === "object" &&
-      gb?.setPayload
+      typeof hydratedState.payload === "object"
     ) {
-      gb?.setPayload(hydratedState.payload);
+      setPayload(hydratedState.payload);
     }
 
     if (
       hydratedState?.payloadPatch &&
-      typeof hydratedState?.payloadPatch === "object" &&
-      gb?.setPayload
+      typeof hydratedState.payloadPatch === "object"
     ) {
-      const payload = gb.getDecryptedPayload?.() || {
-        features: gb.getFeatures?.(),
-        experiments: gb.getExperiments?.(),
-      };
-      Object.keys(hydratedState.payloadPatch as FeatureApiResponse).forEach(
-        (key) => {
-          const k = key as keyof FeatureApiResponse;
-          if (!payload[k]) {
-            payload[k] = hydratedState.payloadPatch[k];
-          } else {
-            if (typeof payload[k] === "object") {
-              payload[k] = { ...payload[k], ...hydratedState.payloadPatch[k] };
-            }
-          }
-        },
-      );
-      gb?.setPayload(payload);
+      patchPayload(hydratedState.payloadPatch);
     }
 
     // logs are imported by hydration only
@@ -203,6 +185,16 @@ function setupListeners() {
           navigator.clipboard.writeText(message.value);
         }
         break;
+      case "SET_PAYLOAD":
+        if (message.data) {
+          setPayload(message.data);
+        }
+        break;
+      case "PATCH_PAYLOAD":
+        if (message.data) {
+          patchPayload(message.data);
+        }
+        break;
       default:
         return;
     }
@@ -232,6 +224,59 @@ function updateExperiments(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (data) {
       gb.setForcedVariations?.(data as Record<string, number>);
+    }
+  });
+}
+
+function setPayload(data: FeatureApiResponse) {
+  onGrowthBookLoad((gb) => {
+    if (data) {
+      if (gb.setPayload) {
+        gb.setPayload(data);
+      } else {
+        if (gb.setFeatures && data.features) {
+          gb.setFeatures(data.features);
+        }
+        if (gb.setExperiments && data.experiments) {
+          gb.setExperiments(data.experiments);
+        }
+      }
+    }
+  });
+}
+
+function patchPayload(data: FeatureApiResponse) {
+  onGrowthBookLoad((gb) => {
+    if (data) {
+      const payload = gb.getDecryptedPayload?.() || {
+        features: gb.getFeatures?.(),
+        experiments: gb.getExperiments?.(),
+      };
+      Object.keys(data).forEach(
+        (key) => {
+          const k = key as keyof FeatureApiResponse;
+          if (!payload[k]) {
+            // @ts-ignore
+            payload[k] = data[k];
+          } else {
+            if (typeof payload[k] === "object") {
+              // @ts-ignore
+              payload[k] = { ...payload[k], ...data[k] };
+            }
+          }
+        },
+      );
+
+      if (gb.setPayload) {
+        gb.setPayload(data);
+      } else {
+        if (gb.setFeatures && data.features) {
+          gb.setFeatures(data.features);
+        }
+        if (gb.setExperiments && data.experiments) {
+          gb.setExperiments(data.experiments);
+        }
+      }
     }
   });
 }

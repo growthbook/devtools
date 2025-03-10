@@ -179,6 +179,10 @@ chrome.runtime.onMessage.addListener(async (msg: Message) => {
     case "COPY_TO_CLIPBOARD":
       window.postMessage(msg, window.location.origin);
       break;
+    case "SET_PAYLOAD":
+    case "PATCH_PAYLOAD":
+      window.postMessage(msg, window.location.origin);
+      break;
     default:
       break;
   }
