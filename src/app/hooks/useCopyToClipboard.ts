@@ -28,19 +28,17 @@ export const useCopyToClipboard = ({
     } catch (e) {
       // devtools panel must send a message to embed_script
       const activeTabId = await getActiveTabId();
-      if (!activeTabId) {
-      }
-      if (chrome?.tabs) {
-        console.log("send 1", value);
-        await chrome.tabs.sendMessage(activeTabId, {
-          type: "COPY_TO_CLIPBOARD",
-          value,
-        });
-        setSuccess(true);
-      } else {
-        console.log("send 2", value);
-        await chrome.runtime.sendMessage({ type: "COPY_TO_CLIPBOARD", value });
-        setSuccess(true);
+      if (activeTabId) {
+        if (chrome?.tabs) {
+          await chrome.tabs.sendMessage(activeTabId, {
+            type: "COPY_TO_CLIPBOARD",
+            value,
+          });
+          setSuccess(true);
+        } else {
+          await chrome.runtime.sendMessage({type: "COPY_TO_CLIPBOARD", value});
+          setSuccess(true);
+        }
       }
     }
   };

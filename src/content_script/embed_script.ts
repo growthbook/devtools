@@ -268,13 +268,13 @@ function patchPayload(data: FeatureApiResponse) {
       );
 
       if (gb.setPayload) {
-        gb.setPayload(data);
+        gb.setPayload(payload);
       } else {
-        if (gb.setFeatures && data.features) {
-          gb.setFeatures(data.features);
+        if (gb.setFeatures && payload.features) {
+          gb.setFeatures(payload.features);
         }
-        if (gb.setExperiments && data.experiments) {
-          gb.setExperiments(data.experiments);
+        if (gb.setExperiments && payload.experiments) {
+          gb.setExperiments(payload.experiments);
         }
       }
     }

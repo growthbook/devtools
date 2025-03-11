@@ -95,7 +95,7 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
 
       // Firefox: Proxied tab state messages (UI -> background -> content_script)
       if (
-        ["getTabState", "setTabState", "COPY_TO_CLIPBOARD"].includes(
+        ["getTabState", "setTabState", "COPY_TO_CLIPBOARD", "SET_PAYLOAD", "PATCH_PAYLOAD"].includes(
           message.type,
         )
       ) {

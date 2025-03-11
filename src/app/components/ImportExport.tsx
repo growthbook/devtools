@@ -8,7 +8,7 @@ import {
   PiLinkBold,
   PiUploadSimpleBold,
 } from "react-icons/pi";
-import useTabState from "@/app/hooks/useTabState";
+import useTabState, {getActiveTabId} from "@/app/hooks/useTabState";
 import { Attributes } from "@growthbook/growthbook";
 import { getOS } from "@/app/utils";
 import clsx from "clsx";
@@ -106,7 +106,7 @@ const ImportExport = ({ close }: { close: () => void }) => {
     }
   }, [statePayload, dirty]);
 
-  const importState = () => {
+  const importState = async () => {
     try {
       const data = JSON.parse(formValue);
       if (data?.attributes && typeof data.attributes === "object") {
@@ -122,13 +122,33 @@ const ImportExport = ({ close }: { close: () => void }) => {
         data?.payload &&
         typeof data.payload === "object"
       ) {
-        chrome.runtime.sendMessage({ type: "SET_PAYLOAD", data: data.payload });
+        const activeTabId = await getActiveTabId();
+        if (activeTabId) {
+          if (chrome?.tabs) {
+            await chrome.tabs.sendMessage(activeTabId, {
+              type: "SET_PAYLOAD",
+              data: data.payload,
+            });
+          } else {
+            chrome.runtime.sendMessage({type: "SET_PAYLOAD", data: data.payload});
+          }
+        }
       }
       if (
         data?.patchPayload &&
         typeof data.patchPayload === "object"
       ) {
-        chrome.runtime.sendMessage({ type: "PATCH_PAYLOAD", data: data.patchPayload });
+        const activeTabId = await getActiveTabId();
+        if (activeTabId) {
+          if (chrome?.tabs) {
+            await chrome.tabs.sendMessage(activeTabId, {
+              type: "PATCH_PAYLOAD",
+              data: data.patchPayload,
+            });
+          } else {
+            chrome.runtime.sendMessage({type: "PATCH_PAYLOAD", data: data.patchPayload});
+          }
+        }
       }
 
       setTextareaError(false);
