@@ -1,13 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Badge, Button, Checkbox, Link, Switch } from "@radix-ui/themes";
+import { Badge, Button, Checkbox, Link } from "@radix-ui/themes";
 import { useCopyToClipboard } from "@/app/hooks/useCopyToClipboard";
 import { PiCaretRightFill, PiCheckBold, PiLinkBold } from "react-icons/pi";
 import useTabState from "@/app/hooks/useTabState";
 import { Attributes } from "@growthbook/growthbook";
 import { getOS } from "@/app/utils";
 import * as Accordion from "@radix-ui/react-accordion";
-import ValueField from "@/app/components/ValueField";
-import { NAV_H } from "@/app";
 
 type StatePayload = {
   features?: Record<string, any>;

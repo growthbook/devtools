@@ -1,14 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Badge, Button, Checkbox, Link, Switch } from "@radix-ui/themes";
+import { Badge, Button, Checkbox, Link } from "@radix-ui/themes";
 import { useCopyToClipboard } from "@/app/hooks/useCopyToClipboard";
 import {
   PiArrowSquareInBold,
   PiArrowSquareOutBold,
   PiCaretRightFill,
   PiCheckBold,
-  PiDownloadSimpleBold,
-  PiLinkBold,
-  PiUploadSimpleBold,
 } from "react-icons/pi";
 import useTabState, { getActiveTabId } from "@/app/hooks/useTabState";
 import { Attributes } from "@growthbook/growthbook";
