@@ -104,14 +104,18 @@ function hydrateApp() {
     }
 
     if (
-      hydratedState?.payloadPatch &&
-      typeof hydratedState.payloadPatch === "object"
+      hydratedState?.patchPayload &&
+      typeof hydratedState.patchPayload === "object"
     ) {
-      patchPayload(hydratedState.payloadPatch);
+      patchPayload(hydratedState.patchPayload);
     }
 
     // logs are imported by hydration only
     if (hydratedState?.logs && Array.isArray(hydratedState.logs)) {
+      const logs = hydratedState.logs.map((log: any) => ({
+        ...log,
+        source: log.source ? log.source : "external",
+      }));
       updateTabState("logEvents", hydratedState.logs, true);
     }
   });

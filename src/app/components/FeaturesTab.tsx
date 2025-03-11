@@ -25,10 +25,12 @@ import SearchBar from "@/app/components/SearchBar";
 import { Box, Button, Link, Switch, Tooltip } from "@radix-ui/themes";
 import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
 import { useResponsiveContext } from "../hooks/useResponsive";
+import { TbEyeSearch } from "react-icons/tb";
 
 export type FeatureDefinitionWithId = FeatureDefinition & {
   id: string;
   noDefinition?: boolean;
+  isDraft?: boolean;
 };
 
 export const LEFT_PERCENT = 0.4;
@@ -283,6 +285,12 @@ export default function FeaturesTab() {
                       forced={isForced}
                       type="feature"
                     />
+                    {selectedFeature?.feature?.isDraft ? (
+                      <TbEyeSearch
+                        className="inline-block mr-1 opacity-50"
+                        size={12}
+                      />
+                    ) : null}
                     {fid}
                   </div>
                 </div>

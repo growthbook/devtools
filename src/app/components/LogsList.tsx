@@ -158,8 +158,11 @@ export default function LogsList({
                       smTextSizeClass,
                     })}
                   >
-                    <div className="w-[20%] min-w-[70px] px-1 text-left text-nowrap text-ellipsis flex items-center">
-                      <PiCaretRightFill className="caret mr-0.5" size={12} />
+                    <div className="w-[20%] min-w-[70px] pr-2 text-left text-nowrap text-ellipsis flex items-center">
+                      <PiCaretRightFill
+                        className="caret mr-0.5 flex-shrink-0"
+                        size={12}
+                      />
                       <Text className={xsTextSizeClass}>
                         {formattedDateTime}
                       </Text>
@@ -174,6 +177,7 @@ export default function LogsList({
                         xsTextSizeClass,
                       )}
                     >
+                      {evt.source ? "＊" : ""}
                       {evt.logType}
                     </div>
                     <div
@@ -209,7 +213,11 @@ export default function LogsList({
                 </Accordion.Trigger>
                 <Accordion.Content>
                   <ValueField
-                    value={evt.details}
+                    value={
+                      evt.source
+                        ? { eventSource: evt.source, ...evt.details }
+                        : evt.details
+                    }
                     valueType="json"
                     jsonStringifySpaces={2}
                     maxHeight={120}
