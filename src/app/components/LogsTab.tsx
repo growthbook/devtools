@@ -1,5 +1,5 @@
 import { LogUnion } from "@growthbook/growthbook";
-import React, { useEffect } from "react";
+import React from "react";
 import useTabState from "../hooks/useTabState";
 import LogsList from "./LogsList";
 import { Link } from "@radix-ui/themes";

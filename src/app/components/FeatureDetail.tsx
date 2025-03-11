@@ -24,6 +24,7 @@ import useGlobalState from "@/app/hooks/useGlobalState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
 import useTabState from "@/app/hooks/useTabState";
 import DebugLogger from "@/app/components/DebugLogger";
+import { TbEyeSearch } from "react-icons/tb";
 
 export default function FeatureDetail({
   selectedFid,
@@ -134,6 +135,20 @@ export default function FeatureDetail({
         </div>
 
         <div className="content">
+          {selectedFeature?.feature?.isDraft ? (
+            <Callout.Root
+              color="cyan"
+              size="1"
+              className="py-1.5 px-2 mt-2 mb-4"
+            >
+              <Tooltip content="You are previewing a draft state of this feature. Reload the current page to reset.">
+                <span className="text-sm">
+                  <TbEyeSearch className="inline-block mr-1 mb-0.5" />
+                  Previewing draft
+                </span>
+              </Tooltip>
+            </Callout.Root>
+          ) : null}
           {selectedFeature?.feature?.noDefinition ? (
             <Callout.Root
               color="amber"

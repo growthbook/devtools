@@ -23,10 +23,12 @@ import { getFeatureDetails } from "@/app/components/FeaturesTab";
 import { ValueType } from "@/app/components/ValueField";
 import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
 import { useResponsiveContext } from "../hooks/useResponsive";
+import { TbEyeSearch } from "react-icons/tb";
 
 export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
   features?: string[];
   featureTypes?: Record<string, ValueType>;
+  isDraft?: boolean;
 };
 
 export const LEFT_PERCENT = 0.4;
@@ -284,6 +286,12 @@ export default function ExperimentsTab() {
                     forced={isForced}
                     type="experiment"
                   />
+                  {selectedExperiment?.experiment?.isDraft ? (
+                    <TbEyeSearch
+                      className="inline-block mr-1 opacity-50"
+                      size={12}
+                    />
+                  ) : null}
                   {eid}
                 </div>
                 <div

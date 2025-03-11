@@ -2,7 +2,7 @@ import type {
   Experiment,
   FeatureDefinition,
   ExperimentOverride,
-  StickyAssignmentsDocument,
+  StickyAssignmentsDocument, FeatureApiResponse,
 } from "@growthbook/growthbook";
 import {
   FetchVisualChangesetPayload,
@@ -167,6 +167,21 @@ type PullOverrides = {
   type: "GB_REQUEST_OVERRIDES";
 };
 
+type SetPayload = {
+  type: "SET_PAYLOAD";
+  data: FeatureApiResponse;
+};
+
+type PatchPayload = {
+  type: "PATCH_PAYLOAD";
+  data: FeatureApiResponse;
+};
+
+type CopyToClipboard = {
+  type: "COPY_TO_CLIPBOARD";
+  value: string;
+};
+
 // Messages sent to content script
 export type Message =
   | RequestRefreshMessage
@@ -182,7 +197,10 @@ export type Message =
   | TransformCopyRequestMessage
   | TransformCopyResponseMessage
   | UpdateTabState
-  | PullOverrides;
+  | PullOverrides
+  | SetPayload
+  | PatchPayload
+  | CopyToClipboard;
 
 export type BGLoadVisualChangsetMessage = {
   type: "BG_LOAD_VISUAL_CHANGESET";

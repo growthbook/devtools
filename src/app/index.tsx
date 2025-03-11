@@ -1,13 +1,13 @@
 import "@/app/css/index.css";
 import {
-  Theme,
-  IconButton,
   Dialog,
-  Tabs,
-  Tooltip,
+  IconButton,
   Select,
+  Tabs,
+  Theme,
+  Tooltip,
 } from "@radix-ui/themes";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import logo from "./logo.svg";
 import logoWhite from "./logo-white.svg";
 import useTabState from "@/app/hooks/useTabState";
@@ -19,27 +19,20 @@ import LogsTab from "./components/LogsTab";
 import SettingsForm, { API_KEY } from "@/app/components/Settings";
 import useSdkData from "@/app/hooks/useSdkData";
 import {
-  PiX,
   PiCircleFill,
-  PiGearSixFill,
   PiWarningFill,
   PiWarningOctagonFill,
-  PiSunBold,
-  PiMoonBold,
-  PiCircleHalfBold,
+  PiX,
 } from "react-icons/pi";
 import ArchetypesList from "@/app/components/ArchetypesList";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import ConditionalWrapper from "@/app/components/ConditionalWrapper";
 import { useResponsiveContext } from "./hooks/useResponsive";
 import { Archetype } from "@/app/gbTypes";
-import packageJson from "@growthbook/growthbook/package.json";
 import { Attributes } from "@growthbook/growthbook";
-
-const latestSdkVersion = packageJson.version;
-const latestSdkParts = latestSdkVersion.split(".");
-latestSdkParts[2] = "0";
-const latestMinorSdkVersion = latestSdkParts.join(".");
+import { AppMenu } from "@/app/components/AppMenu";
+import Share from "@/app/components/Share";
+import ImportExport from "@/app/components/ImportExport";
 
 export const MW = 1200; // max-width
 export const RESPONSIVE_W = 570; // small width mode
@@ -56,6 +49,8 @@ export function isDark(theme: Theme): boolean {
 export const App = () => {
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [importExportOpen, setImportExportOpen] = useState(false);
 
   const { isResponsive, isTiny } = useResponsiveContext();
   const [theme, setTheme, themeReady] = useGlobalState<Theme>(
@@ -63,12 +58,9 @@ export const App = () => {
     "system",
     true,
   );
-  const [dark, setDark] = useGlobalState("dark", isDark(theme));
-  useEffect(() => {
-    if (themeReady && dark !== isDark(theme)) {
-      setDark(isDark(theme));
-    }
-  }, [theme, themeReady, dark]);
+  const dark = useMemo(() => {
+    return isDark(theme);
+  }, [theme, themeReady]);
 
   const [apiKey, setApiKey, apiKeyReady] = useGlobalState(API_KEY, "", true);
 
@@ -164,11 +156,14 @@ export const App = () => {
                   </Tabs.Trigger>
                   <div className="flex-1" />
                   <div className="flex items-center gap-2 flex-grow-0 flex-shrink-0">
-                    <ThemeButton />
-                    <SettingsButton
+                    <AppMenu
                       apiKeyReady={apiKeyReady}
                       apiKey={apiKey}
+                      theme={theme}
+                      setTheme={setTheme}
                       setSettingsOpen={setSettingsOpen}
+                      setShareOpen={setShareOpen}
+                      setImportExportOpen={setImportExportOpen}
                     />
                   </div>
                   <div className="mx-2" />
@@ -252,11 +247,14 @@ export const App = () => {
                 </Select.Content>
               </Select.Root>
               <div className="flex items-center gap-2 flex-grow-0 flex-shrink-0">
-                <ThemeButton />
-                <SettingsButton
+                <AppMenu
                   apiKeyReady={apiKeyReady}
                   apiKey={apiKey}
+                  theme={theme}
+                  setTheme={setTheme}
                   setSettingsOpen={setSettingsOpen}
+                  setShareOpen={setShareOpen}
+                  setImportExportOpen={setImportExportOpen}
                 />
               </div>
             </div>
@@ -288,6 +286,45 @@ export const App = () => {
           <Dialog.Content className="ModalBody">
             <Dialog.Title>Settings</Dialog.Title>
             <SettingsForm close={() => setSettingsOpen(false)} />
+            <Dialog.Close style={{ position: "absolute", top: 5, right: 5 }}>
+              <IconButton
+                color="gray"
+                highContrast
+                size="1"
+                variant="outline"
+                radius="full"
+              >
+                <PiX size={20} />
+              </IconButton>
+            </Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Root>
+
+        <Dialog.Root open={shareOpen} onOpenChange={(o) => setShareOpen(o)}>
+          <Dialog.Content className="ModalBody">
+            <Dialog.Title>Share DevTools State</Dialog.Title>
+            <Share close={() => setShareOpen(false)} />
+            <Dialog.Close style={{ position: "absolute", top: 5, right: 5 }}>
+              <IconButton
+                color="gray"
+                highContrast
+                size="1"
+                variant="outline"
+                radius="full"
+              >
+                <PiX size={20} />
+              </IconButton>
+            </Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Root>
+
+        <Dialog.Root
+          open={importExportOpen}
+          onOpenChange={(o) => setImportExportOpen(o)}
+        >
+          <Dialog.Content className="ModalBody">
+            <Dialog.Title>Import / Export DevTools State</Dialog.Title>
+            <ImportExport close={() => setImportExportOpen(false)} />
             <Dialog.Close style={{ position: "absolute", top: 5, right: 5 }}>
               <IconButton
                 color="gray"
@@ -435,79 +472,4 @@ function NavLabel({
   }
 
   return null;
-}
-
-function SettingsButton({
-  apiKeyReady,
-  apiKey,
-  setSettingsOpen,
-}: {
-  apiKeyReady: boolean;
-  apiKey: string;
-  setSettingsOpen: (b: boolean) => void;
-}) {
-  return apiKeyReady && !apiKey ? (
-    <Tooltip content="Enter an Access Token for improved functionality">
-      <IconButton
-        className="relative"
-        variant="outline"
-        size="1"
-        onClick={() => setSettingsOpen(true)}
-      >
-        <PiCircleFill
-          size={9}
-          className="absolute text-red-600 bg-surface rounded-full border border-surface"
-          style={{ right: 1, top: 1 }}
-        />
-        <PiGearSixFill size={17} />
-      </IconButton>
-    </Tooltip>
-  ) : (
-    <IconButton
-      variant="outline"
-      size="1"
-      onClick={() => setSettingsOpen(true)}
-    >
-      <PiGearSixFill size={17} />
-    </IconButton>
-  );
-}
-
-function ThemeButton() {
-  const [theme, setTheme] = useGlobalState<Theme>("theme", "system", true);
-  return (
-    <Tooltip
-      side="bottom"
-      content={`Theme: ${
-        theme === "system"
-          ? "System default"
-          : theme === "dark"
-            ? "Dark"
-            : "Light"
-      }`}
-    >
-      <IconButton
-        variant="ghost"
-        style={{ margin: 0 }}
-        size="1"
-        onClick={() =>
-          setTheme(
-            theme === "system"
-              ? "light"
-              : theme === "light"
-                ? "dark"
-                : "system",
-          )
-        }
-      >
-        {theme === "system" ? (
-          <PiCircleHalfBold />
-        ) : theme === "dark" ? (
-          <PiMoonBold />
-        ) : (
-          <PiSunBold />
-        )}
-      </IconButton>
-    </Tooltip>
-  );
 }

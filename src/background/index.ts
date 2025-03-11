@@ -94,11 +94,22 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
       }
 
       // Firefox: Proxied tab state messages (UI -> background -> content_script)
-      if (message.type === "getTabState" || message.type === "setTabState") {
+      if (
+        [
+          "getTabState",
+          "setTabState",
+          "COPY_TO_CLIPBOARD",
+          "SET_PAYLOAD",
+          "PATCH_PAYLOAD",
+        ].includes(message.type)
+      ) {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           const activeTabId = tabs[0]?.id;
           if (activeTabId) {
-            chrome.tabs.sendMessage(activeTabId, message);
+            chrome.tabs.sendMessage(activeTabId, {
+              ...message,
+              tabId: activeTabId,
+            });
           }
         });
       }
@@ -190,9 +201,9 @@ const UpdateTabIconBasedOnSDK = (
             : "") +
           (!data.payloadDecrypted ? "Decryption issues\n" : "")) +
         (paddedVersionString(data.version) <
-           paddedVersionString(latestMinorSdkVersion)
-            ? "Outdated SDK version"
-            : "");
+        paddedVersionString(latestMinorSdkVersion)
+          ? "Outdated SDK version"
+          : "");
     } else {
       chrome.action.setIcon({
         tabId,
@@ -206,8 +217,8 @@ const UpdateTabIconBasedOnSDK = (
         (data.canConnect && !data.version
           ? "Unknown SDK version"
           : data.canConnect &&
-            paddedVersionString(data.version) <
-              paddedVersionString(latestMinorSdkVersion)
+              paddedVersionString(data.version) <
+                paddedVersionString(latestMinorSdkVersion)
             ? "Outdated SDK version"
             : "");
     }
@@ -285,9 +296,26 @@ export function getSdkStatus(
     !sdkData.hasPayload ||
     sdkData.trackingCallbackParams?.length !== 2 ||
     !sdkData.payloadDecrypted ||
-    paddedVersionString(sdkData.version) < paddedVersionString(latestMinorSdkVersion)
+    paddedVersionString(sdkData.version) <
+      paddedVersionString(latestMinorSdkVersion)
   ) {
     return "yellow";
   }
   return "green";
 }
+
+// Firefox: return tabId if asked by content_script
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.action === "GET_TAB_ID") {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const activeTabId = tabs[0]?.id;
+      if (activeTabId) {
+        chrome.tabs.sendMessage(activeTabId, {
+          type: "SET_TAB_ID",
+          tabId: activeTabId,
+        });
+      }
+    });
+  }
+  return true;
+});

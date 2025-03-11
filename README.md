@@ -64,6 +64,12 @@ Some notes
 
 ## Changelog
 
+*1.1.0* (2025-03-11)
+- Share DevTools session by link
+- Import/export DevTools session by JSON blob
+- Preview draft features & experiments not in SDK payload
+- Bug fixes (occasional attributes tab crashes, mislabeled experiment overrides, theme flickering)
+
 *1.0.4* (2025-03-05)
 - Ability to clear individual attribute overrides
 - Bug fixes (legacy SDK support, prevent attribute caching, search)

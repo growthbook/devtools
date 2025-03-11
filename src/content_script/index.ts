@@ -8,6 +8,8 @@ import {
 } from "@/content_script/pageMessageHandlers";
 
 const forceLoadVisualEditor = false;
+let tabId: number | undefined;
+
 export const SESSION_STORAGE_TAB_STATE_KEY = "growthbook-devtools-tab-state";
 
 // Special state variables will push their updates to the embed script / SDK when changed:
@@ -41,9 +43,13 @@ window.addEventListener(
         (Array.isArray(currentValue) || currentValue === undefined || !success)
       ) {
         if (currentValue === undefined || !success) {
-          setState(property, [value], true);
+          setState(property, Array.isArray(value) ? value : [value], true);
         } else {
-          setState(property, [...currentValue, value], true);
+          setState(
+            property,
+            [...currentValue, ...(Array.isArray(value) ? value : [value])],
+            true,
+          );
         }
       } else {
         setState(property, value, true);
@@ -70,6 +76,7 @@ function setState(property: string, value: any, skipPostMessage?: boolean) {
     type: "tabStateChanged",
     property,
     value,
+    tabId,
   });
   // send custom messages to Embed script for specific properties so that the Embed script can update the GB SDK
   if (!skipPostMessage && property in propertiesWithCustomMessage) {
@@ -107,11 +114,13 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
           type: "tabStateChanged",
           property: message.property,
           value: stateValue,
+          tabId,
         });
       } else {
         chrome.runtime.sendMessage({
           type: "tabStateChanged",
           property: message.property,
+          tabId,
           // not found, send empty message to signal unset
         });
       }
@@ -159,7 +168,6 @@ window.addEventListener(
 );
 
 // Listen for messages from devtools, background, etc.
-// todo: remove 1 ore more?:
 chrome.runtime.onMessage.addListener(async (msg: Message) => {
   switch (msg.type) {
     case "GB_SET_OVERRIDES":
@@ -167,6 +175,13 @@ chrome.runtime.onMessage.addListener(async (msg: Message) => {
       break;
     case "GB_REQUEST_REFRESH":
       refreshSDK();
+      break;
+    case "COPY_TO_CLIPBOARD":
+      window.postMessage(msg, window.location.origin);
+      break;
+    case "SET_PAYLOAD":
+    case "PATCH_PAYLOAD":
+      window.postMessage(msg, window.location.origin);
       break;
     default:
       break;
@@ -215,4 +230,14 @@ window.addEventListener("storage", (event) => {
 
 function refreshSDK() {
   window.postMessage({ type: "GB_REQUEST_REFRESH" }, window.location.origin);
+}
+
+// Firefox: ask the background for the current tabId.
+if (navigator.userAgent.includes("Firefox")) {
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === "SET_TAB_ID") {
+      tabId = message.tabId;
+    }
+  });
+  chrome.runtime.sendMessage({ action: "GET_TAB_ID" });
 }

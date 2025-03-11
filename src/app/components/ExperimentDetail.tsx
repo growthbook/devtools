@@ -1,5 +1,12 @@
 import { MW, NAV_H } from "@/app";
-import { Button, IconButton, Link, RadioCards } from "@radix-ui/themes";
+import {
+  Button,
+  Callout,
+  IconButton,
+  Link,
+  RadioCards,
+  Tooltip,
+} from "@radix-ui/themes";
 import {
   PiArrowSquareOut,
   PiCaretRightFill,
@@ -28,6 +35,7 @@ import { SelectedExperiment } from "@/app/components/ExperimentsTab";
 import { AutoExperimentVariation, isURLTargeted } from "@growthbook/growthbook";
 import clsx from "clsx";
 import DebugLogger, { DebugLogAccordion } from "@/app/components/DebugLogger";
+import { TbEyeSearch } from "react-icons/tb";
 
 export default function ExperimentDetail({
   selectedEid,
@@ -161,6 +169,21 @@ export default function ExperimentDetail({
         </div>
 
         <div className="content">
+          {selectedExperiment?.experiment?.isDraft ? (
+            <Callout.Root
+              color="cyan"
+              size="1"
+              className="py-1.5 px-2 mt-2 mb-4"
+            >
+              <Tooltip content="You are previewing a draft state of this experiment. Reload the current page to reset.">
+                <span className="text-sm">
+                  <TbEyeSearch className="inline-block mr-1 mb-0.5" />
+                  Previewing draft
+                </span>
+              </Tooltip>
+            </Callout.Root>
+          ) : null}
+
           <div className="my-1">
             <div className="mt-2 mb-3">
               <div className="label font-semibold">Enrollment Status</div>

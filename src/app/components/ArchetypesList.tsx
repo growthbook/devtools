@@ -5,7 +5,6 @@ import {
   PiCaretDownFill,
   PiCheck,
   PiPencilSimple,
-  PiUser,
   PiUserCircle,
 } from "react-icons/pi";
 import useApi from "@/app/hooks/useApi";
@@ -70,7 +69,7 @@ export default function ArchetypesList() {
             className="block text-nowrap overflow-hidden overflow-ellipsis"
             style={{ maxWidth: "calc(100vw - 120px - 20px - 20px)" }}
           >
-            <PiUserCircle className="inline-block mr-1" />
+            <PiUserCircle className="inline-block mr-1 mb-0.5" />
             {selectedArchetype?.name || "Current User"}
           </Link>
           <PiCaretDownFill className="ml-0.5 text-violet-a11" size={12} />

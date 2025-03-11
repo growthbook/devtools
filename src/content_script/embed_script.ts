@@ -64,10 +64,59 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
 function init() {
   setupListeners();
   pushAppUpdates();
-  pullOverrides();
+  hydrateApp();
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
       pushAppUpdates();
+    }
+  });
+}
+
+function hydrateApp() {
+  const hydratedState = getQueryState();
+  if (!hydratedState) {
+    pullOverrides();
+    return;
+  }
+
+  onGrowthBookLoad((gb) => {
+    if (
+      hydratedState?.attributes &&
+      typeof hydratedState.attributes === "object"
+    ) {
+      gb?.setAttributeOverrides?.(hydratedState.attributes);
+    }
+
+    if (hydratedState?.features && typeof hydratedState.features === "object") {
+      let forcedFeaturesMap = new Map(Object.entries(hydratedState.features));
+      gb?.setForcedFeatures?.(forcedFeaturesMap);
+    }
+
+    if (
+      hydratedState?.experiments &&
+      typeof hydratedState.experiments === "object"
+    ) {
+      gb?.setForcedVariations?.(hydratedState.experiments);
+    }
+
+    if (hydratedState?.payload && typeof hydratedState.payload === "object") {
+      setPayload(hydratedState.payload);
+    }
+
+    if (
+      hydratedState?.patchPayload &&
+      typeof hydratedState.patchPayload === "object"
+    ) {
+      patchPayload(hydratedState.patchPayload);
+    }
+
+    // logs are imported by hydration only
+    if (hydratedState?.logs && Array.isArray(hydratedState.logs)) {
+      const logs = hydratedState.logs.map((log: any) => ({
+        ...log,
+        source: log.source ? log.source : "external",
+      }));
+      updateTabState("logEvents", hydratedState.logs, true);
     }
   });
 }
@@ -131,6 +180,22 @@ function setupListeners() {
       case "GB_REQUEST_REFRESH":
         pushAppUpdates();
         break;
+      case "COPY_TO_CLIPBOARD":
+        if (message.value) {
+          window.focus();
+          navigator.clipboard.writeText(message.value);
+        }
+        break;
+      case "SET_PAYLOAD":
+        if (message.data) {
+          setPayload(message.data);
+        }
+        break;
+      case "PATCH_PAYLOAD":
+        if (message.data) {
+          patchPayload(message.data);
+        }
+        break;
       default:
         return;
     }
@@ -160,6 +225,57 @@ function updateExperiments(data: unknown) {
   onGrowthBookLoad((gb) => {
     if (data) {
       gb.setForcedVariations?.(data as Record<string, number>);
+    }
+  });
+}
+
+function setPayload(data: FeatureApiResponse) {
+  onGrowthBookLoad((gb) => {
+    if (data) {
+      if (gb.setPayload) {
+        gb.setPayload(data);
+      } else {
+        if (gb.setFeatures && data.features) {
+          gb.setFeatures(data.features);
+        }
+        if (gb.setExperiments && data.experiments) {
+          gb.setExperiments(data.experiments);
+        }
+      }
+    }
+  });
+}
+
+function patchPayload(data: FeatureApiResponse) {
+  onGrowthBookLoad((gb) => {
+    if (data) {
+      const payload = gb.getDecryptedPayload?.() || {
+        features: gb.getFeatures?.(),
+        experiments: gb.getExperiments?.(),
+      };
+      Object.keys(data).forEach((key) => {
+        const k = key as keyof FeatureApiResponse;
+        if (!payload[k]) {
+          // @ts-ignore
+          payload[k] = data[k];
+        } else {
+          if (typeof payload[k] === "object") {
+            // @ts-ignore
+            payload[k] = { ...payload[k], ...data[k] };
+          }
+        }
+      });
+
+      if (gb.setPayload) {
+        gb.setPayload(payload);
+      } else {
+        if (gb.setFeatures && payload.features) {
+          gb.setFeatures(payload.features);
+        }
+        if (gb.setExperiments && payload.experiments) {
+          gb.setExperiments(payload.experiments);
+        }
+      }
     }
   });
 }
@@ -233,6 +349,7 @@ function subscribeToSdkChanges(
   gb.setAttributeOverrides = async (attributes: Attributes) => {
     await _setAttributeOverrides?.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
+    updateTabState("overriddenAttributes", attributes);
   };
 
   const _setForcedFeatures = gb.setForcedFeatures;
@@ -398,8 +515,8 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   };
   const hasPayload =
     !!gb.getDecryptedPayload?.() ||
-    (Object.keys(gb.getFeatures?.() || {}).length > 0 ||
-      (gb.getExperiments?.() || []).length > 0);
+    Object.keys(gb.getFeatures?.() || {}).length > 0 ||
+    (gb.getExperiments?.() || []).length > 0;
   // check if payload was decrypted
   const hasDecryptionKey = !!gbContext?.decryptionKey;
   let payloadDecrypted = true;
@@ -421,8 +538,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
 
   const onFeatureUsage = gbContext?.onFeatureUsage;
   const usingOnFeatureUsage =
-    typeof onFeatureUsage === "function" &&
-    !onFeatureUsage.isNoopCallback;
+    typeof onFeatureUsage === "function" && !onFeatureUsage.isNoopCallback;
 
   const isRemoteEval = !!gb.isRemoteEval?.();
 
@@ -495,6 +611,27 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     errorMessage:
       res?.error || !!clientKey ? undefined : "No Client Key was found",
   };
+}
+
+export function getQueryState() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const state = params.get("_gbdebug");
+    if (!state) return null;
+    const decoded = decodeURIComponent(state);
+    const data = JSON.parse(decoded);
+    params.delete("_gbdebug");
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname +
+        (params.toString() ? "?" + params.toString() : ""),
+    );
+    return data;
+  } catch (e) {
+    console.error("Failed to parse query state", e);
+    return null;
+  }
 }
 
 // start running
