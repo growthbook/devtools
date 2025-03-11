@@ -3,7 +3,7 @@
 
   "name": "GrowthBook DevTools",
   "description": "GrowthBook DevTools helps you debug feature flags and experiments and design A/B tests visually — all from your browser.",
-  "version": "1.0.4",
+  "version": "1.1.0",
 
   "browser_specific_settings": {
     "gecko": {
