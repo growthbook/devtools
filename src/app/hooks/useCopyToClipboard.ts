@@ -36,7 +36,10 @@ export const useCopyToClipboard = ({
           });
           setSuccess(true);
         } else {
-          await chrome.runtime.sendMessage({type: "COPY_TO_CLIPBOARD", value});
+          await chrome.runtime.sendMessage({
+            type: "COPY_TO_CLIPBOARD",
+            value,
+          });
           setSuccess(true);
         }
       }

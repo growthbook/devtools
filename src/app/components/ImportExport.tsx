@@ -2,13 +2,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Badge, Button, Checkbox, Link, Switch } from "@radix-ui/themes";
 import { useCopyToClipboard } from "@/app/hooks/useCopyToClipboard";
 import {
+  PiArrowSquareInBold,
+  PiArrowSquareOutBold,
   PiCaretRightFill,
   PiCheckBold,
   PiDownloadSimpleBold,
   PiLinkBold,
   PiUploadSimpleBold,
 } from "react-icons/pi";
-import useTabState, {getActiveTabId} from "@/app/hooks/useTabState";
+import useTabState, { getActiveTabId } from "@/app/hooks/useTabState";
 import { Attributes } from "@growthbook/growthbook";
 import { getOS } from "@/app/utils";
 import clsx from "clsx";
@@ -24,7 +26,9 @@ type StatePayload = {
 const ImportExport = ({ close }: { close: () => void }) => {
   const isDevtoolsPanel = useMemo(
     () =>
-      document.querySelector("#root")?.getAttribute("data-is-devtools-panel") === "1",
+      document
+        .querySelector("#root")
+        ?.getAttribute("data-is-devtools-panel") === "1",
     [],
   );
   const isFirefox = navigator.userAgent.includes("Firefox");
@@ -40,9 +44,10 @@ const ImportExport = ({ close }: { close: () => void }) => {
     overriddenAttributesReady,
   ] = useTabState<Attributes>("overriddenAttributes", {});
 
-  const [formValue, setformValue] = useState("");
+  const [formValue, setFormValue] = useState("");
   const [textareaError, setTextareaError] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [imported, setImported] = useState(false);
 
   const numForcedFeatures = Object.keys(forcedFeatures || {}).length;
   const numForcedVariations = Object.keys(forcedVariations || {}).length;
@@ -91,21 +96,6 @@ const ImportExport = ({ close }: { close: () => void }) => {
     overriddenAttributes,
   ]);
 
-  const overridesText = useMemo(() => {
-    let parts: string[] = [];
-    includeFeatures && parts.push("features");
-    includeExperiments && parts.push("experiments");
-    includeAttributes && parts.push("attributes");
-    if (!parts.length) return "none";
-    return parts.join(", ");
-  }, [includeFeatures, includeExperiments, includeAttributes]);
-
-  useEffect(() => {
-    if (!dirty) {
-      setformValue(statePayload);
-    }
-  }, [statePayload, dirty]);
-
   const importState = async () => {
     try {
       const data = JSON.parse(formValue);
@@ -118,10 +108,7 @@ const ImportExport = ({ close }: { close: () => void }) => {
       if (data?.experiments && typeof data.experiments === "object") {
         setForcedVariations(data.experiments);
       }
-      if (
-        data?.payload &&
-        typeof data.payload === "object"
-      ) {
+      if (data?.payload && typeof data.payload === "object") {
         const activeTabId = await getActiveTabId();
         if (activeTabId) {
           if (chrome?.tabs) {
@@ -130,14 +117,14 @@ const ImportExport = ({ close }: { close: () => void }) => {
               data: data.payload,
             });
           } else {
-            chrome.runtime.sendMessage({type: "SET_PAYLOAD", data: data.payload});
+            chrome.runtime.sendMessage({
+              type: "SET_PAYLOAD",
+              data: data.payload,
+            });
           }
         }
       }
-      if (
-        data?.patchPayload &&
-        typeof data.patchPayload === "object"
-      ) {
+      if (data?.patchPayload && typeof data.patchPayload === "object") {
         const activeTabId = await getActiveTabId();
         if (activeTabId) {
           if (chrome?.tabs) {
@@ -146,13 +133,19 @@ const ImportExport = ({ close }: { close: () => void }) => {
               data: data.patchPayload,
             });
           } else {
-            chrome.runtime.sendMessage({type: "PATCH_PAYLOAD", data: data.patchPayload});
+            chrome.runtime.sendMessage({
+              type: "PATCH_PAYLOAD",
+              data: data.patchPayload,
+            });
           }
         }
       }
 
       setTextareaError(false);
       setDirty(false);
+      setFormValue("");
+      setImported(true);
+      setTimeout(() => setImported(false), 1000);
     } catch (e) {
       console.error("Failed to parse imported state", e);
       setTextareaError(true);
@@ -162,6 +155,7 @@ const ImportExport = ({ close }: { close: () => void }) => {
   const cancelImport = () => {
     setDirty(false);
     setTextareaError(false);
+    setFormValue("");
   };
 
   const { performCopy, copySuccess } = useCopyToClipboard({
@@ -177,86 +171,77 @@ const ImportExport = ({ close }: { close: () => void }) => {
 
   return (
     <div>
-      <div className="my-4">
+      <div className="my-2">
         <Accordion.Root className="accordion" type="single" collapsible>
           <Accordion.Item value="advanced">
             <Accordion.Trigger className="trigger mb-0.5">
               <Link
                 size="2"
                 role="button"
-                className={clsx("text-left leading-3", {
-                  "hover:underline": !dirty,
-                  "opacity-50": dirty,
-                })}
-                color={dirty ? "gray" : undefined}
+                className="text-left leading-3 hover:underline"
               >
                 <PiCaretRightFill className="caret mr-0.5" size={12} />
-                Export overrides{" "}
-                <span className="text-xs">({overridesText})</span>
+                Select which overrides to export
               </Link>
             </Accordion.Trigger>
-            <Accordion.Content
-              className={clsx("accordionInner overflow-hidden w-full", {
-                "opacity-50": dirty,
-              })}
-            >
+            <Accordion.Content className="accordionInner overflow-hidden w-full">
               <div className="box py-1">
-                <div className="my-1">
+                <div className="flex justify-between items-center my-1">
                   <label className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11">
                     <Checkbox
                       size="1"
                       checked={includeFeatures}
                       onCheckedChange={(b) => setIncludeFeatures(!!b)}
                     />
-                    <span>Features</span>{" "}
-                    {numForcedFeatures > 0 ? (
-                      <Badge color="amber" radius="full">
-                        {numForcedFeatures}
-                      </Badge>
-                    ) : (
-                      <Badge color="gray" radius="full" variant="soft">
-                        none
-                      </Badge>
-                    )}
+                    <span>Features</span>
                   </label>
+                  {numForcedFeatures > 0 ? (
+                    <Badge color="amber" radius="medium">
+                      {numForcedFeatures}
+                    </Badge>
+                  ) : (
+                    <Badge color="gray" radius="medium" variant="soft">
+                      none
+                    </Badge>
+                  )}
                 </div>
-                <div className="my-1">
+                <div className="flex justify-between items-center my-1">
                   <label className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11">
                     <Checkbox
                       size="1"
                       checked={includeExperiments}
                       onCheckedChange={(b) => setIncludeExperiments(!!b)}
                     />
-                    <span>Experiments</span>{" "}
-                    {numForcedVariations > 0 ? (
-                      <Badge color="amber" radius="full">
-                        {numForcedVariations}
-                      </Badge>
-                    ) : (
-                      <Badge color="gray" radius="full" variant="soft">
-                        none
-                      </Badge>
-                    )}
+                    <span>Experiments</span>
                   </label>
+                  {numForcedVariations > 0 ? (
+                    <Badge color="amber" radius="medium">
+                      {numForcedVariations}
+                    </Badge>
+                  ) : (
+                    <Badge color="gray" radius="medium" variant="soft">
+                      none
+                    </Badge>
+                  )}
                 </div>
-                <div className="my-1">
+                <div className="flex justify-between items-center my-1">
                   <label className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11">
                     <Checkbox
                       size="1"
                       checked={includeAttributes}
                       onCheckedChange={(b) => setIncludeAttributes(!!b)}
                     />
-                    <span>Attributes</span>{" "}
-                    {numAttributeOverrides > 0 ? (
-                      <Badge color="amber" radius="full">
-                        {numAttributeOverrides}
-                      </Badge>
-                    ) : (
-                      <Badge color="gray" radius="full" variant="soft">
-                        none
-                      </Badge>
-                    )}
+                    <span>Attributes</span>
                   </label>
+                  {numAttributeOverrides > 0 ? (
+                    <Badge color="amber" radius="medium">
+                      {numAttributeOverrides}
+                    </Badge>
+                  ) : (
+                    <Badge color="gray" radius="medium" variant="soft">
+                      none
+                    </Badge>
+                  )}
                 </div>
               </div>
             </Accordion.Content>
@@ -265,15 +250,55 @@ const ImportExport = ({ close }: { close: () => void }) => {
       </div>
 
       <div className="my-4">
-        <h2>
-          {!dirty ? (
-            <>
-              Current State <span className="text-xs">(Paste to import)</span>
-            </>
-          ) : (
-            "Import State"
+        <h2>Current State</h2>
+        <div
+          className={clsx(
+            "rt-TextAreaRoot rt-r-size-2 rt-variant-surface mt-1 mb-2",
           )}
-        </h2>
+          style={{ minHeight: "unset !important" }}
+        >
+          <TextareaAutosize
+            className="rt-reset rt-TextAreaInput mono"
+            style={{ fontSize: "12px", lineHeight: "16px", padding: "6px 6px" }}
+            id="stateField"
+            name={"__stateField__"}
+            value={statePayload}
+            readOnly
+            onFocus={(e) => e.target.select()}
+            maxRows={2}
+            minRows={1}
+          />
+        </div>
+
+        <div className="flex items-start justify-between gap-3">
+          <div className="text-gray-11 text-xs">
+            Copy and paste into Import field (
+            {getOS() === "Mac" ? "⌘ + C" : "Ctrl + C"})
+          </div>
+          {!isDevtoolsPanel || isFirefox ? (
+            copySuccess ? (
+              <Button size="2" className="w-[100px]">
+                <PiCheckBold />
+                Copied
+              </Button>
+            ) : (
+              <Button
+                size="2"
+                className="w-[100px]"
+                onClick={() => {
+                  if (!copySuccess) performCopy(formValue);
+                }}
+              >
+                <PiArrowSquareOutBold />
+                Copy
+              </Button>
+            )
+          ) : null}
+        </div>
+      </div>
+
+      <div className="my-t">
+        <h2>Import</h2>
         <div
           className={clsx(
             "rt-TextAreaRoot rt-r-size-2 rt-variant-surface mt-1 mb-2",
@@ -283,66 +308,52 @@ const ImportExport = ({ close }: { close: () => void }) => {
           )}
           style={{ minHeight: "unset !important" }}
         >
-          <TextareaAutosize
+          <textarea
             className="rt-reset rt-TextAreaInput mono"
             style={{ fontSize: "12px", lineHeight: "16px", padding: "6px 6px" }}
-            id="stateField"
+            id="importField"
             name={"__stateField__"}
             value={formValue}
             onChange={(e) => {
-              setformValue(e.target.value);
+              setFormValue(e.target.value);
               setDirty(true);
             }}
             onFocus={(e) => e.target.select()}
-            maxRows={4}
-            minRows={2}
+            rows={2}
           />
         </div>
-        {dirty ? (
-          <div className="flex items-center justify-end gap-3">
-            <Link href="#" size="2" role="button" onClick={cancelImport}>
-              Cancel
-            </Link>
+        <div className="flex items-start justify-end gap-3">
+          <div className="text-gray-11 text-xs flex-1">
+            Paste to import ({getOS() === "Mac" ? "⌘ + V" : "Ctrl + V"})
+          </div>
+          {dirty ? (
+            <div className="flex items-center gap-3">
+              <Link href="#" size="2" role="button" onClick={cancelImport}>
+                Cancel
+              </Link>
+              <Button
+                type="button"
+                size="2"
+                onClick={importState}
+                disabled={!dirty}
+                className="w-[100px]"
+              >
+                <PiArrowSquareInBold />
+                Import
+              </Button>
+            </div>
+          ) : imported ? (
             <Button
               type="button"
               size="2"
               onClick={importState}
-              disabled={!dirty}
+              className="w-[100px]"
             >
-              <PiDownloadSimpleBold />
-              Import
+              <PiCheckBold />
+              Imported
             </Button>
-          </div>
-        ) : (
-          <>
-            {isDevtoolsPanel && !isFirefox ? (
-              <div className="text-gray-11 text-xs">
-                Copy this data to export (
-                {getOS() === "Mac" ? "⌘ + C" : "Ctrl + C"})
-              </div>
-            ) : (
-              <div className="flex items-center justify-end gap-3">
-                {copySuccess ? (
-                  <Button size="2" className="w-[145px]">
-                    <PiCheckBold />
-                    Copied
-                  </Button>
-                ) : (
-                  <Button
-                    size="2"
-                    className="w-[145px]"
-                    onClick={() => {
-                      if (!copySuccess) performCopy(formValue);
-                    }}
-                  >
-                    <PiUploadSimpleBold />
-                    Export (Copy)
-                  </Button>
-                )}
-              </div>
-            )}
-          </>
-        )}
+          ) : null}
+        </div>
       </div>
     </div>
   );

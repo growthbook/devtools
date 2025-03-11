@@ -99,10 +99,7 @@ function hydrateApp() {
       gb?.setForcedVariations?.(hydratedState.experiments);
     }
 
-    if (
-      hydratedState?.payload &&
-      typeof hydratedState.payload === "object"
-    ) {
+    if (hydratedState?.payload && typeof hydratedState.payload === "object") {
       setPayload(hydratedState.payload);
     }
 
@@ -252,20 +249,18 @@ function patchPayload(data: FeatureApiResponse) {
         features: gb.getFeatures?.(),
         experiments: gb.getExperiments?.(),
       };
-      Object.keys(data).forEach(
-        (key) => {
-          const k = key as keyof FeatureApiResponse;
-          if (!payload[k]) {
+      Object.keys(data).forEach((key) => {
+        const k = key as keyof FeatureApiResponse;
+        if (!payload[k]) {
+          // @ts-ignore
+          payload[k] = data[k];
+        } else {
+          if (typeof payload[k] === "object") {
             // @ts-ignore
-            payload[k] = data[k];
-          } else {
-            if (typeof payload[k] === "object") {
-              // @ts-ignore
-              payload[k] = { ...payload[k], ...data[k] };
-            }
+            payload[k] = { ...payload[k], ...data[k] };
           }
-        },
-      );
+        }
+      });
 
       if (gb.setPayload) {
         gb.setPayload(payload);

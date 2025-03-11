@@ -18,7 +18,9 @@ type StatePayload = {
 const Share = ({ close }: { close: () => void }) => {
   const isDevtoolsPanel = useMemo(
     () =>
-      document.querySelector("#root")?.getAttribute("data-is-devtools-panel") === "1",
+      document
+        .querySelector("#root")
+        ?.getAttribute("data-is-devtools-panel") === "1",
     [],
   );
   const isFirefox = navigator.userAgent.includes("Firefox");
@@ -93,15 +95,6 @@ const Share = ({ close }: { close: () => void }) => {
     url,
   ]);
 
-  const overridesText = useMemo(() => {
-    let parts: string[] = [];
-    includeFeatures && parts.push("features");
-    includeExperiments && parts.push("experiments");
-    includeAttributes && parts.push("attributes");
-    if (!parts.length) return "none";
-    return parts.join(", ");
-  }, [includeFeatures, includeExperiments, includeAttributes]);
-
   const { performCopy, copySuccess } = useCopyToClipboard({
     timeout: 1500,
   });
@@ -124,7 +117,7 @@ const Share = ({ close }: { close: () => void }) => {
         Share your current session with other DevTools users
       </div>
 
-      <div className="my-4">
+      <div className="my-2">
         <Accordion.Root className="accordion" type="single" collapsible>
           <Accordion.Item value="advanced">
             <Accordion.Trigger className="trigger mb-0.5">
@@ -134,68 +127,67 @@ const Share = ({ close }: { close: () => void }) => {
                 className="text-left leading-3 hover:underline"
               >
                 <PiCaretRightFill className="caret mr-0.5" size={12} />
-                Share overrides{" "}
-                <span className="text-xs">({overridesText})</span>
+                Select which overrides to export
               </Link>
             </Accordion.Trigger>
             <Accordion.Content className="accordionInner overflow-hidden w-full">
               <div className="box py-1">
-                <div className="my-1">
+                <div className="flex justify-between items-center my-1">
                   <label className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11">
                     <Checkbox
                       size="1"
                       checked={includeFeatures}
                       onCheckedChange={(b) => setIncludeFeatures(!!b)}
                     />
-                    <span>Features</span>{" "}
-                    {numForcedFeatures > 0 ? (
-                      <Badge color="amber" radius="full">
-                        {numForcedFeatures}
-                      </Badge>
-                    ) : (
-                      <Badge color="gray" radius="full" variant="soft">
-                        none
-                      </Badge>
-                    )}
+                    <span>Features</span>
                   </label>
+                  {numForcedFeatures > 0 ? (
+                    <Badge color="amber" radius="medium">
+                      {numForcedFeatures}
+                    </Badge>
+                  ) : (
+                    <Badge color="gray" radius="medium" variant="soft">
+                      none
+                    </Badge>
+                  )}
                 </div>
-                <div className="my-1">
+                <div className="flex justify-between items-center my-1">
                   <label className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11">
                     <Checkbox
                       size="1"
                       checked={includeExperiments}
                       onCheckedChange={(b) => setIncludeExperiments(!!b)}
                     />
-                    <span>Experiments</span>{" "}
-                    {numForcedVariations > 0 ? (
-                      <Badge color="amber" radius="full">
-                        {numForcedVariations}
-                      </Badge>
-                    ) : (
-                      <Badge color="gray" radius="full" variant="soft">
-                        none
-                      </Badge>
-                    )}
+                    <span>Experiments</span>
                   </label>
+                  {numForcedVariations > 0 ? (
+                    <Badge color="amber" radius="medium">
+                      {numForcedVariations}
+                    </Badge>
+                  ) : (
+                    <Badge color="gray" radius="medium" variant="soft">
+                      none
+                    </Badge>
+                  )}
                 </div>
-                <div className="my-1">
+                <div className="flex justify-between items-center my-1">
                   <label className="inline-flex gap-2 text-sm items-center select-none cursor-pointer hover:text-violet-11">
                     <Checkbox
                       size="1"
                       checked={includeAttributes}
                       onCheckedChange={(b) => setIncludeAttributes(!!b)}
                     />
-                    <span>Attributes</span>{" "}
-                    {numAttributeOverrides > 0 ? (
-                      <Badge color="amber" radius="full">
-                        {numAttributeOverrides}
-                      </Badge>
-                    ) : (
-                      <Badge color="gray" radius="full" variant="soft">
-                        none
-                      </Badge>
-                    )}
+                    <span>Attributes</span>
                   </label>
+                  {numAttributeOverrides > 0 ? (
+                    <Badge color="amber" radius="medium">
+                      {numAttributeOverrides}
+                    </Badge>
+                  ) : (
+                    <Badge color="gray" radius="medium" variant="soft">
+                      none
+                    </Badge>
+                  )}
                 </div>
               </div>
             </Accordion.Content>
