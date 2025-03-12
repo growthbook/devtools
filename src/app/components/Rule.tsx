@@ -6,7 +6,7 @@ import {
 } from "@growthbook/growthbook";
 import { upperFirst } from "lodash";
 import ValueField, { ValueType } from "@/app/components/ValueField";
-import { Checkbox, Link, Progress } from "@radix-ui/themes";
+import {Button, Checkbox, Link, Progress} from "@radix-ui/themes";
 import useTabState from "@/app/hooks/useTabState";
 import { PiFlagFill, PiFlaskFill } from "react-icons/pi";
 import { EvaluatedFeature } from "@/app/hooks/useGBSandboxEval";
@@ -34,6 +34,7 @@ export default function Rule({
   valueType = "string",
   evaluatedFeature,
   hideInactive = false,
+  onApply,
 }: {
   rule: FeatureRule;
   rules: FeatureRule[];
@@ -42,6 +43,7 @@ export default function Rule({
   valueType?: ValueType;
   evaluatedFeature?: EvaluatedFeature;
   hideInactive?: boolean;
+  onApply?: (value: any) => void;
 }) {
   const [selectedEid, setSelectedEid] = useTabState<string | undefined>(
     "selectedEid",
@@ -196,6 +198,8 @@ export default function Rule({
                   coverage={coverage}
                   namespace={namespace}
                   valueType={valueType}
+                  onApply={onApply}
+                  evaluatedFeature={evaluatedFeature}
                 />
               )}
               {ruleType === "rollout" && (
@@ -204,7 +208,7 @@ export default function Rule({
                     <span className="font-semibold">SAMPLE</span> users by{" "}
                     <span className="conditionValue">{hashAttribute}</span>
                   </div>
-                  <div className="mt-2 flex items-center gap-3 text-xs">
+                  <div className="mt-2 mb-3 flex items-center gap-3 text-xs">
                     <span className="font-semibold flex-shrink-0">ROLLOUT</span>
                     <Progress
                       size="3"
@@ -218,22 +222,35 @@ export default function Rule({
                 </>
               )}
               {"force" in rule ? (
-                <div className="my-2 text-xs">
-                  <span className="mr-2 font-semibold">SERVE</span>
+                <div className="my-2 text-xs flex gap-2 items-start flex-wrap">
+                  <span className="font-semibold flex-none">SERVE</span>
                   <ValueField
                     value={force}
                     valueType={valueType}
                     maxHeight={60}
                     customPrismStyle={{ padding: "2px" }}
-                    customPrismOuterStyle={{ marginTop: "2px" }}
+                    customPrismOuterStyle={{ flex: "1 1 100%" }}
                     customBooleanStyle={{
-                      marginTop: "5px",
                       fontSize: "12px",
                       display: "inline-block",
                     }}
                     stringAsCode={false}
                     formatDefaultTypeAsConditionValue={true}
                   />
+                  {onApply && JSON.stringify(evaluatedFeature?.result?.value) !== JSON.stringify(force) ? (
+                    <div className="flex flex-1 justify-end">
+                      <Button
+                        size="1"
+                        color="amber"
+                        variant="ghost"
+                        className="flex-none text-xs"
+                        style={{ padding: "3px 6px", height: "auto", marginLeft: 0, marginRight: 0 }}
+                        onClick={() => onApply(force)}
+                      >
+                        Preview
+                      </Button>
+                    </div>
+                  ): null}
                 </div>
               ) : null}
             </>
@@ -263,6 +280,8 @@ export function ExperimentRule({
   coverage,
   namespace,
   valueType = "number",
+  onApply,
+  evaluatedFeature,
 }: {
   variations?: any[];
   weights?: number[];
@@ -270,6 +289,8 @@ export function ExperimentRule({
   coverage?: number;
   namespace?: [string, number, number] | undefined;
   valueType?: ValueType;
+  onApply?: (value: any) => void;
+  evaluatedFeature?: EvaluatedFeature;
 }) {
   const [theme, setTheme, themeReady] = useGlobalState<Theme>(
     "theme",
@@ -345,12 +366,31 @@ export function ExperimentRule({
                   />
                 </td>
                 <td className="pl-2 py-1">
-                  {weights?.[i] !== undefined
-                    ? Math.round(weights[i] * 1000) / 10 + "%"
-                    : null}
+                  <div className="flex gap-3 items-center flex-nowrap">
+                    <span>
+                    {weights?.[i] !== undefined
+                      ? Math.round(weights[i] * 1000) / 10 + "%"
+                      : null}
+                    </span>
+                    {onApply && evaluatedFeature &&
+                      JSON.stringify(evaluatedFeature?.result?.value) !== JSON.stringify(variation) ? (
+                      <div className="flex flex-1 justify-end">
+                        <Button
+                          size="1"
+                          color="amber"
+                          variant="ghost"
+                          className="flex-none text-xs"
+                          style={{ padding: "3px 6px", height: "auto", marginLeft: 0, marginRight: 0 }}
+                          onClick={() => onApply(variation)}
+                        >
+                          Preview
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
                 </td>
               </tr>
-            ))}
+              ))}
           </tbody>
         </table>
         <div

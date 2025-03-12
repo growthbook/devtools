@@ -285,7 +285,7 @@ export default function FeaturesTab() {
                       forced={isForced}
                       type="feature"
                     />
-                    {selectedFeature?.feature?.isDraft ? (
+                    {feature?.isDraft ? (
                       <TbEyeSearch
                         className="inline-block mr-1 opacity-50"
                         size={12}

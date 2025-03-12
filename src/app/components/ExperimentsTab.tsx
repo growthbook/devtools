@@ -286,7 +286,7 @@ export default function ExperimentsTab() {
                     forced={isForced}
                     type="experiment"
                   />
-                  {selectedExperiment?.experiment?.isDraft ? (
+                  {experiment?.isDraft ? (
                     <TbEyeSearch
                       className="inline-block mr-1 opacity-50"
                       size={12}

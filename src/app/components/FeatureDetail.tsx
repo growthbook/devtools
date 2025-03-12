@@ -213,8 +213,8 @@ export default function FeatureDetail({
 
               {!hideInactiveRules || defaultValueStatus === "matches" ? (
                 <div
-                  className={`rule ${defaultValueStatus}`}
-                  style={{ padding: "12px 8px 12px 14px" }}
+                  className={`rule relative ${defaultValueStatus}`}
+                  style={{ padding: "12px 12px 12px 14px" }}
                 >
                   <div className="text-sm font-semibold mb-2">
                     Default value
@@ -222,16 +222,40 @@ export default function FeatureDetail({
                       {defaultValueStatus === "matches" ? "Active" : "Inactive"}
                     </div>
                   </div>
-                  <ValueField
-                    value={selectedFeature?.feature?.defaultValue}
-                    valueType={selectedFeature?.valueType}
-                  />
+                  <div className="flex gap-2 items-start flex-wrap">
+                    <ValueField
+                      value={selectedFeature?.feature?.defaultValue}
+                      valueType={selectedFeature?.valueType}
+                      maxHeight={60}
+                      customPrismStyle={{ padding: "2px" }}
+                      customPrismOuterStyle={{ flex: "1 1 100%" }}
+                      customBooleanStyle={{
+                        fontSize: "12px",
+                        display: "inline-block",
+                      }}
+                    />
+                    {selectedFid && JSON.stringify(selectedFeature?.evaluatedFeature?.result?.value) !== JSON.stringify(selectedFeature?.feature?.defaultValue) ? (
+                      <div className="flex flex-1 justify-end">
+                        <Button
+                          size="1"
+                          color="amber"
+                          variant="ghost"
+                          className="flex-none text-xs"
+                          style={{ padding: "3px 6px", height: "auto", marginLeft: 0, marginRight: 0 }}
+                          onClick={() => {
+                            setForcedFeature(selectedFid, selectedFeature?.feature?.defaultValue);
+                            setOverrideFeature(true);
+                          }}
+                        >
+                          Preview
+                        </Button>
+                      </div>
+                    ): null}
+                  </div>
                 </div>
               ) : null}
 
-              {selectedFid &&
-              selectedFeature &&
-              (selectedFeature?.feature?.rules ?? []).length ? (
+              {selectedFid && selectedFeature && (selectedFeature?.feature?.rules ?? []).length ? (
                 <>
                   {selectedFeature?.feature?.rules?.map((rule, i) => {
                     return (
@@ -244,6 +268,10 @@ export default function FeatureDetail({
                         valueType={selectedFeature.valueType}
                         evaluatedFeature={selectedFeature.evaluatedFeature}
                         hideInactive={hideInactiveRules}
+                        onApply={(v: any) => {
+                          setForcedFeature(selectedFid, v);
+                          setOverrideFeature(true);
+                        }}
                       />
                     );
                   })}
