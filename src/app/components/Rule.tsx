@@ -6,9 +6,20 @@ import {
 } from "@growthbook/growthbook";
 import { upperFirst } from "lodash";
 import ValueField, { ValueType } from "@/app/components/ValueField";
-import {Button, Checkbox, Link, Progress} from "@radix-ui/themes";
+import {
+  Checkbox,
+  IconButton,
+  Link,
+  Progress,
+  Tooltip,
+} from "@radix-ui/themes";
 import useTabState from "@/app/hooks/useTabState";
-import { PiFlagFill, PiFlaskFill } from "react-icons/pi";
+import {
+  PiEyeBold,
+  PiEyeSlashBold,
+  PiFlagFill,
+  PiFlaskFill,
+} from "react-icons/pi";
 import { EvaluatedFeature } from "@/app/hooks/useGBSandboxEval";
 import { DebugLog } from "devtools";
 import DebugLogger from "@/app/components/DebugLogger";
@@ -136,6 +147,9 @@ export default function Rule({
         : "force";
   const ruleName = upperFirst(ruleType) + " rule";
 
+  const valueActive =
+    JSON.stringify(evaluatedFeature?.result?.value) === JSON.stringify(force);
+
   return (
     <div className={`rule ${status}`}>
       <div className="inner">
@@ -229,7 +243,7 @@ export default function Rule({
                     valueType={valueType}
                     maxHeight={60}
                     customPrismStyle={{ padding: "2px" }}
-                    customPrismOuterStyle={{ flex: "1 1 100%" }}
+                    customPrismOuterStyle={{ flex: "1 1 auto", width: "100%" }}
                     customBooleanStyle={{
                       fontSize: "12px",
                       display: "inline-block",
@@ -237,20 +251,14 @@ export default function Rule({
                     stringAsCode={false}
                     formatDefaultTypeAsConditionValue={true}
                   />
-                  {onApply && JSON.stringify(evaluatedFeature?.result?.value) !== JSON.stringify(force) ? (
+                  {onApply ? (
                     <div className="flex flex-1 justify-end">
-                      <Button
-                        size="1"
-                        color="amber"
-                        variant="ghost"
-                        className="flex-none text-xs"
-                        style={{ padding: "3px 6px", height: "auto", marginLeft: 0, marginRight: 0 }}
+                      <ActivateValueButton
                         onClick={() => onApply(force)}
-                      >
-                        Preview
-                      </Button>
+                        disabled={valueActive}
+                      />
                     </div>
-                  ): null}
+                  ) : null}
                 </div>
               ) : null}
             </>
@@ -343,54 +351,52 @@ export function ExperimentRule({
         <div className="font-semibold mb-1">SERVE</div>
         <table className="leading-3">
           <tbody>
-            {variations?.map?.((variation, i) => (
-              <tr key={i}>
-                <td className="pr-2 py-1">
-                  <div
-                    className="px-0.5 rounded-full border font-semibold"
-                    style={{
-                      fontSize: "11px",
-                      color: getVariationColor(i),
-                      borderColor: getVariationColor(i),
-                    }}
-                  >
-                    {i}
-                  </div>
-                </td>
-                <td width="100%" className="py-1">
-                  <ValueField
-                    value={variation}
-                    valueType={valueType}
-                    stringAsCode
-                    maxHeight={50}
-                  />
-                </td>
-                <td className="pl-2 py-1">
-                  <div className="flex gap-3 items-center flex-nowrap">
-                    <span>
-                    {weights?.[i] !== undefined
-                      ? Math.round(weights[i] * 1000) / 10 + "%"
-                      : null}
-                    </span>
-                    {onApply && evaluatedFeature &&
-                      JSON.stringify(evaluatedFeature?.result?.value) !== JSON.stringify(variation) ? (
-                      <div className="flex flex-1 justify-end">
-                        <Button
-                          size="1"
-                          color="amber"
-                          variant="ghost"
-                          className="flex-none text-xs"
-                          style={{ padding: "3px 6px", height: "auto", marginLeft: 0, marginRight: 0 }}
-                          onClick={() => onApply(variation)}
-                        >
-                          Preview
-                        </Button>
-                      </div>
-                    ) : null}
-                  </div>
-                </td>
-              </tr>
-              ))}
+            {variations?.map?.((variation, i) => {
+              const valueActive =
+                JSON.stringify(evaluatedFeature?.result?.value) ===
+                JSON.stringify(variation);
+              return (
+                <tr key={i}>
+                  <td className="pr-2 py-1">
+                    <div
+                      className="px-0.5 rounded-full border font-semibold"
+                      style={{
+                        fontSize: "11px",
+                        color: getVariationColor(i),
+                        borderColor: getVariationColor(i),
+                      }}
+                    >
+                      {i}
+                    </div>
+                  </td>
+                  <td width="100%" className="py-1">
+                    <ValueField
+                      value={variation}
+                      valueType={valueType}
+                      stringAsCode
+                      maxHeight={50}
+                    />
+                  </td>
+                  <td className="pl-2 py-1">
+                    <div className="flex gap-3 items-center flex-nowrap">
+                      <span>
+                        {weights?.[i] !== undefined
+                          ? Math.round(weights[i] * 1000) / 10 + "%"
+                          : null}
+                      </span>
+                      {onApply && evaluatedFeature ? (
+                        <div className="flex flex-1 justify-end">
+                          <ActivateValueButton
+                            onClick={() => onApply(variation)}
+                            disabled={valueActive}
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         <div
@@ -508,6 +514,29 @@ export function ConditionDisplay({
       )}
     </>
   );
+}
+
+export function ActivateValueButton(props: {
+  onClick: () => void;
+  disabled: boolean;
+}) {
+  const button = () => (
+    <IconButton
+      size="2"
+      variant="ghost"
+      className="flex-shrink-0"
+      style={{ marginLeft: 0, marginRight: 0 }}
+      onClick={props.onClick}
+      disabled={props.disabled}
+    >
+      {!props.disabled ? <PiEyeBold /> : <PiEyeSlashBold />}
+    </IconButton>
+  );
+
+  if (props.disabled) {
+    return button();
+  }
+  return <Tooltip content="Preview this value">{button()}</Tooltip>;
 }
 
 export interface Condition {

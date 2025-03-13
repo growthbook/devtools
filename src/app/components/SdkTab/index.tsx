@@ -302,7 +302,7 @@ export function getSdkStatus(
   sdkData: SDKHealthCheckResult,
 ): "green" | "yellow" | "red" {
   if (
-    !sdkData.canConnect ||
+    (!sdkData.canConnect && !sdkData.hasPayload) ||
     !sdkData.version ||
     (sdkData.version &&
       paddedVersionString(sdkData.version) < paddedVersionString("0.30.0"))
@@ -310,6 +310,7 @@ export function getSdkStatus(
     return "red";
   }
   if (
+    !sdkData.canConnect ||
     !sdkData.hasPayload ||
     sdkData.trackingCallbackParams?.length !== 2 ||
     !sdkData.payloadDecrypted ||

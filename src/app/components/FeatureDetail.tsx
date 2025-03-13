@@ -10,13 +10,15 @@ import {
 import {
   PiArrowSquareOut,
   PiCaretRightFill,
-  PiInfo,
   PiTimerBold,
   PiXBold,
 } from "react-icons/pi";
 import EditableValueField from "@/app/components/EditableValueField";
 import ValueField from "@/app/components/ValueField";
-import Rule, { USE_PREVIOUS_LOG_IF_MATCH } from "@/app/components/Rule";
+import Rule, {
+  ActivateValueButton,
+  USE_PREVIOUS_LOG_IF_MATCH,
+} from "@/app/components/Rule";
 import * as Accordion from "@radix-ui/react-accordion";
 import React, { useEffect, useState } from "react";
 import { HEADER_H, LEFT_PERCENT, SelectedFeature } from "./FeaturesTab";
@@ -82,6 +84,10 @@ export default function FeatureDetail({
       }
     }
   }, [selectedFid, JSON.stringify(forcedFeatures)]);
+
+  const defaultActive =
+    JSON.stringify(selectedFeature?.evaluatedFeature?.result?.value) ===
+    JSON.stringify(selectedFeature?.feature?.defaultValue);
 
   const rightPercent = isResponsive ? 1 : 1 - LEFT_PERCENT;
 
@@ -222,40 +228,42 @@ export default function FeatureDetail({
                       {defaultValueStatus === "matches" ? "Active" : "Inactive"}
                     </div>
                   </div>
-                  <div className="flex gap-2 items-start flex-wrap">
+                  <div className="flex gap-2 items-start flex-wrap text-xs">
                     <ValueField
                       value={selectedFeature?.feature?.defaultValue}
                       valueType={selectedFeature?.valueType}
                       maxHeight={60}
                       customPrismStyle={{ padding: "2px" }}
-                      customPrismOuterStyle={{ flex: "1 1 100%" }}
+                      customPrismOuterStyle={{
+                        flex: "1 1 auto",
+                        width: "100%",
+                      }}
                       customBooleanStyle={{
                         fontSize: "12px",
                         display: "inline-block",
                       }}
                     />
-                    {selectedFid && JSON.stringify(selectedFeature?.evaluatedFeature?.result?.value) !== JSON.stringify(selectedFeature?.feature?.defaultValue) ? (
+                    {selectedFid ? (
                       <div className="flex flex-1 justify-end">
-                        <Button
-                          size="1"
-                          color="amber"
-                          variant="ghost"
-                          className="flex-none text-xs"
-                          style={{ padding: "3px 6px", height: "auto", marginLeft: 0, marginRight: 0 }}
+                        <ActivateValueButton
                           onClick={() => {
-                            setForcedFeature(selectedFid, selectedFeature?.feature?.defaultValue);
+                            setForcedFeature(
+                              selectedFid,
+                              selectedFeature?.feature?.defaultValue,
+                            );
                             setOverrideFeature(true);
                           }}
-                        >
-                          Preview
-                        </Button>
+                          disabled={defaultActive}
+                        />
                       </div>
-                    ): null}
+                    ) : null}
                   </div>
                 </div>
               ) : null}
 
-              {selectedFid && selectedFeature && (selectedFeature?.feature?.rules ?? []).length ? (
+              {selectedFid &&
+              selectedFeature &&
+              (selectedFeature?.feature?.rules ?? []).length ? (
                 <>
                   {selectedFeature?.feature?.rules?.map((rule, i) => {
                     return (

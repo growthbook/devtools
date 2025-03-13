@@ -194,12 +194,16 @@ const UpdateTabIconBasedOnSDK = (
         path: chrome.runtime.getURL("/logo128-problem.png"),
       });
       title =
-        "GrowthBook DevTools\n🟡 SDK connected\n" +
-        ((!data.hasPayload ? "No SDK payload\n" : "") +
-          (data.trackingCallbackParams?.length !== 2
-            ? "Tracking callback issues\n"
-            : "") +
-          (!data.payloadDecrypted ? "Decryption issues\n" : "")) +
+        "GrowthBook DevTools\n🟡 " +
+        (!data.canConnect
+          ? "SDK not connected\n"
+          : !data.hasPayload
+            ? "No SDK payload\n"
+            : "SDK connected\n") +
+        (data.trackingCallbackParams?.length !== 2
+          ? "Tracking callback issues\n"
+          : "") +
+        (!data.payloadDecrypted ? "Decryption issues\n" : "") +
         (paddedVersionString(data.version) <
         paddedVersionString(latestMinorSdkVersion)
           ? "Outdated SDK version"
@@ -207,9 +211,7 @@ const UpdateTabIconBasedOnSDK = (
     } else {
       chrome.action.setIcon({
         tabId,
-        path: data.canConnect
-          ? chrome.runtime.getURL("/logo128-problem.png")
-          : chrome.runtime.getURL("/logo128.png"),
+        path: chrome.runtime.getURL("/logo128.png"),
       });
       title =
         "GrowthBook DevTools\n🔴 " +
@@ -285,7 +287,7 @@ export function getSdkStatus(
   sdkData: SDKHealthCheckResult,
 ): "green" | "yellow" | "red" {
   if (
-    !sdkData.canConnect ||
+    (!sdkData.canConnect && !sdkData.hasPayload) ||
     !sdkData.version ||
     (sdkData.version &&
       paddedVersionString(sdkData.version) < paddedVersionString("0.30.0"))
@@ -293,6 +295,7 @@ export function getSdkStatus(
     return "red";
   }
   if (
+    !sdkData.canConnect ||
     !sdkData.hasPayload ||
     sdkData.trackingCallbackParams?.length !== 2 ||
     !sdkData.payloadDecrypted ||

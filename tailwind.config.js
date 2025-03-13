@@ -60,6 +60,7 @@ module.exports = {
         indigo: generateRadixScale("indigo"),
         gray: generateRadixScale("gray"),
         amber: generateRadixScale("amber"),
+        gold: generateRadixScale("gold"),
       },
       zIndex: {
         max: "2147483647",
