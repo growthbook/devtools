@@ -1,9 +1,11 @@
 import { MW, NAV_H } from "@/app";
 import {
+  Badge,
   Button,
   Callout,
   IconButton,
   Link,
+  Select,
   Switch,
   Tooltip,
 } from "@radix-ui/themes";
@@ -27,6 +29,41 @@ import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
 import useTabState from "@/app/hooks/useTabState";
 import DebugLogger from "@/app/components/DebugLogger";
 import { TbEyeSearch } from "react-icons/tb";
+import useApi from "@/app/hooks/useApi";
+import {SDKAttribute} from "@/app/gbTypes";
+import clsx from "clsx";
+
+export type ApiFeatureWithRevisions = {
+  archived: boolean;
+  dateCreated: boolean;
+  dateUpdated: boolean;
+  defaultValue: string;
+  valueType: "string" | "number" | "boolean" | "json";
+  description: string;
+  environments: Record<string, any>;
+  id: string;
+  owner: string;
+  project: string;
+  tags: string[];
+  revision: { comment: string; date: string; publishedBy?: string; version?: number; }
+  revisions: Revision[];
+}
+export type Revision = {
+  baseVersion?: number;
+  version: number;
+  comment: string;
+  date: string;
+  status: "draft" | "published" | "discarded" | "approved" | "changes-requested" | "pending-review";
+  publishedBy?: string;
+  rules: Record<string, any>;
+  definitions: Record<string, any>;
+}
+export type SelectedFeatureWithMeta = SelectedFeature & {
+  comment?: string;
+  date?: string;
+  publishedBy?: string;
+  version?: number;
+}
 
 export default function FeatureDetail({
   selectedFid,
@@ -66,6 +103,28 @@ export default function FeatureDetail({
     setOverrideFeature(false);
   };
 
+  const [revisions, setRevisions] = useTabState<Revision[] | null>(
+    `revisions_${selectedFid}`,
+    null
+  );
+  // cache for the version of the feature in the SDK in case overwritten by revision selector
+  const [sdkRevision, setSdkRevision] = useTabState<SelectedFeatureWithMeta | undefined>(
+    `sdkRevision_${selectedFid}`,
+    undefined
+  );
+  const [revisionNum, setRevisionNum] = useTabState<number | null>(
+    `revisionNum_${selectedFid}`,
+    null
+  );
+  const [revisionEnvs, setRevisionEnvs] = useTabState<string[] | null>(
+    `revisionEnvs_${selectedFid}`,
+    null
+  );
+  const [revisionEnv, setRevisionEnv] = useTabState<string | null>(
+    `revisionEnv_${selectedFid}`,
+    null
+  );
+
   const debugLog = selectedFeature?.evaluatedFeature?.debug;
   const defaultValueStatus = debugLog
     ? debugLog?.[debugLog.length - 1]?.[0]?.startsWith(
@@ -84,6 +143,47 @@ export default function FeatureDetail({
       }
     }
   }, [selectedFid, JSON.stringify(forcedFeatures)]);
+
+  const {
+    isLoading: featureMetaLoading,
+    error: featureMetaError,
+    data: featureMetaData,
+  } = useApi<{ feature: ApiFeatureWithRevisions }>(
+    selectedFid ?
+      `/api/v1/features/${selectedFid}?withRevisions=drafts` :
+      null
+  );
+
+  useEffect(() => {
+    if (!featureMetaLoading && featureMetaData) {
+      if (!sdkRevision && selectedFeature) {
+        // make sure default revision is saved (with meta info) in case of payload mutation
+        setSdkRevision({...selectedFeature, ...(featureMetaData?.feature?.revision ?? {})});
+      }
+      const revisions = featureMetaData?.feature?.revisions;
+      if (revisions?.length && Object.keys(revisions?.[0])?.length) {
+        setRevisions(featureMetaData.feature.revisions);
+        const envs = Object.keys(revisions?.[0]?.rules || {});
+        setRevisionEnvs(envs);
+        if (!revisionEnv || !envs.includes(revisionEnv)) {
+          let env = envs?.[0];
+          const devLike = envs.find((env) => env.toLowerCase().startsWith("dev"));
+          const stagingLike = envs.find((env) => env.toLowerCase().startsWith("staging"));
+          const qaLike = envs.find((env) => env.toLowerCase().startsWith("qa"));
+          if (devLike) {
+            env = devLike;
+          } else if (stagingLike) {
+            env = stagingLike;
+          } else if (qaLike) {
+            env = qaLike;
+          }
+          setRevisionEnv(env);
+        }
+      }
+    }
+  }, [featureMetaData, featureMetaLoading]);
+
+  console.log({featureMetaData, revisions})
 
   const defaultActive =
     JSON.stringify(selectedFeature?.evaluatedFeature?.result?.value) ===
@@ -205,22 +305,36 @@ export default function FeatureDetail({
 
           {!selectedFeature?.feature?.noDefinition ? (
             <>
-              <div className="flex justify-between items-end mt-6 mb-2 py-1 text-md font-semibold border-b border-gray-a6">
-                <span>Rules and Values</span>
-                <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer">
-                  <span>Hide inactive</span>
-                  <Switch
-                    size="1"
-                    checked={hideInactiveRules}
-                    onCheckedChange={(b) => setHideInactiveRules(b)}
+              <div className="mt-6 mb-2 py-1 border-b border-gray-a6">
+                <div className="flex justify-between items-end text-md font-semibold">
+                  <div>Rules and Values</div>
+                  <label
+                    className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer flex-shrink-0">
+                    <span>Hide inactive rules</span>
+                    <Switch
+                      size="1"
+                      checked={hideInactiveRules}
+                      onCheckedChange={(b) => setHideInactiveRules(b)}
+                    />
+                  </label>
+                </div>
+                {revisions ? (
+                  <RevisionSelector
+                    sdkRevision={sdkRevision}
+                    revisions={revisions}
+                    revisionNum={revisionNum}
+                    setRevisionNum={setRevisionNum}
+                    revisionEnvs={revisionEnvs}
+                    revisionEnv={revisionEnv}
+                    setRevisionEnv={setRevisionEnv}
                   />
-                </label>
+                ) : null}
               </div>
 
               {!hideInactiveRules || defaultValueStatus === "matches" ? (
                 <div
                   className={`rule relative ${defaultValueStatus}`}
-                  style={{ padding: "12px 12px 12px 14px" }}
+                  style={{padding: "12px 12px 12px 14px"}}
                 >
                   <div className="text-sm font-semibold mb-2">
                     Default value
@@ -327,6 +441,105 @@ export default function FeatureDetail({
             </div>
           ) : null}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function RevisionSelector({
+  sdkRevision,
+  revisions,
+  revisionNum,
+  setRevisionNum,
+  revisionEnvs,
+  revisionEnv,
+  setRevisionEnv,
+}: {
+  sdkRevision?: SelectedFeatureWithMeta;
+  revisions: Revision[];
+  revisionNum: number | null;
+  setRevisionNum: (n: number | null) => void;
+  revisionEnvs: string[] | null;
+  revisionEnv: string | null;
+  setRevisionEnv: (s: string | null) => void;
+}) {
+  const liveRevisionNum = sdkRevision?.version;
+  const revision = revisions.find((r) => r.version === revisionNum);
+
+  const drawLiveRevisionRow = () => {
+    return (
+      <div className="flex justify-between w-full">
+        <span>{liveRevisionNum !== undefined ? `Revision ${liveRevisionNum}` : "Live revision"}</span>
+        <Badge size="1" className="text-2xs" color="teal" ml="3">
+          live
+        </Badge>
+      </div>
+    );
+  }
+  const drawRevisionRow = (revision: Revision) => {
+    const revisionStatus = revision?.status === "published" ? "live" : revision?.status && revision?.status !== "discarded" ? "draft" : "inactive";
+    const revisionStatusColor = revisionStatus === "draft" ? "indigo" : revisionStatus === "live" ? "teal" : "gray";
+    return (
+      <div className="flex justify-between w-full">
+        <span>Revision {revision.version}</span>
+        <Badge size="1" className="text-2xs" color={revisionStatusColor} ml="3">
+          {revisionStatus}
+        </Badge>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-x-4 gap-y-1 justify-between flex-wrap my-1">
+      <div>
+        <Select.Root
+          size="1"
+          value={JSON.stringify(revisionNum)}
+          onValueChange={(v) => {
+            setRevisionNum(v !== "null" ? parseInt(v) : null);
+          }}
+        >
+          <Select.Trigger>
+            <div className="w-[120px] overflow-hidden overflow-ellipsis">
+              {revision ? drawRevisionRow(revision) : drawLiveRevisionRow()}
+            </div>
+          </Select.Trigger>
+          <Select.Content variant="soft">
+            <Select.Item value="null">
+              {drawLiveRevisionRow()}
+            </Select.Item>
+            {revisions.map((r) => (
+              <Select.Item value={r.version + ""} key={r.version}>
+                {drawRevisionRow(r)}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select.Root>
+      </div>
+      <div className="flex items-center gap-1">
+        <div className="text-xs text-gray-10 font-semibold">Env:</div>
+        {revisionNum !== null && revisionEnvs ? (
+          <Select.Root
+            size="1"
+            value={revisionEnv ?? ""}
+            onValueChange={(v) => {
+              setRevisionEnv(v ?? null);
+            }}
+          >
+            <Select.Trigger>
+              <div className="min-w-[70px] max-w-[150px] overflow-hidden overflow-ellipsis">{revisionEnv}</div>
+            </Select.Trigger>
+            <Select.Content variant="soft">
+              {revisionEnvs.map((env) => (
+                <Select.Item value={env} key={env}>
+                  {env}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+        ) : (
+          <em className="text-xs text-gray-10">using SDK definition</em>
+        )}
       </div>
     </div>
   );

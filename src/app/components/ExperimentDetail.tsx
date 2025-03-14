@@ -36,6 +36,8 @@ import { AutoExperimentVariation, isURLTargeted } from "@growthbook/growthbook";
 import clsx from "clsx";
 import DebugLogger, { DebugLogAccordion } from "@/app/components/DebugLogger";
 import { TbEyeSearch } from "react-icons/tb";
+import useApi from "@/app/hooks/useApi";
+import {SDKAttribute} from "@/app/gbTypes";
 
 export default function ExperimentDetail({
   selectedEid,
