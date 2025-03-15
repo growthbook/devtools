@@ -285,11 +285,15 @@ export default function FeaturesTab() {
                       forced={isForced}
                       type="feature"
                     />
-                    {selectedFeature?.feature?.isDraft ? (
-                      <TbEyeSearch
-                        className="inline-block mr-1 opacity-50"
-                        size={12}
-                      />
+                    {feature?.isDraft ? (
+                      <Tooltip content="Previewing draft">
+                        <span>
+                          <TbEyeSearch
+                            className="inline-block mr-1 text-indigo-9"
+                            size={12}
+                          />
+                        </span>
+                      </Tooltip>
                     ) : null}
                     {fid}
                   </div>

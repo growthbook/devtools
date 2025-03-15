@@ -26,9 +26,9 @@ export default function FeatureExperimentStatusIcon({
               : "Active on this page; overridden"
           }
         >
-          <button>
+          <span>
             <PiCheckCircleFill className="inline-block mr-1.5 mb-0.5 text-amber-600" />
-          </button>
+          </span>
         </Tooltip>
       );
     } else {
@@ -40,9 +40,9 @@ export default function FeatureExperimentStatusIcon({
               : "Active on this page."
           }
         >
-          <button>
+          <span>
             <PiCheckCircleBold className="inline-block mr-1.5 mb-0.5 text-violet-8" />
-          </button>
+          </span>
         </Tooltip>
       );
     }
@@ -51,9 +51,9 @@ export default function FeatureExperimentStatusIcon({
   if (forced) {
     return (
       <Tooltip content={`Overridden`}>
-        <button>
+        <span>
           <PiCircleDuotone className="inline-block mr-1.5 mb-0.5 text-amber-600" />
-        </button>
+        </span>
       </Tooltip>
     );
   } else {

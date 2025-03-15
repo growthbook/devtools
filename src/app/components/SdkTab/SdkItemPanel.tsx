@@ -13,6 +13,7 @@ import {
   PiArrowsClockwise,
   PiArrowSquareOut,
   PiCaretRightFill,
+  PiInfoBold,
   PiWarningFill,
   PiWarningOctagonFill,
   PiXBold,
@@ -187,6 +188,7 @@ function ItemPanel({
 
 function statusPanel({
   sdkFound,
+  hasPayload,
   canConnect,
   apiHost,
   clientKey,
@@ -255,7 +257,7 @@ function statusPanel({
           </Text>
           <Text as="div" size="2" weight="regular" mb="3">
             Ensure that{" "}
-            <code className="text-pink-600">enableDevMode: true</code> is set
+            <code className="text-gold-11">enableDevMode: true</code> is set
             when creating your GrowthBook SDK instance (JavaScript and React
             only).
           </Text>
@@ -290,24 +292,55 @@ function statusPanel({
         </>
       ) : (
         <>
-          <Text as="div" size="2" weight="regular" mb="2">
+          <Text as="div" size="2" weight="regular" mb="1">
             {canConnect
               ? "The SDK is connected to the GrowthBook API."
               : "The SDK is not connected to the GrowthBook API."}
           </Text>
+          {!canConnect && hasPayload ? (
+            <Callout.Root color="violet" size="1" className="mb-4">
+              <Callout.Icon>
+                <PiInfoBold />
+              </Callout.Icon>
+              <Callout.Text>
+                <div className="mb-2">
+                  Although no valid API connection was found, a valid SDK
+                  payload was found.
+                </div>
+                <div className="text-xs leading-4">
+                  Your SDK may be bootstrapped: the payload may have been
+                  hydrated rather than fetched. If you are unsure, please double
+                  check your implementation.
+                </div>
+              </Callout.Text>
+            </Callout.Root>
+          ) : !canConnect ? (
+            <Callout.Root color="red" size="1" className="mb-4">
+              <Callout.Icon>
+                <PiWarningFill />
+              </Callout.Icon>
+              <Callout.Text>
+                Neither a valid API connection nor an SDK payload were found.
+                Your SDK may be unable to reference your features or
+                experiments.
+              </Callout.Text>
+            </Callout.Root>
+          ) : null}
+
           <Text as="div" size="2" weight="regular" mb="2">
             <div className="font-semibold mb-0.5">Host:</div>
-            <code className="text-pink-600">{apiHost ?? "None"}</code>
+            <code className="text-gold-11">{apiHost || "None"}</code>
           </Text>
           <Text as="div" size="2" weight="regular" mb="2">
             <div className="font-semibold mb-0.5">Client Key:</div>
-            <code className="text-pink-600">{clientKey ?? "None"}</code>
+            <code className="text-gold-11">{clientKey || "None"}</code>
           </Text>
-          {errorMessage && (
-            <Text as="div" size="2" weight="light">
-              error: {errorMessage ?? "None"}
+          {errorMessage ? (
+            <Text as="div" size="2" weight="light" color="orange" mt="2">
+              <PiWarningFill className="inline-block mr-2" />
+              {errorMessage}
             </Text>
-          )}
+          ) : null}
         </>
       )}
     </>
@@ -393,18 +426,18 @@ function trackingCallbackPanel({
       {trackingCallbackParams?.length === 2 ? (
         <>
           The SDK is using a{" "}
-          <code className="text-pink-600">trackingCallback</code>.
+          <code className="text-gold-11">trackingCallback</code>.
         </>
       ) : !hasTrackingCallback ? (
         <>
           The SDK is not using a{" "}
-          <code className="text-pink-600">trackingCallback</code>. You will need
+          <code className="text-gold-11">trackingCallback</code>. You will need
           to add one to track experiment exposure to your data warehouse.
         </>
       ) : (
         <>
           The SDK is using a{" "}
-          <code className="text-pink-600">trackingCallback</code> with{" "}
+          <code className="text-gold-11">trackingCallback</code> with{" "}
           {trackingCallbackParams?.length ? (
             <em className="text-amber-600">{trackingCallbackParams.length}</em>
           ) : (
@@ -487,17 +520,17 @@ function streamingPanel({
       </Text>
       <Text as="div" size="2" weight="regular" mb="2">
         <div className="font-semibold mb-0.5">Streaming host:</div>
-        <code className="text-pink-600">{streamingHost ?? "None"}</code>
+        <code className="text-gold-11">{streamingHost || "None"}</code>
       </Text>
       <Text as="div" size="2" weight="regular">
         <div className="font-semibold mb-0.5">Client Key:</div>
-        <code className="text-pink-600">{clientKey ?? "None"}</code>
+        <code className="text-gold-11">{clientKey || "None"}</code>
       </Text>
       <Text as="div" size="2" weight="regular" mt="2">
         <div className="font-semibold">Streaming host request headers:</div>
-        <div>
-          <code className="text-pink-600">
-            {JSON.stringify(streamingHostRequestHeaders) ?? "None"}
+        <div className="mt-0.5">
+          <code className="text-gold-11">
+            {JSON.stringify(streamingHostRequestHeaders) || "None"}
           </code>
         </div>
       </Text>
@@ -536,12 +569,12 @@ function logEventPanel({ usingLogEvent }: SDKHealthCheckResult) {
     <Text as="div" size="2" weight="regular">
       {usingLogEvent ? (
         <>
-          The SDK is using a <code className="text-pink-600">logEvent</code>{" "}
+          The SDK is using a <code className="text-gold-11">logEvent</code>{" "}
           callback.
         </>
       ) : (
         <>
-          The SDK is not using a <code className="text-pink-600">logEvent</code>{" "}
+          The SDK is not using a <code className="text-gold-11">logEvent</code>{" "}
           callback. This optional callback allows you to track events to a data
           warehouse directly from the SDK.
         </>
@@ -556,12 +589,12 @@ function onFeatureUsagePanel({ usingOnFeatureUsage }: SDKHealthCheckResult) {
       {usingOnFeatureUsage ? (
         <>
           The SDK is using an{" "}
-          <code className="text-pink-600">onFeatureUsage</code> callback.
+          <code className="text-gold-11">onFeatureUsage</code> callback.
         </>
       ) : (
         <>
           The SDK is not using a{" "}
-          <code className="text-pink-600">onFeatureUsage</code> callback. This
+          <code className="text-gold-11">onFeatureUsage</code> callback. This
           optional callback allows you to track feature flag telemetry to a data
           warehouse.
         </>

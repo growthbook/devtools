@@ -31,6 +31,11 @@ export default function useTabState<T>(
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    if (!property) {
+      setState(defaultValue);
+      setReady(false);
+      return;
+    }
     // Fetch (query) state from content script when the component mounts (or when the property changes)
     // note: Content script state is pushed via "tabStateChanged" message
     const fetchState = async () => {
@@ -56,6 +61,7 @@ export default function useTabState<T>(
 
     // Listener for content script state changes
     const listener = async (message: any, sender: any) => {
+      if (!property) return;
       const activeTabId = await getActiveTabId();
       const senderTabId = sender?.tab?.id ?? message?.tabId;
       const shouldListen =
@@ -80,6 +86,7 @@ export default function useTabState<T>(
 
   // Setter for state: updates state in the content script
   const setTabState = async (value: T) => {
+    if (!property) return;
     setState(value); // Optimistic update
     const activeTabId = await getActiveTabId();
     if (!activeTabId) return;
