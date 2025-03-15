@@ -10,6 +10,7 @@ import {
   Tooltip,
 } from "@radix-ui/themes";
 import {
+  PiArrowCounterClockwiseBold,
   PiArrowSquareOut,
   PiCaretRightFill,
   PiTimerBold,
@@ -26,7 +27,7 @@ import React, { useEffect, useState } from "react";
 import { HEADER_H, LEFT_PERCENT, SelectedFeature } from "./FeaturesTab";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
-import useTabState from "@/app/hooks/useTabState";
+import useTabState, {getActiveTabId} from "@/app/hooks/useTabState";
 import DebugLogger from "@/app/components/DebugLogger";
 import { TbEyeSearch } from "react-icons/tb";
 import useApi from "@/app/hooks/useApi";
@@ -104,24 +105,24 @@ export default function FeatureDetail({
   };
 
   const [revisions, setRevisions] = useTabState<Revision[] | null>(
-    `revisions_${selectedFid}`,
+    selectedFid ? `revisions_${selectedFid}` : "",
     null
   );
   // cache for the version of the feature in the SDK in case overwritten by revision selector
   const [sdkRevision, setSdkRevision] = useTabState<SelectedFeatureWithMeta | undefined>(
-    `sdkRevision_${selectedFid}`,
+    selectedFid ? `sdkRevision_${selectedFid}` : "",
     undefined
   );
   const [revisionNum, setRevisionNum] = useTabState<number | null>(
-    `revisionNum_${selectedFid}`,
+    selectedFid ? `revisionNum_${selectedFid}` : "",
     null
   );
   const [revisionEnvs, setRevisionEnvs] = useTabState<string[] | null>(
-    `revisionEnvs_${selectedFid}`,
+    selectedFid ? `revisionEnvs_${selectedFid}` : "",
     null
   );
-  const [revisionEnv, setRevisionEnv] = useTabState<string | null>(
-    `revisionEnv_${selectedFid}`,
+  const [revisionEnv, setRevisionEnv, revisionEnvReady] = useTabState<string | null>(
+    selectedFid ? `revisionEnv_${selectedFid}` : "",
     null
   );
 
@@ -155,7 +156,7 @@ export default function FeatureDetail({
   );
 
   useEffect(() => {
-    if (!featureMetaLoading && featureMetaData) {
+    if (!featureMetaLoading && featureMetaData && revisionEnvReady) {
       if (!sdkRevision && selectedFeature) {
         // make sure default revision is saved (with meta info) in case of payload mutation
         setSdkRevision({...selectedFeature, ...(featureMetaData?.feature?.revision ?? {})});
@@ -181,9 +182,51 @@ export default function FeatureDetail({
         }
       }
     }
-  }, [featureMetaData, featureMetaLoading]);
+  }, [featureMetaData, featureMetaLoading, revisionEnvReady]);
 
-  console.log({featureMetaData, revisions})
+  useEffect(() => {
+    (async () => {
+      if (revisions && sdkRevision && selectedFid) {
+        let payloadPatch: any = null;
+        if (revisionNum !== null && revisionEnv !== null) {
+          const revision = revisions.find((r) => r.version === revisionNum);
+          const definition: string | undefined = revision?.definitions?.[revisionEnv];
+          let decoded: any = null;
+          try {
+            decoded = JSON.parse(definition ?? "");
+          } catch (e) {
+            console.error("Draft decoding error", e)
+          }
+          if (decoded) {
+            payloadPatch = {
+              features: {[selectedFid]: {...decoded, isDraft: true}}
+            };
+          }
+        } else if (revisionNum === null) {
+          payloadPatch = {
+            features: {[selectedFid]: {...sdkRevision.feature, isDraft: false}}
+          };
+        }
+
+        if (payloadPatch) {
+          const activeTabId = await getActiveTabId();
+          if (activeTabId) {
+            if (chrome?.tabs) {
+              await chrome.tabs.sendMessage(activeTabId, {
+                type: "PATCH_PAYLOAD",
+                data: payloadPatch,
+              });
+            } else {
+              chrome.runtime.sendMessage({
+                type: "PATCH_PAYLOAD",
+                data: payloadPatch,
+              });
+            }
+          }
+        }
+      }
+    })();
+  }, [revisionNum, revisionEnv, revisions, sdkRevision]);
 
   const defaultActive =
     JSON.stringify(selectedFeature?.evaluatedFeature?.result?.value) ===
@@ -243,23 +286,32 @@ export default function FeatureDetail({
         <div className="content">
           {selectedFeature?.feature?.isDraft ? (
             <Callout.Root
-              color="cyan"
+              color="indigo"
               size="1"
-              className="py-1.5 px-2 mt-2 mb-4"
+              className="block py-1.5 px-3 mt-2 mb-4"
             >
-              <Tooltip content="You are previewing a draft state of this feature. Reload the current page to reset.">
-                <span className="text-sm">
+              <div className="flex items-center justify-between w-full">
+                <div className="text-sm">
                   <TbEyeSearch className="inline-block mr-1 mb-0.5" />
                   Previewing draft
-                </span>
-              </Tooltip>
+                </div>
+                <Link
+                  size="1"
+                  href="#"
+                  role="button"
+                  onClick={() => setRevisionNum(null)}
+                >
+                  <PiArrowCounterClockwiseBold className="inline-block mr-1" />
+                  Exit preview
+                </Link>
+              </div>
             </Callout.Root>
           ) : null}
           {selectedFeature?.feature?.noDefinition ? (
             <Callout.Root
               color="amber"
               size="1"
-              className="py-1.5 px-2 mt-2 mb-4"
+              className="py-1.5 px-3 mt-2 mb-4"
             >
               <Tooltip content="This feature id is not in your SDK payload yet was still evaluated. This may indicate a stale reference in your codebase or an unpublished feature.">
                 <span className="text-sm">
@@ -538,7 +590,9 @@ function RevisionSelector({
             </Select.Content>
           </Select.Root>
         ) : (
-          <em className="text-xs text-gray-10">using SDK definition</em>
+          <div className="rt-reset rt-SelectTrigger rt-r-size-1 rt-variant-surface text-gray-10">
+            using SDK definition
+          </div>
         )}
       </div>
     </div>

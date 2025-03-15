@@ -173,7 +173,7 @@ export default function ExperimentDetail({
         <div className="content">
           {selectedExperiment?.experiment?.isDraft ? (
             <Callout.Root
-              color="cyan"
+              color="indigo"
               size="1"
               className="py-1.5 px-2 mt-2 mb-4"
             >

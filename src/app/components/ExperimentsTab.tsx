@@ -305,28 +305,28 @@ export default function ExperimentsTab() {
                     <div className="flex items-center gap-2 pr-0.5">
                       {types.redirect ? (
                         <Tooltip content="URL Redirect experiment">
-                          <button>
+                          <span>
                             <PiLinkBold size={12} />
-                          </button>
+                          </span>
                         </Tooltip>
                       ) : null}
                       {types.visual ? (
                         <Tooltip content="Visual Editor experiment">
-                          <button>
+                          <span>
                             <PiDesktopFill size={12} />
-                          </button>
+                          </span>
                         </Tooltip>
                       ) : null}
                       {types.features ? (
                         <Tooltip content="Feature flag experiment">
-                          <button>
+                          <span>
                             <PiFlagFill className="inline-block" size={12} />
                             {fullWidthListView ? (
                               <span className="ml-1">
                                 {types.features.length}
                               </span>
                             ) : null}
-                          </button>
+                          </span>
                         </Tooltip>
                       ) : null}
                     </div>
