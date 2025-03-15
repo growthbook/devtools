@@ -31,8 +31,6 @@ import useTabState, {getActiveTabId} from "@/app/hooks/useTabState";
 import DebugLogger from "@/app/components/DebugLogger";
 import { TbEyeSearch } from "react-icons/tb";
 import useApi from "@/app/hooks/useApi";
-import {SDKAttribute} from "@/app/gbTypes";
-import clsx from "clsx";
 
 export type ApiFeatureWithRevisions = {
   archived: boolean;
@@ -542,7 +540,7 @@ function RevisionSelector({
   }
 
   return (
-    <div className="flex items-center gap-x-4 gap-y-1 justify-between flex-wrap my-1">
+    <div className="flex items-center gap-x-4 gap-y-1 justify-between flex-wrap mt-3 mb-1">
       <div>
         <Select.Root
           size="1"
@@ -590,7 +588,7 @@ function RevisionSelector({
             </Select.Content>
           </Select.Root>
         ) : (
-          <div className="rt-reset rt-SelectTrigger rt-r-size-1 rt-variant-surface text-gray-10">
+          <div className="rt-reset rt-SelectTrigger rt-r-size-1 rt-variant-surface bg-gray-a1 text-gray-11">
             using SDK definition
           </div>
         )}
