@@ -64,6 +64,11 @@ Some notes
 
 ## Changelog
 
+*1.1.1* (2025-03-15)
+- Choose between live and draft versions of features using the GrowthBook API
+- Quickly apply feature overrides from feature rules
+- Show feature descriptions and other meta information from the API
+
 *1.1.0* (2025-03-11)
 - Share DevTools session by link
 - Import/export DevTools session by JSON blob

@@ -27,10 +27,12 @@ import React, { useEffect, useState } from "react";
 import { HEADER_H, LEFT_PERCENT, SelectedFeature } from "./FeaturesTab";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
-import useTabState, {getActiveTabId} from "@/app/hooks/useTabState";
+import useTabState, { getActiveTabId } from "@/app/hooks/useTabState";
 import DebugLogger from "@/app/components/DebugLogger";
 import { TbEyeSearch } from "react-icons/tb";
 import useApi from "@/app/hooks/useApi";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export type ApiFeatureWithRevisions = {
   archived: boolean;
@@ -44,25 +46,36 @@ export type ApiFeatureWithRevisions = {
   owner: string;
   project: string;
   tags: string[];
-  revision: { comment: string; date: string; publishedBy?: string; version?: number; }
+  revision: {
+    comment: string;
+    date: string;
+    publishedBy?: string;
+    version?: number;
+  };
   revisions: Revision[];
-}
+};
 export type Revision = {
   baseVersion?: number;
   version: number;
   comment: string;
   date: string;
-  status: "draft" | "published" | "discarded" | "approved" | "changes-requested" | "pending-review";
+  status:
+    | "draft"
+    | "published"
+    | "discarded"
+    | "approved"
+    | "changes-requested"
+    | "pending-review";
   publishedBy?: string;
   rules: Record<string, any>;
   definitions: Record<string, any>;
-}
+};
 export type SelectedFeatureWithMeta = SelectedFeature & {
   comment?: string;
   date?: string;
   publishedBy?: string;
   version?: number;
-}
+};
 
 export default function FeatureDetail({
   selectedFid,
@@ -102,27 +115,25 @@ export default function FeatureDetail({
     setOverrideFeature(false);
   };
 
-  const [revisions, setRevisions] = useTabState<Revision[] | null>(
-    selectedFid ? `revisions_${selectedFid}` : "",
-    null
-  );
+  const [revisionsByFid, setRevisionsByFid] = useTabState<
+    Record<string, Revision[]>
+  >("revisionsByFid", {});
+
   // cache for the version of the feature in the SDK in case overwritten by revision selector
-  const [sdkRevision, setSdkRevision] = useTabState<SelectedFeatureWithMeta | undefined>(
-    selectedFid ? `sdkRevision_${selectedFid}` : "",
-    undefined
-  );
-  const [revisionNum, setRevisionNum] = useTabState<number | null>(
-    selectedFid ? `revisionNum_${selectedFid}` : "",
-    null
-  );
-  const [revisionEnvs, setRevisionEnvs] = useTabState<string[] | null>(
-    selectedFid ? `revisionEnvs_${selectedFid}` : "",
-    null
-  );
-  const [revisionEnv, setRevisionEnv, revisionEnvReady] = useTabState<string | null>(
-    selectedFid ? `revisionEnv_${selectedFid}` : "",
-    null
-  );
+  const [sdkRevisionByFid, setSdkRevisionByFid, sdkRevisionByFidReady] =
+    useTabState<Record<string, SelectedFeatureWithMeta>>(
+      "sdkRevisionByFid",
+      {},
+    );
+
+  const [revisionNumByFid, setRevisionNumByFid, revisionNumByFidReady] =
+    useTabState<Record<string, number | null>>("revisionNumByFid", {});
+
+  const [revisionEnvsByFid, setRevisionEnvsByFid, revisionEnvsByFidReady] =
+    useTabState<Record<string, string[] | null>>("revisionEnvsByFid", {});
+
+  const [revisionEnvByFid, setRevisionEnvByFid, revisionEnvByFidReady] =
+    useTabState<Record<string, string | null>>("revisionEnvById", {});
 
   const debugLog = selectedFeature?.evaluatedFeature?.debug;
   const defaultValueStatus = debugLog
@@ -148,26 +159,47 @@ export default function FeatureDetail({
     error: featureMetaError,
     data: featureMetaData,
   } = useApi<{ feature: ApiFeatureWithRevisions }>(
-    selectedFid ?
-      `/api/v1/features/${selectedFid}?withRevisions=drafts` :
-      null
+    selectedFid ? `/api/v1/features/${selectedFid}?withRevisions=drafts` : null,
   );
 
   useEffect(() => {
-    if (!featureMetaLoading && featureMetaData && revisionEnvReady) {
-      if (!sdkRevision && selectedFeature) {
+    if (!selectedFid) return;
+    if (!featureMetaLoading && featureMetaData && revisionEnvByFidReady) {
+      if (!sdkRevisionByFid?.[selectedFid] && selectedFeature) {
         // make sure default revision is saved (with meta info) in case of payload mutation
-        setSdkRevision({...selectedFeature, ...(featureMetaData?.feature?.revision ?? {})});
+        const newRevisionsByFid = {
+          ...sdkRevisionByFid,
+          [selectedFid]: {
+            ...selectedFeature,
+            ...(featureMetaData?.feature?.revision ?? {}),
+          },
+        };
+        setSdkRevisionByFid(newRevisionsByFid);
       }
       const revisions = featureMetaData?.feature?.revisions;
       if (revisions?.length && Object.keys(revisions?.[0])?.length) {
-        setRevisions(featureMetaData.feature.revisions);
+        const newRevisionsByFid = {
+          ...revisionsByFid,
+          [selectedFid]: revisions,
+        };
+        setRevisionsByFid(newRevisionsByFid);
+
         const envs = Object.keys(revisions?.[0]?.rules || {});
-        setRevisionEnvs(envs);
+        const newRevisionEnvsByFid = {
+          ...revisionEnvsByFid,
+          [selectedFid]: envs,
+        };
+        setRevisionEnvsByFid(newRevisionEnvsByFid);
+
+        const revisionEnv = revisionEnvByFid?.[selectedFid];
         if (!revisionEnv || !envs.includes(revisionEnv)) {
           let env = envs?.[0];
-          const devLike = envs.find((env) => env.toLowerCase().startsWith("dev"));
-          const stagingLike = envs.find((env) => env.toLowerCase().startsWith("staging"));
+          const devLike = envs.find((env) =>
+            env.toLowerCase().startsWith("dev"),
+          );
+          const stagingLike = envs.find((env) =>
+            env.toLowerCase().startsWith("staging"),
+          );
           const qaLike = envs.find((env) => env.toLowerCase().startsWith("qa"));
           if (devLike) {
             env = devLike;
@@ -176,37 +208,65 @@ export default function FeatureDetail({
           } else if (qaLike) {
             env = qaLike;
           }
-          setRevisionEnv(env);
+          const newRevisionEnvByFid = {
+            ...revisionEnvByFid,
+            [selectedFid]: env,
+          };
+          setRevisionEnvByFid(newRevisionEnvByFid);
         }
       }
     }
-  }, [featureMetaData, featureMetaLoading, revisionEnvReady]);
+  }, [selectedFid, featureMetaData, featureMetaLoading, revisionEnvByFidReady]);
 
-  useEffect(() => {
-    (async () => {
-      if (revisions && sdkRevision && selectedFid) {
-        let payloadPatch: any = null;
-        if (revisionNum !== null && revisionEnv !== null) {
-          const revision = revisions.find((r) => r.version === revisionNum);
-          const definition: string | undefined = revision?.definitions?.[revisionEnv];
-          let decoded: any = null;
-          try {
-            decoded = JSON.parse(definition ?? "");
-          } catch (e) {
-            console.error("Draft decoding error", e)
-          }
-          if (decoded) {
-            payloadPatch = {
-              features: {[selectedFid]: {...decoded, isDraft: true}}
-            };
-          }
-        } else if (revisionNum === null) {
+  const changeRevision = ({
+    num,
+    env,
+  }: {
+    num?: number | null;
+    env?: string | null;
+  }) => {
+    if (!selectedFid || !sdkRevisionByFidReady || !revisionNumByFidReady)
+      return;
+    const revisions = revisionsByFid?.[selectedFid];
+    const sdkRevision = sdkRevisionByFid?.[selectedFid];
+
+    if (revisions && sdkRevision) {
+      if (num !== undefined) {
+        setRevisionNumByFid({ ...revisionNumByFid, [selectedFid]: num });
+      } else {
+        num = revisionNumByFid?.[selectedFid] ?? null;
+      }
+      if (env !== undefined) {
+        setRevisionEnvByFid({ ...revisionEnvByFid, [selectedFid]: env });
+      } else {
+        env = revisionEnvByFid?.[selectedFid] ?? null;
+      }
+
+      let payloadPatch: any = null;
+      if (num !== null && env !== null) {
+        const revision = revisions.find((r) => r.version === num);
+        const definition: string | undefined = revision?.definitions?.[env];
+        let decoded: any = null;
+        try {
+          decoded = JSON.parse(definition ?? "");
+        } catch (e) {
+          console.error("Draft decoding error", e);
+        }
+        if (decoded) {
           payloadPatch = {
-            features: {[selectedFid]: {...sdkRevision.feature, isDraft: false}}
+            features: { [selectedFid]: { ...decoded, isDraft: true } },
           };
         }
+      } else if (num === null) {
+        payloadPatch = {
+          features: {
+            [selectedFid]: { ...sdkRevision.feature, isDraft: false },
+          },
+        };
+      }
 
-        if (payloadPatch) {
+      if (payloadPatch) {
+        (async () => {
           const activeTabId = await getActiveTabId();
           if (activeTabId) {
             if (chrome?.tabs) {
@@ -221,10 +281,10 @@ export default function FeatureDetail({
               });
             }
           }
-        }
+        })();
       }
-    })();
-  }, [revisionNum, revisionEnv, revisions, sdkRevision]);
+    }
+  };
 
   const defaultActive =
     JSON.stringify(selectedFeature?.evaluatedFeature?.result?.value) ===
@@ -282,6 +342,50 @@ export default function FeatureDetail({
         </div>
 
         <div className="content">
+          {featureMetaData?.feature?.description ? (
+            <div>
+              <div className="label font-semibold mb-1">Description</div>
+              <div className="box text-xs overflow-y-auto max-h-[150px]">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  urlTransform={(url) => {
+                    // even though we're on 9.0.0, the URL sanitization in our version is
+                    // messing up & in urls. This code come from the latest version of react-markdown
+                    const safeProtocol = /^(https?|ircs?|mailto|xmpp)$/i;
+                    const colon = url.indexOf(":");
+                    const questionMark = url.indexOf("?");
+                    const numberSign = url.indexOf("#");
+                    const slash = url.indexOf("/");
+
+                    if (
+                      // If there is no protocol, it’s relative.
+                      colon < 0 ||
+                      // If the first colon is after a `?`, `#`, or `/`, it’s not a protocol.
+                      (slash > -1 && colon > slash) ||
+                      (questionMark > -1 && colon > questionMark) ||
+                      (numberSign > -1 && colon > numberSign) ||
+                      // It is a protocol, it should be allowed.
+                      safeProtocol.test(url.slice(0, colon))
+                    ) {
+                      return url;
+                    }
+                    return "";
+                  }}
+                  components={{
+                    // open external links in new tab
+                    a: ({ ...props }) => (
+                      <a href={props.href} target="_blank" rel="noreferrer">
+                        {props.children}
+                      </a>
+                    ),
+                  }}
+                >
+                  {featureMetaData?.feature?.description ?? ""}
+                </ReactMarkdown>
+              </div>
+            </div>
+          ) : null}
+
           {selectedFeature?.feature?.isDraft ? (
             <Callout.Root
               color="indigo"
@@ -297,7 +401,7 @@ export default function FeatureDetail({
                   size="1"
                   href="#"
                   role="button"
-                  onClick={() => setRevisionNum(null)}
+                  onClick={() => changeRevision({ num: null })}
                 >
                   <PiArrowCounterClockwiseBold className="inline-block mr-1" />
                   Exit preview
@@ -348,7 +452,10 @@ export default function FeatureDetail({
                   setForcedFeature(selectedFid, v);
                   setOverrideFeature(true);
                 }}
-                valueType={selectedFeature?.valueType}
+                valueType={
+                  featureMetaData?.feature?.valueType ??
+                  selectedFeature?.valueType
+                }
               />
             ) : null}
           </div>
@@ -358,8 +465,7 @@ export default function FeatureDetail({
               <div className="mt-6 mb-2 py-1 border-b border-gray-a6">
                 <div className="flex justify-between items-end text-md font-semibold">
                   <div>Rules and Values</div>
-                  <label
-                    className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer flex-shrink-0">
+                  <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer flex-shrink-0">
                     <span>Hide inactive rules</span>
                     <Switch
                       size="1"
@@ -368,15 +474,15 @@ export default function FeatureDetail({
                     />
                   </label>
                 </div>
-                {revisions ? (
+                {selectedFid && revisionsByFid?.[selectedFid] ? (
                   <RevisionSelector
-                    sdkRevision={sdkRevision}
-                    revisions={revisions}
-                    revisionNum={revisionNum}
-                    setRevisionNum={setRevisionNum}
-                    revisionEnvs={revisionEnvs}
-                    revisionEnv={revisionEnv}
-                    setRevisionEnv={setRevisionEnv}
+                    sdkRevision={sdkRevisionByFid?.[selectedFid]}
+                    revisions={revisionsByFid[selectedFid]}
+                    revisionNum={revisionNumByFid?.[selectedFid] ?? null}
+                    revisionEnvs={revisionEnvsByFid?.[selectedFid] ?? null}
+                    revisionEnv={revisionEnvByFid?.[selectedFid] ?? null}
+                    setRevisionNum={(num) => changeRevision({ num })}
+                    setRevisionEnv={(env) => changeRevision({ env })}
                   />
                 ) : null}
               </div>
@@ -384,7 +490,7 @@ export default function FeatureDetail({
               {!hideInactiveRules || defaultValueStatus === "matches" ? (
                 <div
                   className={`rule relative ${defaultValueStatus}`}
-                  style={{padding: "12px 12px 12px 14px"}}
+                  style={{ padding: "12px 12px 12px 14px" }}
                 >
                   <div className="text-sm font-semibold mb-2">
                     Default value
@@ -500,17 +606,17 @@ function RevisionSelector({
   sdkRevision,
   revisions,
   revisionNum,
-  setRevisionNum,
   revisionEnvs,
   revisionEnv,
+  setRevisionNum,
   setRevisionEnv,
 }: {
   sdkRevision?: SelectedFeatureWithMeta;
   revisions: Revision[];
   revisionNum: number | null;
-  setRevisionNum: (n: number | null) => void;
   revisionEnvs: string[] | null;
   revisionEnv: string | null;
+  setRevisionNum: (n: number | null) => void;
   setRevisionEnv: (s: string | null) => void;
 }) {
   const liveRevisionNum = sdkRevision?.version;
@@ -519,16 +625,30 @@ function RevisionSelector({
   const drawLiveRevisionRow = () => {
     return (
       <div className="flex justify-between w-full">
-        <span>{liveRevisionNum !== undefined ? `Revision ${liveRevisionNum}` : "Live revision"}</span>
+        <span>
+          {liveRevisionNum !== undefined
+            ? `Revision ${liveRevisionNum}`
+            : "Live revision"}
+        </span>
         <Badge size="1" className="text-2xs" color="teal" ml="3">
           live
         </Badge>
       </div>
     );
-  }
+  };
   const drawRevisionRow = (revision: Revision) => {
-    const revisionStatus = revision?.status === "published" ? "live" : revision?.status && revision?.status !== "discarded" ? "draft" : "inactive";
-    const revisionStatusColor = revisionStatus === "draft" ? "indigo" : revisionStatus === "live" ? "teal" : "gray";
+    const revisionStatus =
+      revision?.status === "published"
+        ? "live"
+        : revision?.status && revision?.status !== "discarded"
+          ? "draft"
+          : "inactive";
+    const revisionStatusColor =
+      revisionStatus === "draft"
+        ? "indigo"
+        : revisionStatus === "live"
+          ? "teal"
+          : "gray";
     return (
       <div className="flex justify-between w-full">
         <span>Revision {revision.version}</span>
@@ -536,8 +656,8 @@ function RevisionSelector({
           {revisionStatus}
         </Badge>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="flex items-center gap-x-4 gap-y-1 justify-between flex-wrap mt-3 mb-1">
@@ -555,9 +675,7 @@ function RevisionSelector({
             </div>
           </Select.Trigger>
           <Select.Content variant="soft">
-            <Select.Item value="null">
-              {drawLiveRevisionRow()}
-            </Select.Item>
+            <Select.Item value="null">{drawLiveRevisionRow()}</Select.Item>
             {revisions.map((r) => (
               <Select.Item value={r.version + ""} key={r.version}>
                 {drawRevisionRow(r)}
@@ -577,7 +695,9 @@ function RevisionSelector({
             }}
           >
             <Select.Trigger>
-              <div className="min-w-[70px] max-w-[150px] overflow-hidden overflow-ellipsis">{revisionEnv}</div>
+              <div className="min-w-[70px] max-w-[150px] overflow-hidden overflow-ellipsis">
+                {revisionEnv}
+              </div>
             </Select.Trigger>
             <Select.Content variant="soft">
               {revisionEnvs.map((env) => (

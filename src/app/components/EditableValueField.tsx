@@ -41,6 +41,15 @@ export default function EditableValueField({
   }, []);
 
   useEffect(() => {
+    if (valueType) {
+      setForcedValueType(valueType);
+      if (valueType !== "json" && valueType !== "unknown") {
+        setEditing(true);
+      }
+    }
+  }, [valueType]);
+
+  useEffect(() => {
     if (!editing) {
       setEditedValue(formattedValue);
     }
