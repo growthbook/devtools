@@ -706,7 +706,7 @@ function RevisionSelector({
   };
 
   return (
-    <div className="flex items-start gap-x-4 gap-y-1 justify-between flex-wrap mt-3 mb-1">
+    <div className="flex items-start gap-x-4 gap-y-1 justify-between flex-wrap mt-2 mb-1">
       <div>
         <Select.Root
           size="1"
@@ -726,19 +726,17 @@ function RevisionSelector({
                 {drawLiveRevisionRow()}
               </div>
             </Select.Item>
+            <Select.Separator />
             {revisions.length ? (
-              <>
-                <Select.Separator/>
-                {revisions.map((r) => (
-                  <Select.Item value={r.version + ""} key={r.version}>
-                    <div className="w-[140px] overflow-hidden overflow-ellipsis">
-                      {drawRevisionRow(r)}
-                    </div>
-                  </Select.Item>
-                ))}
-              </>
+              revisions.map((r) => (
+                <Select.Item value={r.version + ""} key={r.version}>
+                  <div className="w-[140px] overflow-hidden overflow-ellipsis">
+                    {drawRevisionRow(r)}
+                  </div>
+                </Select.Item>
+              ))
             ) : (
-              <div className="px-5 pt-2 text-xs text-gray-10 italic">
+              <div className="px-5 text-xs text-gray-10 italic">
                 No other revisions
               </div>
             )}
@@ -747,16 +745,20 @@ function RevisionSelector({
                 <DropdownMenu.Trigger>
                   <Button variant="ghost" size="1">
                     <PiFunnelBold />
-                    {fetchRevisionType === "drafts" ? "Drafts" : "All revisions"}
+                    {fetchRevisionType === "drafts"
+                      ? "Drafts"
+                      : "All revisions"}
                   </Button>
                 </DropdownMenu.Trigger>
-                <DropdownMenu.Content variant="soft" size="1" side="right">
+                <DropdownMenu.Content variant="soft" size="2" side="right">
                   <DropdownMenu.Item
                     onSelect={() => setFetchRevisionType("drafts")}
                   >
                     Fetch drafts only
                   </DropdownMenu.Item>
-                  <DropdownMenu.Item onSelect={() => setFetchRevisionType("all")}>
+                  <DropdownMenu.Item
+                    onSelect={() => setFetchRevisionType("all")}
+                  >
                     Fetch all revisions
                   </DropdownMenu.Item>
                 </DropdownMenu.Content>
