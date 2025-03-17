@@ -36,6 +36,8 @@ import { AutoExperimentVariation, isURLTargeted } from "@growthbook/growthbook";
 import clsx from "clsx";
 import DebugLogger, { DebugLogAccordion } from "@/app/components/DebugLogger";
 import { TbEyeSearch } from "react-icons/tb";
+import useApi from "@/app/hooks/useApi";
+import { SDKAttribute } from "@/app/gbTypes";
 
 export default function ExperimentDetail({
   selectedEid,
@@ -171,7 +173,7 @@ export default function ExperimentDetail({
         <div className="content">
           {selectedExperiment?.experiment?.isDraft ? (
             <Callout.Root
-              color="cyan"
+              color="indigo"
               size="1"
               className="py-1.5 px-2 mt-2 mb-4"
             >

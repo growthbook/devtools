@@ -26,16 +26,20 @@ export async function apiCall(
   return responseData;
 }
 
-type CurriedApiCallType<T> = (url: string, options?: RequestInit) => Promise<T>;
+type CurriedApiCallType<T> = (
+  url: string | null,
+  options?: RequestInit,
+) => Promise<T>;
 
 export default function useApi<Response = unknown>(
-  path: string,
+  path: string | null,
   allowInvalidApiKey = false,
   useSwrSettings?: SWRConfiguration,
 ) {
   const { apiHost, apiKey, apiKeyValid } = useApiKey();
   const curriedApiCall: CurriedApiCallType<Response> = useCallback(
     async (url: string | null, options: Omit<RequestInit, "headers"> = {}) => {
+      if (!url) return;
       if (!apiKeyValid && !allowInvalidApiKey) return;
       return await apiCall(apiHost, apiKey, url, options);
     },
@@ -43,7 +47,9 @@ export default function useApi<Response = unknown>(
   );
 
   return useSWR<Response, Error>(
-    `${path}_${apiHost}_${apiKey}_${apiKeyValid}_${allowInvalidApiKey}`,
+    path && apiHost && apiKey && (apiKeyValid || allowInvalidApiKey)
+      ? `${path}_${apiHost}_${apiKey}_${apiKeyValid}_${allowInvalidApiKey}`
+      : null,
     async () => curriedApiCall(path, { method: "GET" }),
     {
       revalidateOnMount: true,
