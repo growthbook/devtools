@@ -31,6 +31,7 @@ export type FeatureDefinitionWithId = FeatureDefinition & {
   id: string;
   noDefinition?: boolean;
   isDraft?: boolean;
+  isInactive?: boolean;
 };
 
 export const LEFT_PERCENT = 0.4;
@@ -286,7 +287,13 @@ export default function FeaturesTab() {
                       type="feature"
                     />
                     {feature?.isDraft ? (
-                      <Tooltip content="Previewing draft">
+                      <Tooltip
+                        content={
+                          feature?.isInactive
+                            ? "Previewing inactive revision"
+                            : "Previewing draft"
+                        }
+                      >
                         <span>
                           <TbEyeSearch
                             className="inline-block mr-1 text-indigo-9"

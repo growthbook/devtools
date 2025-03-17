@@ -29,6 +29,7 @@ export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
   features?: string[];
   featureTypes?: Record<string, ValueType>;
   isDraft?: boolean;
+  isInactive?: boolean;
 };
 
 export const LEFT_PERCENT = 0.4;

@@ -13,7 +13,6 @@ const Tooltip = ({
     <RadixTooltip.Provider>
       <RadixTooltip.Root>
         <RadixTooltip.Trigger asChild>{children}</RadixTooltip.Trigger>
-        {/* @ts-expect-error */}
         <RadixTooltip.Portal container={shadowRoot}>
           <RadixTooltip.Content sideOffset={5} asChild>
             <div className="z-max bg-slate-700 text-xs text-slate-300 rounded px-4 py-2 shadow-lg max-w-sm">

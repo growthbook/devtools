@@ -3,6 +3,7 @@ import {
   Badge,
   Button,
   Callout,
+  DropdownMenu,
   IconButton,
   Link,
   Select,
@@ -13,6 +14,7 @@ import {
   PiArrowCounterClockwiseBold,
   PiArrowSquareOut,
   PiCaretRightFill,
+  PiFunnelBold,
   PiTimerBold,
   PiXBold,
 } from "react-icons/pi";
@@ -135,6 +137,10 @@ export default function FeatureDetail({
   const [revisionEnvByFid, setRevisionEnvByFid, revisionEnvByFidReady] =
     useTabState<Record<string, string | null>>("revisionEnvById", {});
 
+  const [fetchRevisionType, setFetchRevisionType] = useTabState<
+    "drafts" | "all"
+  >("fetchRevisionType", "drafts");
+
   const debugLog = selectedFeature?.evaluatedFeature?.debug;
   const defaultValueStatus = debugLog
     ? debugLog?.[debugLog.length - 1]?.[0]?.startsWith(
@@ -159,7 +165,9 @@ export default function FeatureDetail({
     error: featureMetaError,
     data: featureMetaData,
   } = useApi<{ feature: ApiFeatureWithRevisions }>(
-    selectedFid ? `/api/v1/features/${selectedFid}?withRevisions=drafts` : null,
+    selectedFid
+      ? `/api/v1/features/${selectedFid}?withRevisions=${fetchRevisionType}`
+      : null,
   );
 
   useEffect(() => {
@@ -176,44 +184,40 @@ export default function FeatureDetail({
         };
         setSdkRevisionByFid(newRevisionsByFid);
       }
-      const revisions = featureMetaData?.feature?.revisions;
-      if (revisions?.length && Object.keys(revisions?.[0])?.length) {
-        const newRevisionsByFid = {
-          ...revisionsByFid,
-          [selectedFid]: revisions,
-        };
-        setRevisionsByFid(newRevisionsByFid);
+      const revisions = featureMetaData?.feature?.revisions ?? [];
+      const newRevisionsByFid = {
+        ...revisionsByFid,
+        [selectedFid]: revisions,
+      };
+      setRevisionsByFid(newRevisionsByFid);
 
-        const envs = Object.keys(revisions?.[0]?.rules || {});
-        const newRevisionEnvsByFid = {
-          ...revisionEnvsByFid,
-          [selectedFid]: envs,
-        };
-        setRevisionEnvsByFid(newRevisionEnvsByFid);
+      const envs = Object.keys(revisions?.[0]?.rules || {});
+      const newRevisionEnvsByFid = {
+        ...revisionEnvsByFid,
+        [selectedFid]: envs,
+      };
+      setRevisionEnvsByFid(newRevisionEnvsByFid);
 
-        const revisionEnv = revisionEnvByFid?.[selectedFid];
-        if (!revisionEnv || !envs.includes(revisionEnv)) {
-          let env = envs?.[0];
-          const devLike = envs.find((env) =>
-            env.toLowerCase().startsWith("dev"),
-          );
-          const stagingLike = envs.find((env) =>
-            env.toLowerCase().startsWith("staging"),
-          );
-          const qaLike = envs.find((env) => env.toLowerCase().startsWith("qa"));
-          if (devLike) {
-            env = devLike;
-          } else if (stagingLike) {
-            env = stagingLike;
-          } else if (qaLike) {
-            env = qaLike;
-          }
-          const newRevisionEnvByFid = {
-            ...revisionEnvByFid,
-            [selectedFid]: env,
-          };
-          setRevisionEnvByFid(newRevisionEnvByFid);
+      const revisionEnv = revisionEnvByFid?.[selectedFid];
+      if (!revisionEnv || !envs.includes(revisionEnv)) {
+        let env = envs?.[0];
+        const devLike = envs.find((env) => env.toLowerCase().startsWith("dev"));
+        const stagingLike = envs.find((env) =>
+          env.toLowerCase().startsWith("staging"),
+        );
+        const qaLike = envs.find((env) => env.toLowerCase().startsWith("qa"));
+        if (devLike) {
+          env = devLike;
+        } else if (stagingLike) {
+          env = stagingLike;
+        } else if (qaLike) {
+          env = qaLike;
         }
+        const newRevisionEnvByFid = {
+          ...revisionEnvByFid,
+          [selectedFid]: env,
+        };
+        setRevisionEnvByFid(newRevisionEnvByFid);
       }
     }
   }, [selectedFid, featureMetaData, featureMetaLoading, revisionEnvByFidReady]);
@@ -254,13 +258,26 @@ export default function FeatureDetail({
         }
         if (decoded) {
           payloadPatch = {
-            features: { [selectedFid]: { ...decoded, isDraft: true } },
+            features: {
+              [selectedFid]: {
+                ...decoded,
+                isDraft: true,
+                isInactive:
+                  revision?.version &&
+                  sdkRevision?.version &&
+                  revision.version <= sdkRevision.version,
+              },
+            },
           };
         }
       } else if (num === null) {
         payloadPatch = {
           features: {
-            [selectedFid]: { ...sdkRevision.feature, isDraft: false },
+            [selectedFid]: {
+              ...sdkRevision.feature,
+              isDraft: false,
+              isInactive: false,
+            },
           },
         };
       }
@@ -285,6 +302,30 @@ export default function FeatureDetail({
       }
     }
   };
+
+  // Reset any cached revision info in the UI if the payload is reverted to default
+  // (ex: page navigation, page reload)
+  useEffect(() => {
+    if (
+      selectedFid &&
+      selectedFeature?.feature &&
+      !selectedFeature.feature?.isDraft
+    ) {
+      if (revisionNumByFid?.[selectedFid] !== null) {
+        setRevisionNumByFid({ ...revisionNumByFid, [selectedFid]: null });
+      }
+    }
+  }, [selectedFid, JSON.stringify(selectedFeature?.feature)]);
+
+  // Reset active revision if changing the filter to something less permissive
+  useEffect(() => {
+    if (
+      fetchRevisionType === "drafts" &&
+      selectedFeature?.feature?.isInactive
+    ) {
+      changeRevision({ num: null });
+    }
+  }, [fetchRevisionType]);
 
   const defaultActive =
     JSON.stringify(selectedFeature?.evaluatedFeature?.result?.value) ===
@@ -395,13 +436,18 @@ export default function FeatureDetail({
               <div className="flex items-center justify-between w-full">
                 <div className="text-sm">
                   <TbEyeSearch className="inline-block mr-1 mb-0.5" />
-                  Previewing draft
+                  {selectedFeature.feature?.isInactive
+                    ? "Previewing inactive revision"
+                    : "Previewing draft"}
                 </div>
                 <Link
                   size="1"
                   href="#"
                   role="button"
-                  onClick={() => changeRevision({ num: null })}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    changeRevision({ num: null });
+                  }}
                 >
                   <PiArrowCounterClockwiseBold className="inline-block mr-1" />
                   Exit preview
@@ -460,140 +506,130 @@ export default function FeatureDetail({
             ) : null}
           </div>
 
-          {!selectedFeature?.feature?.noDefinition ? (
-            <>
-              <div className="mt-6 mb-2 py-1 border-b border-gray-a6">
-                <div className="flex justify-between items-end text-md font-semibold">
-                  <div>Rules and Values</div>
-                  <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer flex-shrink-0">
-                    <span>Hide inactive rules</span>
-                    <Switch
-                      size="1"
-                      checked={hideInactiveRules}
-                      onCheckedChange={(b) => setHideInactiveRules(b)}
-                    />
-                  </label>
+          <div className="mt-6 mb-2 py-1 border-b border-gray-a6">
+            <div className="flex justify-between items-end text-md font-semibold">
+              <div>Rules and Values</div>
+              <label className="flex gap-1 text-xs items-center font-normal select-none cursor-pointer flex-shrink-0">
+                <span>Hide inactive rules</span>
+                <Switch
+                  size="1"
+                  checked={hideInactiveRules}
+                  onCheckedChange={(b) => setHideInactiveRules(b)}
+                />
+              </label>
+            </div>
+            {selectedFid && featureMetaData?.feature?.revisions ? (
+              <RevisionSelector
+                sdkRevision={sdkRevisionByFid?.[selectedFid]}
+                revisions={revisionsByFid[selectedFid] ?? []}
+                revisionNum={revisionNumByFid?.[selectedFid] ?? null}
+                revisionEnvs={revisionEnvsByFid?.[selectedFid] ?? null}
+                revisionEnv={revisionEnvByFid?.[selectedFid] ?? null}
+                setRevisionNum={(num) => changeRevision({ num })}
+                setRevisionEnv={(env) => changeRevision({ env })}
+                noDefinition={selectedFeature?.feature?.noDefinition}
+                fetchRevisionType={fetchRevisionType}
+                setFetchRevisionType={setFetchRevisionType}
+              />
+            ) : null}
+          </div>
+
+          {!hideInactiveRules || defaultValueStatus === "matches" ? (
+            <div
+              className={`rule relative ${defaultValueStatus}`}
+              style={{ padding: "12px 12px 12px 14px" }}
+            >
+              <div className="text-sm font-semibold mb-2">
+                Default value
+                <div className="inline-block ml-3 status capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                  {defaultValueStatus === "matches" ? "Active" : "Inactive"}
                 </div>
-                {selectedFid && revisionsByFid?.[selectedFid] ? (
-                  <RevisionSelector
-                    sdkRevision={sdkRevisionByFid?.[selectedFid]}
-                    revisions={revisionsByFid[selectedFid]}
-                    revisionNum={revisionNumByFid?.[selectedFid] ?? null}
-                    revisionEnvs={revisionEnvsByFid?.[selectedFid] ?? null}
-                    revisionEnv={revisionEnvByFid?.[selectedFid] ?? null}
-                    setRevisionNum={(num) => changeRevision({ num })}
-                    setRevisionEnv={(env) => changeRevision({ env })}
-                  />
+              </div>
+              <div className="flex gap-2 items-start flex-wrap text-xs">
+                <ValueField
+                  value={selectedFeature?.feature?.defaultValue}
+                  valueType={selectedFeature?.valueType}
+                  maxHeight={60}
+                  customPrismStyle={{ padding: "2px" }}
+                  customPrismOuterStyle={{
+                    flex: "1 1 auto",
+                    width: "100%",
+                  }}
+                  customBooleanStyle={{
+                    fontSize: "12px",
+                    display: "inline-block",
+                  }}
+                />
+                {selectedFid ? (
+                  <div className="flex flex-1 justify-end">
+                    <ActivateValueButton
+                      onClick={() => {
+                        setForcedFeature(
+                          selectedFid,
+                          selectedFeature?.feature?.defaultValue,
+                        );
+                        setOverrideFeature(true);
+                      }}
+                      disabled={defaultActive}
+                    />
+                  </div>
                 ) : null}
               </div>
+            </div>
+          ) : null}
 
-              {!hideInactiveRules || defaultValueStatus === "matches" ? (
-                <div
-                  className={`rule relative ${defaultValueStatus}`}
-                  style={{ padding: "12px 12px 12px 14px" }}
-                >
-                  <div className="text-sm font-semibold mb-2">
-                    Default value
-                    <div className="inline-block ml-3 status capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
-                      {defaultValueStatus === "matches" ? "Active" : "Inactive"}
-                    </div>
-                  </div>
-                  <div className="flex gap-2 items-start flex-wrap text-xs">
-                    <ValueField
-                      value={selectedFeature?.feature?.defaultValue}
-                      valueType={selectedFeature?.valueType}
-                      maxHeight={60}
-                      customPrismStyle={{ padding: "2px" }}
-                      customPrismOuterStyle={{
-                        flex: "1 1 auto",
-                        width: "100%",
-                      }}
-                      customBooleanStyle={{
-                        fontSize: "12px",
-                        display: "inline-block",
-                      }}
-                    />
-                    {selectedFid ? (
-                      <div className="flex flex-1 justify-end">
-                        <ActivateValueButton
-                          onClick={() => {
-                            setForcedFeature(
-                              selectedFid,
-                              selectedFeature?.feature?.defaultValue,
-                            );
-                            setOverrideFeature(true);
-                          }}
-                          disabled={defaultActive}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              ) : null}
-
-              {selectedFid &&
-              selectedFeature &&
-              (selectedFeature?.feature?.rules ?? []).length ? (
-                <>
-                  {selectedFeature?.feature?.rules?.map((rule, i) => {
-                    return (
-                      <Rule
-                        key={i}
-                        rule={rule}
-                        rules={selectedFeature.feature.rules || []}
-                        i={i}
-                        fid={selectedFid}
-                        valueType={selectedFeature.valueType}
-                        evaluatedFeature={selectedFeature.evaluatedFeature}
-                        hideInactive={hideInactiveRules}
-                        onApply={(v: any) => {
-                          setForcedFeature(selectedFid, v);
-                          setOverrideFeature(true);
-                        }}
-                      />
-                    );
-                  })}
-                </>
-              ) : null}
-
-              {selectedFeature ? (
-                <div className="mt-3 mb-1">
-                  {debugLog ? <DebugLogger logs={debugLog} /> : null}
-
-                  <Accordion.Root
-                    className="accordion mt-2"
-                    type="single"
-                    collapsible
-                  >
-                    <Accordion.Item value="feature-definition">
-                      <Accordion.Trigger className="trigger mb-0.5">
-                        <Link
-                          size="2"
-                          role="button"
-                          className="hover:underline"
-                        >
-                          <PiCaretRightFill
-                            className="caret mr-0.5"
-                            size={12}
-                          />
-                          Full feature definition
-                        </Link>
-                      </Accordion.Trigger>
-                      <Accordion.Content className="accordionInner overflow-hidden w-full">
-                        <ValueField
-                          value={selectedFeature.feature}
-                          valueType="json"
-                          maxHeight={null}
-                        />
-                      </Accordion.Content>
-                    </Accordion.Item>
-                  </Accordion.Root>
-                </div>
-              ) : null}
+          {selectedFid &&
+          selectedFeature &&
+          (selectedFeature?.feature?.rules ?? []).length ? (
+            <>
+              {selectedFeature?.feature?.rules?.map((rule, i) => {
+                return (
+                  <Rule
+                    key={i}
+                    rule={rule}
+                    rules={selectedFeature.feature.rules || []}
+                    i={i}
+                    fid={selectedFid}
+                    valueType={selectedFeature.valueType}
+                    evaluatedFeature={selectedFeature.evaluatedFeature}
+                    hideInactive={hideInactiveRules}
+                    onApply={(v: any) => {
+                      setForcedFeature(selectedFid, v);
+                      setOverrideFeature(true);
+                    }}
+                  />
+                );
+              })}
             </>
-          ) : debugLog ? (
-            <div className="mt-4 mb-1">
-              <DebugLogger logs={debugLog} startCollapsed={false} />
+          ) : null}
+
+          {selectedFeature ? (
+            <div className="mt-3 mb-1">
+              {debugLog ? <DebugLogger logs={debugLog} /> : null}
+
+              {!selectedFeature.feature?.noDefinition ? (
+                <Accordion.Root
+                  className="accordion mt-2"
+                  type="single"
+                  collapsible
+                >
+                  <Accordion.Item value="feature-definition">
+                    <Accordion.Trigger className="trigger mb-0.5">
+                      <Link size="2" role="button" className="hover:underline">
+                        <PiCaretRightFill className="caret mr-0.5" size={12} />
+                        Full feature definition
+                      </Link>
+                    </Accordion.Trigger>
+                    <Accordion.Content className="accordionInner overflow-hidden w-full">
+                      <ValueField
+                        value={selectedFeature.feature}
+                        valueType="json"
+                        maxHeight={null}
+                      />
+                    </Accordion.Content>
+                  </Accordion.Item>
+                </Accordion.Root>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -610,6 +646,9 @@ function RevisionSelector({
   revisionEnv,
   setRevisionNum,
   setRevisionEnv,
+  noDefinition = false,
+  fetchRevisionType,
+  setFetchRevisionType,
 }: {
   sdkRevision?: SelectedFeatureWithMeta;
   revisions: Revision[];
@@ -618,6 +657,9 @@ function RevisionSelector({
   revisionEnv: string | null;
   setRevisionNum: (n: number | null) => void;
   setRevisionEnv: (s: string | null) => void;
+  noDefinition?: boolean;
+  fetchRevisionType: "drafts" | "all";
+  setFetchRevisionType: (t: "drafts" | "all") => void;
 }) {
   const liveRevisionNum = sdkRevision?.version;
   const revision = revisions.find((r) => r.version === revisionNum);
@@ -627,19 +669,23 @@ function RevisionSelector({
       <div className="flex justify-between w-full">
         <span>
           {liveRevisionNum !== undefined
-            ? `Revision ${liveRevisionNum}`
-            : "Live revision"}
+            ? `SDK revision ${liveRevisionNum}`
+            : "SDK revision"}
         </span>
-        <Badge size="1" className="text-2xs" color="teal" ml="3">
-          live
-        </Badge>
+        {!noDefinition && (
+          <Badge size="1" className="text-2xs" color="teal" ml="3">
+            live
+          </Badge>
+        )}
       </div>
     );
   };
   const drawRevisionRow = (revision: Revision) => {
     const revisionStatus =
       revision?.status === "published"
-        ? "live"
+        ? revision?.version === sdkRevision?.version
+          ? "live"
+          : "inactive"
         : revision?.status && revision?.status !== "discarded"
           ? "draft"
           : "inactive";
@@ -660,7 +706,7 @@ function RevisionSelector({
   };
 
   return (
-    <div className="flex items-center gap-x-4 gap-y-1 justify-between flex-wrap mt-3 mb-1">
+    <div className="flex items-start gap-x-4 gap-y-1 justify-between flex-wrap mt-3 mb-1">
       <div>
         <Select.Root
           size="1"
@@ -668,22 +714,57 @@ function RevisionSelector({
           onValueChange={(v) => {
             setRevisionNum(v !== "null" ? parseInt(v) : null);
           }}
+          disabled={!revisions.length}
         >
           <Select.Trigger>
-            <div className="w-[120px] overflow-hidden overflow-ellipsis">
+            <div className="w-[140px] overflow-hidden overflow-ellipsis">
               {revision ? drawRevisionRow(revision) : drawLiveRevisionRow()}
             </div>
           </Select.Trigger>
           <Select.Content variant="soft">
-            <Select.Item value="null">{drawLiveRevisionRow()}</Select.Item>
-            {revisions.map((r) => (
-              <Select.Item value={r.version + ""} key={r.version}>
-                {drawRevisionRow(r)}
-              </Select.Item>
-            ))}
+            <Select.Item value="null">
+              <div className="w-[140px] overflow-hidden overflow-ellipsis">
+                {drawLiveRevisionRow()}
+              </div>
+            </Select.Item>
+            {revisions.length ? (
+              <>
+                <Select.Separator />
+                {revisions.map((r) => (
+                  <Select.Item value={r.version + ""} key={r.version}>
+                    <div className="w-[140px] overflow-hidden overflow-ellipsis">
+                      {drawRevisionRow(r)}
+                    </div>
+                  </Select.Item>
+                ))}
+              </>
+            ) : null}
           </Select.Content>
         </Select.Root>
+
+        <div className="flex justify-end mt-0.5">
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger>
+              <div className="flex items-center text-2xs select-none text-violet-9 hover:underline decoration-violet-a6 cursor-pointer">
+                <PiFunnelBold className="inline-block mr-1" />
+                {fetchRevisionType === "drafts" ? "Drafts" : "All revisions"}
+                {/*<PiCaretDownFill className="text-violet-a9" size={10}/>*/}
+              </div>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content variant="soft" size="1">
+              <DropdownMenu.Item
+                onSelect={() => setFetchRevisionType("drafts")}
+              >
+                Fetch drafts only
+              </DropdownMenu.Item>
+              <DropdownMenu.Item onSelect={() => setFetchRevisionType("all")}>
+                Fetch all revisions
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        </div>
       </div>
+
       <div className="flex items-center gap-1">
         <div className="text-xs text-gray-10 font-semibold">Env:</div>
         {revisionNum !== null && revisionEnvs ? (
@@ -709,7 +790,7 @@ function RevisionSelector({
           </Select.Root>
         ) : (
           <div className="rt-reset rt-SelectTrigger rt-r-size-1 rt-variant-surface bg-gray-a1 text-gray-11">
-            using SDK definition
+            {!noDefinition ? "using SDK definition" : "unknown"}
           </div>
         )}
       </div>
