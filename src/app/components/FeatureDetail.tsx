@@ -502,6 +502,7 @@ export default function FeatureDetail({
                   featureMetaData?.feature?.valueType ??
                   selectedFeature?.valueType
                 }
+                resetInputOnChange={true}
               />
             ) : null}
           </div>

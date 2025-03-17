@@ -9,10 +9,12 @@ export default function EditableValueField({
   value,
   setValue,
   valueType = "string",
+  resetInputOnChange = false,
 }: {
   value: any;
   setValue: (v: any) => void;
   valueType?: ValueType;
+  resetInputOnChange?: boolean;
 }) {
   const [forcedValueType, setForcedValueType] = useState<ValueType>(valueType);
   const formattedValue =
@@ -49,8 +51,9 @@ export default function EditableValueField({
     }
   }, [valueType]);
 
+  // underlying value changes, reset the field?
   useEffect(() => {
-    if (!editing) {
+    if (!editing || resetInputOnChange) {
       setEditedValue(formattedValue);
     }
   }, [value]);
@@ -133,7 +136,7 @@ export default function EditableValueField({
           <input
             className="rt-reset rt-TextFieldInput"
             type="number"
-            value={editedValue}
+            value={editedValue ?? ""}
             onChange={(e) => {
               const v = e.target.value;
               setEditedValue(v);
@@ -174,7 +177,7 @@ export default function EditableValueField({
         >
           <TextareaAutosize
             name={"__JSON_value__"}
-            value={editedValue}
+            value={editedValue ?? ""}
             onChange={(e) => {
               const v = e.target.value;
               setEditedValue(v);
