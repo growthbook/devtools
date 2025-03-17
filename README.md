@@ -64,8 +64,8 @@ Some notes
 
 ## Changelog
 
-*1.1.1* (2025-03-15)
-- Choose between live and draft versions of features using the GrowthBook API
+*1.1.1* (2025-03-17)
+- Choose between live, draft, and inactive revisions of features using the GrowthBook API
 - Quickly apply feature overrides from feature rules
 - Show feature descriptions and other meta information from the API
 
