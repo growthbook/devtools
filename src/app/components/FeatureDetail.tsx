@@ -714,7 +714,6 @@ function RevisionSelector({
           onValueChange={(v) => {
             setRevisionNum(v !== "null" ? parseInt(v) : null);
           }}
-          disabled={!revisions.length}
         >
           <Select.Trigger>
             <div className="w-[140px] overflow-hidden overflow-ellipsis">
@@ -729,7 +728,7 @@ function RevisionSelector({
             </Select.Item>
             {revisions.length ? (
               <>
-                <Select.Separator />
+                <Select.Separator/>
                 {revisions.map((r) => (
                   <Select.Item value={r.version + ""} key={r.version}>
                     <div className="w-[140px] overflow-hidden overflow-ellipsis">
@@ -738,31 +737,33 @@ function RevisionSelector({
                   </Select.Item>
                 ))}
               </>
-            ) : null}
+            ) : (
+              <div className="px-5 pt-2 text-xs text-gray-10 italic">
+                No other revisions
+              </div>
+            )}
+            <div className="flex justify-end px-5 mt-2.5 mb-1.5">
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger>
+                  <Button variant="ghost" size="1">
+                    <PiFunnelBold />
+                    {fetchRevisionType === "drafts" ? "Drafts" : "All revisions"}
+                  </Button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content variant="soft" size="1" side="right">
+                  <DropdownMenu.Item
+                    onSelect={() => setFetchRevisionType("drafts")}
+                  >
+                    Fetch drafts only
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item onSelect={() => setFetchRevisionType("all")}>
+                    Fetch all revisions
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Root>
+            </div>
           </Select.Content>
         </Select.Root>
-
-        <div className="flex justify-end mt-0.5">
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger>
-              <div className="flex items-center text-2xs select-none text-violet-9 hover:underline decoration-violet-a6 cursor-pointer">
-                <PiFunnelBold className="inline-block mr-1" />
-                {fetchRevisionType === "drafts" ? "Drafts" : "All revisions"}
-                {/*<PiCaretDownFill className="text-violet-a9" size={10}/>*/}
-              </div>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content variant="soft" size="1">
-              <DropdownMenu.Item
-                onSelect={() => setFetchRevisionType("drafts")}
-              >
-                Fetch drafts only
-              </DropdownMenu.Item>
-              <DropdownMenu.Item onSelect={() => setFetchRevisionType("all")}>
-                Fetch all revisions
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Root>
-        </div>
       </div>
 
       <div className="flex items-center gap-1">
