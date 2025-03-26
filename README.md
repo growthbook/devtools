@@ -64,6 +64,10 @@ Some notes
 
 ## Changelog
 
+*1.1.2* (2025-03-25)
+- Persist feature and experiment search filter
+- Bug fix: Improve association of debug logs to feature rules
+
 *1.1.1* (2025-03-17)
 - Choose between live, draft, and inactive revisions of features using the GrowthBook API
 - Quickly apply feature overrides from feature rules

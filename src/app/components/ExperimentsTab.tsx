@@ -107,6 +107,11 @@ export default function ExperimentsTab() {
   const [hideInactiveExperiments, setHideInactiveExperiments] =
     useTabState<boolean>("hideInactiveExperiments", false);
 
+  const [searchValue, setSearchValue] = useTabState<string>(
+    "experimentsSearchValue",
+    ""
+  );
+
   const {
     items: filteredExperiments,
     searchInputProps,
@@ -114,6 +119,7 @@ export default function ExperimentsTab() {
   } = useSearch({
     items: allExperiments,
     defaultSortField: "key",
+    searchValueTuple: [searchValue, setSearchValue],
   });
 
   const sortedFilteredExperiments = useMemo(

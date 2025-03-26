@@ -588,7 +588,6 @@ export default function FeatureDetail({
                   <Rule
                     key={i}
                     rule={rule}
-                    rules={selectedFeature.feature.rules || []}
                     i={i}
                     fid={selectedFid}
                     valueType={selectedFeature.valueType}

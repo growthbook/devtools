@@ -39,7 +39,6 @@ export const GLOBAL_OVERRIDE = "Global override"; // FF override
 
 export default function Rule({
   rule,
-  rules,
   i,
   fid,
   valueType = "string",
@@ -48,7 +47,6 @@ export default function Rule({
   onApply,
 }: {
   rule: FeatureRule;
-  rules: FeatureRule[];
   i: number;
   fid: string;
   valueType?: ValueType;
@@ -67,37 +65,10 @@ export default function Rule({
   const [jsonMode, setJsonMode] = useState(false);
 
   const debug = evaluatedFeature?.debug || [];
-  const debugForRule = useMemo(() => {
-    const d: DebugLog[] = [];
-    let r = 0; // current parent rule number
-    debug.forEach((item, itemNo) => {
-      const nextItem = debug?.[itemNo + 1];
-      // Skip tracking callbacks
-      // if (item?.[0].startsWith("Tracking callback")) return;
-      // If the log id matches our feature's id, assume we can rely on the log's
-      // rule number (i).
-      if (item?.[1]?.id === fid && item?.[1]?.rule?.i !== undefined) {
-        r = item[1].rule.i as number;
-      }
-      // Probably an experiment rule (no rule, has id, id doesn't match),
-      // assume this log belongs to current feature's next rule.
-      if (
-        !item?.[1]?.rule &&
-        item?.[1]?.id &&
-        item[1].id !== fid &&
-        itemNo > 0 &&
-        // these get lumped in the wrong rule otherwise
-        !nextItem?.[0]?.startsWith("Skip rule because prerequisite") &&
-        !nextItem?.[0]?.startsWith("Feature blocked")
-      ) {
-        r++;
-      }
-      if (r === i) {
-        d.push(item);
-      }
-    });
-    return d;
-  }, [fid, i, debug]);
+  const debugForRule = useMemo(
+    () => debug.filter((d) => d?.[1]?.i === i),
+    [fid, i, debug]
+  );
 
   let status: "skipped" | "unreachable" | "matches" | "gates" | "overridden" =
     "skipped";
@@ -275,7 +246,7 @@ export default function Rule({
         />
       )}
       <div className="pt-1 border-t border-t-gray-a6">
-        <DebugLogger startCollapsed={true} logs={debugForRule} />
+        <DebugLogger startCollapsed={true} logs={debugForRule} showCount={true} />
       </div>
     </div>
   );

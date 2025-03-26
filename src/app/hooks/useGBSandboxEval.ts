@@ -101,7 +101,9 @@ export default function useGBSandboxEval() {
       for (const fid in _features) {
         _features[fid].rules = _features[fid]?.rules?.map((rule, i) => ({
           ...rule,
-          i,
+          // Hacky way for associating log to a specific rule:
+          // stuff rule number into something persistent (rule.meta -> exp.meta)
+          meta: rule.meta ? rule.meta.map(m => ({...m, ruleI: i})) : [{ruleI: i}]
         }));
       }
 
@@ -136,9 +138,25 @@ export default function useGBSandboxEval() {
       const evaluatedExperiments: EvaluatedExperiment[] = [];
 
       for (const fid in allFeatures) {
+        let ruleNo = 0;
+
         growthbook.debug = true;
         const result = growthbook.evalFeature(fid);
         growthbook.debug = false;
+
+        for (let i = 0; i < log.length; i++) {
+          const d = log[i];
+          const ctx = d[1];
+          if (ctx?.rule?.meta && ctx?.id === fid) {
+            ruleNo = ctx.rule.meta[0].ruleI;
+          }
+          if (ctx?.exp?.meta && ctx.exp.key === fid) {
+            ruleNo = ctx.exp.meta[0].ruleI;
+          }
+          ctx.i = ruleNo;
+          d[1] = ctx;
+          log[i] = d;
+        }
         const debug = [...log];
         log = [];
 

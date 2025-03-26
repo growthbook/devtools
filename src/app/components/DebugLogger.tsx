@@ -10,10 +10,12 @@ export default function DebugLogger({
   logs,
   startCollapsed = true,
   showContext = true,
+  showCount = false,
 }: {
   logs?: DebugLog[];
   startCollapsed?: boolean;
   showContext?: boolean;
+  showCount?: boolean;
 }) {
   const [collapsed, setCollapsed] = useState(startCollapsed);
 
@@ -34,6 +36,9 @@ export default function DebugLogger({
             size={12}
           />
           Debug log
+          {showCount ? (<>
+            {" "}({logs?.length || 0})
+          </>) : null}
         </Link>
       </div>
       {!collapsed && (

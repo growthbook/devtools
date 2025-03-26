@@ -102,6 +102,11 @@ export default function FeaturesTab() {
     false,
   );
 
+  const [searchValue, setSearchValue] = useTabState<string>(
+    "featuresSearchValue",
+    ""
+  );
+
   const {
     items: filteredFeatures,
     searchInputProps,
@@ -109,6 +114,7 @@ export default function FeaturesTab() {
   } = useSearch({
     items: allFeatures,
     defaultSortField: "id",
+    searchValueTuple: [searchValue, setSearchValue],
   });
 
   const sortedFilteredFeatures = useMemo(

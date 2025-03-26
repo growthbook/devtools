@@ -122,7 +122,6 @@ export default function SdkTab() {
             title="Status"
             status={canConnectStatus}
             color={canConnectStatusColor}
-            showCaret={isResponsive}
           />
         </div>
 
@@ -144,7 +143,6 @@ export default function SdkTab() {
                     : "")
                 }
                 color={versionStatusColor}
-                showCaret={isResponsive}
               />
             </div>
 
@@ -159,7 +157,6 @@ export default function SdkTab() {
                 title="Tracking Callback"
                 status={trackingCallbackStatus}
                 color={trackingCallbackStatusColor}
-                showCaret={isResponsive}
               />
             </div>
 
@@ -174,7 +171,6 @@ export default function SdkTab() {
                 title="Payload Security"
                 status={securityStatus}
                 color="gray"
-                showCaret={isResponsive}
               />
             </div>
 
@@ -189,7 +185,6 @@ export default function SdkTab() {
                 title="Sticky Bucketing"
                 status={usingStickyBucketing}
                 color="gray"
-                showCaret={isResponsive}
               />
             </div>
 
@@ -204,7 +199,6 @@ export default function SdkTab() {
                 title="Streaming"
                 status={streaming}
                 color="gray"
-                showCaret={isResponsive}
               />
             </div>
 
@@ -219,7 +213,6 @@ export default function SdkTab() {
                 title="SDK Payload"
                 status={hasPayload}
                 color="gray"
-                showCaret={isResponsive}
               />
             </div>
 
@@ -234,7 +227,6 @@ export default function SdkTab() {
                 title="Log Event Callback"
                 status={usingLogEvent}
                 color="gray"
-                showCaret={isResponsive}
               />
             </div>
 
@@ -249,7 +241,6 @@ export default function SdkTab() {
                 title="On Feature Usage Callback"
                 status={usingOnFeatureUsage}
                 color="gray"
-                showCaret={isResponsive}
               />
             </div>
           </>
@@ -273,12 +264,10 @@ function ItemStatus({
   title,
   status,
   color,
-  showCaret,
 }: {
   title: string;
   status?: string | boolean;
   color: "green" | "red" | "gray" | "orange";
-  showCaret: boolean;
 }) {
   if (typeof status === "boolean") {
     status = status ? "Yes" : "No";
@@ -288,11 +277,7 @@ function ItemStatus({
       <div className="title pl-4 pr-6">{title}</div>
       <div className="flex pr-4 items-center flex-shrink-0 text-sm">
         <Text color={color}>{status}</Text>
-        {showCaret && (
-          <div className="ml-5 font-bold">
-            <PiCaretRight />
-          </div>
-        )}
+        <PiCaretRight className="ml-5 text-gray-10" />
       </div>
     </>
   );

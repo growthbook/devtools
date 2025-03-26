@@ -17,6 +17,7 @@ export interface SearchProps<T> {
   defaultSortDir?: number;
   undefinedLast?: boolean;
   useSort?: boolean;
+  searchValueTuple?: [string, (s: string) => void];
 }
 
 export interface SearchReturn<T> {
@@ -40,8 +41,9 @@ export function useSearch<T>({
   defaultSortDir,
   undefinedLast,
   useSort = true,
+  searchValueTuple,
 }: SearchProps<T>): SearchReturn<T> {
-  const [value, setValue] = useState("");
+  const [value, setValue] = searchValueTuple ? searchValueTuple : useState("");
   const [sort, setSort] = useState({
     field: defaultSortField,
     dir: defaultSortDir || 1,
