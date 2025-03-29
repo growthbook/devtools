@@ -11,10 +11,15 @@ import type {
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import { Attributes } from "@growthbook/growthbook";
 
+type LogUnionWithSource = LogUnion & { source?: string };
+
 type StateObj = {
   attributes?: Record<string, any>;
   features?: Record<string, any>;
   experiments?: Record<string, number>;
+  payload?: FeatureApiResponse;
+  patchPayload?: FeatureApiResponse;
+  logs?: LogUnionWithSource[];
 };
 
 declare global {
@@ -70,55 +75,49 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
 function init() {
   setupListeners();
   pushAppUpdates();
-  hydrateApp();
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      pushAppUpdates();
-    }
-  });
+  const queryState = getQueryState();
+  if (!queryState) {
+    pullOverrides();
+  } else {
+    hydrateApp(queryState);
+  }
 }
 
-function hydrateApp() {
-  const hydratedState = getQueryState();
-  if (!hydratedState) {
-    pullOverrides();
-    return;
-  }
-
+function hydrateApp(state: StateObj) {
   onGrowthBookLoad((gb) => {
     if (
-      hydratedState?.attributes &&
-      typeof hydratedState.attributes === "object"
+      state?.attributes &&
+      typeof state.attributes === "object"
     ) {
-      gb?.setAttributeOverrides?.(hydratedState.attributes);
+      gb?.setAttributeOverrides?.(state.attributes);
     }
 
-    if (hydratedState?.features && typeof hydratedState.features === "object") {
-      let forcedFeaturesMap = new Map(Object.entries(hydratedState.features));
+    if (state?.features && typeof state.features === "object") {
+      let forcedFeaturesMap = new Map(Object.entries(state.features));
       gb?.setForcedFeatures?.(forcedFeaturesMap);
     }
 
     if (
-      hydratedState?.experiments &&
-      typeof hydratedState.experiments === "object"
+      state?.experiments &&
+      typeof state.experiments === "object"
     ) {
-      gb?.setForcedVariations?.(hydratedState.experiments);
+      gb?.setForcedVariations?.(state.experiments);
     }
 
-    if (hydratedState?.payload && typeof hydratedState.payload === "object") {
-      setPayload(hydratedState.payload);
+    if (state?.payload && typeof state.payload === "object") {
+      setPayload(state.payload);
     }
 
     if (
-      hydratedState?.patchPayload &&
-      typeof hydratedState.patchPayload === "object"
+      state?.patchPayload &&
+      typeof state.patchPayload === "object"
     ) {
-      patchPayload(hydratedState.patchPayload);
+      patchPayload(state.patchPayload);
     }
 
     // logs are imported by hydration only
-    if (hydratedState?.logs && Array.isArray(hydratedState.logs)) {
-      const logs = hydratedState.logs.map((log: any) => ({
+    if (state?.logs && Array.isArray(state.logs)) {
+      const logs = state.logs.map((log: any) => ({
         ...log,
         source: log.source ? log.source : "external",
       }));
@@ -204,6 +203,21 @@ function setupListeners() {
         break;
       default:
         return;
+    }
+  });
+
+  // Listen to external state changes (i.e. hydration events from backend or API calls)
+  window.addEventListener("gbdebug_state", ((event: CustomEvent<StateObj>) => {
+    const state = event.detail;
+    if (state) {
+      hydrateApp(state);
+    }
+  }) as EventListener);
+
+  // Listen to tab/window focus, force refresh
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      pushAppUpdates();
     }
   });
 }
@@ -621,7 +635,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   };
 }
 
-function getQueryState() {
+function getQueryState(): StateObj | null {
   try {
     const params = new URLSearchParams(window.location.search);
     const state = params.get("_gbdebug");
