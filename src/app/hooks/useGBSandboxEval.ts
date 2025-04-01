@@ -103,7 +103,9 @@ export default function useGBSandboxEval() {
           ...rule,
           // Hacky way for associating log to a specific rule:
           // stuff rule number into something persistent (rule.meta -> exp.meta)
-          meta: rule.meta ? rule.meta.map(m => ({...m, ruleI: i})) : [{ruleI: i}]
+          meta: rule.meta
+            ? rule.meta.map((m) => ({ ...m, ruleI: i }))
+            : [{ ruleI: i }],
         }));
       }
 

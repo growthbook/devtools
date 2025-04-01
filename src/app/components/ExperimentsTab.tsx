@@ -109,7 +109,7 @@ export default function ExperimentsTab() {
 
   const [searchValue, setSearchValue] = useTabState<string>(
     "experimentsSearchValue",
-    ""
+    "",
   );
 
   const {

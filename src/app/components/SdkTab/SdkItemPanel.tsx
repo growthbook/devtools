@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   Button,
   Callout,
+  Dialog,
   Flex,
   IconButton,
   Link,
@@ -13,18 +14,22 @@ import {
   PiArrowsClockwise,
   PiArrowSquareOut,
   PiCaretRightFill,
+  PiCode,
+  PiCodeBold,
   PiInfoBold,
   PiWarningFill,
   PiWarningOctagonFill,
+  PiX,
   PiXBold,
 } from "react-icons/pi";
 import * as Accordion from "@radix-ui/react-accordion";
 import { useResponsiveContext } from "@/app/hooks/useResponsive";
 import { SdkItem } from "./index";
 import useSdkData from "@/app/hooks/useSdkData";
-import { SDKHealthCheckResult } from "devtools";
+import { InjectSdkMessage, SDKHealthCheckResult } from "devtools";
 import { getActiveTabId } from "@/app/hooks/useTabState";
 import { paddedVersionString } from "@growthbook/growthbook";
+import InjectSdkForm from "@/app/components/InjectSdk";
 
 const panelTitles: Record<SdkItem, string> = {
   status: "SDK Status",
@@ -81,6 +86,7 @@ export default function SdkItemPanel({
   latestSdkVersion,
   latestMinorSdkVersion,
   hasPayload,
+  sdkInjected,
 }: {
   selectedItem: SdkItem;
   unsetSelectedItem: () => void;
@@ -88,6 +94,7 @@ export default function SdkItemPanel({
   latestSdkVersion: string;
   latestMinorSdkVersion: string;
   hasPayload: boolean;
+  sdkInjected?: boolean;
 }) {
   const { isResponsive } = useResponsiveContext();
 
@@ -188,18 +195,20 @@ function ItemPanel({
 
 function statusPanel({
   sdkFound,
+  sdkInjected,
   hasPayload,
   canConnect,
   apiHost,
   clientKey,
   errorMessage,
 }: SDKHealthCheckResult) {
+  const [injectModalOpen, setInjectModalOpen] = useState(false);
   const [activeTabId, setActiveTabId] = useState<number | undefined>(undefined);
-  const [refreshing, setRefreshing] = useState<boolean>(true);
+  const [refreshingSdk, setRefreshingSdk] = useState<boolean>(true);
 
   const refresh = async () => {
-    setRefreshing(true);
-    window.setTimeout(() => setRefreshing(false), 500);
+    setRefreshingSdk(true);
+    window.setTimeout(() => setRefreshingSdk(false), 500);
     const activeTabId = await getActiveTabId();
     setActiveTabId(activeTabId);
     if (activeTabId) {
@@ -211,6 +220,34 @@ function statusPanel({
         await chrome.runtime.sendMessage({
           type: "GB_REQUEST_REFRESH",
         });
+      }
+    }
+  };
+
+  const injectSdk = async ({
+    apiHost,
+    clientKey,
+    autoInject,
+  }: {
+    apiHost: string;
+    clientKey: string;
+    autoInject: boolean;
+  }) => {
+    setRefreshingSdk(true);
+    window.setTimeout(() => setRefreshingSdk(false), 500);
+    const msg: InjectSdkMessage = {
+      type: "GB_INJECT_SDK",
+      apiHost,
+      clientKey,
+      autoInject,
+    };
+    const activeTabId = await getActiveTabId();
+    setActiveTabId(activeTabId);
+    if (activeTabId) {
+      if (chrome?.tabs) {
+        await chrome.tabs.sendMessage(activeTabId, msg);
+      } else {
+        await chrome.runtime.sendMessage(msg);
       }
     }
   };
@@ -227,10 +264,14 @@ function statusPanel({
             <Text as="div" size="2" weight="regular" mb="2" color="gray">
               Attempting to connect to SDK...
             </Text>
-          ) : null}
+          ) : (
+            <Text as="div" size="2" weight="regular" mb="2" color="red">
+              No front-end SDK was found.
+            </Text>
+          )}
 
-          <div className="mb-4">
-            {!activeTabId && !refreshing ? (
+          <div className="mb-6">
+            {!activeTabId && !refreshingSdk ? (
               <Callout.Root color="red" size="1" className="mb-4">
                 <Callout.Icon>
                   <PiWarningOctagonFill />
@@ -240,33 +281,45 @@ function statusPanel({
                 </Callout.Text>
               </Callout.Root>
             ) : null}
-            <Button
-              variant="outline"
-              size="2"
-              onClick={() => {
-                refresh();
-              }}
-              disabled={refreshing}
-            >
-              <PiArrowsClockwise /> Refresh DevTools
-            </Button>
+
+            <div>
+              <Button
+                variant="outline"
+                size="2"
+                onClick={refresh}
+                disabled={refreshingSdk}
+              >
+                <PiArrowsClockwise /> Refresh DevTools
+              </Button>
+            </div>
+
+            <div className="mt-2">
+              <Button
+                variant="outline"
+                size="2"
+                onClick={() => setInjectModalOpen(true)}
+                disabled={refreshingSdk}
+              >
+                <PiCode /> Inject Debugging SDK
+              </Button>
+            </div>
           </div>
 
-          <Text as="div" size="2" weight="regular" mb="3" color="red">
-            No SDK was found.
+          <Text as="div" size="2" weight="bold" mb="3">
+            Troubleshooting your Front-End SDK
           </Text>
+
           <Text as="div" size="2" weight="regular" mb="3">
-            Ensure that{" "}
-            <code className="text-gold-11">enableDevMode: true</code> is set
-            when creating your GrowthBook SDK instance (JavaScript and React
-            only).
+            Ensure <code className="text-gold-11">enableDevMode: true</code> is
+            set in your SDK constructor (JavaScript and React only).
           </Text>
           <Text as="div" size="2" weight="regular" mb="6">
-            If your site has a Content Security Policy (CSP), check whether the
-            CSP allows your HTML Script Tag or SDK to load.{" "}
+            If your site has a Content Security Policy (CSP), ensure that it
+            allows your SDK to load.{" "}
             <Link
               size="2"
               href="https://docs.growthbook.io/lib/script-tag#content-security-policy-csp"
+              target="_blank"
             >
               Read more
             </Link>
@@ -275,17 +328,29 @@ function statusPanel({
             See our SDK implementation guides:
           </Text>
           <div>
-            <Link size="2" href="https://docs.growthbook.io/lib/script-tag">
+            <Link
+              size="2"
+              href="https://docs.growthbook.io/lib/script-tag"
+              target="_blank"
+            >
               HTML Script Tag SDK
             </Link>
           </div>
           <div>
-            <Link size="2" href="https://docs.growthbook.io/lib/js">
+            <Link
+              size="2"
+              href="https://docs.growthbook.io/lib/js"
+              target="_blank"
+            >
               JavaScript SDK
             </Link>
           </div>
           <div>
-            <Link size="2" href="https://docs.growthbook.io/lib/react">
+            <Link
+              size="2"
+              href="https://docs.growthbook.io/lib/react"
+              target="_blank"
+            >
               React SDK
             </Link>
           </div>
@@ -297,8 +362,18 @@ function statusPanel({
               ? "The SDK is connected to the GrowthBook API."
               : "The SDK is not connected to the GrowthBook API."}
           </Text>
+          {sdkInjected ? (
+            <Callout.Root color="gray" size="1" className="my-2">
+              <Callout.Icon>
+                <PiCodeBold />
+              </Callout.Icon>
+              <Callout.Text>
+                This SDK was manually injected by DevTools.
+              </Callout.Text>
+            </Callout.Root>
+          ) : null}
           {!canConnect && hasPayload ? (
-            <Callout.Root color="violet" size="1" className="mb-4">
+            <Callout.Root color="violet" size="1" className="mt-2 mb-4">
               <Callout.Icon>
                 <PiInfoBold />
               </Callout.Icon>
@@ -343,6 +418,30 @@ function statusPanel({
           ) : null}
         </>
       )}
+
+      <Dialog.Root
+        open={injectModalOpen}
+        onOpenChange={(o) => setInjectModalOpen(o)}
+      >
+        <Dialog.Content className="ModalBody">
+          <Dialog.Title>Inject a Debug SDK</Dialog.Title>
+          <InjectSdkForm
+            injectSdk={injectSdk}
+            close={() => setInjectModalOpen(false)}
+          />
+          <Dialog.Close style={{ position: "absolute", top: 5, right: 5 }}>
+            <IconButton
+              color="gray"
+              highContrast
+              size="1"
+              variant="outline"
+              radius="full"
+            >
+              <PiX size={20} />
+            </IconButton>
+          </Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Root>
     </>
   );
 }

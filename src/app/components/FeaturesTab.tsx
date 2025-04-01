@@ -103,7 +103,7 @@ export default function FeaturesTab() {
 
   const [searchValue, setSearchValue] = useTabState<string>(
     "featuresSearchValue",
-    ""
+    "",
   );
 
   const {

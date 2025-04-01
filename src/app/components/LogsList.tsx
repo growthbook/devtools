@@ -1,11 +1,16 @@
-import {Box, Checkbox, Flex, Text, Tooltip} from "@radix-ui/themes";
+import { Box, Checkbox, Flex, Text, Tooltip } from "@radix-ui/themes";
 import React, { ReactNode, useMemo, useState } from "react";
 import useTabState from "../hooks/useTabState";
 import { useSearch } from "../hooks/useSearch";
 import SearchBar from "./SearchBar";
 import { LogType, reshapeEventLog } from "../utils/logs";
 import * as Accordion from "@radix-ui/react-accordion";
-import {PiArrowSquareInBold, PiCaretRightFill, PiFlagFill, PiFlaskFill} from "react-icons/pi";
+import {
+  PiArrowSquareInBold,
+  PiCaretRightFill,
+  PiFlagFill,
+  PiFlaskFill,
+} from "react-icons/pi";
 import ValueField from "./ValueField";
 import clsx from "clsx";
 import { LogUnionWithSource } from "@/app/utils/logs";
@@ -178,11 +183,13 @@ export default function LogsList({
                       )}
                     >
                       {evt.source ? (
-                        <Tooltip content={(
-                          <>
-                            Imported from: <strong>{evt.source}</strong>
-                          </>
-                        )}>
+                        <Tooltip
+                          content={
+                            <>
+                              Imported from: <strong>{evt.source}</strong>
+                            </>
+                          }
+                        >
                           <span>
                             <PiArrowSquareInBold
                               className="inline-block mr-1 text-indigo-9"

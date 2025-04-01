@@ -181,6 +181,7 @@ chrome.runtime.onMessage.addListener(async (msg: Message) => {
       break;
     case "SET_PAYLOAD":
     case "PATCH_PAYLOAD":
+    case "GB_INJECT_SDK":
       window.postMessage(msg, window.location.origin);
       break;
     default:

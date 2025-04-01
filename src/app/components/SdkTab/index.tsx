@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import { SDKHealthCheckResult } from "devtools";
 import { Text } from "@radix-ui/themes";
 import { MW } from "@/app";
@@ -39,6 +39,7 @@ export default function SdkTab() {
 
   const {
     sdkFound,
+    sdkInjected,
     version,
     canConnect,
     hasPayload,
@@ -120,7 +121,16 @@ export default function SdkTab() {
         >
           <ItemStatus
             title="Status"
-            status={canConnectStatus}
+            status={
+              <div className="text-right leading-4">
+                {canConnectStatus}
+                {sdkInjected ? (
+                  <div className="text-xs text-gray-10">
+                    (injected by DevTools)
+                  </div>
+                ) : null}
+              </div>
+            }
             color={canConnectStatusColor}
           />
         </div>
@@ -195,11 +205,7 @@ export default function SdkTab() {
               })}
               onClick={() => setSelectedItem("streaming")}
             >
-              <ItemStatus
-                title="Streaming"
-                status={streaming}
-                color="gray"
-              />
+              <ItemStatus title="Streaming" status={streaming} color="gray" />
             </div>
 
             <div
@@ -254,6 +260,7 @@ export default function SdkTab() {
           latestSdkVersion={latestSdkVersion}
           latestMinorSdkVersion={latestMinorSdkVersion}
           hasPayload={hasPayload}
+          sdkInjected={sdkInjected}
         />
       )}
     </div>
@@ -266,7 +273,7 @@ function ItemStatus({
   color,
 }: {
   title: string;
-  status?: string | boolean;
+  status?: string | ReactNode | boolean;
   color: "green" | "red" | "gray" | "orange";
 }) {
   if (typeof status === "boolean") {

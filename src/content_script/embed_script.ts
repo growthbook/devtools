@@ -31,16 +31,7 @@ declare global {
 
 function getValidGrowthBookInstance(cb: (gb: GrowthBook) => void) {
   if (!window._growthbook) return false;
-
-  if (!window._growthbook.setAttributeOverrides) {
-    const msg: ErrorMessage = {
-      type: "GB_ERROR",
-      error: "Requires minimum Javascript SDK version of 0.16.0",
-    };
-    window.postMessage(msg, window.location.origin);
-  } else {
-    cb(window._growthbook);
-  }
+  cb(window._growthbook);
   return true;
 }
 
@@ -54,11 +45,6 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
       sdkFound: false,
       errorMessage: "SDK not found",
     });
-    const msg: ErrorMessage = {
-      type: "GB_ERROR",
-      error:
-        "Unable to locate GrowthBook SDK instance. Please ensure you are using either the Javascript or React SDK, and Dev Mode is enabled.",
-    };
   }, 5000);
 
   document.addEventListener(
@@ -74,6 +60,14 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
 // Send a refresh message back to content script
 function init() {
   setupListeners();
+
+  const injectSdkConfig = getCookie<{ apiHost: string; clientKey: string }>(
+    "_gbInjectSdk",
+  );
+  if (injectSdkConfig) {
+    injectSdk(injectSdkConfig);
+  }
+
   pushAppUpdates();
   const queryState = getQueryState();
   if (!queryState) {
@@ -85,10 +79,7 @@ function init() {
 
 function hydrateApp(state: StateObj) {
   onGrowthBookLoad((gb) => {
-    if (
-      state?.attributes &&
-      typeof state.attributes === "object"
-    ) {
+    if (state?.attributes && typeof state.attributes === "object") {
       gb?.setAttributeOverrides?.(state.attributes);
     }
 
@@ -97,10 +88,7 @@ function hydrateApp(state: StateObj) {
       gb?.setForcedFeatures?.(forcedFeaturesMap);
     }
 
-    if (
-      state?.experiments &&
-      typeof state.experiments === "object"
-    ) {
+    if (state?.experiments && typeof state.experiments === "object") {
       gb?.setForcedVariations?.(state.experiments);
     }
 
@@ -108,10 +96,7 @@ function hydrateApp(state: StateObj) {
       setPayload(state.payload);
     }
 
-    if (
-      state?.patchPayload &&
-      typeof state.patchPayload === "object"
-    ) {
+    if (state?.patchPayload && typeof state.patchPayload === "object") {
       patchPayload(state.patchPayload);
     }
 
@@ -129,7 +114,7 @@ function hydrateApp(state: StateObj) {
 function pushAppUpdates() {
   updateTabState("url", window.location.href || "");
   onGrowthBookLoad((gb) => {
-    pushSDKUpdate(gb);
+    pushSdkHealthUpdate(gb);
     if (gb) {
       subscribeToSdkChanges(gb);
       updateTabState("features", gb.getFeatures?.() || {});
@@ -157,10 +142,39 @@ function pushAppUpdates() {
   });
 }
 
-async function pushSDKUpdate(gb?: GrowthBook) {
-  const sdkData = await SDKHealthCheck(gb);
+async function pushSdkHealthUpdate(gb?: GrowthBook) {
+  const sdkData = await SdkHealthCheck(gb);
   updateTabState("sdkData", sdkData);
-  updateBackgroundSDK(sdkData);
+  updateBackgroundSdk(sdkData);
+}
+
+function injectSdk(message: any) {
+  if (window._growthbook) return;
+
+  const script = document.createElement("script");
+  script.id = "injected_sdk";
+  script.async = true;
+  script.dataset.apiHost = message.apiHost;
+  script.dataset.clientKey = message.clientKey;
+  script.src =
+    "https://cdn.jsdelivr.net/npm/@growthbook/growthbook/dist/bundles/auto.min.js";
+  document.head.appendChild(script);
+
+  if (message.autoInject) {
+    const payloadObj = {
+      apiHost: message.apiHost,
+      clientKey: message.clientKey,
+    };
+    const cookiePayload = encodeURIComponent(JSON.stringify(payloadObj));
+    document.cookie = `_gbInjectSdk=${cookiePayload}; path=/; domain=${window.location.hostname}`;
+  }
+
+  onGrowthBookLoad((gb) => {
+    if (!gb) return;
+    // @ts-expect-error
+    gb.injected = true;
+    pushAppUpdates();
+  });
 }
 
 function setupListeners() {
@@ -184,6 +198,9 @@ function setupListeners() {
         break;
       case "GB_REQUEST_REFRESH":
         pushAppUpdates();
+        break;
+      case "GB_INJECT_SDK":
+        injectSdk(message);
         break;
       case "COPY_TO_CLIPBOARD":
         if (message.value) {
@@ -223,91 +240,81 @@ function setupListeners() {
 }
 
 function updateAttributes(data: unknown) {
-  onGrowthBookLoad((gb) => {
-    if (typeof data === "object" && data !== null) {
+  if (typeof data === "object" && data !== null) {
+    onGrowthBookLoad((gb) => {
       gb.setAttributeOverrides?.(data as Attributes); // {} to reset
       updateTabState("attributes", gb.getAttributes?.() || {}); // so that when we reset it will reset back to the original attributes
-    }
-  });
+    });
+  }
 }
 
 function updateFeatures(data: unknown) {
+  if (!data) return;
   onGrowthBookLoad((gb) => {
-    if (data) {
-      gb.setForcedFeatures?.(
-        new Map(Object.entries(data as Record<string, any>)),
-      );
-    }
+    gb.setForcedFeatures?.(
+      new Map(Object.entries(data as Record<string, any>)),
+    );
   });
 }
 
 function updateExperiments(data: unknown) {
+  if (!data) return;
   onGrowthBookLoad((gb) => {
-    if (data) {
-      gb.setForcedVariations?.(data as Record<string, number>);
-    }
+    gb.setForcedVariations?.(data as Record<string, number>);
   });
 }
 
 function setPayload(data: FeatureApiResponse) {
+  if (!data) return;
   onGrowthBookLoad((gb) => {
-    if (data) {
-      if (gb.setPayload) {
-        gb.setPayload(data);
-      } else {
-        if (gb.setFeatures && data.features) {
-          gb.setFeatures(data.features);
-        }
-        if (gb.setExperiments && data.experiments) {
-          gb.setExperiments(data.experiments);
-        }
+    if (gb.setPayload) {
+      gb.setPayload(data);
+    } else {
+      if (gb.setFeatures && data.features) {
+        gb.setFeatures(data.features);
+      }
+      if (gb.setExperiments && data.experiments) {
+        gb.setExperiments(data.experiments);
       }
     }
   });
 }
 
 function patchPayload(data: FeatureApiResponse) {
+  if (!data) return;
   onGrowthBookLoad((gb) => {
-    if (data) {
-      const payload = gb.getDecryptedPayload?.() || {
-        features: gb.getFeatures?.(),
-        experiments: gb.getExperiments?.(),
-      };
-      Object.keys(data).forEach((key) => {
-        const k = key as keyof FeatureApiResponse;
-        if (!payload[k]) {
-          // @ts-ignore
-          payload[k] = data[k];
-        } else {
-          if (typeof payload[k] === "object") {
-            // @ts-ignore
-            payload[k] = { ...payload[k], ...data[k] };
-          }
-        }
-      });
-
-      if (gb.setPayload) {
-        gb.setPayload(payload);
+    const payload = gb.getDecryptedPayload?.() || {
+      features: gb.getFeatures?.(),
+      experiments: gb.getExperiments?.(),
+    };
+    Object.keys(data).forEach((key) => {
+      const k = key as keyof FeatureApiResponse;
+      if (!payload[k]) {
+        // @ts-ignore
+        payload[k] = data[k];
       } else {
-        if (gb.setFeatures && payload.features) {
-          gb.setFeatures(payload.features);
+        if (typeof payload[k] === "object") {
+          // @ts-ignore
+          payload[k] = { ...payload[k], ...data[k] };
         }
-        if (gb.setExperiments && payload.experiments) {
-          gb.setExperiments(payload.experiments);
-        }
+      }
+    });
+
+    if (gb.setPayload) {
+      gb.setPayload(payload);
+    } else {
+      if (gb.setFeatures && payload.features) {
+        gb.setFeatures(payload.features);
+      }
+      if (gb.setExperiments && payload.experiments) {
+        gb.setExperiments(payload.experiments);
       }
     }
   });
 }
 
-async function updateBackgroundSDK(data: SDKHealthCheckResult) {
-  window.postMessage(
-    {
-      type: "GB_SDK_UPDATED",
-      data,
-    },
-    window.location.origin,
-  );
+async function updateBackgroundSdk(data: SDKHealthCheckResult) {
+  window.postMessage({ type: "GB_SDK_UPDATED", data }, window.location.origin);
 }
 
 // send a message that the tabstate has been updated
@@ -327,12 +334,7 @@ function updateTabState(property: string, value: unknown, append = false) {
 
 // Prompt the content script to send the existing overrides on pageload
 function pullOverrides() {
-  window.postMessage(
-    {
-      type: "GB_REQUEST_OVERRIDES",
-    },
-    window.location.origin,
-  );
+  window.postMessage({ type: "GB_REQUEST_OVERRIDES" }, window.location.origin);
 }
 
 // add a proxy to the SDKs methods so we know when anything important has been changed programmatically
@@ -514,7 +516,7 @@ function subscribeToSdkChanges(
 
 let cachedHostRes: any = undefined;
 let cachedStreamingHostRes: any = undefined;
-async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
+async function SdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   if (!gb) {
     return {
       canConnect: false,
@@ -528,6 +530,9 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   const gbContext = gb.context;
 
   const devModeEnabled = gbContext?.enableDevMode;
+
+  // @ts-expect-error
+  const sdkInjected = !!gb?.injected;
 
   const [apiHost, clientKey] = gb.getApiInfo();
 
@@ -614,6 +619,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     version: gb?.version,
     hasWindowConfig: !!window?.growthbook_config,
     sdkFound: true,
+    sdkInjected,
     clientKey,
     payload,
     hasTrackingCallback,
@@ -658,18 +664,7 @@ function getQueryState(): StateObj | null {
 
 // state vars:
 function writeStateToCookie(state: StateObj) {
-  let existingState: StateObj = {};
-  try {
-    const existingStateString = document.cookie
-      .split(';')
-      .map(cookie => cookie.trim())
-      .find(cookie => cookie.startsWith(`_gbdebug=`))
-      ?.substring(9) || "{}";
-    const decoded = decodeURIComponent(existingStateString);
-    existingState = JSON.parse(decoded);
-  } catch(e) {
-    console.error("Failed to parse cookie state", e);
-  }
+  let existingState = <StateObj>"_gbdebug" || {};
 
   const attributes = state.attributes ?? existingState.attributes;
   const features = state.features ?? existingState.features;
@@ -685,6 +680,22 @@ function writeStateToCookie(state: StateObj) {
     document.cookie = `_gbdebug=${cookiePayload}; path=/; domain=${window.location.hostname}`;
   } else {
     document.cookie = `_gbdebug=; Max-Age=0; path=/; domain=${window.location.hostname}`;
+  }
+}
+
+function getCookie<T = string>(name: string): T | null {
+  try {
+    const cookieString = document.cookie
+      .split(";")
+      .map((cookie) => cookie.trim())
+      .find((cookie) => cookie.startsWith(`${name}=`));
+    if (!cookieString) return null;
+    return JSON.parse(
+      decodeURIComponent(cookieString.substring(name.length + 1)),
+    ) as T;
+  } catch (e) {
+    console.error("Failed to parse cookie", e);
+    return null;
   }
 }
 
