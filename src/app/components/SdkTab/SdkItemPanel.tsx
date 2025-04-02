@@ -26,7 +26,11 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { useResponsiveContext } from "@/app/hooks/useResponsive";
 import { SdkItem } from "./index";
 import useSdkData from "@/app/hooks/useSdkData";
-import { InjectSdkMessage, SDKHealthCheckResult } from "devtools";
+import {
+  ClearInjectedSdkMessage,
+  InjectSdkMessage,
+  SDKHealthCheckResult,
+} from "devtools";
 import { getActiveTabId } from "@/app/hooks/useTabState";
 import { paddedVersionString } from "@growthbook/growthbook";
 import InjectSdkForm from "@/app/components/InjectSdk";
@@ -85,16 +89,12 @@ export default function SdkItemPanel({
   widthPercent,
   latestSdkVersion,
   latestMinorSdkVersion,
-  hasPayload,
-  sdkInjected,
 }: {
   selectedItem: SdkItem;
   unsetSelectedItem: () => void;
   widthPercent: number;
   latestSdkVersion: string;
   latestMinorSdkVersion: string;
-  hasPayload: boolean;
-  sdkInjected?: boolean;
 }) {
   const { isResponsive } = useResponsiveContext();
 
@@ -196,6 +196,7 @@ function ItemPanel({
 function statusPanel({
   sdkFound,
   sdkInjected,
+  sdkAutoInjected,
   hasPayload,
   canConnect,
   apiHost,
@@ -240,6 +241,23 @@ function statusPanel({
       apiHost,
       clientKey,
       autoInject,
+    };
+    const activeTabId = await getActiveTabId();
+    setActiveTabId(activeTabId);
+    if (activeTabId) {
+      if (chrome?.tabs) {
+        await chrome.tabs.sendMessage(activeTabId, msg);
+      } else {
+        await chrome.runtime.sendMessage(msg);
+      }
+    }
+  };
+
+  const clearInjectedSdk = async () => {
+    setRefreshingSdk(true);
+    window.setTimeout(() => setRefreshingSdk(false), 500);
+    const msg: ClearInjectedSdkMessage = {
+      type: "GB_CLEAR_INJECTED_SDK",
     };
     const activeTabId = await getActiveTabId();
     setActiveTabId(activeTabId);
@@ -300,59 +318,9 @@ function statusPanel({
                 onClick={() => setInjectModalOpen(true)}
                 disabled={refreshingSdk}
               >
-                <PiCode /> Inject Debugging SDK
+                <PiCode /> Inject Debugging SDK...
               </Button>
             </div>
-          </div>
-
-          <Text as="div" size="2" weight="bold" mb="3">
-            Troubleshooting your Front-End SDK
-          </Text>
-
-          <Text as="div" size="2" weight="regular" mb="3">
-            Ensure <code className="text-gold-11">enableDevMode: true</code> is
-            set in your SDK constructor (JavaScript and React only).
-          </Text>
-          <Text as="div" size="2" weight="regular" mb="6">
-            If your site has a Content Security Policy (CSP), ensure that it
-            allows your SDK to load.{" "}
-            <Link
-              size="2"
-              href="https://docs.growthbook.io/lib/script-tag#content-security-policy-csp"
-              target="_blank"
-            >
-              Read more
-            </Link>
-          </Text>
-          <Text as="div" size="2" weight="regular" mb="1">
-            See our SDK implementation guides:
-          </Text>
-          <div>
-            <Link
-              size="2"
-              href="https://docs.growthbook.io/lib/script-tag"
-              target="_blank"
-            >
-              HTML Script Tag SDK
-            </Link>
-          </div>
-          <div>
-            <Link
-              size="2"
-              href="https://docs.growthbook.io/lib/js"
-              target="_blank"
-            >
-              JavaScript SDK
-            </Link>
-          </div>
-          <div>
-            <Link
-              size="2"
-              href="https://docs.growthbook.io/lib/react"
-              target="_blank"
-            >
-              React SDK
-            </Link>
           </div>
         </>
       ) : (
@@ -363,13 +331,36 @@ function statusPanel({
               : "The SDK is not connected to the GrowthBook API."}
           </Text>
           {sdkInjected ? (
-            <Callout.Root color="gray" size="1" className="my-2">
+            <Callout.Root color="gray" size="1" className="my-2 !flex">
               <Callout.Icon>
                 <PiCodeBold />
               </Callout.Icon>
-              <Callout.Text>
-                This SDK was manually injected by DevTools.
-              </Callout.Text>
+              <div className="w-full">
+                <Text as="div" size="2">
+                  This SDK was injected by DevTools.
+                </Text>
+                {sdkAutoInjected ? (
+                  <div className="text-xs leading-4 mt-1">
+                    Automatically injected on all page loads.
+                  </div>
+                ) : null}
+                <div className="text-right">
+                  {!refreshingSdk ? (
+                    <Link
+                      size="1"
+                      href="#"
+                      role="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        clearInjectedSdk();
+                      }}
+                    >
+                      <PiXBold className="inline-block mr-1" />
+                      Remove SDK
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
             </Callout.Root>
           ) : null}
           {!canConnect && hasPayload ? (
@@ -378,14 +369,12 @@ function statusPanel({
                 <PiInfoBold />
               </Callout.Icon>
               <Callout.Text>
-                <div className="mb-2">
+                <div>
                   Although no valid API connection was found, a valid SDK
                   payload was found.
                 </div>
-                <div className="text-xs leading-4">
-                  Your SDK may be bootstrapped: the payload may have been
-                  hydrated rather than fetched. If you are unsure, please double
-                  check your implementation.
+                <div className="mt-2 text-xs leading-4">
+                  Your SDK may be bootstrapped with a hydrated payload.
                 </div>
               </Callout.Text>
             </Callout.Root>
@@ -395,29 +384,149 @@ function statusPanel({
                 <PiWarningFill />
               </Callout.Icon>
               <Callout.Text>
-                Neither a valid API connection nor an SDK payload were found.
-                Your SDK may be unable to reference your features or
-                experiments.
+                <div>
+                  Neither a valid API connection nor an SDK payload were found.
+                </div>
+                <div className="mt-2 text-xs leading-4">
+                  Your SDK cannot reference features or experiments.
+                </div>
               </Callout.Text>
             </Callout.Root>
           ) : null}
 
-          <Text as="div" size="2" weight="regular" mb="2">
-            <div className="font-semibold mb-0.5">Host:</div>
-            <code className="text-gold-11">{apiHost || "None"}</code>
-          </Text>
-          <Text as="div" size="2" weight="regular" mb="2">
-            <div className="font-semibold mb-0.5">Client Key:</div>
-            <code className="text-gold-11">{clientKey || "None"}</code>
-          </Text>
-          {errorMessage ? (
-            <Text as="div" size="2" weight="light" color="orange" mt="2">
-              <PiWarningFill className="inline-block mr-2" />
-              {errorMessage}
+          <div className="mb-4">
+            <Text as="div" size="2" weight="regular" mb="2">
+              <div className="font-semibold mb-0.5">Host:</div>
+              <code className="text-gold-11">{apiHost || "None"}</code>
             </Text>
-          ) : null}
+            <Text as="div" size="2" weight="regular" mb="2">
+              <div className="font-semibold mb-0.5">Client Key:</div>
+              <code className="text-gold-11">{clientKey || "None"}</code>
+            </Text>
+            {errorMessage ? (
+              <Text as="div" size="2" weight="light" color="orange" mt="2">
+                <PiWarningFill className="inline-block mr-2" />
+                {errorMessage}
+              </Text>
+            ) : null}
+          </div>
         </>
       )}
+
+      <Accordion.Root className="accordion my-4" type="single" collapsible>
+        <Accordion.Item value="front-end-debugging">
+          <Accordion.Trigger className="trigger mb-2">
+            <Link
+              size="2"
+              role="button"
+              className="hover:underline"
+              weight="bold"
+            >
+              <PiCaretRightFill className="caret mr-0.5" size={12} />
+              Troubleshooting Front-End SDKs
+            </Link>
+          </Accordion.Trigger>
+          <Accordion.Content className="accordionInner overflow-hidden w-full">
+            <Text as="div" size="2" weight="regular" mb="3">
+              Ensure <code className="text-gold-11">enableDevMode: true</code>{" "}
+              is set in your SDK constructor (JavaScript and React only).
+            </Text>
+            <Text as="div" size="2" weight="regular" mb="3">
+              If your site has a Content Security Policy (CSP), ensure that it
+              allows your SDK to load.{" "}
+              <Link
+                size="2"
+                href="https://docs.growthbook.io/lib/script-tag#content-security-policy-csp"
+                target="_blank"
+              >
+                Read more
+              </Link>
+            </Text>
+            <Text as="div" size="2" weight="regular" mb="1">
+              See our SDK implementation guides:
+            </Text>
+            <div>
+              <Link
+                size="2"
+                href="https://docs.growthbook.io/lib/script-tag"
+                target="_blank"
+              >
+                HTML Script Tag SDK
+              </Link>
+            </div>
+            <div>
+              <Link
+                size="2"
+                href="https://docs.growthbook.io/lib/js"
+                target="_blank"
+              >
+                JavaScript SDK
+              </Link>
+            </div>
+            <div>
+              <Link
+                size="2"
+                href="https://docs.growthbook.io/lib/react"
+                target="_blank"
+              >
+                React SDK
+              </Link>
+            </div>
+          </Accordion.Content>
+        </Accordion.Item>
+      </Accordion.Root>
+
+      <Accordion.Root className="accordion my-4" type="single" collapsible>
+        <Accordion.Item value="debug-log">
+          <Accordion.Trigger className="trigger mb-2">
+            <Link
+              size="2"
+              role="button"
+              className="hover:underline"
+              weight="bold"
+            >
+              <PiCaretRightFill className="caret mr-0.5" size={12} />
+              Debugging Back-End SDKs
+            </Link>
+          </Accordion.Trigger>
+          <Accordion.Content className="accordionInner overflow-hidden w-full">
+            <Text as="div" size="2" weight="regular" mb="3">
+              Any DevTools overrides you have set are automatically sent to any
+              back ends on the same origin via a <code>_gbdebug</code> cookie.
+            </Text>
+            <Text as="div" size="2" weight="regular" mb="3">
+              To apply these overrides in a back-end SDK, and to display
+              back-end SDK event logs, follow our{" "}
+              <Link
+                size="2"
+                href="https://docs.growthbook.io/tools/chrome-extension"
+                target="_blank"
+              >
+                DevTools for Backend guide
+              </Link>
+              .
+            </Text>
+
+            {!sdkFound ? (
+              <Callout.Root color="violet" size="1" className="mb-4">
+                <Callout.Icon>
+                  <PiInfoBold />
+                </Callout.Icon>
+                <Callout.Text>
+                  <div>
+                    If your page does not use a front-end SDK,{" "}
+                    <strong>inject a debugging SDK</strong>.
+                  </div>
+                  <div className="mt-2 text-xs leading-4">
+                    This will allow you to set overrides and view back-end event
+                    logs using DevTools.
+                  </div>
+                </Callout.Text>
+              </Callout.Root>
+            ) : null}
+          </Accordion.Content>
+        </Accordion.Item>
+      </Accordion.Root>
 
       <Dialog.Root
         open={injectModalOpen}
@@ -581,6 +690,7 @@ function stickyBucketingPanel({
           ? "The SDK is using sticky bucketing."
           : "The SDK is not using sticky bucketing. Sticky bucketing is optional and is used to ensure that users are consistently bucketed."}
       </Text>
+
       {usingStickyBucketing && stickyBucketAssignmentDocs ? (
         <Accordion.Root className="accordion mt-2" type="single" collapsible>
           <Accordion.Item value="debug-log">

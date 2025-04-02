@@ -84,6 +84,9 @@ export type InjectSdkMessage = {
   apiHost: string;
   autoInject: boolean;
 };
+export type ClearInjectedSdkMessage = {
+  type: "GB_CLEAR_INJECTED_SDK";
+};
 
 export type SetOverridesMessage = {
   type: "GB_SET_OVERRIDES";
@@ -208,6 +211,7 @@ export type Message =
   | SetPayload
   | PatchPayload
   | InjectSdkMessage
+  | ClearInjectedSdkMessage
   | CopyToClipboard;
 
 export type BGLoadVisualChangsetMessage = {
@@ -243,6 +247,7 @@ type SDKHealthCheckResult = {
   hasWindowConfig?: boolean;
   sdkFound?: boolean;
   sdkInjected?: boolean;
+  sdkAutoInjected?: boolean;
   clientKey?: string;
   isLoading?: boolean;
   payload?: Record<string, any>;

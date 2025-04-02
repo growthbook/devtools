@@ -65,7 +65,7 @@ function init() {
     "_gbInjectSdk",
   );
   if (injectSdkConfig) {
-    injectSdk(injectSdkConfig);
+    injectSdk({ ...injectSdkConfig, fromCookie: true });
   }
 
   pushAppUpdates();
@@ -173,8 +173,22 @@ function injectSdk(message: any) {
     if (!gb) return;
     // @ts-expect-error
     gb.injected = true;
+    // @ts-expect-error
+    gb.autoInjected = message.autoInject || message.fromCookie;
     pushAppUpdates();
   });
+}
+
+function clearInjectedSdk() {
+  if (!window._growthbook) return;
+  document.cookie = `_gbInjectSdk=; Max-Age=0; path=/; domain=${window.location.hostname}`;
+  updateTabState("sdkData", {
+    canConnect: false,
+    hasPayload: false,
+    sdkFound: false,
+    errorMessage: "SDK not found",
+  });
+  window.location.reload();
 }
 
 function setupListeners() {
@@ -201,6 +215,9 @@ function setupListeners() {
         break;
       case "GB_INJECT_SDK":
         injectSdk(message);
+        break;
+      case "GB_CLEAR_INJECTED_SDK":
+        clearInjectedSdk();
         break;
       case "COPY_TO_CLIPBOARD":
         if (message.value) {
@@ -533,6 +550,8 @@ async function SdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
 
   // @ts-expect-error
   const sdkInjected = !!gb?.injected;
+  // @ts-expect-error
+  const sdkAutoInjected = !!gb?.autoInjected;
 
   const [apiHost, clientKey] = gb.getApiInfo();
 
@@ -541,9 +560,9 @@ async function SdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     experiments: gb.getExperiments?.(),
   };
   const hasPayload =
-    !!gb.getDecryptedPayload?.() ||
-    Object.keys(gb.getFeatures?.() || {}).length > 0 ||
-    (gb.getExperiments?.() || []).length > 0;
+    Object.keys(payload?.features || {}).length > 0 ||
+    (payload?.experiments || []).length > 0;
+
   // check if payload was decrypted
   const hasDecryptionKey = !!gbContext?.decryptionKey;
   let payloadDecrypted = true;
@@ -620,6 +639,7 @@ async function SdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     hasWindowConfig: !!window?.growthbook_config,
     sdkFound: true,
     sdkInjected,
+    sdkAutoInjected,
     clientKey,
     payload,
     hasTrackingCallback,

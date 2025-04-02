@@ -259,8 +259,6 @@ export default function SdkTab() {
           widthPercent={rightPercent}
           latestSdkVersion={latestSdkVersion}
           latestMinorSdkVersion={latestMinorSdkVersion}
-          hasPayload={hasPayload}
-          sdkInjected={sdkInjected}
         />
       )}
     </div>
