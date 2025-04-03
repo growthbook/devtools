@@ -3,7 +3,6 @@ import {
   AutoExperiment,
   Experiment,
   FeatureDefinition,
-  LogUnion,
 } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
@@ -12,7 +11,6 @@ import useGBSandboxEval, {
 import {
   PiCircleFill,
   PiFlaskFill,
-  PiPlusCircleFill,
   PiTimerBold,
   PiXBold,
 } from "react-icons/pi";
@@ -26,6 +24,7 @@ import { Box, Button, Link, Switch, Tooltip } from "@radix-ui/themes";
 import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
 import { useResponsiveContext } from "../hooks/useResponsive";
 import { TbEyeSearch } from "react-icons/tb";
+import { LogUnionWithSource } from "@/app/utils/logs";
 
 export type FeatureDefinitionWithId = FeatureDefinition & {
   id: string;
@@ -51,7 +50,7 @@ export default function FeaturesTab() {
     {},
   );
 
-  const [logEvents] = useTabState<LogUnion[] | undefined>(
+  const [logEvents] = useTabState<LogUnionWithSource[] | undefined>(
     "logEvents",
     undefined,
   );
@@ -104,7 +103,7 @@ export default function FeaturesTab() {
 
   const [searchValue, setSearchValue] = useTabState<string>(
     "featuresSearchValue",
-    ""
+    "",
   );
 
   const {

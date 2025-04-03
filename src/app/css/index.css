@@ -255,6 +255,11 @@
     box-shadow 50ms ease-in-out;
 }
 
+.rt-BaseTabListTrigger {
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+
 /* Prevent modal jumping when inner content changes shape and weird scroll bar */
 .rt-BaseDialogScroll {
   position: relative;

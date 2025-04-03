@@ -3,7 +3,6 @@ import {
   AutoExperiment,
   Experiment,
   FeatureDefinition,
-  LogUnion,
 } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
@@ -24,6 +23,7 @@ import { ValueType } from "@/app/components/ValueField";
 import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatusIcon";
 import { useResponsiveContext } from "../hooks/useResponsive";
 import { TbEyeSearch } from "react-icons/tb";
+import { LogUnionWithSource } from "@/app/utils/logs";
 
 export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
   features?: string[];
@@ -93,7 +93,7 @@ export default function ExperimentsTab() {
 
   const { evaluatedExperiments } = useGBSandboxEval();
 
-  const [logEvents] = useTabState<LogUnion[] | undefined>(
+  const [logEvents] = useTabState<LogUnionWithSource[] | undefined>(
     "logEvents",
     undefined,
   );
@@ -109,7 +109,7 @@ export default function ExperimentsTab() {
 
   const [searchValue, setSearchValue] = useTabState<string>(
     "experimentsSearchValue",
-    ""
+    "",
   );
 
   const {

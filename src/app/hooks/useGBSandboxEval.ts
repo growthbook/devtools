@@ -5,7 +5,6 @@ import {
   FeatureDefinition,
   FeatureResult,
   GrowthBook,
-  LogUnion,
   Result,
   StickyAssignmentsDocument,
   StickyBucketService,
@@ -15,6 +14,7 @@ import { DebugLog } from "devtools";
 import { getFeatureExperiments } from "@/app/components/ExperimentsTab";
 import useSdkData from "./useSdkData";
 import { FeatureDefinitionWithId } from "@/app/components/FeaturesTab";
+import { LogUnionWithSource } from "@/app/utils/logs";
 
 export type EvaluatedFeature = {
   result: FeatureResult;
@@ -53,7 +53,7 @@ export default function useGBSandboxEval() {
     () => new Map(Object.entries(forcedFeatures)),
     [forcedFeatures],
   );
-  const [logEvents] = useTabState<LogUnion[] | undefined>(
+  const [logEvents] = useTabState<LogUnionWithSource[] | undefined>(
     "logEvents",
     undefined,
   );
@@ -103,7 +103,9 @@ export default function useGBSandboxEval() {
           ...rule,
           // Hacky way for associating log to a specific rule:
           // stuff rule number into something persistent (rule.meta -> exp.meta)
-          meta: rule.meta ? rule.meta.map(m => ({...m, ruleI: i})) : [{ruleI: i}]
+          meta: rule.meta
+            ? rule.meta.map((m) => ({ ...m, ruleI: i }))
+            : [{ ruleI: i }],
         }));
       }
 

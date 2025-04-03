@@ -171,7 +171,7 @@ export const App = () => {
               </Tabs.List>
             </Tabs.Root>
           ) : (
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mt-[5px]">
               <Select.Root value={currentTab} onValueChange={setCurrentTab}>
                 <Select.Trigger
                   className="!shadow-none !outline-none hover:bg-gray-a3 rounded-none"
@@ -455,16 +455,16 @@ function NavLabel({
         condition={isDropdown}
         wrapper={<div className="flex items-center" />}
       >
-        <span className={!isDropdown ? "pr-3" : "pr-1.5"}>SDK</span>
-        <div className={!isDropdown ? "absolute right-0" : undefined}>
+        <span className={!isDropdown ? "pr-3" : "pr-1"}>SDK</span>
+        <div className={!isDropdown ? "absolute right-1" : undefined}>
           {sdkStatus === "green" && (
-            <PiCircleFill size={9} className="text-emerald-500 mr-1" />
+            <PiCircleFill size={9} className="text-emerald-500" />
           )}
           {sdkStatus === "yellow" && (
-            <PiWarningFill className="text-amber-500" />
+            <PiWarningFill size={12} className="text-amber-500" />
           )}
           {sdkStatus === "red" && (
-            <PiWarningOctagonFill className="text-red-700" />
+            <PiWarningOctagonFill size={12} className="text-red-700" />
           )}
         </div>
       </ConditionalWrapper>
