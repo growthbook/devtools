@@ -53,10 +53,18 @@ export default function LogsList({
     }
   };
 
-  const filteredLogEvents = useMemo(
-    () => logEvents.filter((evt) => filters.includes(evt.logType)),
-    [filters, logEvents],
-  );
+  // filter, dedupe
+  const filteredLogEvents = useMemo(() => {
+    const seen = new Set<string>();
+    return logEvents
+      .filter((evt) => filters.includes(evt.logType))
+      .filter((evt) => {
+        const key = JSON.stringify(evt);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }, [filters, logEvents]);
 
   const reshapedEvents = useMemo(
     () => filteredLogEvents.map(reshapeEventLog),

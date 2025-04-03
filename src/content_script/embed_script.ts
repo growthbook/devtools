@@ -26,6 +26,7 @@ declare global {
   interface Window {
     _growthbook?: GrowthBook;
     growthbook_config?: any;
+    _gbdebugStateEvents?: StateObj[];
   }
 }
 
@@ -75,6 +76,7 @@ function init() {
   } else {
     hydrateApp(queryState);
   }
+  ingestWindowStates();
 }
 
 function hydrateApp(state: StateObj) {
@@ -241,12 +243,7 @@ function setupListeners() {
   });
 
   // Listen to external state changes (i.e. hydration events from backend or API calls)
-  window.addEventListener("gbdebug_state", ((event: CustomEvent<StateObj>) => {
-    const state = event.detail;
-    if (state) {
-      hydrateApp(state);
-    }
-  }) as EventListener);
+  window.addEventListener("gbdebugStateReady", () => ingestWindowStates());
 
   // Listen to tab/window focus, force refresh
   document.addEventListener("visibilitychange", () => {
@@ -680,6 +677,12 @@ function getQueryState(): StateObj | null {
     console.error("Failed to parse query state", e);
     return null;
   }
+}
+
+function ingestWindowStates() {
+  const states = window._gbdebugStateEvents || [];
+  states.forEach((state) => hydrateApp(state));
+  window._gbdebugStateEvents = [];
 }
 
 // state vars:
