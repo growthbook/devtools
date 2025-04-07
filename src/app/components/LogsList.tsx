@@ -1,4 +1,4 @@
-import { Box, Checkbox, Flex, Text, Tooltip } from "@radix-ui/themes";
+import {Box, Checkbox, Flex, Link, Text, Tooltip} from "@radix-ui/themes";
 import React, { ReactNode, useMemo, useState } from "react";
 import useTabState from "../hooks/useTabState";
 import { useSearch } from "../hooks/useSearch";
@@ -9,7 +9,7 @@ import {
   PiArrowSquareInBold,
   PiCaretRightFill,
   PiFlagFill,
-  PiFlaskFill,
+  PiFlaskFill, PiXBold,
 } from "react-icons/pi";
 import ValueField from "./ValueField";
 import clsx from "clsx";
@@ -31,10 +31,12 @@ const responsiveCopy: Record<LogType, ReactNode> = {
 
 export default function LogsList({
   logEvents,
+  setLogEvents,
   isResponsive,
   isTiny,
 }: {
   logEvents: LogUnionWithSource[];
+  setLogEvents: (logs: LogUnionWithSource[]) => void;
   isResponsive: boolean;
   isTiny: boolean;
 }) {
@@ -103,7 +105,23 @@ export default function LogsList({
           searchInputProps={searchInputProps}
           clear={clearSearch}
         />
-        <div className="flex flex-shrink gap-3">
+        <div className="flex flex-shrink gap-3 items-center">
+          {logEvents.length ? (
+            <Link
+              href="#"
+              role="button"
+              color="amber"
+              size="1"
+              onClick={(e) => {
+                e.preventDefault();
+                setLogEvents([]);
+              }}
+              className="flex gap-1 items-center font-normal leading-3 text-right mr-2"
+            >
+              Clear logs
+              <PiXBold className="flex-shrink-0" />
+            </Link>
+          ) : null}
           {(Object.entries(filterCopy) as Array<[LogType, string]>).map(
             ([filter, copy]) => (
               <Text as="label" size="1" key={filter}>

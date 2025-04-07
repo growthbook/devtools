@@ -6,9 +6,10 @@ export interface FlattenedLogEvent {
   eventInfo: string;
   details: Record<string, unknown>;
   source?: string;
+  clientKey?: string;
 }
 export type LogType = LogUnion["logType"];
-export type LogUnionWithSource = LogUnion & { source?: string };
+export type LogUnionWithSource = LogUnion & { source?: string; clientKey?: string; };
 
 export function reshapeEventLog(evt: LogUnionWithSource): FlattenedLogEvent {
   switch (evt.logType) {
@@ -19,6 +20,7 @@ export function reshapeEventLog(evt: LogUnionWithSource): FlattenedLogEvent {
         eventInfo: evt.eventName,
         details: evt.properties || {},
         source: evt.source,
+        clientKey: evt.clientKey,
       };
     case "experiment":
       return {
@@ -30,6 +32,7 @@ export function reshapeEventLog(evt: LogUnionWithSource): FlattenedLogEvent {
           result: evt.result,
         },
         source: evt.source,
+        clientKey: evt.clientKey,
       };
     case "feature":
       return {
@@ -41,6 +44,7 @@ export function reshapeEventLog(evt: LogUnionWithSource): FlattenedLogEvent {
           result: evt.result,
         },
         source: evt.source,
+        clientKey: evt.clientKey,
       };
   }
 }

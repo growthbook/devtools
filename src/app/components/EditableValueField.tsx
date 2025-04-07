@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import ValueField, { ValueType } from "./ValueField";
 import { Button, RadioGroup, Link, DropdownMenu } from "@radix-ui/themes";
 import TextareaAutosize from "react-textarea-autosize";
-import { PiCaretDownFill, PiPencilSimple } from "react-icons/pi";
+import { PiCaretDownFill } from "react-icons/pi";
 
 export default function EditableValueField({
   value,

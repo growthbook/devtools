@@ -11,7 +11,7 @@ import type {
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import { Attributes } from "@growthbook/growthbook";
 
-type LogUnionWithSource = LogUnion & { source?: string };
+type LogUnionWithSource = LogUnion & { source?: string; clientKey?: string; };
 
 type StateObj = {
   attributes?: Record<string, any>;
@@ -22,11 +22,25 @@ type StateObj = {
   logs?: LogUnionWithSource[];
 };
 
+type EventSdkInfo = {
+  apiHost: string;
+  clientKey: string;
+  version?: string;
+  payload?: FeatureApiResponse;
+  attributes?: Attributes;
+};
+
+type LogEvent = {
+  logs: LogUnion[];
+  source?: string;
+  sdkInfo?: EventSdkInfo;
+};
+
 declare global {
   interface Window {
     _growthbook?: GrowthBook;
     growthbook_config?: any;
-    _gbdebugStateEvents?: StateObj[];
+    _gbdebugEvents: LogEvent[] & { push: ((...events: LogEvent[]) => number) & { _patched?: boolean }; };
   }
 }
 
@@ -76,7 +90,11 @@ function init() {
   } else {
     hydrateApp(queryState);
   }
-  ingestWindowStates();
+
+  // ingest existing backend events
+  let existingEvents = [...window._gbdebugEvents];
+  window._gbdebugEvents.length = 0;
+  window._gbdebugEvents.push(...existingEvents);
 }
 
 function hydrateApp(state: StateObj) {
@@ -84,36 +102,56 @@ function hydrateApp(state: StateObj) {
     if (state?.attributes && typeof state.attributes === "object") {
       gb?.setAttributeOverrides?.(state.attributes);
     }
-
     if (state?.features && typeof state.features === "object") {
       let forcedFeaturesMap = new Map(Object.entries(state.features));
       gb?.setForcedFeatures?.(forcedFeaturesMap);
     }
-
     if (state?.experiments && typeof state.experiments === "object") {
       gb?.setForcedVariations?.(state.experiments);
     }
-
     if (state?.payload && typeof state.payload === "object") {
       setPayload(state.payload);
     }
-
     if (state?.patchPayload && typeof state.patchPayload === "object") {
       patchPayload(state.patchPayload);
     }
-
     // logs are imported by hydration only
     if (state?.logs && Array.isArray(state.logs)) {
-      const logs = state.logs.map((log: any) => ({
-        ...log,
-        source: log.source ? log.source : "external",
-      }));
-      updateTabState("logEvents", logs, true);
+      importLogs(state.logs);
     }
   });
 }
 
+function importLogs(logs: LogUnionWithSource[]) {
+  const logsWithSource = logs.map((log: any) => ({
+    ...log,
+    source: log.source ? log.source : "external",
+  }));
+  updateTabState("logEvents", logsWithSource, true);
+}
+
+function ingestLogEvent(event: LogEvent) {
+  const sdkInfo = event.sdkInfo;
+  // todo: message devtools about other SDKs
+  if (typeof sdkInfo?.attributes === "object" && sdkInfo.attributes !== null) {
+    if (!window._growthbook) {
+      updateTabState("attributes", sdkInfo.attributes);
+    }
+  }
+  if (sdkInfo?.payload) {
+    if (!window._growthbook) {
+      updateTabState("features", sdkInfo.payload?.features || {});
+      updateTabState("experiments", sdkInfo.payload?.experiments || []);
+    } else {
+      // todo: smarter patching, tag by source
+      patchPayload(sdkInfo.payload);
+    }
+  }
+  importLogs(event.logs);
+}
+
 function pushAppUpdates() {
+  // todo: push payload for multiple sdks / clientKeys?
   updateTabState("url", window.location.href || "");
   onGrowthBookLoad((gb) => {
     pushSdkHealthUpdate(gb);
@@ -152,21 +190,16 @@ async function pushSdkHealthUpdate(gb?: GrowthBook) {
 
 function injectSdk(message: any) {
   if (window._growthbook) return;
-
+  const { apiHost, clientKey, autoInject } = message;
   const script = document.createElement("script");
   script.id = "injected_sdk";
-  script.async = true;
-  script.dataset.apiHost = message.apiHost;
-  script.dataset.clientKey = message.clientKey;
+  script.dataset.apiHost = apiHost;
+  script.dataset.clientKey = clientKey;
   script.src =
     "https://cdn.jsdelivr.net/npm/@growthbook/growthbook/dist/bundles/auto.min.js";
   document.head.appendChild(script);
-
-  if (message.autoInject) {
-    const payloadObj = {
-      apiHost: message.apiHost,
-      clientKey: message.clientKey,
-    };
+  if (autoInject) {
+    const payloadObj = { apiHost, clientKey };
     const cookiePayload = encodeURIComponent(JSON.stringify(payloadObj));
     document.cookie = `_gbInjectSdk=${cookiePayload}; path=/; domain=${window.location.hostname}`;
   }
@@ -190,6 +223,13 @@ function clearInjectedSdk() {
     sdkFound: false,
     errorMessage: "SDK not found",
   });
+  updateTabState("features", {});
+  updateTabState("experiments", []);
+  updateTabState("attributes", {});
+  updateTabState("forcedFeatures", new Map());
+  updateTabState("forcedVariations", {});
+  updateTabState("overriddenAttributes", {});
+  writeStateToCookie({}, true);
   window.location.reload();
 }
 
@@ -242,19 +282,27 @@ function setupListeners() {
     }
   });
 
-  // Listen to external state changes (i.e. hydration events from backend or API calls)
-  window.addEventListener("gbdebugStateReady", () => ingestWindowStates());
-
   // Listen to tab/window focus, force refresh
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
       pushAppUpdates();
     }
   });
+
+  // Create the backend events array and listen to changes
+  window._gbdebugEvents = window._gbdebugEvents || [];
+  if (!window._gbdebugEvents.push._patched) {
+    window._gbdebugEvents.push = (...events: LogEvent[] ) => {
+      events.forEach((event) => ingestLogEvent(event));
+      return events.length;
+    };
+    window._gbdebugEvents.push._patched = true;
+  }
 }
 
 function updateAttributes(data: unknown) {
   if (typeof data === "object" && data !== null) {
+    writeStateToCookie({ attributes: data });
     onGrowthBookLoad((gb) => {
       gb.setAttributeOverrides?.(data as Attributes); // {} to reset
       updateTabState("attributes", gb.getAttributes?.() || {}); // so that when we reset it will reset back to the original attributes
@@ -264,15 +312,15 @@ function updateAttributes(data: unknown) {
 
 function updateFeatures(data: unknown) {
   if (!data) return;
+  writeStateToCookie({ features: data });
   onGrowthBookLoad((gb) => {
-    gb.setForcedFeatures?.(
-      new Map(Object.entries(data as Record<string, any>)),
-    );
+    gb.setForcedFeatures?.(new Map(Object.entries(data as Record<string, any>)));
   });
 }
 
 function updateExperiments(data: unknown) {
   if (!data) return;
+  writeStateToCookie({ experiments: data as Record<string, number> });
   onGrowthBookLoad((gb) => {
     gb.setForcedVariations?.(data as Record<string, number>);
   });
@@ -336,10 +384,7 @@ function updateTabState(property: string, value: unknown, append = false) {
   window.postMessage(
     {
       type: "UPDATE_TAB_STATE",
-      data: {
-        property,
-        value,
-      },
+      data: { property, value},
       append,
     },
     window.location.origin,
@@ -679,15 +724,9 @@ function getQueryState(): StateObj | null {
   }
 }
 
-function ingestWindowStates() {
-  const states = window._gbdebugStateEvents || [];
-  states.forEach((state) => hydrateApp(state));
-  window._gbdebugStateEvents = [];
-}
-
 // state vars:
-function writeStateToCookie(state: StateObj) {
-  let existingState = <StateObj>"_gbdebug" || {};
+function writeStateToCookie(state: StateObj, reset?: boolean) {
+  let existingState: StateObj = (reset ? {} : getCookie("_gbdebug")) || {};
 
   const attributes = state.attributes ?? existingState.attributes;
   const features = state.features ?? existingState.features;
