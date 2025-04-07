@@ -271,7 +271,7 @@ export default function ExperimentDetail({
                   content={
                     !overrideExperiment
                       ? "Value is simulated by DevTools"
-                      : "Value is overridden and is applied to on-page SDK(s)"
+                      : "Value is overridden and is applied to live SDK(s)"
                   }
                 >
                   <span>

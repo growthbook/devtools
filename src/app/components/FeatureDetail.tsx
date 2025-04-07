@@ -545,7 +545,7 @@ export default function FeatureDetail({
                   content={
                     !overrideFeature
                       ? "Value is simulated by DevTools"
-                      : "Value is overridden and is applied to on-page SDK(s)"
+                      : "Value is overridden and is applied to live SDK(s)"
                   }
                 >
                   <span>
@@ -993,10 +993,10 @@ export function EvaluationSourceViewer({
     <div className="mt-4 mb-2">
       <div className="label font-semibold mb-1">
         <Tooltip
-          content={`The latest "real" ${!isExperiment ? "feature" : "experiment"} evaluation logged by the on-page SDK`}
+          content={`The latest "real" ${!isExperiment ? "feature" : "experiment"} evaluation. Logged on this page by a live SDK.`}
         >
           <span>
-            On-page evaluation
+            Live evaluation
             {evaluations.length === 1 ? "" : `s (${evaluations.length})`}
             <PiInfo size={12} className="text-indigo-9 inline-block ml-1" />
           </span>
