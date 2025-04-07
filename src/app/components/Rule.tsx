@@ -21,7 +21,6 @@ import {
   PiFlaskFill,
 } from "react-icons/pi";
 import { EvaluatedFeature } from "@/app/hooks/useGBSandboxEval";
-import { DebugLog } from "devtools";
 import DebugLogger from "@/app/components/DebugLogger";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { isDark, Theme } from "@/app";
@@ -67,7 +66,7 @@ export default function Rule({
   const debug = evaluatedFeature?.debug || [];
   const debugForRule = useMemo(
     () => debug.filter((d) => d?.[1]?.i === i),
-    [fid, i, debug]
+    [fid, i, debug],
   );
 
   let status: "skipped" | "unreachable" | "matches" | "gates" | "overridden" =
@@ -246,7 +245,11 @@ export default function Rule({
         />
       )}
       <div className="pt-1 border-t border-t-gray-a6">
-        <DebugLogger startCollapsed={true} logs={debugForRule} showCount={true} />
+        <DebugLogger
+          startCollapsed={true}
+          logs={debugForRule}
+          showCount={true}
+        />
       </div>
     </div>
   );

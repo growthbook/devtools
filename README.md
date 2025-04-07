@@ -64,6 +64,13 @@ Some notes
 
 ## Changelog
 
+*1.2.0* (2025-04-07)
+- Support for backend SDK debugging (overrides, logs)
+- Feature and Experiment views now show both simulated and live evaluations when available
+- Ability to inject a "debugging SDK" onto pages with no front-end SDKs
+- UI updates
+- Bug fixes
+
 *1.1.2* (2025-03-25)
 - Persist feature and experiment search filter
 - Bug fix: Improve association of debug logs to feature rules

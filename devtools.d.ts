@@ -1,8 +1,8 @@
-import type {
+import {
   Experiment,
   FeatureDefinition,
   ExperimentOverride,
-  StickyAssignmentsDocument, FeatureApiResponse,
+  StickyAssignmentsDocument, FeatureApiResponse, Attributes,
 } from "@growthbook/growthbook";
 import {
   FetchVisualChangesetPayload,
@@ -76,6 +76,16 @@ export type APIDomMutation = APIVisualChange["domMutations"][number];
 
 export type RequestRefreshMessage = {
   type: "GB_REQUEST_REFRESH";
+};
+
+export type InjectSdkMessage = {
+  type: "GB_INJECT_SDK";
+  clientKey: string;
+  apiHost: string;
+  autoInject: boolean;
+};
+export type ClearInjectedSdkMessage = {
+  type: "GB_CLEAR_INJECTED_SDK";
 };
 
 export type SetOverridesMessage = {
@@ -200,6 +210,8 @@ export type Message =
   | PullOverrides
   | SetPayload
   | PatchPayload
+  | InjectSdkMessage
+  | ClearInjectedSdkMessage
   | CopyToClipboard;
 
 export type BGLoadVisualChangsetMessage = {
@@ -226,7 +238,15 @@ export type BGTransformCopyMessage = {
   };
 };
 
-type SDKHealthCheckResult = {
+export type ExternalSdkInfo = {
+  apiHost: string;
+  clientKey: string;
+  version?: string;
+  payload?: FeatureApiResponse;
+  attributes?: Attributes;
+};
+
+export type SDKHealthCheckResult = {
   canConnect: boolean;
   hasPayload: boolean;
   hasClientKey?: boolean;
@@ -234,6 +254,9 @@ type SDKHealthCheckResult = {
   version?: string;
   hasWindowConfig?: boolean;
   sdkFound?: boolean;
+  sdkInjected?: boolean;
+  sdkAutoInjected?: boolean;
+  externalSdks?: Record<string, ExternalSdkInfo>;
   clientKey?: string;
   isLoading?: boolean;
   payload?: Record<string, any>;

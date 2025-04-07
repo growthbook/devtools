@@ -1,19 +1,18 @@
-import { LogUnion } from "@growthbook/growthbook";
 import React from "react";
 import useTabState from "../hooks/useTabState";
 import LogsList from "./LogsList";
 import { Link } from "@radix-ui/themes";
 import { MW } from "@/app";
 import { useResponsiveContext } from "../hooks/useResponsive";
+import { LogUnionWithSource } from "@/app/utils/logs";
 
 export default function LogsTab() {
   const { isResponsive, isTiny } = useResponsiveContext();
 
   const [currentTab, setCurrentTab] = useTabState("currentTab", "logs");
-  const [logEvents] = useTabState<LogUnion[] | undefined>(
-    "logEvents",
-    undefined,
-  );
+  const [logEvents, setLogEvents] = useTabState<
+    LogUnionWithSource[] | undefined
+  >("logEvents", undefined);
 
   return (
     <div
@@ -45,6 +44,7 @@ export default function LogsTab() {
       ) : (
         <LogsList
           logEvents={logEvents}
+          setLogEvents={setLogEvents}
           isResponsive={isResponsive}
           isTiny={isTiny}
         />

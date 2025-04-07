@@ -1,14 +1,20 @@
-import { LogUnion } from "@growthbook/growthbook";
-import { Box, Checkbox, Flex, Text } from "@radix-ui/themes";
+import { Box, Checkbox, Flex, Link, Text, Tooltip } from "@radix-ui/themes";
 import React, { ReactNode, useMemo, useState } from "react";
 import useTabState from "../hooks/useTabState";
 import { useSearch } from "../hooks/useSearch";
 import SearchBar from "./SearchBar";
 import { LogType, reshapeEventLog } from "../utils/logs";
 import * as Accordion from "@radix-ui/react-accordion";
-import { PiCaretRightFill, PiFlagFill, PiFlaskFill } from "react-icons/pi";
+import {
+  PiArrowSquareInBold,
+  PiCaretRightFill,
+  PiFlagFill,
+  PiFlaskFill,
+  PiXBold,
+} from "react-icons/pi";
 import ValueField from "./ValueField";
 import clsx from "clsx";
+import { LogUnionWithSource } from "@/app/utils/logs";
 
 export const HEADER_H = 40;
 
@@ -26,10 +32,12 @@ const responsiveCopy: Record<LogType, ReactNode> = {
 
 export default function LogsList({
   logEvents,
+  setLogEvents,
   isResponsive,
   isTiny,
 }: {
-  logEvents: LogUnion[];
+  logEvents: LogUnionWithSource[];
+  setLogEvents: (logs: LogUnionWithSource[]) => void;
   isResponsive: boolean;
   isTiny: boolean;
 }) {
@@ -48,10 +56,18 @@ export default function LogsList({
     }
   };
 
-  const filteredLogEvents = useMemo(
-    () => logEvents.filter((evt) => filters.includes(evt.logType)),
-    [filters, logEvents],
-  );
+  // filter, dedupe
+  const filteredLogEvents = useMemo(() => {
+    const seen = new Set<string>();
+    return logEvents
+      .filter((evt) => filters.includes(evt.logType))
+      .filter((evt) => {
+        const key = JSON.stringify(evt);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }, [filters, logEvents]);
 
   const reshapedEvents = useMemo(
     () => filteredLogEvents.map(reshapeEventLog),
@@ -90,7 +106,23 @@ export default function LogsList({
           searchInputProps={searchInputProps}
           clear={clearSearch}
         />
-        <div className="flex flex-shrink gap-3">
+        <div className="flex flex-shrink gap-3 items-center">
+          {logEvents.length ? (
+            <Link
+              href="#"
+              role="button"
+              color="amber"
+              size="1"
+              onClick={(e) => {
+                e.preventDefault();
+                setLogEvents([]);
+              }}
+              className="flex gap-1 items-center font-normal leading-3 text-right mr-2"
+            >
+              Clear logs
+              <PiXBold className="flex-shrink-0" />
+            </Link>
+          ) : null}
           {(Object.entries(filterCopy) as Array<[LogType, string]>).map(
             ([filter, copy]) => (
               <Text as="label" size="1" key={filter}>
@@ -177,7 +209,30 @@ export default function LogsList({
                         xsTextSizeClass,
                       )}
                     >
-                      {evt.source ? "＊" : ""}
+                      {evt.context.source ? (
+                        <Tooltip
+                          content={
+                            <div>
+                              <div>Imported from:</div>
+                              <div className="mt-1">
+                                <strong>{evt.context.source}</strong>
+                              </div>
+                              {evt.context.clientKey ? (
+                                <div className="text-2xs">
+                                  ({evt.context.clientKey})
+                                </div>
+                              ) : null}
+                            </div>
+                          }
+                        >
+                          <span>
+                            <PiArrowSquareInBold
+                              className="inline-block mr-1 text-indigo-9"
+                              size={12}
+                            />
+                          </span>
+                        </Tooltip>
+                      ) : null}
                       {evt.logType}
                     </div>
                     <div
@@ -213,11 +268,7 @@ export default function LogsList({
                 </Accordion.Trigger>
                 <Accordion.Content>
                   <ValueField
-                    value={
-                      evt.source
-                        ? { eventSource: evt.source, ...evt.details }
-                        : evt.details
-                    }
+                    value={evt.details}
                     valueType="json"
                     jsonStringifySpaces={2}
                     maxHeight={120}

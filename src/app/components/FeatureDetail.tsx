@@ -13,8 +13,13 @@ import {
 import {
   PiArrowCounterClockwiseBold,
   PiArrowSquareOut,
+  PiCaretDownFill,
   PiCaretRightFill,
+  PiCheck,
+  PiCheckCircleBold,
+  PiCircleFill,
   PiFunnelBold,
+  PiInfo,
   PiTimerBold,
   PiXBold,
 } from "react-icons/pi";
@@ -25,7 +30,7 @@ import Rule, {
   USE_PREVIOUS_LOG_IF_MATCH,
 } from "@/app/components/Rule";
 import * as Accordion from "@radix-ui/react-accordion";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { HEADER_H, LEFT_PERCENT, SelectedFeature } from "./FeaturesTab";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
@@ -35,6 +40,9 @@ import { TbEyeSearch } from "react-icons/tb";
 import useApi from "@/app/hooks/useApi";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { LogUnionWithSource } from "@/app/utils/logs";
+import { FeatureResult, Result } from "@growthbook/growthbook";
+import clsx from "clsx";
 
 export type ApiFeatureWithRevisions = {
   archived: boolean;
@@ -72,6 +80,15 @@ export type Revision = {
   rules: Record<string, any>;
   definitions: Record<string, any>;
 };
+export type Evaluation = {
+  result: Result<any> | FeatureResult;
+  context?: {
+    source?: string;
+    clientKey?: string;
+    timestamp?: string;
+  };
+};
+
 export type SelectedFeatureWithMeta = SelectedFeature & {
   comment?: string;
   date?: string;
@@ -116,6 +133,57 @@ export default function FeatureDetail({
     setForcedFeatures(newForcedFeatures);
     setOverrideFeature(false);
   };
+
+  const [logEvents] = useTabState<LogUnionWithSource[] | undefined>(
+    "logEvents",
+    undefined,
+  );
+
+  const [viewEvaluationSource, setViewEvaluationSource] = useState<
+    string | undefined
+  >(undefined);
+  const evaluations = useMemo(() => {
+    if (!selectedFid) return [];
+    const evaluationsMap: Record<string, Evaluation> = {};
+    let logs = [...(logEvents || [])]
+      .filter(
+        (log) => log.logType === "feature" && log.featureKey === selectedFid,
+      )
+      .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+    logs.forEach((log) => {
+      const key = (log.source || "local") + "__" + (log.clientKey || "");
+      if (!(key in evaluationsMap) && "result" in log) {
+        evaluationsMap[key] = {
+          result: log.result,
+          context: {
+            source: log.source || "front-end",
+            clientKey: log.clientKey,
+            timestamp: log.timestamp,
+          },
+        };
+      }
+    });
+    return Object.entries(evaluationsMap).sort((a, b) => {
+      if (a[0] === "local") return 1;
+      return a[0].localeCompare(b[0]);
+    });
+  }, [logEvents, selectedFid]);
+
+  useEffect(() => {
+    if (!selectedFid || !evaluations.length) {
+      setViewEvaluationSource(undefined);
+    }
+    if (viewEvaluationSource === undefined && evaluations.length) {
+      setViewEvaluationSource(evaluations?.[0]?.[0]);
+    }
+    if (
+      viewEvaluationSource !== undefined &&
+      evaluations.length &&
+      !evaluations.find((e) => e[0] === viewEvaluationSource)
+    ) {
+      setViewEvaluationSource(evaluations?.[0]?.[0]);
+    }
+  }, [selectedFid, viewEvaluationSource, evaluations]);
 
   const [revisionsByFid, setRevisionsByFid] = useTabState<
     Record<string, Revision[]>
@@ -472,7 +540,23 @@ export default function FeatureDetail({
 
           <div className="my-1">
             <div className="flex items-center justify-between my-2">
-              <div className="label font-semibold">Current value</div>
+              <div className="label font-semibold">
+                <Tooltip
+                  content={
+                    !overrideFeature
+                      ? "Value is simulated by DevTools"
+                      : "Value is overridden and is applied to live SDK(s)"
+                  }
+                >
+                  <span>
+                    Current value
+                    <PiInfo
+                      size={12}
+                      className="text-indigo-9 inline-block ml-1"
+                    />
+                  </span>
+                </Tooltip>
+              </div>
               {overrideFeature && (
                 <Button
                   color="amber"
@@ -492,18 +576,28 @@ export default function FeatureDetail({
               )}
             </div>
             {selectedFeature && selectedFid ? (
-              <EditableValueField
-                value={selectedFeature?.evaluatedFeature?.result?.value}
-                setValue={(v) => {
-                  setForcedFeature(selectedFid, v);
-                  setOverrideFeature(true);
-                }}
-                valueType={
-                  featureMetaData?.feature?.valueType ??
-                  selectedFeature?.valueType
-                }
-                resetInputOnChange={true}
-              />
+              <>
+                <EditableValueField
+                  value={selectedFeature?.evaluatedFeature?.result?.value}
+                  setValue={(v) => {
+                    setForcedFeature(selectedFid, v);
+                    setOverrideFeature(true);
+                  }}
+                  valueType={
+                    featureMetaData?.feature?.valueType ??
+                    selectedFeature?.valueType
+                  }
+                  resetInputOnChange={true}
+                />
+
+                {evaluations.length ? (
+                  <EvaluationSourceViewer
+                    evaluations={evaluations}
+                    viewEvaluationSource={viewEvaluationSource}
+                    setViewEvaluationSource={setViewEvaluationSource}
+                  />
+                ) : null}
+              </>
             ) : null}
           </div>
 
@@ -615,7 +709,11 @@ export default function FeatureDetail({
                 >
                   <Accordion.Item value="feature-definition">
                     <Accordion.Trigger className="trigger mb-0.5">
-                      <Link size="2" role="button" className="hover:underline">
+                      <Link
+                        size="2"
+                        role="button"
+                        className="hover:underline decoration-violet-a6"
+                      >
                         <PiCaretRightFill className="caret mr-0.5" size={12} />
                         Full feature definition
                       </Link>
@@ -796,6 +894,190 @@ function RevisionSelector({
             {!noDefinition ? "using SDK definition" : "unknown"}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+export function EvaluationSourceViewer({
+  evaluations,
+  viewEvaluationSource,
+  setViewEvaluationSource,
+  isExperiment,
+}: {
+  evaluations: [string, Evaluation][];
+  viewEvaluationSource: string | undefined;
+  setViewEvaluationSource: (s: string | undefined) => void;
+  isExperiment?: boolean;
+}) {
+  const viewEvaluation = evaluations.find((e) => e[0] === viewEvaluationSource);
+
+  const timestamp = parseInt(viewEvaluation?.[1]?.context?.timestamp ?? "0");
+  const date = timestamp ? new Date(timestamp) : null;
+  const formattedDateTime = date
+    ? date.toLocaleDateString() === new Date().toLocaleDateString()
+      ? date.toLocaleTimeString(undefined, { hourCycle: "h24" })
+      : date.toLocaleString(undefined, { hourCycle: "h24" })
+    : null;
+
+  const drawRow = function ({
+    evaluation,
+    asTrigger,
+    asDropdown,
+    isExperiment,
+  }: {
+    evaluation: Evaluation | undefined;
+    asTrigger?: boolean;
+    asDropdown?: boolean;
+    isExperiment?: boolean;
+  }) {
+    const valueStr = JSON.stringify(evaluation?.result?.value ?? null);
+    const isBoolean = valueStr === "true" || valueStr === "false";
+
+    let variationId: undefined | number;
+    if (
+      isExperiment &&
+      evaluation?.result &&
+      "variationId" in evaluation.result
+    ) {
+      variationId = evaluation.result.variationId;
+    }
+
+    return (
+      <div
+        className={clsx("flex justify-between items-center", {
+          "w-full": !asDropdown,
+          "w-[300px]": asDropdown,
+        })}
+      >
+        <div className="max-w-[35%] relative">
+          <div
+            className={clsx("text-sm line-clamp-1", {
+              "hover:underline decoration-violet-a6 text-violet-9": asTrigger,
+            })}
+          >
+            {evaluation?.context?.source || "front-end"}
+          </div>
+          {asTrigger ? (
+            <PiCaretDownFill
+              className="inline-block absolute -right-3.5 top-1.5 text-violet-a9"
+              size={11}
+            />
+          ) : null}
+        </div>
+        <div
+          className={clsx(
+            "text-indigo-12 text-sm break-all line-clamp-1 max-w-[60%]",
+            {
+              uppercase: isBoolean,
+            },
+          )}
+        >
+          {isBoolean && !isExperiment ? (
+            <PiCircleFill
+              size={10}
+              className={clsx("inline-block mr-0.5 -mt-0.5", {
+                "text-gray-a7": valueStr === "false",
+                "text-teal-600": valueStr === "true",
+              })}
+            />
+          ) : null}
+          {!isExperiment ? valueStr : null}
+          {isExperiment ? variationId : null}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="mt-4 mb-2">
+      <div className="label font-semibold mb-1">
+        <Tooltip
+          content={`The latest "real" ${!isExperiment ? "feature" : "experiment"} evaluation. Logged on this page by a live SDK.`}
+        >
+          <span>
+            Live evaluation
+            {evaluations.length === 1 ? "" : `s (${evaluations.length})`}
+            <PiInfo size={12} className="text-indigo-9 inline-block ml-1" />
+          </span>
+        </Tooltip>
+      </div>
+      <div className="box-field !pb-1">
+        <div className="flex justify-between text-2xs text-semibold uppercase text-gray-11 mb-1">
+          <div>SDK context</div>
+          <div>{!isExperiment ? "Value" : "Variation"}</div>
+        </div>
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <div
+              className={clsx("w-full flex items-center py-1", {
+                "cursor-pointer": evaluations.length > 1,
+              })}
+            >
+              {drawRow({
+                asTrigger: evaluations.length > 1,
+                evaluation: viewEvaluation?.[1],
+                isExperiment,
+              })}
+            </div>
+          </DropdownMenu.Trigger>
+          {evaluations.length > 1 ? (
+            <DropdownMenu.Content variant="soft" size="2">
+              <DropdownMenu.Label
+                key="top-label"
+                className="flex justify-between font-semibold uppercase text-gray-a10 py-1 h-auto text-xs"
+              >
+                <div>SDK context</div>
+                <div>{!isExperiment ? "Value" : "Variation"}</div>
+              </DropdownMenu.Label>
+              <DropdownMenu.Separator key="top-separator" className="my-1" />
+              {evaluations.map((evaluation) => (
+                <>
+                  <DropdownMenu.Item
+                    key={evaluation[0]}
+                    onSelect={() => setViewEvaluationSource(evaluation[0])}
+                    className="cursor-pointer flex"
+                  >
+                    <div className="w-4">
+                      {evaluation?.[0] === viewEvaluation?.[0] && <PiCheck />}{" "}
+                    </div>
+                    {drawRow({
+                      evaluation: evaluation[1],
+                      asDropdown: true,
+                      isExperiment,
+                    })}
+                  </DropdownMenu.Item>
+                </>
+              ))}
+            </DropdownMenu.Content>
+          ) : null}
+        </DropdownMenu.Root>
+
+        <Accordion.Root className="accordion" type="single" collapsible>
+          <Accordion.Item value="evaluation-details">
+            <Accordion.Trigger className="trigger mb-0.5">
+              <Link
+                size="1"
+                role="button"
+                className="hover:underline decoration-violet-a6"
+              >
+                <PiCaretRightFill
+                  className="caret mr-0.5"
+                  style={{ top: -1.5 }}
+                  size={12}
+                />
+                Logged {formattedDateTime || "unknown"}
+              </Link>
+            </Accordion.Trigger>
+            <Accordion.Content className="accordionInner overflow-hidden w-full mb-1">
+              <ValueField
+                value={viewEvaluation?.[1]}
+                valueType="json"
+                maxHeight={200}
+              />
+            </Accordion.Content>
+          </Accordion.Item>
+        </Accordion.Root>
       </div>
     </div>
   );

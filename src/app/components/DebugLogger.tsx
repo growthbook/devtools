@@ -36,9 +36,7 @@ export default function DebugLogger({
             size={12}
           />
           Debug log
-          {showCount ? (<>
-            {" "}({logs?.length || 0})
-          </>) : null}
+          {showCount ? <> ({logs?.length || 0})</> : null}
         </Link>
       </div>
       {!collapsed && (

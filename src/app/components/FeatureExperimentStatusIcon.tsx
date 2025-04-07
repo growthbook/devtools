@@ -50,7 +50,7 @@ export default function FeatureExperimentStatusIcon({
 
   if (forced) {
     return (
-      <Tooltip content={`Overridden`}>
+      <Tooltip content="Overridden">
         <span>
           <PiCircleDuotone className="inline-block mr-1.5 mb-0.5 text-amber-600" />
         </span>

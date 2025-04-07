@@ -11,25 +11,46 @@ import type {
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import { Attributes } from "@growthbook/growthbook";
 
+type LogUnionWithSource = LogUnion & { source?: string; clientKey?: string };
+
+type StateObj = {
+  attributes?: Record<string, any>;
+  features?: Record<string, any>;
+  experiments?: Record<string, number>;
+  payload?: FeatureApiResponse;
+  patchPayload?: FeatureApiResponse;
+  logs?: LogUnionWithSource[];
+};
+
+type ExternalSdkInfo = {
+  apiHost: string;
+  clientKey: string;
+  version?: string;
+  payload?: FeatureApiResponse;
+  attributes?: Attributes;
+};
+
+type LogEvent = {
+  logs: LogUnion[];
+  source?: string;
+  sdkInfo?: ExternalSdkInfo;
+};
+
 declare global {
   interface Window {
     _growthbook?: GrowthBook;
     growthbook_config?: any;
+    _gbdebugEvents: LogEvent[] & {
+      push: ((...events: LogEvent[]) => number) & { _patched?: boolean };
+    };
   }
 }
 
+const externalSdks: Record<string, ExternalSdkInfo> = {};
+
 function getValidGrowthBookInstance(cb: (gb: GrowthBook) => void) {
   if (!window._growthbook) return false;
-
-  if (!window._growthbook.setAttributeOverrides) {
-    const msg: ErrorMessage = {
-      type: "GB_ERROR",
-      error: "Requires minimum Javascript SDK version of 0.16.0",
-    };
-    window.postMessage(msg, window.location.origin);
-  } else {
-    cb(window._growthbook);
-  }
+  cb(window._growthbook);
   return true;
 }
 
@@ -41,13 +62,10 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
       canConnect: false,
       hasPayload: false,
       sdkFound: false,
+      externalSdks: externalSdks,
+      devModeEnabled: false,
       errorMessage: "SDK not found",
     });
-    const msg: ErrorMessage = {
-      type: "GB_ERROR",
-      error:
-        "Unable to locate GrowthBook SDK instance. Please ensure you are using either the Javascript or React SDK, and Dev Mode is enabled.",
-    };
   }, 5000);
 
   document.addEventListener(
@@ -63,68 +81,91 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
 // Send a refresh message back to content script
 function init() {
   setupListeners();
+
+  // reset the state cookie - will be repopulated if devtools has state set
+  writeStateToCookie({}, true);
+
+  // check if we should inject a debugging SDK
+  const injectSdkConfig = getCookie<{ apiHost: string; clientKey: string }>(
+    "_gbInjectSdk",
+  );
+  if (injectSdkConfig) {
+    injectSdk({ ...injectSdkConfig, fromCookie: true });
+  }
+
   pushAppUpdates();
-  hydrateApp();
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      pushAppUpdates();
+  const queryState = getQueryState();
+  if (!queryState) {
+    pullOverrides();
+  } else {
+    hydrateApp(queryState);
+  }
+
+  // ingest existing backend events
+  let existingEvents = [...window._gbdebugEvents];
+  window._gbdebugEvents.length = 0;
+  window._gbdebugEvents.push(...existingEvents);
+}
+
+function hydrateApp(state: StateObj) {
+  onGrowthBookLoad((gb) => {
+    if (state?.attributes && typeof state.attributes === "object") {
+      gb?.setAttributeOverrides?.(state.attributes);
+    }
+    if (state?.features && typeof state.features === "object") {
+      let forcedFeaturesMap = new Map(Object.entries(state.features));
+      gb?.setForcedFeatures?.(forcedFeaturesMap);
+    }
+    if (state?.experiments && typeof state.experiments === "object") {
+      gb?.setForcedVariations?.(state.experiments);
+    }
+    if (state?.payload && typeof state.payload === "object") {
+      setPayload(state.payload);
+    }
+    if (state?.patchPayload && typeof state.patchPayload === "object") {
+      patchPayload(state.patchPayload);
+    }
+    // logs are imported by hydration only
+    if (state?.logs && Array.isArray(state.logs)) {
+      importLogs(state.logs);
     }
   });
 }
 
-function hydrateApp() {
-  const hydratedState = getQueryState();
-  if (!hydratedState) {
-    pullOverrides();
-    return;
+function importLogs(logs: LogUnionWithSource[]) {
+  const logsWithSource = logs.map((log: any) => ({
+    ...log,
+    source: log.source ? log.source : "external",
+  }));
+  updateTabState("logEvents", logsWithSource, true);
+}
+
+function ingestLogEvent(event: LogEvent) {
+  const sdkInfo = event.sdkInfo;
+  if (sdkInfo) {
+    externalSdks[sdkInfo?.clientKey || "unknown"] = sdkInfo;
+    pushSdkHealthUpdate(window._growthbook);
   }
-
-  onGrowthBookLoad((gb) => {
-    if (
-      hydratedState?.attributes &&
-      typeof hydratedState.attributes === "object"
-    ) {
-      gb?.setAttributeOverrides?.(hydratedState.attributes);
+  if (typeof sdkInfo?.attributes === "object" && sdkInfo.attributes !== null) {
+    if (!window._growthbook) {
+      updateTabState("attributes", sdkInfo.attributes);
     }
-
-    if (hydratedState?.features && typeof hydratedState.features === "object") {
-      let forcedFeaturesMap = new Map(Object.entries(hydratedState.features));
-      gb?.setForcedFeatures?.(forcedFeaturesMap);
+  }
+  if (sdkInfo?.payload) {
+    if (!window._growthbook) {
+      updateTabState("features", sdkInfo.payload?.features || {});
+      updateTabState("experiments", sdkInfo.payload?.experiments || []);
+    } else {
+      patchPayload(sdkInfo.payload);
     }
-
-    if (
-      hydratedState?.experiments &&
-      typeof hydratedState.experiments === "object"
-    ) {
-      gb?.setForcedVariations?.(hydratedState.experiments);
-    }
-
-    if (hydratedState?.payload && typeof hydratedState.payload === "object") {
-      setPayload(hydratedState.payload);
-    }
-
-    if (
-      hydratedState?.patchPayload &&
-      typeof hydratedState.patchPayload === "object"
-    ) {
-      patchPayload(hydratedState.patchPayload);
-    }
-
-    // logs are imported by hydration only
-    if (hydratedState?.logs && Array.isArray(hydratedState.logs)) {
-      const logs = hydratedState.logs.map((log: any) => ({
-        ...log,
-        source: log.source ? log.source : "external",
-      }));
-      updateTabState("logEvents", hydratedState.logs, true);
-    }
-  });
+  }
+  importLogs(event.logs);
 }
 
 function pushAppUpdates() {
   updateTabState("url", window.location.href || "");
   onGrowthBookLoad((gb) => {
-    pushSDKUpdate(gb);
+    pushSdkHealthUpdate(gb);
     if (gb) {
       subscribeToSdkChanges(gb);
       updateTabState("features", gb.getFeatures?.() || {});
@@ -152,10 +193,57 @@ function pushAppUpdates() {
   });
 }
 
-async function pushSDKUpdate(gb?: GrowthBook) {
-  const sdkData = await SDKHealthCheck(gb);
+async function pushSdkHealthUpdate(gb?: GrowthBook) {
+  const sdkData = await sdkHealthCheck(gb);
   updateTabState("sdkData", sdkData);
-  updateBackgroundSDK(sdkData);
+  updateBackgroundSdk(sdkData);
+}
+
+function injectSdk(message: any) {
+  if (window._growthbook) return;
+  const { apiHost, clientKey, autoInject } = message;
+  const script = document.createElement("script");
+  script.id = "injected_sdk";
+  script.dataset.apiHost = apiHost;
+  script.dataset.clientKey = clientKey;
+  script.src =
+    "https://cdn.jsdelivr.net/npm/@growthbook/growthbook/dist/bundles/auto.min.js";
+  document.head.appendChild(script);
+  if (autoInject) {
+    const payloadObj = { apiHost, clientKey };
+    const cookiePayload = encodeURIComponent(JSON.stringify(payloadObj));
+    document.cookie = `_gbInjectSdk=${cookiePayload}; path=/; domain=${window.location.hostname}`;
+  }
+
+  onGrowthBookLoad((gb) => {
+    if (!gb) return;
+    // @ts-expect-error
+    gb.injected = true;
+    // @ts-expect-error
+    gb.autoInjected = message.autoInject || message.fromCookie;
+    pushAppUpdates();
+  });
+}
+
+function clearInjectedSdk() {
+  if (!window._growthbook) return;
+  document.cookie = `_gbInjectSdk=; Max-Age=0; path=/; domain=${window.location.hostname}`;
+  updateTabState("sdkData", {
+    canConnect: false,
+    hasPayload: false,
+    sdkFound: false,
+    externalSdks: externalSdks,
+    devModeEnabled: false,
+    errorMessage: "SDK not found",
+  });
+  updateTabState("features", {});
+  updateTabState("experiments", []);
+  updateTabState("attributes", {});
+  updateTabState("forcedFeatures", new Map());
+  updateTabState("forcedVariations", {});
+  updateTabState("overriddenAttributes", {});
+  writeStateToCookie({}, true);
+  window.location.reload();
 }
 
 function setupListeners() {
@@ -180,6 +268,12 @@ function setupListeners() {
       case "GB_REQUEST_REFRESH":
         pushAppUpdates();
         break;
+      case "GB_INJECT_SDK":
+        injectSdk(message);
+        break;
+      case "GB_CLEAR_INJECTED_SDK":
+        clearInjectedSdk();
+        break;
       case "COPY_TO_CLIPBOARD":
         if (message.value) {
           window.focus();
@@ -200,94 +294,104 @@ function setupListeners() {
         return;
     }
   });
+
+  // Listen to tab/window focus, force refresh
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      pushAppUpdates();
+    }
+  });
+
+  // Create the backend events array and listen to changes
+  window._gbdebugEvents = window._gbdebugEvents || [];
+  if (!window._gbdebugEvents.push._patched) {
+    window._gbdebugEvents.push = (...events: LogEvent[]) => {
+      events.forEach((event) => ingestLogEvent(event));
+      return events.length;
+    };
+    window._gbdebugEvents.push._patched = true;
+  }
 }
 
 function updateAttributes(data: unknown) {
-  onGrowthBookLoad((gb) => {
-    if (typeof data === "object" && data !== null) {
+  if (typeof data === "object" && data !== null) {
+    writeStateToCookie({ attributes: data });
+    onGrowthBookLoad((gb) => {
       gb.setAttributeOverrides?.(data as Attributes); // {} to reset
       updateTabState("attributes", gb.getAttributes?.() || {}); // so that when we reset it will reset back to the original attributes
-    }
-  });
+    });
+  }
 }
 
 function updateFeatures(data: unknown) {
+  if (!data) return;
+  writeStateToCookie({ features: data });
   onGrowthBookLoad((gb) => {
-    if (data) {
-      gb.setForcedFeatures?.(
-        new Map(Object.entries(data as Record<string, any>)),
-      );
-    }
+    gb.setForcedFeatures?.(
+      new Map(Object.entries(data as Record<string, any>)),
+    );
   });
 }
 
 function updateExperiments(data: unknown) {
+  if (!data) return;
+  writeStateToCookie({ experiments: data as Record<string, number> });
   onGrowthBookLoad((gb) => {
-    if (data) {
-      gb.setForcedVariations?.(data as Record<string, number>);
-    }
+    gb.setForcedVariations?.(data as Record<string, number>);
   });
 }
 
 function setPayload(data: FeatureApiResponse) {
+  if (!data) return;
   onGrowthBookLoad((gb) => {
-    if (data) {
-      if (gb.setPayload) {
-        gb.setPayload(data);
-      } else {
-        if (gb.setFeatures && data.features) {
-          gb.setFeatures(data.features);
-        }
-        if (gb.setExperiments && data.experiments) {
-          gb.setExperiments(data.experiments);
-        }
+    if (gb.setPayload) {
+      gb.setPayload(data);
+    } else {
+      if (gb.setFeatures && data.features) {
+        gb.setFeatures(data.features);
+      }
+      if (gb.setExperiments && data.experiments) {
+        gb.setExperiments(data.experiments);
       }
     }
   });
 }
 
 function patchPayload(data: FeatureApiResponse) {
+  if (!data) return;
   onGrowthBookLoad((gb) => {
-    if (data) {
-      const payload = gb.getDecryptedPayload?.() || {
-        features: gb.getFeatures?.(),
-        experiments: gb.getExperiments?.(),
-      };
-      Object.keys(data).forEach((key) => {
-        const k = key as keyof FeatureApiResponse;
-        if (!payload[k]) {
-          // @ts-ignore
-          payload[k] = data[k];
-        } else {
-          if (typeof payload[k] === "object") {
-            // @ts-ignore
-            payload[k] = { ...payload[k], ...data[k] };
-          }
-        }
-      });
-
-      if (gb.setPayload) {
-        gb.setPayload(payload);
+    const payload = gb.getDecryptedPayload?.() || {
+      features: gb.getFeatures?.(),
+      experiments: gb.getExperiments?.(),
+    };
+    Object.keys(data).forEach((key) => {
+      const k = key as keyof FeatureApiResponse;
+      if (!payload[k]) {
+        // @ts-ignore
+        payload[k] = data[k];
       } else {
-        if (gb.setFeatures && payload.features) {
-          gb.setFeatures(payload.features);
+        if (typeof payload[k] === "object") {
+          // @ts-ignore
+          payload[k] = { ...payload[k], ...data[k] };
         }
-        if (gb.setExperiments && payload.experiments) {
-          gb.setExperiments(payload.experiments);
-        }
+      }
+    });
+
+    if (gb.setPayload) {
+      gb.setPayload(payload);
+    } else {
+      if (gb.setFeatures && payload.features) {
+        gb.setFeatures(payload.features);
+      }
+      if (gb.setExperiments && payload.experiments) {
+        gb.setExperiments(payload.experiments);
       }
     }
   });
 }
 
-async function updateBackgroundSDK(data: SDKHealthCheckResult) {
-  window.postMessage(
-    {
-      type: "GB_SDK_UPDATED",
-      data,
-    },
-    window.location.origin,
-  );
+async function updateBackgroundSdk(data: SDKHealthCheckResult) {
+  window.postMessage({ type: "GB_SDK_UPDATED", data }, window.location.origin);
 }
 
 // send a message that the tabstate has been updated
@@ -295,10 +399,7 @@ function updateTabState(property: string, value: unknown, append = false) {
   window.postMessage(
     {
       type: "UPDATE_TAB_STATE",
-      data: {
-        property,
-        value,
-      },
+      data: { property, value },
       append,
     },
     window.location.origin,
@@ -307,12 +408,7 @@ function updateTabState(property: string, value: unknown, append = false) {
 
 // Prompt the content script to send the existing overrides on pageload
 function pullOverrides() {
-  window.postMessage(
-    {
-      type: "GB_REQUEST_OVERRIDES",
-    },
-    window.location.origin,
-  );
+  window.postMessage({ type: "GB_REQUEST_OVERRIDES" }, window.location.origin);
 }
 
 // add a proxy to the SDKs methods so we know when anything important has been changed programmatically
@@ -350,21 +446,23 @@ function subscribeToSdkChanges(
     await _setAttributeOverrides?.call(gb, attributes);
     updateTabState("attributes", gb.getAttributes());
     updateTabState("overriddenAttributes", attributes);
+    writeStateToCookie({ attributes });
   };
 
   const _setForcedFeatures = gb.setForcedFeatures;
   gb.setForcedFeatures = (map: Map<string, any>) => {
     _setForcedFeatures?.call(gb, map);
-    updateTabState(
-      "forcedFeatures",
-      Object.fromEntries(gb.getForcedFeatures?.() || new Map()),
-    );
+    const features = Object.fromEntries(gb.getForcedFeatures?.() || new Map());
+    updateTabState("forcedFeatures", features);
+    writeStateToCookie({ features });
   };
 
   const _setForcedVariations = gb.setForcedVariations;
   gb.setForcedVariations = async (vars: Record<string, number>) => {
     await _setForcedVariations?.call(gb, vars);
-    updateTabState("forcedVariations", gb.getForcedVariations?.() || {});
+    const experiments = gb.getForcedVariations?.() || {};
+    updateTabState("forcedVariations", experiments);
+    writeStateToCookie({ experiments });
   };
 
   const _setPayload = gb.setPayload;
@@ -492,12 +590,13 @@ function subscribeToSdkChanges(
 
 let cachedHostRes: any = undefined;
 let cachedStreamingHostRes: any = undefined;
-async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
+async function sdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   if (!gb) {
     return {
       canConnect: false,
       hasPayload: false,
       sdkFound: false,
+      externalSdks: externalSdks,
       devModeEnabled: false,
       errorMessage: "SDK not found",
     };
@@ -507,6 +606,11 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
 
   const devModeEnabled = gbContext?.enableDevMode;
 
+  // @ts-expect-error
+  const sdkInjected = !!gb?.injected;
+  // @ts-expect-error
+  const sdkAutoInjected = !!gb?.autoInjected;
+
   const [apiHost, clientKey] = gb.getApiInfo();
 
   const payload = gb.getDecryptedPayload?.() || {
@@ -514,9 +618,9 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     experiments: gb.getExperiments?.(),
   };
   const hasPayload =
-    !!gb.getDecryptedPayload?.() ||
-    Object.keys(gb.getFeatures?.() || {}).length > 0 ||
-    (gb.getExperiments?.() || []).length > 0;
+    Object.keys(payload?.features || {}).length > 0 ||
+    (payload?.experiments || []).length > 0;
+
   // check if payload was decrypted
   const hasDecryptionKey = !!gbContext?.decryptionKey;
   let payloadDecrypted = true;
@@ -592,6 +696,9 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     version: gb?.version,
     hasWindowConfig: !!window?.growthbook_config,
     sdkFound: true,
+    sdkInjected,
+    sdkAutoInjected,
+    externalSdks: externalSdks,
     clientKey,
     payload,
     hasTrackingCallback,
@@ -613,7 +720,7 @@ async function SDKHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   };
 }
 
-export function getQueryState() {
+function getQueryState(): StateObj | null {
   try {
     const params = new URLSearchParams(window.location.search);
     const state = params.get("_gbdebug");
@@ -630,6 +737,43 @@ export function getQueryState() {
     return data;
   } catch (e) {
     console.error("Failed to parse query state", e);
+    return null;
+  }
+}
+
+// state vars:
+function writeStateToCookie(state: StateObj, reset?: boolean) {
+  let existingState: StateObj = (reset ? {} : getCookie("_gbdebug")) || {};
+
+  const attributes = state.attributes ?? existingState.attributes;
+  const features = state.features ?? existingState.features;
+  const experiments = state.experiments ?? existingState.experiments;
+
+  const payloadObj: StateObj = {
+    ...(Object.keys(attributes || {}).length ? { attributes } : {}),
+    ...(Object.keys(features || {}).length ? { features } : {}),
+    ...(Object.keys(experiments || {}).length ? { experiments } : {}),
+  };
+  if (Object.keys(payloadObj || {}).length) {
+    const cookiePayload = encodeURIComponent(JSON.stringify(payloadObj));
+    document.cookie = `_gbdebug=${cookiePayload}; path=/; domain=${window.location.hostname}`;
+  } else {
+    document.cookie = `_gbdebug=; Max-Age=0; path=/; domain=${window.location.hostname}`;
+  }
+}
+
+function getCookie<T = string>(name: string): T | null {
+  try {
+    const cookieString = document.cookie
+      .split(";")
+      .map((cookie) => cookie.trim())
+      .find((cookie) => cookie.startsWith(`${name}=`));
+    if (!cookieString) return null;
+    return JSON.parse(
+      decodeURIComponent(cookieString.substring(name.length + 1)),
+    ) as T;
+  } catch (e) {
+    console.error("Failed to parse cookie", e);
     return null;
   }
 }
