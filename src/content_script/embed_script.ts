@@ -82,6 +82,10 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
 function init() {
   setupListeners();
 
+  // reset the state cookie - will be repopulated if devtools has state set
+  writeStateToCookie({}, true);
+
+  // check if we should inject a debugging SDK
   const injectSdkConfig = getCookie<{ apiHost: string; clientKey: string }>(
     "_gbInjectSdk",
   );
@@ -152,7 +156,6 @@ function ingestLogEvent(event: LogEvent) {
       updateTabState("features", sdkInfo.payload?.features || {});
       updateTabState("experiments", sdkInfo.payload?.experiments || []);
     } else {
-      // todo: smarter patching, tag by source
       patchPayload(sdkInfo.payload);
     }
   }
@@ -160,7 +163,6 @@ function ingestLogEvent(event: LogEvent) {
 }
 
 function pushAppUpdates() {
-  // todo: push payload for multiple sdks / clientKeys?
   updateTabState("url", window.location.href || "");
   onGrowthBookLoad((gb) => {
     pushSdkHealthUpdate(gb);
