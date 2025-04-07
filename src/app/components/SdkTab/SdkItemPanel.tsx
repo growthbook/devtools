@@ -37,11 +37,12 @@ import InjectSdkForm from "@/app/components/InjectSdk";
 
 const panelTitles: Record<SdkItem, string> = {
   status: "SDK Status",
+  externalSdks: "Back-end SDKs",
   version: "SDK Version",
   trackingCallback: "Tracking Callback",
   security: "Payload Security",
   stickyBucketing: "Sticky Bucketing",
-  streaming: "Streaming",
+  // streaming: "Streaming",
   payload: "SDK Payload",
   logEvent: "Log Event Callback",
   onFeatureUsage: "On Feature Usage Callback",
@@ -58,11 +59,12 @@ const panels: Record<
   >
 > = {
   status: statusPanel,
+  externalSdks: externalSdksPanel,
   version: versionPanel,
   trackingCallback: trackingCallbackPanel,
   security: securityPanel,
   stickyBucketing: stickyBucketingPanel,
-  streaming: streamingPanel,
+  // streaming: streamingPanel,
   payload: payloadPanel,
   logEvent: logEventPanel,
   onFeatureUsage: onFeatureUsagePanel,
@@ -71,13 +73,15 @@ const panels: Record<
 const doclinks: Record<SdkItem, string | undefined> = {
   status:
     "https://docs.growthbook.io/quick-start#step-2-integrate-growthbook-into-your-application",
+  externalSdks:
+    "https://docs.growthbook.io/tools/chrome-extension#backend-debugging",
   version:
     "https://github.com/growthbook/growthbook/blob/main/packages/shared/src/sdk-versioning/CAPABILITIES.md",
   trackingCallback:
     "https://docs.growthbook.io/lib/js#experimentation-ab-testing",
   security: "https://docs.growthbook.io/lib/js#remote-evaluation",
   stickyBucketing: "https://docs.growthbook.io/app/sticky-bucketing",
-  streaming: "https://docs.growthbook.io/lib/js#streaming-updates",
+  // streaming: "https://docs.growthbook.io/lib/js#streaming-updates",
   payload: "https://docs.growthbook.io/lib/js#loading-features-and-experiments",
   logEvent: undefined,
   onFeatureUsage: "https://docs.growthbook.io/lib/js#feature-usage-callback",
@@ -476,58 +480,6 @@ function statusPanel({
         </Accordion.Item>
       </Accordion.Root>
 
-      <Accordion.Root className="accordion my-4" type="single" collapsible>
-        <Accordion.Item value="debug-log">
-          <Accordion.Trigger className="trigger mb-2">
-            <Link
-              size="2"
-              role="button"
-              className="hover:underline"
-              weight="bold"
-            >
-              <PiCaretRightFill className="caret mr-0.5" size={12} />
-              Debugging Back-End SDKs
-            </Link>
-          </Accordion.Trigger>
-          <Accordion.Content className="accordionInner overflow-hidden w-full">
-            <Text as="div" size="2" weight="regular" mb="3">
-              Any DevTools overrides you have set are automatically sent to any
-              back ends on the same origin via a <code>_gbdebug</code> cookie.
-            </Text>
-            <Text as="div" size="2" weight="regular" mb="3">
-              To apply these overrides in a back-end SDK, and to display
-              back-end SDK event logs, follow our{" "}
-              <Link
-                size="2"
-                href="https://docs.growthbook.io/tools/chrome-extension"
-                target="_blank"
-              >
-                DevTools for Backend guide
-              </Link>
-              .
-            </Text>
-
-            {!sdkFound ? (
-              <Callout.Root color="violet" size="1" className="mb-4">
-                <Callout.Icon>
-                  <PiInfoBold />
-                </Callout.Icon>
-                <Callout.Text>
-                  <div>
-                    If your page does not use a front-end SDK,{" "}
-                    <strong>inject a debugging SDK</strong>.
-                  </div>
-                  <div className="mt-2 text-xs leading-4">
-                    This will allow you to set overrides and view back-end event
-                    logs using DevTools.
-                  </div>
-                </Callout.Text>
-              </Callout.Root>
-            ) : null}
-          </Accordion.Content>
-        </Accordion.Item>
-      </Accordion.Root>
-
       <Dialog.Root
         open={injectModalOpen}
         onOpenChange={(o) => setInjectModalOpen(o)}
@@ -551,6 +503,78 @@ function statusPanel({
           </Dialog.Close>
         </Dialog.Content>
       </Dialog.Root>
+    </>
+  );
+}
+
+function externalSdksPanel({ externalSdks }: SDKHealthCheckResult) {
+  const numExternalSdks = Object.keys(externalSdks || {}).length;
+
+  return (
+    <>
+      {!numExternalSdks ? (
+        <Text as="div" size="2" weight="regular">
+          No back-end SDKs detected.
+        </Text>
+      ) : (
+        <>
+          <Text as="div" size="2" weight="regular">
+            {numExternalSdks} back-end SDK
+            {numExternalSdks !== 1 ? "s" : ""} detected.
+          </Text>
+          <div className="my-3">
+            {Object.values(externalSdks || {}).map((sdkInfo) => (
+              <div className="box w-full">
+                <Text as="div" size="2" weight="regular" mb="2">
+                  <div className="font-semibold mb-0.5">Host:</div>
+                  <code className="text-gold-11">
+                    {sdkInfo.apiHost || "None"}
+                  </code>
+                </Text>
+                <Text as="div" size="2" weight="regular" mb="2">
+                  <div className="font-semibold mb-0.5">Client Key:</div>
+                  <code className="text-gold-11">
+                    {sdkInfo.clientKey || "None"}
+                  </code>
+                </Text>
+                <Text as="div" size="2" weight="regular" mb="2">
+                  <div className="font-semibold mb-0.5">SDK Version:</div>
+                  <code className="text-gold-11">
+                    {sdkInfo.version || "unknown"}
+                  </code>
+                </Text>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      <Accordion.Root className="accordion my-4" type="single" collapsible>
+        <Accordion.Item value="debug-log">
+          <Accordion.Trigger className="trigger mb-2">
+            <Link
+              size="2"
+              role="button"
+              className="hover:underline"
+              weight="bold"
+            >
+              <PiCaretRightFill className="caret mr-0.5" size={12} />
+              Debugging Back-End SDKs
+            </Link>
+          </Accordion.Trigger>
+          <Accordion.Content className="accordionInner overflow-hidden w-full">
+            <Text as="div" size="2" weight="regular" mb="3">
+              Any DevTools overrides you have set are automatically sent to any
+              back ends on the same origin via a <code>_gbdebug</code> cookie.
+            </Text>
+            <Text as="div" size="2" weight="regular" mb="3">
+              To apply these overrides in a back-end SDK and to display back-end
+              SDK event logs, follow our DevTools for Back End documentation
+              below.
+            </Text>
+          </Accordion.Content>
+        </Accordion.Item>
+      </Accordion.Root>
     </>
   );
 }
@@ -714,38 +738,38 @@ function stickyBucketingPanel({
   );
 }
 
-function streamingPanel({
-  streaming,
-  streamingHost,
-  clientKey,
-  streamingHostRequestHeaders,
-}: SDKHealthCheckResult) {
-  return (
-    <>
-      <Text as="div" size="2" weight="regular" mb="2">
-        {streaming
-          ? "The SDK is using streaming (SSE)."
-          : "The SDK is not using streaming (SSE). Streaming is optional and is used to update the SDK with the latest data without refreshing the page."}
-      </Text>
-      <Text as="div" size="2" weight="regular" mb="2">
-        <div className="font-semibold mb-0.5">Streaming host:</div>
-        <code className="text-gold-11">{streamingHost || "None"}</code>
-      </Text>
-      <Text as="div" size="2" weight="regular">
-        <div className="font-semibold mb-0.5">Client Key:</div>
-        <code className="text-gold-11">{clientKey || "None"}</code>
-      </Text>
-      <Text as="div" size="2" weight="regular" mt="2">
-        <div className="font-semibold">Streaming host request headers:</div>
-        <div className="mt-0.5">
-          <code className="text-gold-11">
-            {JSON.stringify(streamingHostRequestHeaders) || "None"}
-          </code>
-        </div>
-      </Text>
-    </>
-  );
-}
+// function streamingPanel({
+//   streaming,
+//   streamingHost,
+//   clientKey,
+//   streamingHostRequestHeaders,
+// }: SDKHealthCheckResult) {
+//   return (
+//     <>
+//       <Text as="div" size="2" weight="regular" mb="2">
+//         {streaming
+//           ? "The SDK is using streaming (SSE)."
+//           : "The SDK is not using streaming (SSE). Streaming is optional and is used to update the SDK with the latest data without refreshing the page."}
+//       </Text>
+//       <Text as="div" size="2" weight="regular" mb="2">
+//         <div className="font-semibold mb-0.5">Streaming host:</div>
+//         <code className="text-gold-11">{streamingHost || "None"}</code>
+//       </Text>
+//       <Text as="div" size="2" weight="regular">
+//         <div className="font-semibold mb-0.5">Client Key:</div>
+//         <code className="text-gold-11">{clientKey || "None"}</code>
+//       </Text>
+//       <Text as="div" size="2" weight="regular" mt="2">
+//         <div className="font-semibold">Streaming host request headers:</div>
+//         <div className="mt-0.5">
+//           <code className="text-gold-11">
+//             {JSON.stringify(streamingHostRequestHeaders) || "None"}
+//           </code>
+//         </div>
+//       </Text>
+//     </>
+//   );
+// }
 
 function payloadPanel({ hasPayload, payload }: SDKHealthCheckResult) {
   return (

@@ -10,10 +10,9 @@ export default function LogsTab() {
   const { isResponsive, isTiny } = useResponsiveContext();
 
   const [currentTab, setCurrentTab] = useTabState("currentTab", "logs");
-  const [logEvents, setLogEvents] = useTabState<LogUnionWithSource[] | undefined>(
-    "logEvents",
-    undefined,
-  );
+  const [logEvents, setLogEvents] = useTabState<
+    LogUnionWithSource[] | undefined
+  >("logEvents", undefined);
 
   return (
     <div

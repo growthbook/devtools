@@ -9,7 +9,10 @@ export interface FlattenedLogEvent {
   clientKey?: string;
 }
 export type LogType = LogUnion["logType"];
-export type LogUnionWithSource = LogUnion & { source?: string; clientKey?: string; };
+export type LogUnionWithSource = LogUnion & {
+  source?: string;
+  clientKey?: string;
+};
 
 export function reshapeEventLog(evt: LogUnionWithSource): FlattenedLogEvent {
   switch (evt.logType) {

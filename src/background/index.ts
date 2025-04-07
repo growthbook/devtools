@@ -177,10 +177,11 @@ const UpdateTabIconBasedOnSDK = (
   const { data } = message;
   const status = getSdkStatus(data);
   if (!tabId) tabId = data?.tabId;
+  const numExternalSdks = Object.keys(data.externalSdks || {}).length;
 
   let title = "GrowthBook DevTools";
 
-  if (data.sdkFound) {
+  if (data.sdkFound || numExternalSdks) {
     if (status === "green") {
       chrome.action.setIcon({
         tabId,
@@ -286,21 +287,25 @@ export const isSameOrigin = (url: string, origin: string) => {
 export function getSdkStatus(
   sdkData: SDKHealthCheckResult,
 ): "green" | "yellow" | "red" {
+  const numExternalSdks = Object.keys(sdkData.externalSdks || {}).length;
   if (
-    (!sdkData.canConnect && !sdkData.hasPayload) ||
-    !sdkData.version ||
+    (!sdkData.canConnect && !sdkData.hasPayload && !numExternalSdks) ||
+    (!sdkData.version && !numExternalSdks) ||
     (sdkData.version &&
       paddedVersionString(sdkData.version) < paddedVersionString("0.30.0"))
   ) {
     return "red";
   }
   if (
-    !sdkData.canConnect ||
-    !sdkData.hasPayload ||
-    sdkData.trackingCallbackParams?.length !== 2 ||
-    !sdkData.payloadDecrypted ||
-    paddedVersionString(sdkData.version) <
-      paddedVersionString(latestMinorSdkVersion)
+    (!sdkData.canConnect && !numExternalSdks) ||
+    (sdkData.canConnect && !sdkData.hasPayload) ||
+    (!sdkData.hasTrackingCallback && !numExternalSdks) ||
+    (sdkData.hasTrackingCallback &&
+      sdkData.trackingCallbackParams?.length !== 2) ||
+    (sdkData.hasPayload && !sdkData.payloadDecrypted) ||
+    (paddedVersionString(sdkData.version) <
+      paddedVersionString(latestMinorSdkVersion) &&
+      !numExternalSdks)
   ) {
     return "yellow";
   }

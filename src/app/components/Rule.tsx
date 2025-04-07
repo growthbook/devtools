@@ -21,7 +21,6 @@ import {
   PiFlaskFill,
 } from "react-icons/pi";
 import { EvaluatedFeature } from "@/app/hooks/useGBSandboxEval";
-import { DebugLog } from "devtools";
 import DebugLogger from "@/app/components/DebugLogger";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { isDark, Theme } from "@/app";

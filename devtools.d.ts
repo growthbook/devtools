@@ -1,8 +1,8 @@
-import type {
+import {
   Experiment,
   FeatureDefinition,
   ExperimentOverride,
-  StickyAssignmentsDocument, FeatureApiResponse,
+  StickyAssignmentsDocument, FeatureApiResponse, Attributes,
 } from "@growthbook/growthbook";
 import {
   FetchVisualChangesetPayload,
@@ -238,7 +238,15 @@ export type BGTransformCopyMessage = {
   };
 };
 
-type SDKHealthCheckResult = {
+export type ExternalSdkInfo = {
+  apiHost: string;
+  clientKey: string;
+  version?: string;
+  payload?: FeatureApiResponse;
+  attributes?: Attributes;
+};
+
+export type SDKHealthCheckResult = {
   canConnect: boolean;
   hasPayload: boolean;
   hasClientKey?: boolean;
@@ -248,6 +256,7 @@ type SDKHealthCheckResult = {
   sdkFound?: boolean;
   sdkInjected?: boolean;
   sdkAutoInjected?: boolean;
+  externalSdks?: Record<string, ExternalSdkInfo>;
   clientKey?: string;
   isLoading?: boolean;
   payload?: Record<string, any>;

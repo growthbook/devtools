@@ -11,7 +11,7 @@ import type {
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import { Attributes } from "@growthbook/growthbook";
 
-type LogUnionWithSource = LogUnion & { source?: string; clientKey?: string; };
+type LogUnionWithSource = LogUnion & { source?: string; clientKey?: string };
 
 type StateObj = {
   attributes?: Record<string, any>;
@@ -22,7 +22,7 @@ type StateObj = {
   logs?: LogUnionWithSource[];
 };
 
-type EventSdkInfo = {
+type ExternalSdkInfo = {
   apiHost: string;
   clientKey: string;
   version?: string;
@@ -33,16 +33,20 @@ type EventSdkInfo = {
 type LogEvent = {
   logs: LogUnion[];
   source?: string;
-  sdkInfo?: EventSdkInfo;
+  sdkInfo?: ExternalSdkInfo;
 };
 
 declare global {
   interface Window {
     _growthbook?: GrowthBook;
     growthbook_config?: any;
-    _gbdebugEvents: LogEvent[] & { push: ((...events: LogEvent[]) => number) & { _patched?: boolean }; };
+    _gbdebugEvents: LogEvent[] & {
+      push: ((...events: LogEvent[]) => number) & { _patched?: boolean };
+    };
   }
 }
+
+const externalSdks: Record<string, ExternalSdkInfo> = {};
 
 function getValidGrowthBookInstance(cb: (gb: GrowthBook) => void) {
   if (!window._growthbook) return false;
@@ -58,6 +62,8 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
       canConnect: false,
       hasPayload: false,
       sdkFound: false,
+      externalSdks: externalSdks,
+      devModeEnabled: false,
       errorMessage: "SDK not found",
     });
   }, 5000);
@@ -132,7 +138,10 @@ function importLogs(logs: LogUnionWithSource[]) {
 
 function ingestLogEvent(event: LogEvent) {
   const sdkInfo = event.sdkInfo;
-  // todo: message devtools about other SDKs
+  if (sdkInfo) {
+    externalSdks[sdkInfo?.clientKey || "unknown"] = sdkInfo;
+    pushSdkHealthUpdate(window._growthbook);
+  }
   if (typeof sdkInfo?.attributes === "object" && sdkInfo.attributes !== null) {
     if (!window._growthbook) {
       updateTabState("attributes", sdkInfo.attributes);
@@ -183,7 +192,7 @@ function pushAppUpdates() {
 }
 
 async function pushSdkHealthUpdate(gb?: GrowthBook) {
-  const sdkData = await SdkHealthCheck(gb);
+  const sdkData = await sdkHealthCheck(gb);
   updateTabState("sdkData", sdkData);
   updateBackgroundSdk(sdkData);
 }
@@ -221,6 +230,8 @@ function clearInjectedSdk() {
     canConnect: false,
     hasPayload: false,
     sdkFound: false,
+    externalSdks: externalSdks,
+    devModeEnabled: false,
     errorMessage: "SDK not found",
   });
   updateTabState("features", {});
@@ -292,7 +303,7 @@ function setupListeners() {
   // Create the backend events array and listen to changes
   window._gbdebugEvents = window._gbdebugEvents || [];
   if (!window._gbdebugEvents.push._patched) {
-    window._gbdebugEvents.push = (...events: LogEvent[] ) => {
+    window._gbdebugEvents.push = (...events: LogEvent[]) => {
       events.forEach((event) => ingestLogEvent(event));
       return events.length;
     };
@@ -314,7 +325,9 @@ function updateFeatures(data: unknown) {
   if (!data) return;
   writeStateToCookie({ features: data });
   onGrowthBookLoad((gb) => {
-    gb.setForcedFeatures?.(new Map(Object.entries(data as Record<string, any>)));
+    gb.setForcedFeatures?.(
+      new Map(Object.entries(data as Record<string, any>)),
+    );
   });
 }
 
@@ -384,7 +397,7 @@ function updateTabState(property: string, value: unknown, append = false) {
   window.postMessage(
     {
       type: "UPDATE_TAB_STATE",
-      data: { property, value},
+      data: { property, value },
       append,
     },
     window.location.origin,
@@ -575,12 +588,13 @@ function subscribeToSdkChanges(
 
 let cachedHostRes: any = undefined;
 let cachedStreamingHostRes: any = undefined;
-async function SdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
+async function sdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   if (!gb) {
     return {
       canConnect: false,
       hasPayload: false,
       sdkFound: false,
+      externalSdks: externalSdks,
       devModeEnabled: false,
       errorMessage: "SDK not found",
     };
@@ -682,6 +696,7 @@ async function SdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     sdkFound: true,
     sdkInjected,
     sdkAutoInjected,
+    externalSdks: externalSdks,
     clientKey,
     payload,
     hasTrackingCallback,

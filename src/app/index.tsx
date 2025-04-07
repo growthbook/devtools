@@ -89,7 +89,11 @@ export const App = () => {
 
   useEffect(() => {
     window.setTimeout(() => {
-      if (!sdkDataRef.current.sdkFound) setCurrentTab("sdkDebug");
+      const numExternalSdks = Object.keys(
+        sdkDataRef.current.externalSdks || {},
+      ).length;
+      if (!sdkDataRef.current.sdkFound && !numExternalSdks)
+        setCurrentTab("sdkDebug");
     }, 800);
   }, []);
 

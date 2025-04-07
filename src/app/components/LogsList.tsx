@@ -1,4 +1,4 @@
-import {Box, Checkbox, Flex, Link, Text, Tooltip} from "@radix-ui/themes";
+import { Box, Checkbox, Flex, Link, Text, Tooltip } from "@radix-ui/themes";
 import React, { ReactNode, useMemo, useState } from "react";
 import useTabState from "../hooks/useTabState";
 import { useSearch } from "../hooks/useSearch";
@@ -9,7 +9,8 @@ import {
   PiArrowSquareInBold,
   PiCaretRightFill,
   PiFlagFill,
-  PiFlaskFill, PiXBold,
+  PiFlaskFill,
+  PiXBold,
 } from "react-icons/pi";
 import ValueField from "./ValueField";
 import clsx from "clsx";

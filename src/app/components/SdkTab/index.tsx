@@ -19,11 +19,12 @@ export const LEFT_PERCENT = 0.5;
 
 export const sdkItems = [
   "status",
+  "externalSdks",
   "version",
   "trackingCallback",
   "security",
   "stickyBucketing",
-  "streaming",
+  // "streaming",
   "payload",
   "logEvent",
   "onFeatureUsage",
@@ -40,6 +41,7 @@ export default function SdkTab() {
   const {
     sdkFound,
     sdkInjected,
+    externalSdks,
     version,
     canConnect,
     hasPayload,
@@ -53,6 +55,8 @@ export default function SdkTab() {
     usingStickyBucketing,
     streaming,
   } = useSdkData();
+
+  const numExternalSdks = Object.keys(externalSdks || {}).length;
 
   const decryptedStatus = payloadDecrypted ? "Decrypted" : "DecryptionError";
   const securityStatus = hasDecryptionKey
@@ -120,7 +124,7 @@ export default function SdkTab() {
           onClick={() => setSelectedItem("status")}
         >
           <ItemStatus
-            title="Status"
+            title="SDK Status"
             status={
               <div className="text-right leading-4">
                 {canConnectStatus}
@@ -132,6 +136,22 @@ export default function SdkTab() {
               </div>
             }
             color={canConnectStatusColor}
+          />
+        </div>
+
+        <div
+          key={`sdkTab_sdkItems_externalSdks`}
+          className={clsx("itemCard flex items-center justify-between", {
+            selected: selectedItem === "externalSdks",
+          })}
+          onClick={() => setSelectedItem("externalSdks")}
+        >
+          <ItemStatus
+            title="Back-end SDKs"
+            status={
+              <div className="text-right leading-4">{numExternalSdks}</div>
+            }
+            color="gray"
           />
         </div>
 
@@ -198,15 +218,15 @@ export default function SdkTab() {
               />
             </div>
 
-            <div
-              key={`sdkTab_sdkItems_streaming`}
-              className={clsx("itemCard flex items-center justify-between", {
-                selected: selectedItem === "streaming",
-              })}
-              onClick={() => setSelectedItem("streaming")}
-            >
-              <ItemStatus title="Streaming" status={streaming} color="gray" />
-            </div>
+            {/*<div*/}
+            {/*  key={`sdkTab_sdkItems_streaming`}*/}
+            {/*  className={clsx("itemCard flex items-center justify-between", {*/}
+            {/*    selected: selectedItem === "streaming",*/}
+            {/*  })}*/}
+            {/*  onClick={() => setSelectedItem("streaming")}*/}
+            {/*>*/}
+            {/*  <ItemStatus title="Streaming" status={streaming} color="gray" />*/}
+            {/*</div>*/}
 
             <div
               key={`sdkTab_sdkItems_payload`}
@@ -291,22 +311,25 @@ function ItemStatus({
 export function getSdkStatus(
   sdkData: SDKHealthCheckResult,
 ): "green" | "yellow" | "red" {
+  const numExternalSdks = Object.keys(sdkData.externalSdks || {}).length;
   if (
-    (!sdkData.canConnect && !sdkData.hasPayload) ||
-    !sdkData.version ||
+    (!sdkData.canConnect && !sdkData.hasPayload && !numExternalSdks) ||
+    (!sdkData.version && !numExternalSdks) ||
     (sdkData.version &&
       paddedVersionString(sdkData.version) < paddedVersionString("0.30.0"))
   ) {
     return "red";
   }
   if (
-    !sdkData.canConnect ||
-    !sdkData.hasPayload ||
-    sdkData.trackingCallbackParams?.length !== 2 ||
-    !sdkData.payloadDecrypted ||
-    (sdkData.version &&
-      paddedVersionString(sdkData.version) <
-        paddedVersionString(latestMinorSdkVersion))
+    (!sdkData.canConnect && !numExternalSdks) ||
+    (sdkData.canConnect && !sdkData.hasPayload) ||
+    (!sdkData.hasTrackingCallback && !numExternalSdks) ||
+    (sdkData.hasTrackingCallback &&
+      sdkData.trackingCallbackParams?.length !== 2) ||
+    (sdkData.hasPayload && !sdkData.payloadDecrypted) ||
+    (paddedVersionString(sdkData.version) <
+      paddedVersionString(latestMinorSdkVersion) &&
+      !numExternalSdks)
   ) {
     return "yellow";
   }

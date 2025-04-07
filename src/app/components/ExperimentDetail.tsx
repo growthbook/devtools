@@ -10,9 +10,10 @@ import {
 import {
   PiArrowSquareOut,
   PiCaretRightFill,
-  PiFlagFill, PiInfo,
+  PiFlagFill,
+  PiInfo,
   PiLinkBold,
-  PiMonitorBold,
+  PiDesktopFill,
   PiXBold,
 } from "react-icons/pi";
 import ValueField from "@/app/components/ValueField";
@@ -22,7 +23,7 @@ import {
   getVariationColor,
 } from "@/app/components/Rule";
 import * as Accordion from "@radix-ui/react-accordion";
-import React, {CSSProperties, useEffect, useMemo, useState} from "react";
+import React, { CSSProperties, useEffect, useMemo, useState } from "react";
 import {
   ExperimentWithFeatures,
   HEADER_H,
@@ -36,8 +37,11 @@ import { AutoExperimentVariation, isURLTargeted } from "@growthbook/growthbook";
 import clsx from "clsx";
 import DebugLogger, { DebugLogAccordion } from "@/app/components/DebugLogger";
 import { TbEyeSearch } from "react-icons/tb";
-import {Evaluation, EvaluationSourceViewer} from "@/app/components/FeatureDetail";
-import {LogUnionWithSource} from "@/app/utils/logs";
+import {
+  Evaluation,
+  EvaluationSourceViewer,
+} from "@/app/components/FeatureDetail";
+import { LogUnionWithSource } from "@/app/utils/logs";
 
 export default function ExperimentDetail({
   selectedEid,
@@ -87,12 +91,17 @@ export default function ExperimentDetail({
     undefined,
   );
 
-  const [viewEvaluationSource, setViewEvaluationSource] = useState<string | undefined>(undefined);
+  const [viewEvaluationSource, setViewEvaluationSource] = useState<
+    string | undefined
+  >(undefined);
   const evaluations = useMemo(() => {
     if (!selectedFid) return [];
     const evaluationsMap: Record<string, Evaluation> = {};
     let logs = [...(logEvents || [])]
-      .filter((log) => log.logType === "experiment" && log.experiment.key === selectedEid)
+      .filter(
+        (log) =>
+          log.logType === "experiment" && log.experiment.key === selectedEid,
+      )
       .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     logs.forEach((log) => {
       const key = (log.source || "local") + "__" + (log.clientKey || "");
@@ -103,14 +112,14 @@ export default function ExperimentDetail({
             source: log.source || "front-end",
             clientKey: log.clientKey,
             timestamp: log.timestamp,
-          }
+          },
         };
       }
     });
     return Object.entries(evaluationsMap).sort((a, b) => {
       if (a[0] === "local") return 1;
-      return (a[0].localeCompare(b[0]));
-    })
+      return a[0].localeCompare(b[0]);
+    });
   }, [logEvents, selectedEid]);
 
   useEffect(() => {
@@ -120,7 +129,11 @@ export default function ExperimentDetail({
     if (viewEvaluationSource === undefined && evaluations.length) {
       setViewEvaluationSource(evaluations?.[0]?.[0]);
     }
-    if (viewEvaluationSource !== undefined && evaluations.length && !evaluations.find((e) => e[0] === viewEvaluationSource)) {
+    if (
+      viewEvaluationSource !== undefined &&
+      evaluations.length &&
+      !evaluations.find((e) => e[0] === viewEvaluationSource)
+    ) {
       setViewEvaluationSource(evaluations?.[0]?.[0]);
     }
   }, [selectedEid, viewEvaluationSource, evaluations]);
@@ -255,14 +268,20 @@ export default function ExperimentDetail({
             <div className="flex items-center justify-between my-2">
               <div className="label font-semibold">
                 <Tooltip
-                  content={!overrideExperiment ?
-                    "Value is simulated by DevTools" :
-                    "Value is overridden and is applied to on-page SDK(s)"
+                  content={
+                    !overrideExperiment
+                      ? "Value is simulated by DevTools"
+                      : "Value is overridden and is applied to on-page SDK(s)"
                   }
                 >
                   <span>
-                    {overrideExperiment ? "Forced variation" : "Current variation"}
-                    <PiInfo size={12} className="text-indigo-9 inline-block ml-1" />
+                    {overrideExperiment
+                      ? "Forced variation"
+                      : "Current variation"}
+                    <PiInfo
+                      size={12}
+                      className="text-indigo-9 inline-block ml-1"
+                    />
                   </span>
                 </Tooltip>
               </div>
@@ -374,7 +393,7 @@ export default function ExperimentDetail({
             ) : null}
             {types?.visual ? (
               <div className="text-sm">
-                <PiMonitorBold className="inline-block mr-1" />
+                <PiDesktopFill className="inline-block mr-1" />
                 Visual Editor
               </div>
             ) : null}
@@ -464,7 +483,11 @@ export default function ExperimentDetail({
               >
                 <Accordion.Item value="feature-definition">
                   <Accordion.Trigger className="trigger mb-0.5">
-                    <Link size="2" role="button" className="hover:underline decoration-violet-a6">
+                    <Link
+                      size="2"
+                      role="button"
+                      className="hover:underline decoration-violet-a6"
+                    >
                       <PiCaretRightFill className="caret mr-0.5" size={12} />
                       Full experiment definition
                     </Link>
