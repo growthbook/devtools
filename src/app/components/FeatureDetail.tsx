@@ -973,7 +973,7 @@ export function EvaluationSourceViewer({
             },
           )}
         >
-          {isBoolean && (
+          {isBoolean && !isExperiment ? (
             <PiCircleFill
               size={10}
               className={clsx("inline-block mr-0.5 -mt-0.5", {
@@ -981,7 +981,7 @@ export function EvaluationSourceViewer({
                 "text-teal-600": valueStr === "true",
               })}
             />
-          )}
+          ) : null}
           {!isExperiment ? valueStr : null}
           {isExperiment ? variationId : null}
         </div>

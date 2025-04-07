@@ -209,12 +209,20 @@ export default function LogsList({
                         xsTextSizeClass,
                       )}
                     >
-                      {evt.source ? (
+                      {evt.context.source ? (
                         <Tooltip
                           content={
-                            <>
-                              Imported from: <strong>{evt.source}</strong>
-                            </>
+                            <div>
+                              <div>Imported from:</div>
+                              <div className="mt-1">
+                                <strong>{evt.context.source}</strong>
+                              </div>
+                              {evt.context.clientKey ? (
+                                <div className="text-2xs">
+                                  ({evt.context.clientKey})
+                                </div>
+                              ) : null}
+                            </div>
                           }
                         >
                           <span>
@@ -260,11 +268,7 @@ export default function LogsList({
                 </Accordion.Trigger>
                 <Accordion.Content>
                   <ValueField
-                    value={
-                      evt.source
-                        ? { eventSource: evt.source, ...evt.details }
-                        : evt.details
-                    }
+                    value={evt.details}
                     valueType="json"
                     jsonStringifySpaces={2}
                     maxHeight={120}

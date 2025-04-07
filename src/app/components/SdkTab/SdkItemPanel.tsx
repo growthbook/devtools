@@ -147,7 +147,7 @@ export default function SdkItemPanel({
         <Flex className="content" flexGrow="1" direction="column">
           <Flex direction="column" flexGrow="1" justify="between" align="start">
             <div
-              className="my-2"
+              className="my-2 w-full"
               style={{
                 maxWidth: `calc(${widthPercent * 100}vw - 32px)`,
               }}
@@ -399,14 +399,16 @@ function statusPanel({
           ) : null}
 
           <div className="mb-4">
-            <Text as="div" size="2" weight="regular" mb="2">
-              <div className="font-semibold mb-0.5">Host:</div>
-              <code className="text-gold-11">{apiHost || "None"}</code>
-            </Text>
-            <Text as="div" size="2" weight="regular" mb="2">
-              <div className="font-semibold mb-0.5">Client Key:</div>
-              <code className="text-gold-11">{clientKey || "None"}</code>
-            </Text>
+            <div className="box mb-2">
+              <Text as="div" size="2" weight="regular" mb="2">
+                <div className="font-semibold mb-0.5">Host:</div>
+                <code className="text-gold-11">{apiHost || "None"}</code>
+              </Text>
+              <Text as="div" size="2" weight="regular">
+                <div className="font-semibold mb-0.5">Client Key:</div>
+                <code className="text-gold-11">{clientKey || "None"}</code>
+              </Text>
+            </div>
             {errorMessage ? (
               <Text as="div" size="2" weight="light" color="orange" mt="2">
                 <PiWarningFill className="inline-block mr-2" />
@@ -523,8 +525,8 @@ function externalSdksPanel({ externalSdks }: SDKHealthCheckResult) {
             {numExternalSdks !== 1 ? "s" : ""} detected.
           </Text>
           <div className="my-3">
-            {Object.values(externalSdks || {}).map((sdkInfo) => (
-              <div className="box w-full">
+            {Object.values(externalSdks || {}).map((sdkInfo, i) => (
+              <div className="box" key={i}>
                 <Text as="div" size="2" weight="regular" mb="2">
                   <div className="font-semibold mb-0.5">Host:</div>
                   <code className="text-gold-11">
@@ -537,7 +539,7 @@ function externalSdksPanel({ externalSdks }: SDKHealthCheckResult) {
                     {sdkInfo.clientKey || "None"}
                   </code>
                 </Text>
-                <Text as="div" size="2" weight="regular" mb="2">
+                <Text as="div" size="2" weight="regular">
                   <div className="font-semibold mb-0.5">SDK Version:</div>
                   <code className="text-gold-11">
                     {sdkInfo.version || "unknown"}
@@ -569,8 +571,7 @@ function externalSdksPanel({ externalSdks }: SDKHealthCheckResult) {
             </Text>
             <Text as="div" size="2" weight="regular" mb="3">
               To apply these overrides in a back-end SDK and to display back-end
-              SDK event logs, follow our DevTools for Back End documentation
-              below.
+              SDK event logs, see the documentation below.
             </Text>
           </Accordion.Content>
         </Accordion.Item>
