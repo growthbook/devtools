@@ -74,7 +74,7 @@ const doclinks: Record<SdkItem, string | undefined> = {
   status:
     "https://docs.growthbook.io/quick-start#step-2-integrate-growthbook-into-your-application",
   externalSdks:
-    "https://docs.growthbook.io/tools/chrome-extension#backend-debugging",
+    "https://docs.growthbook.io/tools/chrome-extension#back-end-debugging",
   version:
     "https://github.com/growthbook/growthbook/blob/main/packages/shared/src/sdk-versioning/CAPABILITIES.md",
   trackingCallback:
