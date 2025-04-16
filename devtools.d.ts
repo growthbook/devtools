@@ -78,6 +78,16 @@ export type RequestRefreshMessage = {
   type: "GB_REQUEST_REFRESH";
 };
 
+export type InjectSdkMessage = {
+  type: "GB_INJECT_SDK";
+  clientKey: string;
+  apiHost: string;
+  autoInject: boolean;
+};
+export type ClearInjectedSdkMessage = {
+  type: "GB_CLEAR_INJECTED_SDK";
+};
+
 export type SetOverridesMessage = {
   type: "GB_SET_OVERRIDES";
   variations: Record<string, number>;
@@ -200,6 +210,8 @@ export type Message =
   | PullOverrides
   | SetPayload
   | PatchPayload
+  | InjectSdkMessage
+  | ClearInjectedSdkMessage
   | CopyToClipboard;
 
 export type BGLoadVisualChangsetMessage = {

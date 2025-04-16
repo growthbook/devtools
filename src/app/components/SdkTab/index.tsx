@@ -205,16 +205,6 @@ export default function SdkTab() {
               />
             </div>
 
-            {/*<div*/}
-            {/*  key={`sdkTab_sdkItems_streaming`}*/}
-            {/*  className={clsx("itemCard flex items-center justify-between", {*/}
-            {/*    selected: selectedItem === "streaming",*/}
-            {/*  })}*/}
-            {/*  onClick={() => setSelectedItem("streaming")}*/}
-            {/*>*/}
-            {/*  <ItemStatus title="Streaming" status={streaming} color="gray" />*/}
-            {/*</div>*/}
-
             <div
               key={`sdkTab_sdkItems_payload`}
               className={clsx("itemCard flex items-center justify-between", {
