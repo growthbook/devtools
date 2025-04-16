@@ -40,7 +40,6 @@ export default function SdkTab() {
 
   const {
     sdkFound,
-    sdkInjected,
     externalSdks,
     version,
     canConnect,
@@ -53,7 +52,6 @@ export default function SdkTab() {
     usingOnFeatureUsage,
     isRemoteEval,
     usingStickyBucketing,
-    streaming,
   } = useSdkData();
 
   const numExternalSdks = Object.keys(externalSdks || {}).length;
@@ -125,16 +123,7 @@ export default function SdkTab() {
         >
           <ItemStatus
             title="SDK Status"
-            status={
-              <div className="text-right leading-4">
-                {canConnectStatus}
-                {sdkInjected ? (
-                  <div className="text-xs text-gray-10">
-                    (injected by DevTools)
-                  </div>
-                ) : null}
-              </div>
-            }
+            status={canConnectStatus}
             color={canConnectStatusColor}
           />
         </div>
@@ -148,9 +137,7 @@ export default function SdkTab() {
         >
           <ItemStatus
             title="Back-end SDKs"
-            status={
-              <div className="text-right leading-4">{numExternalSdks}</div>
-            }
+            status={numExternalSdks}
             color="gray"
           />
         </div>

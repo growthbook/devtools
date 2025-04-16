@@ -85,14 +85,6 @@ function init() {
   // reset the state cookie - will be repopulated if devtools has state set
   writeStateToCookie({}, true);
 
-  // check if we should inject a debugging SDK
-  const injectSdkConfig = getCookie<{ apiHost: string; clientKey: string }>(
-    "_gbInjectSdk",
-  );
-  if (injectSdkConfig) {
-    injectSdk({ ...injectSdkConfig, fromCookie: true });
-  }
-
   pushAppUpdates();
   const queryState = getQueryState();
   if (!queryState) {
@@ -199,53 +191,6 @@ async function pushSdkHealthUpdate(gb?: GrowthBook) {
   updateBackgroundSdk(sdkData);
 }
 
-function injectSdk(message: any) {
-  if (window._growthbook) return;
-  const { apiHost, clientKey, autoInject } = message;
-  const script = document.createElement("script");
-  script.id = "injected_sdk";
-  script.dataset.apiHost = apiHost;
-  script.dataset.clientKey = clientKey;
-  script.src =
-    "https://cdn.jsdelivr.net/npm/@growthbook/growthbook/dist/bundles/auto.min.js";
-  document.head.appendChild(script);
-  if (autoInject) {
-    const payloadObj = { apiHost, clientKey };
-    const cookiePayload = encodeURIComponent(JSON.stringify(payloadObj));
-    document.cookie = `_gbInjectSdk=${cookiePayload}; path=/; domain=${window.location.hostname}`;
-  }
-
-  onGrowthBookLoad((gb) => {
-    if (!gb) return;
-    // @ts-expect-error
-    gb.injected = true;
-    // @ts-expect-error
-    gb.autoInjected = message.autoInject || message.fromCookie;
-    pushAppUpdates();
-  });
-}
-
-function clearInjectedSdk() {
-  if (!window._growthbook) return;
-  document.cookie = `_gbInjectSdk=; Max-Age=0; path=/; domain=${window.location.hostname}`;
-  updateTabState("sdkData", {
-    canConnect: false,
-    hasPayload: false,
-    sdkFound: false,
-    externalSdks: externalSdks,
-    devModeEnabled: false,
-    errorMessage: "SDK not found",
-  });
-  updateTabState("features", {});
-  updateTabState("experiments", []);
-  updateTabState("attributes", {});
-  updateTabState("forcedFeatures", new Map());
-  updateTabState("forcedVariations", {});
-  updateTabState("overriddenAttributes", {});
-  writeStateToCookie({}, true);
-  window.location.reload();
-}
-
 function setupListeners() {
   // listen for state change events that will affect the SDK
   window.addEventListener("message", (event) => {
@@ -267,12 +212,6 @@ function setupListeners() {
         break;
       case "GB_REQUEST_REFRESH":
         pushAppUpdates();
-        break;
-      case "GB_INJECT_SDK":
-        injectSdk(message);
-        break;
-      case "GB_CLEAR_INJECTED_SDK":
-        clearInjectedSdk();
         break;
       case "COPY_TO_CLIPBOARD":
         if (message.value) {
@@ -606,11 +545,6 @@ async function sdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
 
   const devModeEnabled = gbContext?.enableDevMode;
 
-  // @ts-expect-error
-  const sdkInjected = !!gb?.injected;
-  // @ts-expect-error
-  const sdkAutoInjected = !!gb?.autoInjected;
-
   const [apiHost, clientKey] = gb.getApiInfo();
 
   const payload = gb.getDecryptedPayload?.() || {
@@ -696,8 +630,6 @@ async function sdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     version: gb?.version,
     hasWindowConfig: !!window?.growthbook_config,
     sdkFound: true,
-    sdkInjected,
-    sdkAutoInjected,
     externalSdks: externalSdks,
     clientKey,
     payload,
