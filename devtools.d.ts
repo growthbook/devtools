@@ -254,8 +254,6 @@ export type SDKHealthCheckResult = {
   version?: string;
   hasWindowConfig?: boolean;
   sdkFound?: boolean;
-  sdkInjected?: boolean;
-  sdkAutoInjected?: boolean;
   externalSdks?: Record<string, ExternalSdkInfo>;
   clientKey?: string;
   isLoading?: boolean;

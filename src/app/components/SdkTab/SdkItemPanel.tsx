@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   Button,
   Callout,
-  Dialog,
   Flex,
   IconButton,
   Link,
@@ -14,26 +13,18 @@ import {
   PiArrowsClockwise,
   PiArrowSquareOut,
   PiCaretRightFill,
-  PiCode,
-  PiCodeBold,
   PiInfoBold,
   PiWarningFill,
   PiWarningOctagonFill,
-  PiX,
   PiXBold,
 } from "react-icons/pi";
 import * as Accordion from "@radix-ui/react-accordion";
 import { useResponsiveContext } from "@/app/hooks/useResponsive";
 import { SdkItem } from "./index";
 import useSdkData from "@/app/hooks/useSdkData";
-import {
-  ClearInjectedSdkMessage,
-  InjectSdkMessage,
-  SDKHealthCheckResult,
-} from "devtools";
+import { SDKHealthCheckResult } from "devtools";
 import { getActiveTabId } from "@/app/hooks/useTabState";
 import { paddedVersionString } from "@growthbook/growthbook";
-import InjectSdkForm from "@/app/components/InjectSdk";
 
 const panelTitles: Record<SdkItem, string> = {
   status: "SDK Status",
@@ -199,15 +190,12 @@ function ItemPanel({
 
 function statusPanel({
   sdkFound,
-  sdkInjected,
-  sdkAutoInjected,
   hasPayload,
   canConnect,
   apiHost,
   clientKey,
   errorMessage,
 }: SDKHealthCheckResult) {
-  const [injectModalOpen, setInjectModalOpen] = useState(false);
   const [activeTabId, setActiveTabId] = useState<number | undefined>(undefined);
   const [refreshingSdk, setRefreshingSdk] = useState<boolean>(true);
 
@@ -225,51 +213,6 @@ function statusPanel({
         await chrome.runtime.sendMessage({
           type: "GB_REQUEST_REFRESH",
         });
-      }
-    }
-  };
-
-  const injectSdk = async ({
-    apiHost,
-    clientKey,
-    autoInject,
-  }: {
-    apiHost: string;
-    clientKey: string;
-    autoInject: boolean;
-  }) => {
-    setRefreshingSdk(true);
-    window.setTimeout(() => setRefreshingSdk(false), 500);
-    const msg: InjectSdkMessage = {
-      type: "GB_INJECT_SDK",
-      apiHost,
-      clientKey,
-      autoInject,
-    };
-    const activeTabId = await getActiveTabId();
-    setActiveTabId(activeTabId);
-    if (activeTabId) {
-      if (chrome?.tabs) {
-        await chrome.tabs.sendMessage(activeTabId, msg);
-      } else {
-        await chrome.runtime.sendMessage(msg);
-      }
-    }
-  };
-
-  const clearInjectedSdk = async () => {
-    setRefreshingSdk(true);
-    window.setTimeout(() => setRefreshingSdk(false), 500);
-    const msg: ClearInjectedSdkMessage = {
-      type: "GB_CLEAR_INJECTED_SDK",
-    };
-    const activeTabId = await getActiveTabId();
-    setActiveTabId(activeTabId);
-    if (activeTabId) {
-      if (chrome?.tabs) {
-        await chrome.tabs.sendMessage(activeTabId, msg);
-      } else {
-        await chrome.runtime.sendMessage(msg);
       }
     }
   };
@@ -314,17 +257,6 @@ function statusPanel({
                 <PiArrowsClockwise /> Refresh DevTools
               </Button>
             </div>
-
-            <div className="mt-2">
-              <Button
-                variant="outline"
-                size="2"
-                onClick={() => setInjectModalOpen(true)}
-                disabled={refreshingSdk}
-              >
-                <PiCode /> Inject Debugging SDK...
-              </Button>
-            </div>
           </div>
         </>
       ) : (
@@ -334,39 +266,6 @@ function statusPanel({
               ? "The SDK is connected to the GrowthBook API."
               : "The SDK is not connected to the GrowthBook API."}
           </Text>
-          {sdkInjected ? (
-            <Callout.Root color="gray" size="1" className="my-2 !flex">
-              <Callout.Icon>
-                <PiCodeBold />
-              </Callout.Icon>
-              <div className="w-full">
-                <Text as="div" size="2">
-                  This SDK was injected by DevTools.
-                </Text>
-                {sdkAutoInjected ? (
-                  <div className="text-xs leading-4 mt-1">
-                    Automatically injected on all page loads.
-                  </div>
-                ) : null}
-                <div className="text-right">
-                  {!refreshingSdk ? (
-                    <Link
-                      size="1"
-                      href="#"
-                      role="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        clearInjectedSdk();
-                      }}
-                    >
-                      <PiXBold className="inline-block mr-1" />
-                      Remove SDK
-                    </Link>
-                  ) : null}
-                </div>
-              </div>
-            </Callout.Root>
-          ) : null}
           {!canConnect && hasPayload ? (
             <Callout.Root color="violet" size="1" className="mt-2 mb-4">
               <Callout.Icon>
@@ -481,30 +380,6 @@ function statusPanel({
           </Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>
-
-      <Dialog.Root
-        open={injectModalOpen}
-        onOpenChange={(o) => setInjectModalOpen(o)}
-      >
-        <Dialog.Content className="ModalBody">
-          <Dialog.Title>Inject a Debug SDK</Dialog.Title>
-          <InjectSdkForm
-            injectSdk={injectSdk}
-            close={() => setInjectModalOpen(false)}
-          />
-          <Dialog.Close style={{ position: "absolute", top: 5, right: 5 }}>
-            <IconButton
-              color="gray"
-              highContrast
-              size="1"
-              variant="outline"
-              radius="full"
-            >
-              <PiX size={20} />
-            </IconButton>
-          </Dialog.Close>
-        </Dialog.Content>
-      </Dialog.Root>
     </>
   );
 }
