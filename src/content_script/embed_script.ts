@@ -25,6 +25,7 @@ type StateObj = {
 type ExternalSdkInfo = {
   apiHost: string;
   clientKey: string;
+  source?: string;
   version?: string;
   payload?: FeatureApiResponse;
   attributes?: Attributes;
@@ -32,7 +33,6 @@ type ExternalSdkInfo = {
 
 type LogEvent = {
   logs: LogUnion[];
-  source?: string;
   sdkInfo?: ExternalSdkInfo;
 };
 
@@ -124,10 +124,11 @@ function hydrateApp(state: StateObj) {
   });
 }
 
-function importLogs(logs: LogUnionWithSource[]) {
+function importLogs(logs: LogUnionWithSource[], sdkInfo?: ExternalSdkInfo) {
   const logsWithSource = logs.map((log: any) => ({
     ...log,
-    source: log.source ? log.source : "external",
+    source: sdkInfo?.source || log.source || "external",
+    clientKey: sdkInfo?.clientKey || log.clientKey,
   }));
   updateTabState("logEvents", logsWithSource, true);
 }
@@ -151,7 +152,7 @@ function ingestLogEvent(event: LogEvent) {
       patchPayload(sdkInfo.payload);
     }
   }
-  importLogs(event.logs);
+  importLogs(event.logs, event?.sdkInfo);
 }
 
 function pushAppUpdates() {
