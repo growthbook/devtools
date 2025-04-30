@@ -64,6 +64,10 @@ Some notes
 
 ## Changelog
 
+*1.2.2* (2025-04-30)
+- Support for safe rollouts
+- Align back-end interfaces with JS SDK ^1.5.0
+
 *1.2.1* (2025-04-16)
 - Support for backend SDK debugging (overrides, logs)
 - Feature and Experiment views now show both simulated and live evaluations when available
