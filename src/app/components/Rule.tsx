@@ -25,7 +25,7 @@ import DebugLogger from "@/app/components/DebugLogger";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { isDark, Theme } from "@/app";
 
-type RuleType = "force" | "rollout" | "experiment" | "prerequisite";
+type RuleType = "force" | "rollout" | "experiment" | "prerequisite" | "safe-rollout";
 
 const RULE_MATCHED_LOGS = [
   "Force",
@@ -108,14 +108,20 @@ export default function Rule({
     namespace,
   } = rule;
   const key = rule.key ?? fid;
-  let ruleType: RuleType = variations
-    ? "experiment"
-    : "coverage" in rule
-      ? "rollout"
-      : rule?.parentConditions?.some((p) => p.gate)
-        ? "prerequisite"
-        : "force";
-  const ruleName = upperFirst(ruleType) + " rule";
+  let ruleType: RuleType =
+    rule?.key?.startsWith("srk_")
+      ? "safe-rollout"
+      : variations
+        ? "experiment"
+        : "coverage" in rule
+        ? "rollout"
+        : rule?.parentConditions?.some((p) => p.gate)
+          ? "prerequisite"
+          : "force";
+  const ruleName =
+    ruleType === "safe-rollout"
+      ? "Safe Rollout"
+      : upperFirst(ruleType) + " rule";
 
   const valueActive =
     JSON.stringify(evaluatedFeature?.result?.value) === JSON.stringify(force);
@@ -174,7 +180,7 @@ export default function Rule({
                   />
                 </div>
               ) : null}
-              {ruleType === "experiment" && (
+              {ruleType === "experiment" || ruleType === "safe-rollout" && (
                 <ExperimentRule
                   variations={variations}
                   weights={weights}

@@ -51,6 +51,7 @@ export default function ExperimentsTab() {
 
   // de-dupe
   const allExperiments = useMemo(() => {
+
     const merged: ExperimentWithFeatures[] = [
       ...experiments,
       ...featureExperiments,
@@ -58,6 +59,9 @@ export default function ExperimentsTab() {
     const seenEids = new Set<string>();
     const allExperiments: ExperimentWithFeatures[] = [];
     merged.forEach((exp) => {
+      //scrub safe rollout from experiments
+      if (exp.key.startsWith("srk_")) return;
+      
       if ("changeId" in exp) {
         // changeId experiments are already de-duped
         allExperiments.push({ ...exp });

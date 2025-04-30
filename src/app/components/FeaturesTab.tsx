@@ -438,6 +438,7 @@ export function getFeatureDetails({
 
   const linkedExperiments = (feature?.rules || [])
     .filter((rule) => rule.variations)
+    .filter((rule => !rule.key?.startsWith("srk_")))
     .map((rule) => ({
       key: rule.key ?? fid,
       ...rule,
