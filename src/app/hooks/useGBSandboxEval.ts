@@ -152,8 +152,10 @@ export default function useGBSandboxEval() {
           if (ctx?.rule?.meta && ctx?.id === fid) {
             ruleNo = ctx.rule.meta[0].ruleI;
           }
-          if (ctx?.exp?.meta && ctx.exp.key === fid) {
-            ruleNo = ctx.exp.meta[0].ruleI;
+          if (ctx?.exp?.meta) {
+            if (ctx.exp.key === fid || ctx.exp.key.startsWith("srk_")) {
+              ruleNo = ctx.exp.meta[0].ruleI;
+            }
           }
           ctx.i = ruleNo;
           d[1] = ctx;
