@@ -8,10 +8,15 @@
     "clean": "rimraf dist",
     "test": "npx jest",
     "style": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "build:chrome": "yarn clean && yarn build && cp public/manifest.chrome.json dist/manifest.json && cd dist && rm -f manifest.*.json",
-    "build:firefox": "yarn clean && yarn build && cp public/manifest.firefox.json dist/manifest.json && cd dist && rm -f manifest.*.json",
-    "package:chrome": "yarn clean && yarn build && cp public/manifest.chrome.json dist/manifest.json && cd dist && rm -f manifest.*.json && zip -r build.chrome.zip . && mv build.chrome.zip ../",
-    "package:firefox": "yarn clean && yarn build && cp public/manifest.firefox.json dist/manifest.json && cd dist && rm -f manifest.*.json && zip -r build.firefox.zip . && mv build.firefox.zip ../"
+    "build:production": "yarn clean && yarn build && yarn prepare:manifest",
+    "prepare:manifest": "cp public/manifest.$BROWSER.json dist/manifest.json && cd dist && rm -f manifest.*.json",
+    "package:zip": "cd dist && zip -r build.$BROWSER.$npm_package_version.zip . && mv build.$BROWSER-$npm_package_version.zip ../",
+    "build:chrome": "BROWSER=chrome yarn build:production",
+    "build:firefox": "BROWSER=firefox yarn build:production",
+    "build:all": "yarn build:chrome && yarn build:firefox",
+    "package:chrome": "BROWSER=chrome yarn build:chrome && yarn package:zip",
+    "package:firefox": "BROWSER=firefox yarn build:firefox && yarn package:zip",
+    "package:all": "yarn build:all && BROWSER=firefox yarn package:firefox && BROWSER=chrome yarn package:chrome"
   },
   "license": "MIT",
   "repository": {
