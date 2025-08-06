@@ -64,6 +64,9 @@ Some notes
 
 ## Changelog
 
+*1.2.3* (2025-08-06)
+- Bug fixes (experiment tab crashes, experiment rule details not always rendering)
+
 *1.2.2* (2025-04-30)
 - Support for safe rollouts
 - Align back-end interfaces with JS SDK ^1.5.0

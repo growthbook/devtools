@@ -61,7 +61,7 @@ export default function ExperimentsTab() {
     merged.forEach((exp) => {
       //scrub safe rollout from experiments
       if (exp.key.startsWith("srk_")) return;
-      
+
       if ("changeId" in exp) {
         // changeId experiments are already de-duped
         allExperiments.push({ ...exp });
@@ -450,9 +450,9 @@ export function getExperimentTypes(experiment: ExperimentWithFeatures) {
   return {
     features: experiment?.features,
     featureTypes: experiment?.featureTypes,
-    redirect: experiment?.variations?.some((v) => v.urlRedirect),
+    redirect: experiment?.variations?.some((v) => v?.urlRedirect),
     visual: experiment?.variations?.some(
-      (v) => v.domMutations?.length || v?.css || v?.js,
+      (v) => v?.domMutations?.length || v?.css || v?.js,
     ),
   };
 }

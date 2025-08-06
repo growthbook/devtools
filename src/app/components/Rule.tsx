@@ -180,7 +180,7 @@ export default function Rule({
                   />
                 </div>
               ) : null}
-              {ruleType === "experiment" || ruleType === "safe-rollout" && (
+              {ruleType === "experiment" || ruleType === "safe-rollout" ? (
                 <ExperimentRule
                   variations={variations}
                   weights={weights}
@@ -191,7 +191,7 @@ export default function Rule({
                   onApply={onApply}
                   evaluatedFeature={evaluatedFeature}
                 />
-              )}
+              ) : null}
               {ruleType === "rollout" && (
                 <>
                   <div className="mt-2 text-xs">
