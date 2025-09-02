@@ -33,6 +33,7 @@ import { Attributes } from "@growthbook/growthbook";
 import { AppMenu } from "@/app/components/AppMenu";
 import Share from "@/app/components/Share";
 import ImportExport from "@/app/components/ImportExport";
+import HoldoutsTab from "@/app/components/HoldoutsTab";
 
 export const MW = 1200; // max-width
 export const RESPONSIVE_W = 570; // small width mode
@@ -143,6 +144,12 @@ export const App = () => {
                   <Tabs.Trigger value="experiments">
                     <NavLabel
                       type="experiments"
+                      forcedVariations={forcedVariations}
+                    />
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="holdouts">
+                    <NavLabel
+                      type="holdouts"
                       forcedVariations={forcedVariations}
                     />
                   </Tabs.Trigger>
@@ -274,6 +281,8 @@ export const App = () => {
             <FeaturesTab />
           ) : currentTab === "experiments" ? (
             <ExperimentsTab />
+          ) : currentTab === "holdouts" ? (
+            <HoldoutsTab />
           ) : currentTab === "attributes" ? (
             <AttributesTab />
           ) : currentTab === "logs" ? (
@@ -355,7 +364,7 @@ function NavLabel({
   overriddenAttributes,
   sdkStatus,
 }: {
-  type: "features" | "experiments" | "attributes" | "logs" | "sdkDebug";
+  type: "features" | "experiments" | "holdouts" | "attributes" | "logs" | "sdkDebug";
   isDropdown?: boolean;
   forcedFeatures?: Record<string, any>;
   forcedVariations?: Record<string, any>;
@@ -397,6 +406,28 @@ function NavLabel({
       >
         <span className={!isDropdown ? (count ? "pr-3" : "px-1.5") : "pr-1"}>
           Experiments
+        </span>
+        {count ? (
+          <div className={!isDropdown ? "absolute right-0" : undefined}>
+            <Tooltip content={`${count} override${count !== 1 ? "s" : ""}`}>
+              <div className="p-1">
+                <PiCircleFill size={9} className="text-amber-500" />
+              </div>
+            </Tooltip>
+          </div>
+        ) : null}
+      </ConditionalWrapper>
+    );
+  }
+  if (type === "holdouts") {
+    const count = Object.keys(forcedVariations || {}).length;
+    return (
+      <ConditionalWrapper
+        condition={isDropdown}
+        wrapper={<div className="flex items-center" />}
+      >
+        <span className={!isDropdown ? (count ? "pr-3" : "px-1.5") : "pr-1"}>
+          Holdouts
         </span>
         {count ? (
           <div className={!isDropdown ? "absolute right-0" : undefined}>

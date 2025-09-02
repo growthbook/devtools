@@ -66,7 +66,9 @@ export default function FeaturesTab() {
 
   const allFeatures = useMemo(() => {
     let ret = [...reshapedFeatures];
+    ret = ret.filter((f) => !f.id.startsWith("$holdout"));
     Object.entries(forcedFeatures).forEach(([key, val]) => {
+      if (key.startsWith("$holdout")) return;
       if (!ret.find((f) => f.id === key)) {
         ret.push({
           id: key,
@@ -77,6 +79,7 @@ export default function FeaturesTab() {
     (logEvents || [])
       .filter((log) => log.logType === "feature")
       .forEach((log) => {
+        if (log.featureKey?.startsWith("$holdout")) return;
         if (log.featureKey && !ret.find((f) => f.id === log.featureKey)) {
           ret.push({
             id: log.featureKey,
