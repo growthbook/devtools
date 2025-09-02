@@ -24,6 +24,7 @@ import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatu
 import { useResponsiveContext } from "../hooks/useResponsive";
 import { TbEyeSearch } from "react-icons/tb";
 import { LogUnionWithSource } from "@/app/utils/logs";
+import HoldoutDetail from "@/app/components/HoldoutDetail";
 
 export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
   features?: string[];
@@ -35,7 +36,7 @@ export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
 export const LEFT_PERCENT = 0.4;
 export const HEADER_H = 40;
 
-export default function ExperimentsTab() {
+export default function HoldoutsTab() {
   const { isResponsive } = useResponsiveContext();
 
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
@@ -61,7 +62,7 @@ export default function ExperimentsTab() {
     merged.forEach((exp) => {
       //scrub safe rollout from experiments
       if (exp.key.startsWith("srk_")) return;
-      if (exp.key.startsWith("holdout")) return;
+      if (!exp.key.startsWith("holdout")) return;
       if ("changeId" in exp) {
         // changeId experiments are already de-duped
         allExperiments.push({ ...exp });
@@ -218,7 +219,7 @@ export default function ExperimentsTab() {
             className="inline-block"
             style={{ maxWidth: 200 }}
             autoFocus
-            placeholder="Search Holdouts"
+            placeholder="Search Experiments"
             searchInputProps={searchInputProps}
             clear={clearSearch}
           />
@@ -365,7 +366,7 @@ export default function ExperimentsTab() {
 
           {!firstLoad && !sortedFilteredExperiments.length ? (
             <div className="my-3 mx-4">
-              <em>No holdouts found.</em>
+              <em>No experiments found.</em>
               <div className="mt-1 text-sm">
                 See the{" "}
                 <Link
@@ -385,7 +386,7 @@ export default function ExperimentsTab() {
           ) : null}
         </div>
 
-        <ExperimentDetail
+        <HoldoutDetail
           selectedEid={selectedEid}
           setSelectedEid={setSelectedEid}
           selectedExperiment={selectedExperiment}
