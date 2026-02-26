@@ -45,7 +45,7 @@ interface ErrorDisplayProps {
   cspError: CSPError | null;
 }
 const ErrorDisplay: FC<ErrorDisplayProps> = ({ error, cspError }) => {
-  if (cspError && !cspError.isFatal && error !== "csp-error") {
+  if (cspError && !cspError.isFatal && !error) {
     return <CSPErrorDisplay cspError={cspError} />;
   }
 
