@@ -87,6 +87,7 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
             // not found, send empty message to signal unset
           });
         }
+        sendResponse({ success: true });
       }
       if (message.type === "setGlobalState") {
         await setState(message.property, message.value, message.persist);
