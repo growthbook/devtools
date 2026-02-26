@@ -11,12 +11,25 @@ type UseGhostElementHook = (args: {
 const cloneElement = (element: HTMLElement) => {
   const clone = element.cloneNode(true) as HTMLElement;
   const computedStyles = window.getComputedStyle(element);
+  const isSvgClone = clone instanceof SVGElement;
 
   for (let i = 0; i < computedStyles.length; i++) {
     const styleProperty = computedStyles[i];
+    const styleValue = computedStyles.getPropertyValue(styleProperty);
+
+    // Browsers may map these to SVG presentation attributes, where "auto"
+    // is invalid and logs errors like: <svg> attribute height: Expected length.
+    if (
+      isSvgClone &&
+      (styleProperty === "height" || styleProperty === "width") &&
+      styleValue.trim() === "auto"
+    ) {
+      continue;
+    }
+
     clone.style.setProperty(
       styleProperty,
-      computedStyles.getPropertyValue(styleProperty),
+      styleValue,
     );
   }
 
