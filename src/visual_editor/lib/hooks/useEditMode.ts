@@ -10,6 +10,7 @@ import { VisualEditorVariation } from "devtools";
 import { Attribute } from "@/visual_editor/components/AttributeEdit";
 import getSelector from "@/visual_editor/lib/getSelector";
 import { CONTAINER_ID } from "@/visual_editor";
+import { waitForHydrationSafe } from "@/visual_editor/lib/hydration";
 
 export const hoverAttributeName = "edit-mode-hover";
 
@@ -308,6 +309,18 @@ const useEditMode: UseEditModeHook = ({
   // upon every DOM mutation, we revert all changes and replay them to ensure
   // that the DOM is in the correct state
   const mutateRevert = useRef<(() => void) | null>(null);
+  const [hydrationSafe, setHydrationSafe] = useState(false);
+  const pendingMutationsRef = useRef<VisualEditorVariation["domMutations"]>();
+
+  useEffect(() => {
+    let cancelled = false;
+    waitForHydrationSafe().then(() => {
+      if (!cancelled) setHydrationSafe(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const runMutations = (
     domMutations?: VisualEditorVariation["domMutations"],
@@ -330,8 +343,19 @@ const useEditMode: UseEditModeHook = ({
   };
 
   useEffect(() => {
+    if (!hydrationSafe) {
+      pendingMutationsRef.current = variation?.domMutations;
+      return;
+    }
     runMutations(variation?.domMutations);
-  }, [variation]);
+  }, [variation, hydrationSafe]);
+
+  useEffect(() => {
+    if (!hydrationSafe) return;
+    if (!pendingMutationsRef.current) return;
+    runMutations(pendingMutationsRef.current);
+    pendingMutationsRef.current = undefined;
+  }, [hydrationSafe]);
 
   const hasTextInChildren = (element: Element) => {
     for (let child of element.children) {
