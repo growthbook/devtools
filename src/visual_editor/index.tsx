@@ -1,5 +1,7 @@
 import { debounce } from "lodash";
 import React, {
+  Component,
+  ErrorInfo,
   FC,
   useCallback,
   useEffect,
@@ -47,7 +49,7 @@ import DebugPanel from "./components/DebugPanel";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
-import { isGlobalObserverPaused, resumeGlobalObserver } from "dom-mutator";
+import { isGlobalObserverPaused } from "dom-mutator";
 
 const VisualEditor: FC<{}> = () => {
   const { x, y, setX, setY, parentStyles } = useFixedPositioning({
@@ -170,6 +172,10 @@ const VisualEditor: FC<{}> = () => {
       (selectedVariation?.css ? 1 : 0),
     [selectedVariation],
   );
+  const issueError = error || aiError;
+  const hasNonFatalCspWarning = !!cspError && !cspError.isFatal && !issueError;
+  const hasIssues = !!issueError || !!cspError;
+  const issuesCount = (issueError ? 1 : 0) + (cspError ? 1 : 0);
 
   useEffect(() => {
     if (!variations.length) return;
@@ -336,8 +342,14 @@ const VisualEditor: FC<{}> = () => {
           </VisualEditorSection>
         )}
 
-        {error || aiError ? (
-          <ErrorDisplay error={error || aiError} cspError={cspError} />
+        {hasIssues ? (
+          <VisualEditorSection
+            title={`Issues (${issuesCount})`}
+            isCollapsible
+            isExpanded={!hasNonFatalCspWarning}
+          >
+            <ErrorDisplay error={issueError} cspError={cspError} />
+          </VisualEditorSection>
         ) : null}
 
         <div className="m-4 text-center">
@@ -401,27 +413,160 @@ const VisualEditor: FC<{}> = () => {
   );
 };
 
+type VisualEditorErrorBoundaryProps = {
+  onRetry: () => void;
+  children: React.ReactNode;
+};
+type VisualEditorErrorBoundaryState = {
+  hasError: boolean;
+  message: string;
+};
+
+class VisualEditorErrorBoundary extends Component<
+  VisualEditorErrorBoundaryProps,
+  VisualEditorErrorBoundaryState
+> {
+  state: VisualEditorErrorBoundaryState = {
+    hasError: false,
+    message: "",
+  };
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, message: error?.message || "Unknown error" };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    window.postMessage(
+      {
+        type: "GB_ERROR",
+        error: `visual-editor-crash: ${error?.message || "Unknown error"}; ${info.componentStack || ""}`,
+      },
+      window.location.origin,
+    );
+  }
+
+  private retry = () => {
+    this.setState({ hasError: false, message: "" });
+    this.props.onRetry();
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="rounded-xl shadow-xl z-max w-80 bg-dark p-4 text-red-400">
+          <p className="text-sm mb-2">Visual Editor hit a runtime error.</p>
+          <p className="text-xs mb-3 break-words">{this.state.message}</p>
+          <button
+            className="bg-slate-600 text-slate-100 px-3 py-1 rounded text-xs"
+            onClick={this.retry}
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 /**
  * mounting the visual editor
  */
 export const CONTAINER_ID = "__gb_visual_editor";
 
-const container = document.createElement("div");
-container.id = CONTAINER_ID;
+export let shadowRoot: ShadowRoot | null = null;
+let root: ReactDOM.Root | null = null;
+let mountObserver: MutationObserver | null = null;
+let remountTimeout: number | null = null;
+let remountCount = 0;
+let remountWindowStart = 0;
+const REMOUNT_WINDOW_MS = 10000;
+const MAX_REMOUNTS_PER_WINDOW = 5;
 
-export const shadowRoot = container?.attachShadow({ mode: "open" });
+const isNodeAttached = (node: Node | null) =>
+  !!node && document.documentElement.contains(node);
 
-if (shadowRoot) {
-  shadowRoot.innerHTML = `
-    <style>${VisualEditorCss}</style>
-    <div id="visual-editor-root"></div>
-  `;
-}
+const scheduleRemount = () => {
+  const now = Date.now();
+  if (now - remountWindowStart > REMOUNT_WINDOW_MS) {
+    remountWindowStart = now;
+    remountCount = 0;
+  }
+  if (remountCount >= MAX_REMOUNTS_PER_WINDOW) return;
+  remountCount += 1;
 
-document.body.appendChild(container);
+  if (remountTimeout) window.clearTimeout(remountTimeout);
+  remountTimeout = window.setTimeout(() => {
+    ensureVisualEditorMounted();
+  }, 150);
+};
 
-const root = ReactDOM.createRoot(
-  shadowRoot.querySelector("#visual-editor-root")!,
-);
+const getContainer = () =>
+  document.getElementById(CONTAINER_ID) as HTMLDivElement | null;
 
-root.render(<VisualEditor />);
+const ensureVisualEditorMounted = () => {
+  let container = getContainer();
+  if (!container || !isNodeAttached(container)) {
+    container = document.createElement("div");
+    container.id = CONTAINER_ID;
+    document.body.appendChild(container);
+  }
+
+  if (!container.shadowRoot) {
+    shadowRoot = container.attachShadow({ mode: "open" });
+    shadowRoot.innerHTML = `
+      <style>${VisualEditorCss}</style>
+      <div id="visual-editor-root"></div>
+    `;
+    root = null;
+  } else {
+    shadowRoot = container.shadowRoot;
+    if (!shadowRoot.querySelector("#visual-editor-root")) {
+      shadowRoot.innerHTML = `
+        <style>${VisualEditorCss}</style>
+        <div id="visual-editor-root"></div>
+      `;
+      root = null;
+    }
+  }
+
+  const mountNode = shadowRoot?.querySelector("#visual-editor-root");
+  if (!mountNode) return;
+
+  if (!root) {
+    root = ReactDOM.createRoot(mountNode);
+  }
+  root.render(
+    <VisualEditorErrorBoundary onRetry={() => ensureVisualEditorMounted()}>
+      <VisualEditor />
+    </VisualEditorErrorBoundary>,
+  );
+
+  if (!mountObserver) {
+    mountObserver = new MutationObserver(() => {
+      const currentContainer = getContainer();
+      if (!currentContainer || !isNodeAttached(currentContainer)) {
+        scheduleRemount();
+      }
+    });
+    mountObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+  }
+};
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    ensureVisualEditorMounted();
+  }
+});
+
+window.addEventListener("pagehide", () => {
+  if (remountTimeout) {
+    window.clearTimeout(remountTimeout);
+    remountTimeout = null;
+  }
+});
+
+ensureVisualEditorMounted();
