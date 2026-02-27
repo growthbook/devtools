@@ -310,7 +310,6 @@ const useEditMode: UseEditModeHook = ({
   // that the DOM is in the correct state
   const mutateRevert = useRef<(() => void) | null>(null);
   const [hydrationSafe, setHydrationSafe] = useState(false);
-  const pendingMutationsRef = useRef<VisualEditorVariation["domMutations"]>();
 
   useEffect(() => {
     let cancelled = false;
@@ -343,19 +342,9 @@ const useEditMode: UseEditModeHook = ({
   };
 
   useEffect(() => {
-    if (!hydrationSafe) {
-      pendingMutationsRef.current = variation?.domMutations;
-      return;
-    }
+    if (!hydrationSafe) return;
     runMutations(variation?.domMutations);
   }, [variation, hydrationSafe]);
-
-  useEffect(() => {
-    if (!hydrationSafe) return;
-    if (!pendingMutationsRef.current) return;
-    runMutations(pendingMutationsRef.current);
-    pendingMutationsRef.current = undefined;
-  }, [hydrationSafe]);
 
   const hasTextInChildren = (element: Element) => {
     for (let child of element.children) {
