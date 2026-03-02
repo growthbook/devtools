@@ -124,6 +124,7 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
           // not found, send empty message to signal unset
         });
       }
+      sendResponse({ success: true });
     }
     if (message.type === "setTabState") {
       setState(message.property, message.value); // Update the state property
@@ -202,10 +203,10 @@ if (!document.getElementById(DEVTOOLS_SCRIPT_ID)) {
 
 // Inject visual editor content script
 const VISUAL_EDITOR_SCRIPT_ID = "visual-editor-script";
-if (
-  !document.getElementById(VISUAL_EDITOR_SCRIPT_ID) &&
-  (!!loadVisualEditorQueryParams() || forceLoadVisualEditor)
-) {
+const shouldInjectVisualEditor =
+  !!loadVisualEditorQueryParams() || forceLoadVisualEditor;
+const injectVisualEditorScript = () => {
+  if (document.getElementById(VISUAL_EDITOR_SCRIPT_ID)) return;
   const script = document.createElement("script");
   script.id = VISUAL_EDITOR_SCRIPT_ID;
   script.async = true;
@@ -213,6 +214,16 @@ if (
   script.src = chrome.runtime.getURL("js/visual_editor.js");
 
   document.body.appendChild(script);
+};
+
+if (shouldInjectVisualEditor) {
+  if (document.readyState === "complete") {
+    injectVisualEditorScript();
+  } else {
+    window.addEventListener("load", injectVisualEditorScript, {
+      once: true,
+    });
+  }
 }
 // check if the storage has been removed and reload the data from embed script
 window.addEventListener("storage", (event) => {

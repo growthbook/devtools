@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CSPError,
   VisualEditorVariation,
@@ -9,6 +9,7 @@ import {
   UpdateVisualChangesetRequestMessage,
 } from "devtools";
 import normalizeVariations from "../normalizeVariations";
+import { classifyCSPViolation } from "../csp";
 type UseVisualChangesetHook = (visualChangesetId: string) => {
   loading: boolean;
   experimentUrl: string | null;
@@ -36,14 +37,29 @@ const useVisualChangeset: UseVisualChangesetHook = (visualChangesetId) => {
   const [experiment, setExperiment] = useState<APIExperiment | null>(null);
   const [experimentUrl, setExperimentUrl] = useState<string | null>(null);
   const [variations, setVariations] = useState<VisualEditorVariation[]>([]);
+  const cspEventTimestamps = useRef<Record<string, number>>({});
 
-  document.addEventListener("securitypolicyviolation", (e) => {
-    if (e.violatedDirective !== "script-src") return;
-    setError("csp-error");
-    setCSPError({
-      violatedDirective: e.violatedDirective,
-    });
-  });
+  useEffect(() => {
+    const cspHandler = (e: SecurityPolicyViolationEvent) => {
+      const classification = classifyCSPViolation(e);
+      if (!classification.isRelevant) return;
+
+      // Deduplicate noisy CSP events for 2 seconds.
+      const now = Date.now();
+      const lastSeen = cspEventTimestamps.current[classification.key] || 0;
+      if (now - lastSeen < 2000) return;
+      cspEventTimestamps.current[classification.key] = now;
+
+      setCSPError(classification.details);
+      if (classification.isFatal) {
+        setError("csp-error");
+      }
+    };
+
+    document.addEventListener("securitypolicyviolation", cspHandler);
+    return () =>
+      document.removeEventListener("securitypolicyviolation", cspHandler);
+  }, []);
 
   const updateVisualChangeset = useCallback(
     async (variations: VisualEditorVariation[]) => {

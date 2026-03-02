@@ -22,6 +22,11 @@ export type CopyMode = "energetic" | "concise" | "humorous";
 
 export type CSPError = {
   violatedDirective: string;
+  effectiveDirective?: string;
+  blockedURI?: string;
+  sourceFile?: string;
+  isFatal?: boolean;
+  timestamp?: number;
 };
 
 export interface VisualEditorVariation {
