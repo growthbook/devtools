@@ -1,12 +1,13 @@
 import React, { forwardRef } from "react";
 import { RxMove } from "react-icons/rx";
 import useFloatingAnchor from "../lib/hooks/useFloatingAnchor";
+import { SelectorError } from "../lib/hooks/useSelectorErrors";
 
 const MoveElementHandle = forwardRef<
   HTMLDivElement,
-  { parentElement: HTMLElement; onPointerDown: () => void }
->(function ({ parentElement, onPointerDown }, ref) {
-  const domRect = useFloatingAnchor(parentElement);
+  { parentElement: HTMLElement; onPointerDown: () => void; onSelectorError?: (error: SelectorError) => void }
+>(function ({ parentElement, onPointerDown, onSelectorError }, ref) {
+  const domRect = useFloatingAnchor(parentElement, { onSelectorError });
   if (!domRect) return null;
   if (!parentElement) return null;
   return (

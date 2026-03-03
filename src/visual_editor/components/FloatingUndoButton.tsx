@@ -1,14 +1,17 @@
 import React from "react";
 import useFloatingAnchor from "../lib/hooks/useFloatingAnchor";
+import { SelectorError } from "../lib/hooks/useSelectorErrors";
 
 export default function FloatingUndoButton({
   parentElement,
   undo,
+  onSelectorError,
 }: {
   parentElement: HTMLElement;
   undo: () => void;
+  onSelectorError?: (error: SelectorError) => void;
 }) {
-  const domRect = useFloatingAnchor(parentElement);
+  const domRect = useFloatingAnchor(parentElement, { onSelectorError });
   if (!domRect) return null;
   if (!parentElement) return null;
   return (

@@ -1,16 +1,18 @@
 import React, { FC, useMemo } from "react";
 import useFloatingAnchor from "../lib/hooks/useFloatingAnchor";
 import getSelector from "../lib/getSelector";
+import { SelectorError } from "../lib/hooks/useSelectorErrors";
 
 const SelectorDisplay: FC<{
   parentElement: Element | null;
-}> = ({ parentElement }) => {
-  const domRect = useFloatingAnchor(parentElement);
+  onSelectorError?: (error: SelectorError) => void;
+}> = ({ parentElement, onSelectorError }) => {
+  const domRect = useFloatingAnchor(parentElement, { onSelectorError });
 
   const selector = useMemo(() => {
     if (!parentElement) return null;
-    return getSelector(parentElement);
-  }, [parentElement]);
+    return getSelector(parentElement, { onError: onSelectorError });
+  }, [parentElement, onSelectorError]);
 
   if (!domRect) return null;
   if (!parentElement) return null;

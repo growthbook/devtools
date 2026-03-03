@@ -1,19 +1,32 @@
 import { useCallback, useEffect, useState } from "react";
 import { throttle } from "lodash";
 import getSelector from "@/visual_editor/lib/getSelector";
+import { safeQuerySelector, SelectorError } from "./useSelectorErrors";
 
-export default function useFloatingAnchor(parentElement: Element | null) {
+interface UseFloatingAnchorOptions {
+  onSelectorError?: (error: SelectorError) => void;
+}
+
+export default function useFloatingAnchor(
+  parentElement: Element | null,
+  options?: UseFloatingAnchorOptions
+) {
   const [domRect, setDomRect] = useState<DOMRect | null>(null);
 
   const onChange = useCallback(
     throttle(() => {
       let selector = "";
       if (parentElement) selector = getSelector(parentElement);
-      // get element by query selector
-      const rect = document.querySelector(selector)?.getBoundingClientRect();
+      
+      const element = safeQuerySelector(
+        selector,
+        options?.onSelectorError,
+        "useFloatingAnchor"
+      );
+      const rect = element?.getBoundingClientRect();
       setDomRect(rect ?? null);
     }, 1000 / 60),
-    [parentElement, setDomRect],
+    [parentElement, setDomRect, options?.onSelectorError],
   );
 
   useEffect(() => {

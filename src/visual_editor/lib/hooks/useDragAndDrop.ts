@@ -7,6 +7,7 @@ import {
   onDrag,
   teardown as draggingTeardown,
 } from "@/visual_editor/lib/moveElement";
+import { SelectorError } from "./useSelectorErrors";
 
 type UseDragAndDropHook = (args: {
   isEnabled?: boolean;
@@ -17,6 +18,7 @@ type UseDragAndDropHook = (args: {
   moveHandleRef: RefObject<HTMLDivElement | null>;
   hasSDK: boolean;
   sdkVersion: string | undefined;
+  onSelectorError?: (error: SelectorError) => void;
 }) => {
   isDragging: boolean;
 };
@@ -30,6 +32,7 @@ const useDragAndDrop: UseDragAndDropHook = ({
   moveHandleRef,
   hasSDK,
   sdkVersion,
+  onSelectorError,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [pointerXY, setPointerXY] = useState<{ x: number; y: number }>({
@@ -78,11 +81,11 @@ const useDragAndDrop: UseDragAndDropHook = ({
     (_event: MouseEvent) => {
       if (isDragging && elementToDrag && dragDestination) {
         const { parentElement, siblingElement } = dragDestination;
-        const parentSelector = getSelector(parentElement);
+        const parentSelector = getSelector(parentElement, { onError: onSelectorError });
         const insertBeforeSelector = siblingElement
-          ? getSelector(siblingElement)
+          ? getSelector(siblingElement, { onError: onSelectorError })
           : undefined;
-        const elementSelector = getSelector(elementToDrag);
+        const elementSelector = getSelector(elementToDrag, { onError: onSelectorError });
 
         const precedingPositionMut = elementUnderEditMutations.slice(-1)?.[0];
         if (precedingPositionMut?.attribute === "position") {

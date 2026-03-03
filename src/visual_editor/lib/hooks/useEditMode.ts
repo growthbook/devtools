@@ -10,6 +10,7 @@ import { VisualEditorVariation } from "devtools";
 import { Attribute } from "@/visual_editor/components/AttributeEdit";
 import getSelector from "@/visual_editor/lib/getSelector";
 import { CONTAINER_ID } from "@/visual_editor";
+import { SelectorError } from "./useSelectorErrors";
 
 export const hoverAttributeName = "edit-mode-hover";
 
@@ -32,6 +33,7 @@ type UseEditModeHook = (args: {
   isEnabled: boolean;
   updateVariation: (updates: Partial<VisualEditorVariation>) => void;
   variation: VisualEditorVariation | null;
+  onSelectorError?: (error: SelectorError) => void;
 }) => {
   elementUnderEdit: HTMLElement | null;
   setElementUnderEdit: (element: HTMLElement | null) => void;
@@ -74,6 +76,7 @@ const useEditMode: UseEditModeHook = ({
   isEnabled,
   variation,
   updateVariation,
+  onSelectorError,
 }) => {
   const [elementUnderEdit, setElementUnderEdit] = useState<HTMLElement | null>(
     null,
@@ -91,18 +94,20 @@ const useEditMode: UseEditModeHook = ({
       elementUnderEdit
         ? getSelector(elementUnderEdit, {
             ignoreClassNames,
+            onError: onSelectorError,
           })
         : "",
-    [elementUnderEdit, ignoreClassNames],
+    [elementUnderEdit, ignoreClassNames, onSelectorError],
   );
   const highlightedElementSelector = useMemo(
     () =>
       highlightedElement
         ? getSelector(highlightedElement, {
             ignoreClassNames,
+            onError: onSelectorError,
           })
         : "",
-    [highlightedElement, ignoreClassNames],
+    [highlightedElement, ignoreClassNames, onSelectorError],
   );
 
   const elementUnderEditCopy = useMemo(() => {

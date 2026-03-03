@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import React, { FC } from "react";
 import useFloatingAnchor from "../lib/hooks/useFloatingAnchor";
+import { SelectorError } from "../lib/hooks/useSelectorErrors";
 
 const overlayStyles = (domRect: DOMRect) => ({
   top: {
@@ -94,8 +95,9 @@ const FloatingFrame: FC<{
   hideOverlay?: boolean;
   parentElement: Element | null;
   clearSelectedElement?: () => void;
-}> = ({ parentElement, clearSelectedElement, hideOverlay }) => {
-  const domRect = useFloatingAnchor(parentElement);
+  onSelectorError?: (error: SelectorError) => void;
+}> = ({ parentElement, clearSelectedElement, hideOverlay, onSelectorError }) => {
+  const domRect = useFloatingAnchor(parentElement, { onSelectorError });
 
   if (!domRect) return null;
   return (

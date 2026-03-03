@@ -20,6 +20,7 @@ import useCustomJs from "./lib/hooks/useCustomJs";
 import useEditMode from "./lib/hooks/useEditMode";
 import useDragAndDrop from "./lib/hooks/useDragAndDrop";
 import useSDKDiagnostics from "./lib/hooks/useSDKDiagnostics";
+import { useSelectorErrors } from "./lib/hooks/useSelectorErrors";
 
 import Toolbar, { VisualEditorMode } from "./components/Toolbar";
 import ElementDetails from "./components/ElementDetails";
@@ -79,6 +80,9 @@ const VisualEditor: FC<{}> = () => {
       experiment,
     });
 
+  const { lastError: selectorError, addError: addSelectorError, clearErrors: clearSelectorErrors } = 
+    useSelectorErrors();
+
   const {
     loading: aiLoading,
     error: aiError,
@@ -136,6 +140,7 @@ const VisualEditor: FC<{}> = () => {
     isEnabled: mode === "edit",
     variation: selectedVariation,
     updateVariation: updateSelectedVariation,
+    onSelectorError: addSelectorError,
   });
 
   const moveHandleRef = useRef<HTMLDivElement | null>(null);
@@ -150,6 +155,7 @@ const VisualEditor: FC<{}> = () => {
     moveHandleRef,
     hasSDK,
     sdkVersion: version,
+    onSelectorError: addSelectorError,
   });
   // wait for 1 second before setting dragging to true
   useEffect(() => {
@@ -198,7 +204,13 @@ const VisualEditor: FC<{}> = () => {
   //reset inline editing when mode changes
   useEffect(() => {
     resetAndStopInlineEditing();
-  }, [mode]);
+    clearSelectorErrors();
+  }, [mode, clearSelectorErrors]);
+
+  // clear selector errors when element under edit changes
+  useEffect(() => {
+    clearSelectorErrors();
+  }, [elementUnderEdit, clearSelectorErrors]);
   return (
     <>
       <VisualEditorPane style={parentStyles}>
@@ -336,8 +348,12 @@ const VisualEditor: FC<{}> = () => {
           </VisualEditorSection>
         )}
 
-        {error || aiError ? (
-          <ErrorDisplay error={error || aiError} cspError={cspError} />
+        {error || aiError || selectorError ? (
+          <ErrorDisplay 
+            error={error || aiError} 
+            cspError={cspError}
+            selectorError={selectorError}
+          />
         ) : null}
 
         <div className="m-4 text-center">
@@ -360,9 +376,13 @@ const VisualEditor: FC<{}> = () => {
             clearSelectedElement={() => {
               stopInlineEditing();
             }}
+            onSelectorError={addSelectorError}
           />
           {!elementUnderEdit && (
-            <SelectorDisplay parentElement={elementUnderEdit} />
+            <SelectorDisplay 
+              parentElement={elementUnderEdit}
+              onSelectorError={addSelectorError}
+            />
           )}
           {elementUnderEditMutations.length > 0 && !!elementUnderEdit ? (
             <FloatingUndoButton
@@ -379,6 +399,7 @@ const VisualEditor: FC<{}> = () => {
                   resetAndStopInlineEditing();
                 }
               }}
+              onSelectorError={addSelectorError}
             />
           ) : null}
         </>
@@ -388,13 +409,20 @@ const VisualEditor: FC<{}> = () => {
           ref={moveHandleRef}
           parentElement={elementUnderEdit}
           onPointerDown={() => stopInlineEditing()}
+          onSelectorError={addSelectorError}
         />
       ) : null}
       {/** Overlays for highlighting hovered elements **/}
       {mode === "edit" && !isDragging ? (
         <>
-          <FloatingFrame parentElement={highlightedElement} />
-          <SelectorDisplay parentElement={highlightedElement} />
+          <FloatingFrame 
+            parentElement={highlightedElement}
+            onSelectorError={addSelectorError}
+          />
+          <SelectorDisplay 
+            parentElement={highlightedElement}
+            onSelectorError={addSelectorError}
+          />
         </>
       ) : null}
     </>
