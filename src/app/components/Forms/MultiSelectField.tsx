@@ -4,9 +4,10 @@ import ReactSelect, {
   MenuPlacement,
 } from "react-select";
 import CreatableSelect from "react-select/creatable";
-import { customStyles, SingleValue } from "./SelectField";
 import { clone } from "lodash";
+import { useSelectMenuPortal } from "@/app/SelectMenuPortal";
 import { isDefined } from "@/app/utils";
+import { customStyles, SingleValue } from "./SelectField";
 
 export type MultiSelectFieldProps = {
   value: string[];
@@ -49,6 +50,8 @@ export default function MultiSelectField({
   formatCreateLabel,
   validOptionPattern,
 }: MultiSelectFieldProps) {
+  const menuPortalTarget = useSelectMenuPortal();
+
   const map = useMemo(() => {
     const map = new Map<string, SingleValue>();
     options.forEach((opt) => {
@@ -71,6 +74,8 @@ export default function MultiSelectField({
       isMulti
       className={className}
       menuPlacement={menuPlacement}
+      menuPortalTarget={menuPortalTarget}
+      menuPosition="fixed"
       classNamePrefix="gb-multi-select"
       formatOptionLabel={formatOptionLabel}
       isDisabled={disabled || false}

@@ -1,3 +1,7 @@
+:root {
+  --gb-select-menu-z: 2147483647; /* ahead of z-front */
+}
+
 .FormRoot {
   margin: auto;
 }

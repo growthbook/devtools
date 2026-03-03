@@ -33,6 +33,7 @@ import { Attributes } from "@growthbook/growthbook";
 import { AppMenu } from "@/app/components/AppMenu";
 import Share from "@/app/components/Share";
 import ImportExport from "@/app/components/ImportExport";
+import { SelectMenuPortalProvider } from "@/app/SelectMenuPortal";
 
 export const MW = 1200; // max-width
 export const RESPONSIVE_W = 570; // small width mode
@@ -106,7 +107,8 @@ export const App = () => {
       appearance={dark ? "dark" : "light"}
       className={dark ? "dark" : "light"}
     >
-      <div id="main" className="text-indigo-12 overflow-hidden">
+      <SelectMenuPortalProvider>
+        <div id="main" className="text-indigo-12 overflow-hidden">
         <div
           className="shadow-sm px-3 pt-1 w-full relative bg-surface z-front"
           style={{ height: NAV_H }}
@@ -343,6 +345,7 @@ export const App = () => {
           </Dialog.Content>
         </Dialog.Root>
       </div>
+      </SelectMenuPortalProvider>
     </Theme>
   );
 };

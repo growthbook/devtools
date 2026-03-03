@@ -5,8 +5,13 @@ import ReactSelect, {
   MenuPlacement,
 } from "react-select";
 import { clone } from "lodash";
+import { useSelectMenuPortal } from "@/app/SelectMenuPortal";
 
 export const customStyles = {
+  menuPortal: (provided: any) => ({
+    ...provided,
+    zIndex: "var(--gb-select-menu-z)",
+  }),
   control: (provided: any, state: any) => ({
     ...provided,
     borderColor: state.isFocused ? "var(--focus-8)" : "var(--gray-a7)",
@@ -114,6 +119,8 @@ export default function SelectField({
   validOptionPattern,
   menuPlacement,
 }: SelectFieldProps) {
+  const menuPortalTarget = useSelectMenuPortal();
+
   const map = useMemo(() => {
     const map = new Map<string, SingleValue>();
     options.forEach((opt) => {
@@ -136,6 +143,8 @@ export default function SelectField({
     return (
       <CreatableSelect
         menuPlacement={menuPlacement}
+        menuPortalTarget={menuPortalTarget}
+        menuPosition={menuPortalTarget ? "fixed" : undefined}
         className={className}
         isClearable={isClearable}
         isDisabled={disabled || false}
@@ -187,6 +196,8 @@ export default function SelectField({
   return (
     <ReactSelect
       menuPlacement={menuPlacement}
+      menuPortalTarget={menuPortalTarget}
+      menuPosition={menuPortalTarget ? "fixed" : undefined}
       isClearable={isClearable}
       className={className}
       isDisabled={disabled || false}
