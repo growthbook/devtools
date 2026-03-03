@@ -25,6 +25,7 @@ import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatu
 import { useResponsiveContext } from "../hooks/useResponsive";
 import { TbEyeSearch } from "react-icons/tb";
 import { LogUnionWithSource } from "@/app/utils/logs";
+import { formatExperimentKey } from "@/app/components/ExperimentsTab";
 
 export type FeatureDefinitionWithId = FeatureDefinition & {
   id: string;
@@ -285,6 +286,7 @@ export default function FeaturesTab() {
                       "top-[13px]": fullWidthListView,
                     })}
                     style={{ width: fullWidthListView ? col1 : undefined }}
+                    title={formatExperimentKey(fid)}
                   >
                     <FeatureExperimentStatusIcon
                       evaluated={pageEvaluatedFeatures.has(fid)}
@@ -307,7 +309,7 @@ export default function FeaturesTab() {
                         </span>
                       </Tooltip>
                     ) : null}
-                    {fid}
+                    {formatExperimentKey(fid)}
                   </div>
                 </div>
                 {fullWidthListView && (

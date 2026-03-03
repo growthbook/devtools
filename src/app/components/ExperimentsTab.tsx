@@ -291,6 +291,7 @@ export default function ExperimentsTab() {
                 <div
                   className="title line-clamp-1 pl-2.5 pr-8"
                   style={{ width: fullWidthListView ? col1 : undefined }}
+                  title={getExperimentDisplayName(experiment)}
                 >
                   <FeatureExperimentStatusIcon
                     evaluated={pageEvaluatedExperiments.has(eid)}
@@ -303,7 +304,7 @@ export default function ExperimentsTab() {
                       size={12}
                     />
                   ) : null}
-                  {eid}
+                  {getExperimentDisplayName(experiment)}
                 </div>
                 <div
                   className={clsx("flex items-center flex-shrink-0 text-sm", {
@@ -477,4 +478,36 @@ export function getFeatureExperiments(
     }
   }
   return experiments;
+}
+
+// Extracts the holdout ID from a $holdout:<id> feature ID, or returns undefined
+export function holdoutIdFromFid(fid: string): string | undefined {
+  const match = fid.match(/^\$holdout:(.+)$/);
+  return match ? match[1] : undefined;
+}
+
+// Used to prettify $holdout:<id> feature IDs (feature list, detail header, Implementation link)
+export function formatExperimentKey(key: string): string {
+  const holdoutId = holdoutIdFromFid(key);
+  if (holdoutId) {
+    return `Holdout generated feature (${holdoutId})`;
+  }
+  return key;
+}
+
+export function getHoldoutFeatureId(
+  experiment: ExperimentWithFeatures,
+): string | undefined {
+  return experiment.features?.find((f) => f.startsWith("$holdout:"));
+}
+
+export function getExperimentDisplayName(
+  experiment: ExperimentWithFeatures,
+): string {
+  if (experiment.name) return experiment.name;
+  const holdoutFid = getHoldoutFeatureId(experiment);
+  if (holdoutFid) {
+    return `Holdout (${holdoutIdFromFid(holdoutFid)})`;
+  }
+  return experiment.key;
 }

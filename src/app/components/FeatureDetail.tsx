@@ -18,9 +18,11 @@ import {
   PiCheck,
   PiCheckCircleBold,
   PiCircleFill,
+  PiFlaskFill,
   PiFunnelBold,
   PiInfo,
   PiTimerBold,
+  PiWarningFill,
   PiXBold,
 } from "react-icons/pi";
 import EditableValueField from "@/app/components/EditableValueField";
@@ -32,6 +34,7 @@ import Rule, {
 import * as Accordion from "@radix-ui/react-accordion";
 import React, { useEffect, useMemo, useState } from "react";
 import { HEADER_H, LEFT_PERCENT, SelectedFeature } from "./FeaturesTab";
+import { formatExperimentKey, holdoutIdFromFid } from "@/app/components/ExperimentsTab";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
 import useTabState, { getActiveTabId } from "@/app/hooks/useTabState";
@@ -41,7 +44,7 @@ import useApi from "@/app/hooks/useApi";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { LogUnionWithSource } from "@/app/utils/logs";
-import { FeatureResult, Result } from "@growthbook/growthbook";
+import { FeatureDefinition, FeatureResult, Result } from "@growthbook/growthbook";
 import clsx from "clsx";
 
 export type ApiFeatureWithRevisions = {
@@ -138,6 +141,38 @@ export default function FeatureDetail({
     "logEvents",
     undefined,
   );
+
+  const [features] = useTabState<Record<string, FeatureDefinition>>(
+    "features",
+    {},
+  );
+
+  // Detect if this feature is held-out: rules[0] has a parentCondition referencing a $holdout: fid
+  const holdoutGateFid = useMemo(() => {
+    const rules = selectedFeature?.feature?.rules ?? [];
+    const rule0 = rules[0] as any;
+    return (
+      rule0?.parentConditions?.find((pc: { id?: string }) =>
+        pc.id?.startsWith("$holdout:"),
+      )?.id ?? null
+    );
+  }, [selectedFid, selectedFeature?.feature?.rules]);
+
+  // The holdout experiment key lives on the holdout feature's first rule
+  const holdoutExpKey = useMemo(() => {
+    if (!holdoutGateFid) return null;
+    const holdoutFeature = features[holdoutGateFid];
+    return (holdoutFeature?.rules?.[0] as any)?.key ?? null;
+  }, [holdoutGateFid, features]);
+
+  const [selectedEid, setSelectedEid] = useTabState<string | undefined>(
+    "selectedEid",
+    undefined,
+  );
+  const [selectedChangeId, setSelectedChangeId] = useTabState<
+    string | undefined
+  >("selectedChangeId", undefined);
+  const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
 
   const [viewEvaluationSource, setViewEvaluationSource] = useState<
     string | undefined
@@ -421,7 +456,7 @@ export default function FeatureDetail({
           {selectedFid && (
             <>
               <div className="flex items-start gap-2">
-                <h2 className="font-bold flex-1">{selectedFid}</h2>
+                <h2 className="font-bold flex-1">{formatExperimentKey(selectedFid)}</h2>
                 <IconButton
                   size="3"
                   variant="ghost"
@@ -435,22 +470,36 @@ export default function FeatureDetail({
                   <PiXBold />
                 </IconButton>
               </div>
-              <Link
-                size="2"
-                href={`${appOrigin}/features/${selectedFid}`}
-                target="_blank"
-              >
-                GrowthBook
-                <PiArrowSquareOut
-                  size={16}
-                  className="inline-block mb-1 ml-0.5"
-                />
-              </Link>
+              {!selectedFid?.startsWith("$holdout:") && (
+                <Link
+                  size="2"
+                  href={`${appOrigin}/features/${selectedFid}`}
+                  target="_blank"
+                >
+                  GrowthBook
+                  <PiArrowSquareOut
+                    size={16}
+                    className="inline-block mb-1 ml-0.5"
+                  />
+                </Link>
+              )}
             </>
           )}
         </div>
 
         <div className="content">
+          {selectedFid?.startsWith("$holdout:") ? (
+            <Callout.Root color="amber" size="1" className="mt-1 mb-3">
+              <Callout.Icon>
+                <PiWarningFill />
+              </Callout.Icon>
+              <Callout.Text>
+                This is a generated feature flag used for holdout
+                implementation.
+              </Callout.Text>
+            </Callout.Root>
+          ) : null}
+
           {featureMetaData?.feature?.description ? (
             <div>
               <div className="label font-semibold mb-1">Description</div>
@@ -600,6 +649,34 @@ export default function FeatureDetail({
               </>
             ) : null}
           </div>
+
+          {holdoutGateFid ? (
+            <div className="mt-6 mb-4">
+              <div className="text-md font-semibold mb-1">Holdout</div>
+              <div>
+                {holdoutExpKey ? (
+                  <Link
+                    size="2"
+                    role="button"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setSelectedEid(holdoutExpKey);
+                      setSelectedChangeId(undefined);
+                      setCurrentTab("experiments");
+                    }}
+                  >
+                    <PiFlaskFill className="inline-block mr-1" size={12} />
+                    {`Holdout Experiment (${holdoutIdFromFid(holdoutGateFid)})`}
+                  </Link>
+                ) : (
+                  <span className="text-sm">
+                    {formatExperimentKey(holdoutGateFid)}
+                  </span>
+                )}
+              </div>
+            </div>
+          ) : null}
 
           <div className="mt-6 mb-2 py-1 border-b border-gray-a6">
             <div className="flex justify-between items-end text-md font-semibold">
