@@ -14,8 +14,13 @@ export default function getSelector(
   } catch (e) {
     selector =
       element.tagName.toLowerCase() +
-      (element.id ? `#${element.id}` : "") +
-      (element.className ? `.${element.className}` : "");
+      (element.id ? `#${CSS.escape(element.id)}` : "") +
+      (element.className
+        ? element.className
+          .split(' ')
+          .map(c => `.${CSS.escape(c)}`)
+          .join('')
+        : "");
   }
   return selector;
 }
