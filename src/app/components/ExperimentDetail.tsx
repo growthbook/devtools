@@ -11,6 +11,7 @@ import {
   PiArrowSquareOut,
   PiCaretRightFill,
   PiFlagFill,
+  PiFlaskFill,
   PiInfo,
   PiLinkBold,
   PiDesktopFill,
@@ -26,6 +27,10 @@ import * as Accordion from "@radix-ui/react-accordion";
 import React, { CSSProperties, useEffect, useMemo, useState } from "react";
 import {
   ExperimentWithFeatures,
+  formatExperimentKey,
+  getExperimentDisplayName,
+  getHoldoutFeatureId,
+  holdoutIdFromFid,
   HEADER_H,
   LEFT_PERCENT,
 } from "./ExperimentsTab";
@@ -33,7 +38,7 @@ import useGlobalState from "@/app/hooks/useGlobalState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
 import useTabState from "@/app/hooks/useTabState";
 import { SelectedExperiment } from "@/app/components/ExperimentsTab";
-import { AutoExperimentVariation, isURLTargeted } from "@growthbook/growthbook";
+import { AutoExperimentVariation, FeatureDefinition, isURLTargeted } from "@growthbook/growthbook";
 import clsx from "clsx";
 import DebugLogger, { DebugLogAccordion } from "@/app/components/DebugLogger";
 import { TbEyeSearch } from "react-icons/tb";
@@ -90,6 +95,59 @@ export default function ExperimentDetail({
     "logEvents",
     undefined,
   );
+
+  const [features] = useTabState<Record<string, FeatureDefinition>>(
+    "features",
+    {},
+  );
+
+  const holdoutMembers = useMemo(() => {
+    const holdoutFid = selectedExperiment?.experiment
+      ? getHoldoutFeatureId(selectedExperiment.experiment)
+      : undefined;
+    if (!holdoutFid) return null;
+
+    const heldFeatures: string[] = [];
+    const heldExperiments: string[] = [];
+
+    for (const [fid, feature] of Object.entries(features)) {
+      const rules = feature.rules ?? [];
+      const rule0 = rules[0];
+      if (!rule0) continue;
+      const isHoldoutGate = rule0.parentConditions?.some(
+        (pc: { id?: string }) => pc.id === holdoutFid,
+      );
+      if (!isHoldoutGate) continue;
+
+      heldFeatures.push(fid);
+
+      for (let i = 1; i < rules.length; i++) {
+        const rule = rules[i] as any;
+        if (rule.variations && rule.key) {
+          heldExperiments.push(rule.key);
+        }
+      }
+    }
+
+    return heldFeatures.length || heldExperiments.length
+      ? { heldFeatures, heldExperiments }
+      : null;
+  }, [selectedExperiment?.experiment, features]);
+
+  // Detect if this experiment is itself under a holdout
+  const parentHoldout = useMemo(() => {
+    const expFeatures = selectedExperiment?.experiment?.features ?? [];
+    for (const fid of expFeatures) {
+      const rule0 = (features[fid]?.rules ?? [])[0] as any;
+      const holdoutFid = rule0?.parentConditions?.find(
+        (pc: { id?: string }) => pc.id?.startsWith("$holdout:"),
+      )?.id;
+      if (!holdoutFid) continue;
+      const holdoutExpKey = (features[holdoutFid]?.rules?.[0] as any)?.key;
+      if (holdoutExpKey) return { holdoutFid, holdoutExpKey };
+    }
+    return null;
+  }, [selectedExperiment?.experiment, features]);
 
   const [viewEvaluationSource, setViewEvaluationSource] = useState<
     string | undefined
@@ -196,7 +254,9 @@ export default function ExperimentDetail({
             <>
               <div className="flex items-start gap-2">
                 <h2 className="font-bold flex-1">
-                  {selectedExperiment?.experiment?.name || selectedEid}
+                  {selectedExperiment?.experiment
+                    ? getExperimentDisplayName(selectedExperiment.experiment)
+                    : selectedEid}
                 </h2>
                 <IconButton
                   size="3"
@@ -375,6 +435,69 @@ export default function ExperimentDetail({
             />
           ) : null}
 
+          {parentHoldout ? (
+            <div className="mt-3 mb-1">
+              <div className="label font-semibold">Holdout</div>
+              <Link
+                size="2"
+                role="button"
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setSelectedEid(parentHoldout.holdoutExpKey);
+                  setCurrentTab("experiments");
+                }}
+              >
+                <PiFlaskFill className="inline-block mr-1" size={12} />
+                {`Holdout Experiment (${holdoutIdFromFid(parentHoldout.holdoutFid)})`}
+              </Link>
+            </div>
+          ) : null}
+
+          {holdoutMembers ? (
+            <>
+              <div className="mt-4 mb-1 text-md font-semibold">
+                Held-out members
+              </div>
+              <div className="mb-4">
+                {holdoutMembers.heldFeatures.map((fid) => (
+                  <div key={fid}>
+                    <Link
+                      size="2"
+                      role="button"
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setSelectedFid(fid);
+                        setCurrentTab("features");
+                      }}
+                    >
+                      <PiFlagFill className="inline-block mr-1" size={12} />
+                      {fid}
+                    </Link>
+                  </div>
+                ))}
+                {holdoutMembers.heldExperiments.map((eid) => (
+                  <div key={eid}>
+                    <Link
+                      size="2"
+                      role="button"
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setSelectedEid(eid);
+                        setCurrentTab("experiments");
+                      }}
+                    >
+                      <PiFlaskFill className="inline-block mr-1" size={12} />
+                      {eid}
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
+
           <div className="mt-4 mb-1 text-md font-semibold">
             Implementation
             {(types?.redirect ? 1 : 0) +
@@ -410,7 +533,7 @@ export default function ExperimentDetail({
                   }}
                 >
                   <PiFlagFill className="inline-block mr-1" size={12} />
-                  {fid}
+                  {formatExperimentKey(fid)}
                 </Link>
               </div>
             ))}
@@ -604,9 +727,14 @@ export function getVariationSummary({
   const m = meta?.[i];
   const { urlRedirect } = (variation || {}) as AutoExperimentVariation;
 
+  const isHoldout = !!getHoldoutFeatureId(experiment);
+  const holdoutDefaults = ["Holdout", "Treatment"];
+
   let title = `Variation ${m?.key ?? i}`;
   if (m?.name) {
     title = m.name;
+  } else if (isHoldout && holdoutDefaults[i] !== undefined) {
+    title = holdoutDefaults[i];
   } else if (urlRedirect) {
     title += `(${urlRedirect})`;
   }

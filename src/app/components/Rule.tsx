@@ -23,6 +23,7 @@ import {
 import { EvaluatedFeature } from "@/app/hooks/useGBSandboxEval";
 import DebugLogger from "@/app/components/DebugLogger";
 import useGlobalState from "@/app/hooks/useGlobalState";
+import { formatExperimentKey, holdoutIdFromFid } from "@/app/components/ExperimentsTab";
 import { isDark, Theme } from "@/app";
 
 type RuleType = "force" | "rollout" | "experiment" | "prerequisite" | "safe-rollout";
@@ -165,7 +166,9 @@ export default function Rule({
                 }}
               >
                 <PiFlaskFill className="inline-block mr-0.5" size={12} />
-                {key}
+                {holdoutIdFromFid(fid)
+                  ? `Holdout Experiment (${holdoutIdFromFid(fid)})`
+                  : key}
               </Link>
             )}
           </div>
@@ -473,7 +476,7 @@ export function ConditionDisplay({
                 }}
               >
                 <PiFlagFill className="inline-block mr-0.5" size={12} />
-                {cond.field}
+                {formatExperimentKey(cond.field)}
               </Link>
             ) : (
               cond.field
