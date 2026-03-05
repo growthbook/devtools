@@ -65,8 +65,7 @@ Some notes
 ## Changelog
 
 *1.2.4* (2026-03-05)
-- CSP bugfixes
-- Visual editor invalid selector bugfixes
+- Visual editor bugfixes (CSP issues, invalid CSS selectors)
 - Support holdouts in devtools
 - Support OR conditions and new operator types
 - Bump SDK support to 1.6.5
