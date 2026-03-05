@@ -101,11 +101,11 @@ export default function useGBSandboxEval() {
       for (const fid in _features) {
         _features[fid].rules = _features[fid]?.rules?.map((rule, i) => ({
           ...rule,
-          // Hacky way for associating log to a specific rule:
-          // stuff rule number into something persistent (rule.meta -> exp.meta)
+          // Stuff rule index + featureId into meta so it survives into exp.meta.
+          // featureId is needed for experiment-ref rules where exp.key !== fid.
           meta: rule.meta
-            ? rule.meta.map((m) => ({ ...m, ruleI: i }))
-            : [{ ruleI: i }],
+            ? rule.meta.map((m) => ({ ...m, ruleI: i, featureId: fid }))
+            : [{ ruleI: i, featureId: fid }],
         }));
       }
 
@@ -153,7 +153,9 @@ export default function useGBSandboxEval() {
             ruleNo = ctx.rule.meta[0].ruleI;
           }
           if (ctx?.exp?.meta) {
-            if (ctx.exp.key === fid || ctx.exp.key.startsWith("srk_")) {
+            // For experiment-ref rules, exp.key is the experiment name (not fid),
+            // so check featureId that we stamped into meta instead.
+            if (ctx.exp.meta[0]?.featureId === fid) {
               ruleNo = ctx.exp.meta[0].ruleI;
             }
           }
