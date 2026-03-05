@@ -64,6 +64,13 @@ Some notes
 
 ## Changelog
 
+*1.2.4* (2026-03-05)
+- CSP bugfixes
+- Visual editor invalid selector bugfixes
+- Support holdouts in devtools
+- Support OR conditions and new operator types
+- Bump SDK support to 1.6.5
+
 *1.2.3* (2025-08-06)
 - Bug fixes (experiment tab crashes, experiment rule details not always rendering)
 

@@ -419,6 +419,30 @@ export function ExperimentRule({
   );
 }
 
+const MULTI_VALUE_OPERATORS = new Set(["$in", "$nin", "$ini", "$nini"]);
+function MultiValueDisplay({ value }: { value: string }) {
+  const parts = value
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+
+  if (!parts.length) {
+    return <span className="conditionValue italic">empty list</span>;
+  }
+
+  return (
+    <span>
+      <span className="font-medium mr-1">(</span>
+      {parts.map((v, i) => (
+        <span key={i} className="conditionValue mr-1">
+          {v}
+        </span>
+      ))}
+      <span className="font-medium">)</span>
+    </span>
+  );
+}
+
 export function ConditionDisplay({
   condition,
   parentConditions,
@@ -434,16 +458,29 @@ export function ConditionDisplay({
   );
 
   const conditionJson = condition ? JSON.stringify(condition) : undefined;
-  let conds = (conditionJson ? jsonToConds(conditionJson) : []) ?? [];
+  const parsed = conditionJson
+    ? jsonToConds(conditionJson)
+    : { and: [], orBlocks: [] };
+
+  const prereqConds: Condition[] = [];
   parentConditions?.forEach((p) => {
     const pConditionJson = p.condition
       ? JSON.stringify(p.condition)
       : undefined;
-    let pConds = (pConditionJson ? jsonToConds(pConditionJson) : []) ?? [];
-    if (!pConds.length) return;
-    conds.push(...pConds.map((pc) => ({ ...pc, field: p.id, prereq: true })));
+    const pParsed = pConditionJson
+      ? jsonToConds(pConditionJson)
+      : { and: [], orBlocks: [] };
+    if (!pParsed?.and.length || pParsed.orBlocks.length > 0) return;
+    prereqConds.push(
+      ...pParsed.and.map((pc) => ({ ...pc, field: p.id, prereq: true })),
+    );
   });
-  if (!conds.length)
+
+  const andConds = [...prereqConds, ...(parsed?.and ?? [])];
+  const orBlocks = parsed?.orBlocks ?? [];
+  const hasAny = andConds.length > 0 || orBlocks.length > 0;
+
+  if (!parsed || !hasAny) {
     return (
       <div>
         <div className="mr-2 font-semibold mb-0.5">IF</div>
@@ -458,38 +495,85 @@ export function ConditionDisplay({
         />
       </div>
     );
+  }
+
+  const renderCondRow = (
+    cond: Condition,
+    key: string | number,
+    prefix: string | null,
+  ) => (
+    <div className="condition" key={key}>
+      {prefix && <span className="mr-2 font-semibold">{prefix}</span>}
+      <span className="conditionValue">
+        {cond.prereq ? (
+          <Link
+            size="1"
+            role="button"
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setSelectedFid(cond.field);
+            }}
+          >
+            <PiFlagFill className="inline-block mr-0.5" size={12} />
+            {formatExperimentKey(cond.field)}
+          </Link>
+        ) : (
+          cond.field
+        )}
+      </span>
+      <span className="conditionOperator">
+        {operatorToText(cond.operator, cond.prereq)}
+      </span>
+      {"value" in cond ? (
+        MULTI_VALUE_OPERATORS.has(cond.operator) ? (
+          <MultiValueDisplay value={cond.value ?? ""} />
+        ) : (
+          <span className="conditionValue">{cond.value}</span>
+        )
+      ) : null}
+    </div>
+  );
+
+  const renderOrBlock = (branches: Condition[][], blockKey: string, prefix: string) => (
+    <React.Fragment key={blockKey}>
+      <div className="condition">
+        <span className="font-semibold">{prefix} [</span>
+      </div>
+      <div>
+        {branches.map((group, gi) => (
+          <React.Fragment key={`${blockKey}-${gi}`}>
+            {gi > 0 && (
+              <div className="condition">
+                <span className="font-semibold">OR</span>
+              </div>
+            )}
+            <div className="border-l-2 border-gray-a6 pl-2">
+              {group.map((cond, i) =>
+                renderCondRow(cond, `${blockKey}-${gi}-${i}`, i > 0 ? "AND" : null),
+              )}
+            </div>
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="condition">
+        <span className="font-semibold">]</span>
+      </div>
+    </React.Fragment>
+  );
+
   return (
     <>
-      {conds.map((cond, i) => (
-        <div className="condition" key={i}>
-          {i === 0 && <span className="mr-2 font-semibold">IF</span>}
-          {i > 0 && <span className="mr-2 font-semibold">AND</span>}
-          <span className="conditionValue">
-            {cond.prereq ? (
-              <Link
-                size="1"
-                role="button"
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedFid(cond.field);
-                }}
-              >
-                <PiFlagFill className="inline-block mr-0.5" size={12} />
-                {formatExperimentKey(cond.field)}
-              </Link>
-            ) : (
-              cond.field
-            )}
-          </span>
-          <span className="conditionOperator">
-            {operatorToText(cond.operator)}
-          </span>
-          {"value" in cond ? (
-            <span className="conditionValue">{cond.value}</span>
-          ) : null}
-        </div>
-      ))}
+      {andConds.map((cond, i) =>
+        renderCondRow(cond, i, i === 0 ? "IF" : "AND"),
+      )}
+      {orBlocks.map((branches, bi) =>
+        renderOrBlock(
+          branches,
+          `or-block-${bi}`,
+          andConds.length > 0 || bi > 0 ? "AND" : "IF",
+        ),
+      )}
       {ruleType === "prerequisite" && (
         <div className="condition mt-2" key="continue">
           <span className="mr-2 font-semibold">CONTINUE</span>
@@ -529,17 +613,25 @@ export interface Condition {
   prereq?: boolean;
 }
 
-export function jsonToConds(json: string): null | Condition[] {
-  if (!json || json === "{}") return [];
+export interface ParsedConditionGroups {
+  // Simple AND conditions
+  and: Condition[];
+  // Each OR block is an array of branches (each branch is an AND group), ANDed with `and`
+  orBlocks: Condition[][][];
+}
+
+export function jsonToConds(json: string): ParsedConditionGroups | null {
+  if (!json || json === "{}") return { and: [], orBlocks: [] };
   // Advanced use case where we can't use the simple editor
-  if (json.match(/\$(or|nor|all|type)/)) return null;
+  if (json.match(/\$(nor|all|type)/)) return null;
 
   try {
     const _parsed = JSON.parse(json);
     if (_parsed["$not"]) return null;
 
-    // quick pass to break out $and (saved groups and simple logic)
+    // Expand $and; collect each $or entry as a separate block rather than overwriting
     const parsed: any = {};
+    const orBlocksRaw: any[][] = [];
     try {
       Object.keys(_parsed).forEach((field) => {
         const value = _parsed[field];
@@ -547,9 +639,15 @@ export function jsonToConds(json: string): null | Condition[] {
           value.forEach((o: any) => {
             if (o["$not"]) throw new Error("invalid nested condition");
             Object.keys(o).forEach((k) => {
-              parsed[k] = o[k];
+              if (k === "$or" && Array.isArray(o[k])) {
+                orBlocksRaw.push(o[k]);
+              } else {
+                parsed[k] = o[k];
+              }
             });
           });
+        } else if (field === "$or" && Array.isArray(value)) {
+          orBlocksRaw.push(value);
         } else {
           parsed[field] = value;
         }
@@ -558,7 +656,7 @@ export function jsonToConds(json: string): null | Condition[] {
       return null;
     }
 
-    const conds: Condition[] = [];
+    const andConds: Condition[] = [];
     let valid = true;
 
     Object.keys(parsed).forEach((field) => {
@@ -570,13 +668,13 @@ export function jsonToConds(json: string): null | Condition[] {
 
       if (typeof value !== "object") {
         if (value === true || value === false) {
-          return conds.push({
+          return andConds.push({
             field,
             operator: value ? "$true" : "$false",
           });
         }
 
-        return conds.push({
+        return andConds.push({
           field,
           operator: "$eq",
           value: value + "",
@@ -585,14 +683,14 @@ export function jsonToConds(json: string): null | Condition[] {
       Object.keys(value).forEach((operator) => {
         const v: any = value[operator];
 
-        if (operator === "$in" || operator === "$nin") {
+        if (["$in", "$nin", "$ini", "$nini"].includes(operator)) {
           if (
             v.some((str: any) => typeof str === "string" && str.includes(","))
           ) {
             valid = false;
             return;
           }
-          return conds.push({
+          return andConds.push({
             field,
             operator,
             value: v.join(", "),
@@ -602,7 +700,7 @@ export function jsonToConds(json: string): null | Condition[] {
         if (operator === "$elemMatch") {
           if (typeof v === "object" && Object.keys(v).length === 1) {
             if ("$eq" in v && typeof v["$eq"] !== "object") {
-              return conds.push({
+              return andConds.push({
                 field,
                 operator: "$includes",
                 value: v["$eq"] + "",
@@ -616,7 +714,7 @@ export function jsonToConds(json: string): null | Condition[] {
         if (operator === "$not") {
           if (typeof v === "object" && Object.keys(v).length === 1) {
             if ("$regex" in v && typeof v["$regex"] === "string") {
-              return conds.push({
+              return andConds.push({
                 field,
                 operator: "$notRegex",
                 value: v["$regex"],
@@ -626,7 +724,7 @@ export function jsonToConds(json: string): null | Condition[] {
               const m = v["$elemMatch"];
               if (typeof m === "object" && Object.keys(m).length === 1) {
                 if ("$eq" in m && typeof m["$eq"] !== "object") {
-                  return conds.push({
+                  return andConds.push({
                     field,
                     operator: "$notIncludes",
                     value: m["$eq"] + "",
@@ -639,14 +737,14 @@ export function jsonToConds(json: string): null | Condition[] {
 
         if (operator === "$size") {
           if (v === 0) {
-            return conds.push({
+            return andConds.push({
               field,
               operator: "$empty",
             });
           }
           if (typeof v === "object" && Object.keys(v).length === 1) {
             if ("$gt" in v && v["$gt"] === 0) {
-              return conds.push({
+              return andConds.push({
                 field,
                 operator: "$notEmpty",
               });
@@ -660,19 +758,19 @@ export function jsonToConds(json: string): null | Condition[] {
         }
 
         if (operator === "$exists") {
-          return conds.push({
+          return andConds.push({
             field,
             operator: v ? "$exists" : "$notExists",
           });
         }
         if (operator === "$eq" && (v === true || v === false)) {
-          return conds.push({
+          return andConds.push({
             field,
             operator: v ? "$true" : "$false",
           });
         }
         if (operator === "$ne" && (v === true || v === false)) {
-          return conds.push({
+          return andConds.push({
             field,
             operator: v ? "$false" : "$true",
           });
@@ -687,6 +785,8 @@ export function jsonToConds(json: string): null | Condition[] {
             "$lt",
             "$lte",
             "$regex",
+            "$regexi",
+            "$notRegexi",
             "$veq",
             "$vne",
             "$vgt",
@@ -696,7 +796,7 @@ export function jsonToConds(json: string): null | Condition[] {
           ].includes(operator) &&
           typeof v !== "object"
         ) {
-          return conds.push({
+          return andConds.push({
             field,
             operator,
             value: v + "",
@@ -707,7 +807,7 @@ export function jsonToConds(json: string): null | Condition[] {
           (operator === "$inGroup" || operator === "$notInGroup") &&
           typeof v === "string"
         ) {
-          return conds.push({
+          return andConds.push({
             field,
             operator,
             value: v,
@@ -717,7 +817,23 @@ export function jsonToConds(json: string): null | Condition[] {
       });
     });
     if (!valid) return null;
-    return conds;
+
+    if (orBlocksRaw.length === 0) {
+      return { and: andConds, orBlocks: [] };
+    }
+
+    // Parse OR blocks; nested ORs within a branch fall back to raw JSON
+    const orBlocks: Condition[][][] = [];
+    for (const orBranchesRaw of orBlocksRaw) {
+      const branches: Condition[][] = [];
+      for (const orItem of orBranchesRaw) {
+        const branch = jsonToConds(JSON.stringify(orItem));
+        if (branch === null || branch.orBlocks.length > 0) return null;
+        branches.push(branch.and);
+      }
+      orBlocks.push(branches);
+    }
+    return { and: andConds, orBlocks };
   } catch (e) {
     return null;
   }
@@ -744,7 +860,7 @@ function operatorToText(operator: string, isPrerequisite?: boolean): string {
       return `<`;
     case "$lte":
     case "$vlte":
-      return `<=`;
+      return `≤`;
     case "$gt":
     case "$vgt":
       return `>`;
@@ -756,9 +872,13 @@ function operatorToText(operator: string, isPrerequisite?: boolean): string {
     case "$notExists":
       return isPrerequisite ? `is not live` : `is NULL`;
     case "$in":
-      return `is in`;
+      return `is any of`;
     case "$nin":
-      return `is not in`;
+      return `is none of`;
+    case "$ini":
+      return `is any of (case insensitive)`;
+    case "$nini":
+      return `is none of (case insensitive)`;
     case "$inGroup":
       return `is in group`;
     case "$notInGroup":
@@ -771,6 +891,10 @@ function operatorToText(operator: string, isPrerequisite?: boolean): string {
       return `matches`;
     case "$notRegex":
       return `does not match`;
+    case "$regexi":
+      return `matches (case insensitive)`;
+    case "$notRegexi":
+      return `does not match (case insensitive)`;
   }
   return operator;
 }

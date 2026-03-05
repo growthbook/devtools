@@ -158,9 +158,11 @@ function ingestLogEvent(event: LogEvent) {
 function pushAppUpdates() {
   updateTabState("url", window.location.href || "");
   onGrowthBookLoad((gb) => {
-    pushSdkHealthUpdate(gb);
     if (gb) {
       subscribeToSdkChanges(gb);
+    }
+    pushSdkHealthUpdate(gb);
+    if (gb) {
       updateTabState("features", gb.getFeatures?.() || {});
       updateTabState("experiments", gb.getExperiments?.() || []);
 
