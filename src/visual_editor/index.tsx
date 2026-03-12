@@ -125,6 +125,7 @@ const VisualEditor: FC<{}> = () => {
     addClassNames,
     removeClassNames,
     setCSS,
+    hideElement,
     elementUnderEditMutations,
     addDomMutation,
     removeDomMutation,
@@ -290,6 +291,18 @@ const VisualEditor: FC<{}> = () => {
                 removeDomMutation={removeDomMutation}
               />
             </VisualEditorSection>
+
+            <div className="px-4 pb-4">
+              <button
+                className="w-full border border-red-900 hover:bg-red-950 text-red-400 py-1.5 rounded text-sm font-medium cursor-pointer transition-colors"
+                onClick={() => {
+                  hideElement();
+                  clearElementUnderEdit();
+                }}
+              >
+                Remove element
+              </button>
+            </div>
           </>
         ) : null}
 

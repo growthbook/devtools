@@ -6,6 +6,7 @@ import mutate, {
 } from "dom-mutator";
 import { useRef, useMemo, useCallback, useState, useEffect } from "react";
 import { throttle } from "lodash";
+import styleToObject from "style-to-object";
 import { VisualEditorVariation } from "devtools";
 import { Attribute } from "@/visual_editor/components/AttributeEdit";
 import getSelector from "@/visual_editor/lib/getSelector";
@@ -53,6 +54,7 @@ type UseEditModeHook = (args: {
   removeClassNames: (classNames: string) => void;
 
   setCSS: (css: string) => void;
+  hideElement: () => void;
 
   elementUnderEditMutations: DeclarativeMutation[];
   addDomMutation: (mutation: DeclarativeMutation) => void;
@@ -288,6 +290,22 @@ const useEditMode: UseEditModeHook = ({
     },
     [elementUnderEditSelector, addDomMutations],
   );
+
+  const hideElement = useCallback(() => {
+    if (!elementUnderEdit || !elementUnderEditSelector) return;
+    const currentStyle = elementUnderEdit.getAttribute("style") ?? "";
+    let styleObj: Record<string, string> = {};
+    try {
+      styleObj = styleToObject(currentStyle) ?? {};
+    } catch (e) {
+      // ignore parse errors
+    }
+    styleObj["display"] = "none";
+    const newCSS = Object.entries(styleObj)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join("; ");
+    setCSS(newCSS);
+  }, [elementUnderEdit, elementUnderEditSelector, setCSS]);
 
   const elementUnderEditMutations = useMemo(
     () =>
@@ -555,6 +573,7 @@ const useEditMode: UseEditModeHook = ({
     addClassNames,
     removeClassNames,
     setCSS,
+    hideElement,
     elementUnderEditMutations,
     removeDomMutation,
     addDomMutation,
