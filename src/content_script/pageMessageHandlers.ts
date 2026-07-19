@@ -15,6 +15,7 @@ import {
   TransformCopyPayload,
   UpdateVisualChangesetPayload,
 } from "@/background/visualEditorHandlers";
+import { VeDeprecationStatus } from "devtools";
 import { VISUAL_CHANGESET_ID_PARAMS_KEY } from "@/visual_editor/lib/constants";
 import { saveApiHost, saveApiKey } from "@/app/storage";
 
@@ -106,6 +107,60 @@ export const visualEditorUpdateChangesetRequest = (
       window.postMessage(message, window.location.origin);
     },
   );
+};
+
+// Deprecation status for the legacy visual editor. The injection gate in
+// index.ts fetches this from the background (which pings the standalone
+// Visual Editor extension) before injecting the editor, and caches it here
+// so the editor's own status request doesn't repeat the cross-extension ping.
+let cachedVeDeprecationStatus: VeDeprecationStatus | null = null;
+
+export const fetchVeDeprecationStatus = (): Promise<VeDeprecationStatus> =>
+  new Promise((resolve) => {
+    const fallback: VeDeprecationStatus = {
+      newExtensionInstalled: false,
+      sidePanelOpen: false,
+      dismissed: false,
+      isFirefox: navigator.userAgent.includes("Firefox"),
+    };
+    try {
+      chrome.runtime.sendMessage(
+        { type: "BG_GET_VE_DEPRECATION_STATUS" },
+        (resp?: VeDeprecationStatus) => {
+          if (chrome.runtime.lastError || !resp) {
+            resolve(fallback);
+          } else {
+            cachedVeDeprecationStatus = resp;
+            resolve(resp);
+          }
+        },
+      );
+    } catch {
+      resolve(fallback);
+    }
+  });
+
+export const veDeprecationStatusRequest = async () => {
+  const status =
+    cachedVeDeprecationStatus ?? (await fetchVeDeprecationStatus());
+  window.postMessage(
+    {
+      type: "GB_RESPONSE_VE_DEPRECATION_STATUS",
+      data: {
+        showNotice: !status.dismissed,
+        isFirefox: status.isFirefox,
+      },
+    },
+    window.location.origin,
+  );
+};
+
+export const veDeprecationDismissRequest = () => {
+  if (cachedVeDeprecationStatus) cachedVeDeprecationStatus.dismissed = true;
+  chrome.runtime.sendMessage({ type: "BG_DISMISS_VE_DEPRECATION" }, () => {
+    // touch lastError so Chrome doesn't log an unchecked-error warning
+    void chrome.runtime.lastError;
+  });
 };
 
 export const visualEditorTransformCopyRequest = (

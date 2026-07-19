@@ -46,6 +46,7 @@ import AICopySuggestor from "./components/AICopySuggestor";
 import FloatingUndoButton from "./components/FloatingUndoButton";
 import MoveElementHandle from "./components/MoveElementHandle";
 import DebugPanel from "./components/DebugPanel";
+import DeprecationNotice from "./components/DeprecationNotice";
 
 import VisualEditorCss from "./shadowDom.css";
 import "./targetPage.css";
@@ -413,6 +414,63 @@ const VisualEditor: FC<{}> = () => {
   );
 };
 
+// Gates the legacy editor behind the deprecation notice. Rendered instead
+// of <VisualEditor/> so none of the editor's hooks run (no changeset load,
+// no DOM mutations, no query-param cleanup) until the user chooses to
+// continue. This component only mounts when the standalone Visual Editor
+// extension is NOT installed — when it is, the content script skips
+// injecting this bundle entirely.
+const VisualEditorGate: FC<{}> = () => {
+  const [gateState, setGateState] = useState<"loading" | "notice" | "editor">(
+    "loading",
+  );
+  const [isFirefox, setIsFirefox] = useState(false);
+
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      const data = event.data;
+      if (data?.type !== "GB_RESPONSE_VE_DEPRECATION_STATUS") return;
+      setIsFirefox(!!data.data?.isFirefox);
+      setGateState(data.data?.showNotice ? "notice" : "editor");
+    };
+    window.addEventListener("message", onMessage);
+    window.postMessage(
+      { type: "GB_REQUEST_VE_DEPRECATION_STATUS" },
+      window.location.origin,
+    );
+    // Fail open: if the content script never answers (e.g. an older
+    // version without the handler), load the editor rather than a blank
+    // shadow root.
+    const fallback = window.setTimeout(() => {
+      setGateState((s) => (s === "loading" ? "editor" : s));
+    }, 2000);
+    return () => {
+      window.removeEventListener("message", onMessage);
+      window.clearTimeout(fallback);
+    };
+  }, []);
+
+  if (gateState === "loading") return null;
+
+  if (gateState === "notice") {
+    return (
+      <DeprecationNotice
+        isFirefox={isFirefox}
+        onContinue={() => {
+          window.postMessage(
+            { type: "GB_DISMISS_VE_DEPRECATION" },
+            window.location.origin,
+          );
+          setGateState("editor");
+        }}
+        onClose={() => unmountVisualEditor()}
+      />
+    );
+  }
+
+  return <VisualEditor />;
+};
+
 type VisualEditorErrorBoundaryProps = {
   onRetry: () => void;
   children: React.ReactNode;
@@ -504,7 +562,35 @@ const scheduleRemount = () => {
 const getContainer = () =>
   document.getElementById(CONTAINER_ID) as HTMLDivElement | null;
 
+// Set when the user closes the editor from the deprecation notice; stops
+// every auto-remount path (MutationObserver, visibilitychange) for the
+// rest of this page view.
+let editorClosed = false;
+
+// Tear the editor down for good on this page view. Used by the ✕ on the
+// deprecation notice — the legacy editor otherwise has no way to close.
+export const unmountVisualEditor = () => {
+  editorClosed = true;
+  if (mountObserver) {
+    mountObserver.disconnect();
+    mountObserver = null;
+  }
+  if (remountTimeout) {
+    window.clearTimeout(remountTimeout);
+    remountTimeout = null;
+  }
+  // Deferred: root.unmount() can't run synchronously from inside a React
+  // event handler on the same root.
+  window.setTimeout(() => {
+    root?.unmount();
+    root = null;
+    shadowRoot = null;
+    getContainer()?.remove();
+  }, 0);
+};
+
 const ensureVisualEditorMounted = () => {
+  if (editorClosed) return;
   let container = getContainer();
   if (!container || !isNodeAttached(container)) {
     container = document.createElement("div");
@@ -538,7 +624,7 @@ const ensureVisualEditorMounted = () => {
   }
   root.render(
     <VisualEditorErrorBoundary onRetry={() => ensureVisualEditorMounted()}>
-      <VisualEditor />
+      <VisualEditorGate />
     </VisualEditorErrorBoundary>,
   );
 

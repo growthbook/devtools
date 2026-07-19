@@ -2,7 +2,9 @@ import {
   Experiment,
   FeatureDefinition,
   ExperimentOverride,
-  StickyAssignmentsDocument, FeatureApiResponse, Attributes,
+  StickyAssignmentsDocument,
+  FeatureApiResponse,
+  Attributes,
 } from "@growthbook/growthbook";
 import {
   FetchVisualChangesetPayload,
@@ -197,6 +199,25 @@ type CopyToClipboard = {
   value: string;
 };
 
+// Legacy visual editor deprecation: the injected editor asks the content
+// script whether to show the "install the new extension" notice before
+// rendering, and reports the user's "keep using the legacy editor" choice.
+type VeDeprecationStatusRequestMessage = {
+  type: "GB_REQUEST_VE_DEPRECATION_STATUS";
+};
+
+type VeDeprecationStatusResponseMessage = {
+  type: "GB_RESPONSE_VE_DEPRECATION_STATUS";
+  data: {
+    showNotice: boolean;
+    isFirefox: boolean;
+  };
+};
+
+type VeDeprecationDismissMessage = {
+  type: "GB_DISMISS_VE_DEPRECATION";
+};
+
 // Messages sent to content script
 export type Message =
   | RequestRefreshMessage
@@ -217,7 +238,10 @@ export type Message =
   | PatchPayload
   | InjectSdkMessage
   | ClearInjectedSdkMessage
-  | CopyToClipboard;
+  | CopyToClipboard
+  | VeDeprecationStatusRequestMessage
+  | VeDeprecationStatusResponseMessage
+  | VeDeprecationDismissMessage;
 
 export type BGLoadVisualChangsetMessage = {
   type: "BG_LOAD_VISUAL_CHANGESET";
@@ -285,9 +309,36 @@ type BGSetSDKUsageData = {
   data: SDKHealthCheckResult & { tabId?: number };
 };
 
+// data is unused for these three; declared so the background router's
+// `const { type, data } = message` destructuring stays valid on the union.
+export type BGGetVeDeprecationStatusMessage = {
+  type: "BG_GET_VE_DEPRECATION_STATUS";
+  data?: undefined;
+};
+
+export type BGDismissVeDeprecationMessage = {
+  type: "BG_DISMISS_VE_DEPRECATION";
+  data?: undefined;
+};
+
+export type BGOpenNewVePanelMessage = {
+  type: "BG_OPEN_NEW_VE_PANEL";
+  data?: undefined;
+};
+
+export type VeDeprecationStatus = {
+  newExtensionInstalled: boolean;
+  sidePanelOpen: boolean;
+  dismissed: boolean;
+  isFirefox: boolean;
+};
+
 // Messages sent to background script
 export type BGMessage =
   | BGLoadVisualChangsetMessage
   | BGUpdateVisualChangsetMessage
   | BGTransformCopyMessage
-  | BGSetSDKUsageData;
+  | BGSetSDKUsageData
+  | BGGetVeDeprecationStatusMessage
+  | BGDismissVeDeprecationMessage
+  | BGOpenNewVePanelMessage;
