@@ -15,6 +15,19 @@ let tabId: number | undefined;
 
 export const SESSION_STORAGE_TAB_STATE_KEY = "growthbook-devtools-tab-state";
 
+// False once the extension has been reloaded, updated, or uninstalled while
+// this content script is still attached to the page. Orphaned content
+// scripts keep receiving window events (the embed script keeps posting),
+// but any chrome.runtime call throws "Extension context invalidated" —
+// check this and bail instead.
+const isExtensionContextValid = () => {
+  try {
+    return !!chrome.runtime?.id;
+  } catch (e) {
+    return false;
+  }
+};
+
 // Special state variables will push their updates to the embed script / SDK when changed:
 const propertiesWithCustomMessage: Record<string, string> = {
   overriddenAttributes: "GB_UPDATE_ATTRIBUTES", // setOverriddenAttributes
@@ -36,6 +49,7 @@ try {
 window.addEventListener(
   "message",
   function (event: MessageEvent<Message | BGMessage>) {
+    if (!isExtensionContextValid()) return;
     const data = event.data;
     if (data?.type === "UPDATE_TAB_STATE") {
       const { property, value } = data.data;
@@ -75,12 +89,14 @@ function setState(property: string, value: any, skipPostMessage?: boolean) {
     SESSION_STORAGE_TAB_STATE_KEY,
     JSON.stringify(state),
   );
-  chrome.runtime.sendMessage({
-    type: "tabStateChanged",
-    property,
-    value,
-    tabId,
-  });
+  if (isExtensionContextValid()) {
+    chrome.runtime.sendMessage({
+      type: "tabStateChanged",
+      property,
+      value,
+      tabId,
+    });
+  }
   // send custom messages to Embed script for specific properties so that the Embed script can update the GB SDK
   if (!skipPostMessage && property in propertiesWithCustomMessage) {
     const customMessage =
@@ -143,6 +159,7 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
 window.addEventListener(
   "message",
   function (event: MessageEvent<Message | BGMessage>) {
+    if (!isExtensionContextValid()) return;
     const data = event.data;
     switch (data?.type) {
       case "GB_REQUEST_OPEN_VISUAL_EDITOR":
