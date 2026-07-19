@@ -119,7 +119,6 @@ export const fetchVeDeprecationStatus = (): Promise<VeDeprecationStatus> =>
   new Promise((resolve) => {
     const fallback: VeDeprecationStatus = {
       newExtensionInstalled: false,
-      sidePanelOpen: false,
       dismissed: false,
       isFirefox: navigator.userAgent.includes("Firefox"),
     };

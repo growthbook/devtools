@@ -150,7 +150,6 @@ export async function handleGetVeDeprecationStatus(
   ]);
   sendResponse({
     newExtensionInstalled: !!pong,
-    sidePanelOpen: !!pong?.sidePanelOpen,
     dismissed,
     isFirefox,
   });
@@ -165,37 +164,6 @@ export async function handleDismissVeDeprecation(
   } catch {
     sendResponse({ success: false });
   }
-}
-
-// Relay "open the new extension's side panel" to the new extension. Only
-// succeeds when the user's click gesture propagates across the extension
-// boundary — callers fall back to pointing at the toolbar when it doesn't.
-export async function handleOpenNewVePanel(
-  sender: MessageSender,
-  sendResponse: (res: { opened: boolean }) => void,
-) {
-  const tabId = sender.tab?.id;
-  if (typeof tabId !== "number" || isFirefox) {
-    return sendResponse({ opened: false });
-  }
-  const attempts = NEW_VISUAL_EDITOR_EXTENSION_IDS.map(
-    (id) =>
-      new Promise<boolean>((resolve) => {
-        try {
-          chrome.runtime.sendMessage(
-            id,
-            { type: "GB_VE_OPEN_PANEL", tabId },
-            (resp) => {
-              resolve(!chrome.runtime.lastError && !!resp?.opened);
-            },
-          );
-        } catch {
-          resolve(false);
-        }
-      }),
-  );
-  const results = await Promise.all(attempts);
-  sendResponse({ opened: results.some(Boolean) });
 }
 
 // CRUD methods

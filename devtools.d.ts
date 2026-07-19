@@ -309,7 +309,7 @@ type BGSetSDKUsageData = {
   data: SDKHealthCheckResult & { tabId?: number };
 };
 
-// data is unused for these three; declared so the background router's
+// data is unused for these two; declared so the background router's
 // `const { type, data } = message` destructuring stays valid on the union.
 export type BGGetVeDeprecationStatusMessage = {
   type: "BG_GET_VE_DEPRECATION_STATUS";
@@ -321,14 +321,8 @@ export type BGDismissVeDeprecationMessage = {
   data?: undefined;
 };
 
-export type BGOpenNewVePanelMessage = {
-  type: "BG_OPEN_NEW_VE_PANEL";
-  data?: undefined;
-};
-
 export type VeDeprecationStatus = {
   newExtensionInstalled: boolean;
-  sidePanelOpen: boolean;
   dismissed: boolean;
   isFirefox: boolean;
 };
@@ -340,5 +334,4 @@ export type BGMessage =
   | BGTransformCopyMessage
   | BGSetSDKUsageData
   | BGGetVeDeprecationStatusMessage
-  | BGDismissVeDeprecationMessage
-  | BGOpenNewVePanelMessage;
+  | BGDismissVeDeprecationMessage;

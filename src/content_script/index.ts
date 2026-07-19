@@ -9,7 +9,6 @@ import {
   visualEditorTransformCopyRequest,
   visualEditorUpdateChangesetRequest,
 } from "@/content_script/pageMessageHandlers";
-import { showVeToolbarHint } from "@/content_script/veToolbarHint";
 
 const forceLoadVisualEditor = false;
 let tabId: number | undefined;
@@ -229,31 +228,16 @@ const injectVisualEditorScript = () => {
 // The in-page editor injected above is deprecated in favor of the
 // standalone GrowthBook Visual Editor extension. Before injecting, ask the
 // background whether that extension is installed:
-//   - installed → never load the legacy editor. Its side panel can't open
-//     itself here (no user gesture on this page), so if it isn't open yet,
-//     show a one-time hint pointing the user at the extensions toolbar.
+//   - installed → do nothing. The user has the replacement; the new
+//     extension handles the "Open in Visual Editor" flow itself.
 //   - not installed → inject as before; the editor itself shows a
 //     dismissible install notice (see visual_editor/DeprecationNotice).
-const VE_HINT_SHOWN_SESSION_KEY_PREFIX = "gb-ve-hint-shown:";
 if (shouldInjectVisualEditor) {
   fetchVeDeprecationStatus().then((status) => {
     if (status.newExtensionInstalled) {
       console.info(
         "[gb-devtools] Standalone GrowthBook Visual Editor detected — not loading the deprecated in-page editor.",
       );
-      if (!status.sidePanelOpen) {
-        // Once per tab per changeset, so reloads mid-session don't re-nag
-        // but a fresh "Open in Visual Editor" click still gets guidance.
-        const vcId = loadVisualEditorQueryParams()?.visualChangesetId ?? "";
-        const hintKey = VE_HINT_SHOWN_SESSION_KEY_PREFIX + vcId;
-        try {
-          if (window.sessionStorage.getItem(hintKey)) return;
-          window.sessionStorage.setItem(hintKey, "1");
-        } catch (e) {
-          // sessionStorage unavailable — still show the hint
-        }
-        showVeToolbarHint();
-      }
       return;
     }
     if (document.readyState === "complete") {

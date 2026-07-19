@@ -17,7 +17,6 @@ import {
   handleDismissVeDeprecation,
   handleGetVeDeprecationStatus,
   handleLoadVisualChangeset,
-  handleOpenNewVePanel,
   handleTransformCopy,
   handleUpdateVisualChangeset,
 } from "@/background/visualEditorHandlers";
@@ -165,9 +164,6 @@ chrome.runtime.onMessage.addListener(
         break;
       case "BG_DISMISS_VE_DEPRECATION":
         handleDismissVeDeprecation(sendResponse);
-        break;
-      case "BG_OPEN_NEW_VE_PANEL":
-        handleOpenNewVePanel(sender, sendResponse);
         break;
       default:
         if (navigator.userAgent.includes("Firefox")) {
