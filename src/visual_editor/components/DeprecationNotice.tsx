@@ -6,12 +6,9 @@ import { NEW_VISUAL_EDITOR_STORE_URL } from "../lib/constants";
 // extension is not installed (when it IS installed, the content script
 // never injects this bundle at all — see content_script/index.ts).
 const DeprecationNotice: FC<{
-  // The new extension is Chrome-only; Firefox users get softer copy since
-  // they can't switch yet.
-  isFirefox: boolean;
   onContinue: () => void;
   onClose: () => void;
-}> = ({ isFirefox, onContinue, onClose }) => (
+}> = ({ onContinue, onClose }) => (
   <div
     className="fixed inset-0 z-max flex items-center justify-center"
     style={{ background: "rgba(0, 0, 0, 0.6)" }}
@@ -34,29 +31,14 @@ const DeprecationNotice: FC<{
       </div>
 
       <div className="p-4 text-light text-sm leading-relaxed">
-        {isFirefox ? (
-          <>
-            <p className="mb-2">
-              A new and improved GrowthBook Visual Editor is available as its
-              own extension — currently for Chrome only.
-            </p>
-            <p>
-              This built-in editor is deprecated. You can keep using it in
-              Firefox for now.
-            </p>
-          </>
-        ) : (
-          <>
-            <p className="mb-2">
-              The Visual Editor has moved to its own extension, with a new
-              editing experience and the latest features.
-            </p>
-            <p>
-              This built-in editor is deprecated and will be removed in a future
-              release.
-            </p>
-          </>
-        )}
+        <p className="mb-2">
+          The Visual Editor has moved to its own extension, with a new editing
+          experience and the latest features.
+        </p>
+        <p>
+          This built-in editor is deprecated and will be removed in a future
+          release.
+        </p>
 
         <button
           className="w-full p-2 mt-4 bg-indigo-800 hover:bg-indigo-700 rounded text-white font-semibold transition-colors"
@@ -64,9 +46,7 @@ const DeprecationNotice: FC<{
             window.open(NEW_VISUAL_EDITOR_STORE_URL, "_blank", "noopener")
           }
         >
-          {isFirefox
-            ? "View it in the Chrome Web Store"
-            : "Get the new Visual Editor"}
+          Get the new Visual Editor
         </button>
         <button
           className="w-full p-2 mt-1 text-slate-400 hover:text-slate-200 underline transition-colors"

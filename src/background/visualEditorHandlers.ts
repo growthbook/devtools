@@ -151,7 +151,6 @@ export async function handleGetVeDeprecationStatus(
   sendResponse({
     newExtensionInstalled: !!pong,
     dismissed,
-    isFirefox,
   });
 }
 

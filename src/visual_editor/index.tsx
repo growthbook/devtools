@@ -424,13 +424,11 @@ const VisualEditorGate: FC<{}> = () => {
   const [gateState, setGateState] = useState<"loading" | "notice" | "editor">(
     "loading",
   );
-  const [isFirefox, setIsFirefox] = useState(false);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       const data = event.data;
       if (data?.type !== "GB_RESPONSE_VE_DEPRECATION_STATUS") return;
-      setIsFirefox(!!data.data?.isFirefox);
       setGateState(data.data?.showNotice ? "notice" : "editor");
     };
     window.addEventListener("message", onMessage);
@@ -455,7 +453,6 @@ const VisualEditorGate: FC<{}> = () => {
   if (gateState === "notice") {
     return (
       <DeprecationNotice
-        isFirefox={isFirefox}
         onContinue={() => {
           window.postMessage(
             { type: "GB_DISMISS_VE_DEPRECATION" },

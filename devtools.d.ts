@@ -210,7 +210,6 @@ type VeDeprecationStatusResponseMessage = {
   type: "GB_RESPONSE_VE_DEPRECATION_STATUS";
   data: {
     showNotice: boolean;
-    isFirefox: boolean;
   };
 };
 
@@ -324,7 +323,6 @@ export type BGDismissVeDeprecationMessage = {
 export type VeDeprecationStatus = {
   newExtensionInstalled: boolean;
   dismissed: boolean;
-  isFirefox: boolean;
 };
 
 // Messages sent to background script

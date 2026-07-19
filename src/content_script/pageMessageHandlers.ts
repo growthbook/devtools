@@ -120,7 +120,6 @@ export const fetchVeDeprecationStatus = (): Promise<VeDeprecationStatus> =>
     const fallback: VeDeprecationStatus = {
       newExtensionInstalled: false,
       dismissed: false,
-      isFirefox: navigator.userAgent.includes("Firefox"),
     };
     try {
       chrome.runtime.sendMessage(
@@ -147,7 +146,6 @@ export const veDeprecationStatusRequest = async () => {
       type: "GB_RESPONSE_VE_DEPRECATION_STATUS",
       data: {
         showNotice: !status.dismissed,
-        isFirefox: status.isFirefox,
       },
     },
     window.location.origin,
