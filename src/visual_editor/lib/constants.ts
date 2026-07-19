@@ -5,9 +5,6 @@ export const VISUAL_CHANGESET_ID_PARAMS_KEY = "vc-id";
 // machine) can be probed alongside the store ID during local testing.
 export const NEW_VISUAL_EDITOR_EXTENSION_IDS = [
   "nbomejknbpkcpjdagefhichaajpoempk",
-  // LOCAL DEV ONLY — unpacked build at ~/GrowthBook/visual-editor/dist.
-  // Remove before merging.
-  "cidlokcklkmepniadobebeaneagmfloh",
 ];
 export const NEW_VISUAL_EDITOR_STORE_URL =
   "https://chromewebstore.google.com/detail/growthbook-visual-editor/nbomejknbpkcpjdagefhichaajpoempk";
