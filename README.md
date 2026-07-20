@@ -64,6 +64,9 @@ Some notes
 
 ## Changelog
 
+*1.2.5* (2026-07-19)
+- GrowthBook is moving to a new and separate visual editor extension. This change makes the old visual editor work nicely with the new.
+
 *1.2.4* (2026-03-05)
 - Visual editor bug fixes (CSP issues, invalid CSS selectors)
 - Support holdouts

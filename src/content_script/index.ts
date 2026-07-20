@@ -1,6 +1,9 @@
 import type { BGMessage, Message } from "devtools";
 import {
+  fetchVeDeprecationStatus,
   loadVisualEditorQueryParams,
+  veDeprecationDismissRequest,
+  veDeprecationStatusRequest,
   visualEditorLoadChangesetRequest,
   visualEditorOpenRequest,
   visualEditorTransformCopyRequest,
@@ -11,6 +14,19 @@ const forceLoadVisualEditor = false;
 let tabId: number | undefined;
 
 export const SESSION_STORAGE_TAB_STATE_KEY = "growthbook-devtools-tab-state";
+
+// False once the extension has been reloaded, updated, or uninstalled while
+// this content script is still attached to the page. Orphaned content
+// scripts keep receiving window events (the embed script keeps posting),
+// but any chrome.runtime call throws "Extension context invalidated" —
+// check this and bail instead.
+const isExtensionContextValid = () => {
+  try {
+    return !!chrome.runtime?.id;
+  } catch (e) {
+    return false;
+  }
+};
 
 // Special state variables will push their updates to the embed script / SDK when changed:
 const propertiesWithCustomMessage: Record<string, string> = {
@@ -33,6 +49,7 @@ try {
 window.addEventListener(
   "message",
   function (event: MessageEvent<Message | BGMessage>) {
+    if (!isExtensionContextValid()) return;
     const data = event.data;
     if (data?.type === "UPDATE_TAB_STATE") {
       const { property, value } = data.data;
@@ -72,12 +89,14 @@ function setState(property: string, value: any, skipPostMessage?: boolean) {
     SESSION_STORAGE_TAB_STATE_KEY,
     JSON.stringify(state),
   );
-  chrome.runtime.sendMessage({
-    type: "tabStateChanged",
-    property,
-    value,
-    tabId,
-  });
+  if (isExtensionContextValid()) {
+    chrome.runtime.sendMessage({
+      type: "tabStateChanged",
+      property,
+      value,
+      tabId,
+    });
+  }
   // send custom messages to Embed script for specific properties so that the Embed script can update the GB SDK
   if (!skipPostMessage && property in propertiesWithCustomMessage) {
     const customMessage =
@@ -140,6 +159,7 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
 window.addEventListener(
   "message",
   function (event: MessageEvent<Message | BGMessage>) {
+    if (!isExtensionContextValid()) return;
     const data = event.data;
     switch (data?.type) {
       case "GB_REQUEST_OPEN_VISUAL_EDITOR":
@@ -153,6 +173,12 @@ window.addEventListener(
         break;
       case "GB_REQUEST_TRANSFORM_COPY":
         visualEditorTransformCopyRequest(data);
+        break;
+      case "GB_REQUEST_VE_DEPRECATION_STATUS":
+        veDeprecationStatusRequest();
+        break;
+      case "GB_DISMISS_VE_DEPRECATION":
+        veDeprecationDismissRequest();
         break;
       case "GB_ERROR":
       case "GB_SDK_UPDATED":
@@ -216,14 +242,29 @@ const injectVisualEditorScript = () => {
   document.body.appendChild(script);
 };
 
+// The in-page editor injected above is deprecated in favor of the
+// standalone GrowthBook Visual Editor extension. Before injecting, ask the
+// background whether that extension is installed:
+//   - installed → do nothing. The user has the replacement; the new
+//     extension handles the "Open in Visual Editor" flow itself.
+//   - not installed → inject as before; the editor itself shows a
+//     dismissible install notice (see visual_editor/DeprecationNotice).
 if (shouldInjectVisualEditor) {
-  if (document.readyState === "complete") {
-    injectVisualEditorScript();
-  } else {
-    window.addEventListener("load", injectVisualEditorScript, {
-      once: true,
-    });
-  }
+  fetchVeDeprecationStatus().then((status) => {
+    if (status.newExtensionInstalled) {
+      console.info(
+        "[gb-devtools] Standalone GrowthBook Visual Editor detected — not loading the deprecated in-page editor.",
+      );
+      return;
+    }
+    if (document.readyState === "complete") {
+      injectVisualEditorScript();
+    } else {
+      window.addEventListener("load", injectVisualEditorScript, {
+        once: true,
+      });
+    }
+  });
 }
 // check if the storage has been removed and reload the data from embed script
 window.addEventListener("storage", (event) => {

@@ -14,6 +14,8 @@ import {
   BGSetSDKUsageData,
 } from "devtools";
 import {
+  handleDismissVeDeprecation,
+  handleGetVeDeprecationStatus,
   handleLoadVisualChangeset,
   handleTransformCopy,
   handleUpdateVisualChangeset,
@@ -156,6 +158,12 @@ chrome.runtime.onMessage.addListener(
           sender,
           sendResponse,
         );
+        break;
+      case "BG_GET_VE_DEPRECATION_STATUS":
+        handleGetVeDeprecationStatus(sender, sendResponse);
+        break;
+      case "BG_DISMISS_VE_DEPRECATION":
+        handleDismissVeDeprecation(sendResponse);
         break;
       default:
         if (navigator.userAgent.includes("Firefox")) {
