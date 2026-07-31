@@ -7,10 +7,18 @@ import type {
   Options,
   Result,
   TrackingCallback,
+  TrackingData,
   UserContext,
 } from "@growthbook/growthbook";
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import { Attributes } from "@growthbook/growthbook";
+
+
+type TrackingCallbackWithUser = (
+  experiment: Experiment<any>,
+  result: Result<any>,
+  user?: UserContext,
+) => void;
 
 type LogUnionWithSource = LogUnion & { source?: string; clientKey?: string };
 
@@ -459,7 +467,7 @@ function subscribeToSdkChanges(
     const patchedCallBack = (
       experiment: Experiment<any>,
       result: Result<any>,
-      user: UserContext
+      user?: UserContext,
     ) => {
       if (!hasSdkLogSupport) {
         gb.logs!.push({
@@ -472,10 +480,10 @@ function subscribeToSdkChanges(
       if ("isNoopCallback" in callback && callback.isNoopCallback) {
         gb.setDeferredTrackingCalls?.([
           ...gb.getDeferredTrackingCalls(),
-          { experiment, result, user },
+          { experiment, result, user } as TrackingData,
         ]);
       }
-      (callback(experiment, result, user);
+      (callback as TrackingCallbackWithUser)(experiment, result, user);
     };
     if ("isNoopCallback" in callback && callback.isNoopCallback) {
       patchedCallBack.isNoopCallback = true;
