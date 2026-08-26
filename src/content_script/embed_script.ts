@@ -459,8 +459,8 @@ function subscribeToSdkChanges(
     const patchedCallBack = (
       experiment: Experiment<any>,
       result: Result<any>,
-      // Newer SDKs pass a third userContext arg - forward whatever we get
-      ...rest: unknown[]
+      // SDK 1.7+ passes a third userContext arg - forward it or it's lost
+      user?: Parameters<TrackingCallback>[2],
     ) => {
       if (!hasSdkLogSupport) {
         gb.logs!.push({
@@ -476,11 +476,7 @@ function subscribeToSdkChanges(
           { experiment, result },
         ]);
       }
-      (callback as (...args: unknown[]) => unknown)(
-        experiment,
-        result,
-        ...rest,
-      );
+      callback(experiment, result, user);
     };
     if ("isNoopCallback" in callback && callback.isNoopCallback) {
       patchedCallBack.isNoopCallback = true;
@@ -502,12 +498,7 @@ function subscribeToSdkChanges(
 
   // Feature usage callbacks
   // @ts-expect-error Context is private but we still need to write it here
-  gb.context.onFeatureUsage = (
-    key: string,
-    result: FeatureResult<any>,
-    // Newer SDKs pass a third userContext arg - forward whatever we get
-    ...rest: unknown[]
-  ) => {
+  gb.context.onFeatureUsage = (key: string, result: FeatureResult<any>) => {
     if (!hasSdkLogSupport) {
       gb.logs!.push({
         featureKey: key,
@@ -517,7 +508,10 @@ function subscribeToSdkChanges(
       });
     }
     if (typeof onFeatureUsage === "function") {
-      (onFeatureUsage as (...args: unknown[]) => unknown)(key, result, ...rest);
+      // Only ever called with 2 args - onFeatureUsage lives in the SDK's user
+      // context, and core.ts calls those as cb(key, result). The 3-arg form is
+      // for GrowthBookClient's global context, which DevTools doesn't patch.
+      onFeatureUsage(key, result);
     }
   };
   if (!onFeatureUsage || typeof onFeatureUsage !== "function") {
