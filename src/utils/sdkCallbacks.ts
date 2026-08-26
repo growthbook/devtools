@@ -1,20 +1,14 @@
-// Helpers for inspecting the callbacks a page's SDK was initialized with.
-// Shared by the injected embed script (which reads them off the SDK context),
-// the background worker (icon status), and the SDK tab UI.
+import type { SDKHealthCheckResult } from "devtools";
 
-// A trackingCallback may be written as either `(experiment, result)` or
-// `(experiment, result, userContext)` - the SDK types allow both.
-const VALID_TRACKING_CALLBACK_PARAM_COUNTS = [2, 3];
-
-// Pull the parameter names off a function's source. Returns undefined when we
-// can't tell (native/bound functions, minified oddities) so callers can avoid
-// warning about something they didn't actually detect.
+// Pull the parameter names off a function's source. Returns undefined when we can't tell, eg native or bound functions
 export function parseCallbackParams(
   callback: (...args: any[]) => any,
 ): string[] | undefined {
   let src: string;
   try {
+    // A page can shadow toString, so it may throw or return a non-string
     src = callback.toString();
+    if (typeof src !== "string") return undefined;
   } catch (e) {
     return undefined;
   }
@@ -27,13 +21,25 @@ export function parseCallbackParams(
   const open = src.indexOf("(");
   if (open === -1) return undefined;
 
-  // Walk to the matching close paren, tracking nesting so that default values
-  // and destructured params don't cut the list short.
+  // Walk to the matching close paren so defaults and destructured params don't cut the list short
   const params: string[] = [];
   let current = "";
   let depth = 0;
+  let quote: string | null = null;
   for (let i = open; i < src.length; i++) {
     const char = src[i];
+    // Brackets and commas inside a string default aren't structure
+    if (quote) {
+      current += char;
+      if (char === "\\") current += src[++i] ?? "";
+      else if (char === quote) quote = null;
+      continue;
+    }
+    if (char === '"' || char === "'" || char === "`") {
+      quote = char;
+      current += char;
+      continue;
+    }
     if (char === "(" || char === "[" || char === "{") {
       depth++;
       if (depth === 1) continue;
@@ -50,27 +56,28 @@ export function parseCallbackParams(
     }
     current += char;
   }
-  // Never found the closing paren
   return undefined;
 }
 
+// A trackingCallback may be written as `(experiment, result)` or `(experiment, result, userContext)`
 export function trackingCallbackParamsAreValid(
   params: string[] | undefined,
 ): boolean {
-  // Couldn't determine the params - don't claim there's a problem
   if (!params) return true;
-  // Rest params (`...args`) can stand in for any number of arguments
+  // Declaring nothing is indistinguishable from an arity-erasing forwarding
+  // wrapper (`function () { cb.apply(this, arguments) }`), which works fine
+  if (params.length === 0) return true;
   if (params.some((param) => param.startsWith("..."))) return true;
-  return VALID_TRACKING_CALLBACK_PARAM_COUNTS.includes(params.length);
+  return params.length === 2 || params.length === 3;
 }
 
 export function hasTrackingCallbackIssues({
   hasTrackingCallback,
   trackingCallbackParams,
-}: {
-  hasTrackingCallback?: boolean;
-  trackingCallbackParams?: string[];
-}): boolean {
+}: Pick<
+  SDKHealthCheckResult,
+  "hasTrackingCallback" | "trackingCallbackParams"
+>): boolean {
   if (!hasTrackingCallback) return false;
   return !trackingCallbackParamsAreValid(trackingCallbackParams);
 }

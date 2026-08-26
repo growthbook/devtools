@@ -7,6 +7,7 @@ import type {
   Options,
   Result,
   TrackingCallback,
+  TrackingUserContext,
 } from "@growthbook/growthbook";
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import { Attributes } from "@growthbook/growthbook";
@@ -459,8 +460,8 @@ function subscribeToSdkChanges(
     const patchedCallBack = (
       experiment: Experiment<any>,
       result: Result<any>,
-      // SDK 1.7+ passes a third userContext arg - forward it or it's lost
-      user?: Parameters<TrackingCallback>[2],
+      // SDK 1.7+ passes a third userContext arg
+      user?: TrackingUserContext,
     ) => {
       if (!hasSdkLogSupport) {
         gb.logs!.push({
@@ -471,12 +472,15 @@ function subscribeToSdkChanges(
         });
       }
       if ("isNoopCallback" in callback && callback.isNoopCallback) {
+        // Keep `user` - fireDeferredTrackingCalls replays these as
+        // trackingCallback(call.experiment, call.result, call.user)
         gb.setDeferredTrackingCalls?.([
           ...gb.getDeferredTrackingCalls(),
-          { experiment, result },
+          { experiment, result, user },
         ]);
       }
-      callback(experiment, result, user);
+      // Returned so the SDK can still await an async trackingCallback
+      return callback(experiment, result, user);
     };
     if ("isNoopCallback" in callback && callback.isNoopCallback) {
       patchedCallBack.isNoopCallback = true;
@@ -508,9 +512,6 @@ function subscribeToSdkChanges(
       });
     }
     if (typeof onFeatureUsage === "function") {
-      // Only ever called with 2 args - onFeatureUsage lives in the SDK's user
-      // context, and core.ts calls those as cb(key, result). The 3-arg form is
-      // for GrowthBookClient's global context, which DevTools doesn't patch.
       onFeatureUsage(key, result);
     }
   };

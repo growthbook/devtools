@@ -4,6 +4,10 @@ import {
   trackingCallbackParamsAreValid,
 } from "./sdkCallbacks";
 
+function getDefault() {
+  return undefined;
+}
+
 describe("parseCallbackParams", () => {
   it("parses arrow functions", () => {
     expect(parseCallbackParams((experiment, result) => {})).toEqual([
@@ -19,21 +23,62 @@ describe("parseCallbackParams", () => {
   });
 
   it("parses function expressions", () => {
-    expect(
-      parseCallbackParams(function (experiment: any, result: any) {}),
-    ).toEqual(["experiment", "result"]);
+    expect(parseCallbackParams(function (experiment, result) {})).toEqual([
+      "experiment",
+      "result",
+    ]);
   });
 
   it("parses async functions", () => {
-    expect(
-      parseCallbackParams(async function (experiment: any, result: any) {}),
-    ).toEqual(["experiment", "result"]);
+    expect(parseCallbackParams(async function (experiment, result) {})).toEqual(
+      ["experiment", "result"],
+    );
   });
 
   it("parses a single unparenthesized arrow param", () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const cb = (experiment: any) => ({ key: experiment.key });
+    // Built at runtime - a type annotation forces parens, which would silently
+    // take the paren-walking path instead of the bare-arrow branch
+    const cb = Function("return experiment => ({ key: experiment.key })")();
+    expect(cb.toString()).toMatch(/^experiment\s*=>/);
     expect(parseCallbackParams(cb)).toEqual(["experiment"]);
+  });
+
+  it("does not read a bare arrow's body as its params", () => {
+    const cb = Function(
+      'return e => window.gtag("event", "x", { id: e.key })',
+    )();
+    expect(parseCallbackParams(cb)).toEqual(["e"]);
+  });
+
+  it("does not split on a comma inside a string default", () => {
+    expect(
+      parseCallbackParams((experiment, result, sep = ",") => [
+        experiment,
+        result,
+        sep,
+      ]),
+    ).toEqual(["experiment", "result", 'sep = ","']);
+  });
+
+  it("does not desync on a bracket inside a string default", () => {
+    expect(parseCallbackParams((a, b = "){[") => [a, b])).toEqual([
+      "a",
+      'b = "){["',
+    ]);
+  });
+
+  it("returns undefined when toString returns a non-string", () => {
+    const cb: any = () => {};
+    cb.toString = () => 12345;
+    expect(parseCallbackParams(cb)).toBeUndefined();
+  });
+
+  it("returns undefined when toString throws", () => {
+    const cb: any = () => {};
+    cb.toString = () => {
+      throw new Error("nope");
+    };
+    expect(parseCallbackParams(cb)).toBeUndefined();
   });
 
   it("does not truncate at a destructured param", () => {
@@ -85,7 +130,11 @@ describe("trackingCallbackParamsAreValid", () => {
 
   it("rejects too few params", () => {
     expect(trackingCallbackParamsAreValid(["experiment"])).toBe(false);
-    expect(trackingCallbackParamsAreValid([])).toBe(false);
+  });
+
+  it("accepts a zero-arity forwarding wrapper rather than warning", () => {
+    // `function () { cb.apply(this, arguments) }` parses to [] and works fine
+    expect(trackingCallbackParamsAreValid([])).toBe(true);
   });
 
   it("rejects too many params", () => {
@@ -118,5 +167,3 @@ describe("hasTrackingCallbackIssues", () => {
     ).toBe(true);
   });
 });
-
-declare function getDefault(): any;
