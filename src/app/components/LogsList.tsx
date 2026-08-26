@@ -1,4 +1,12 @@
-import { Box, Checkbox, Flex, Link, Text, Tooltip } from "@radix-ui/themes";
+import {
+  Badge,
+  Box,
+  Checkbox,
+  Flex,
+  Link,
+  Text,
+  Tooltip,
+} from "@radix-ui/themes";
 import React, { ReactNode, useMemo, useState } from "react";
 import useTabState from "../hooks/useTabState";
 import { useSearch } from "../hooks/useSearch";
@@ -250,6 +258,15 @@ export default function LogsList({
                       )}
                     >
                       {evt.eventInfo}
+                      {evt.isContextualBandit ? (
+                        <Badge
+                          size="1"
+                          color="violet"
+                          className="text-2xs ml-1.5 flex-shrink-0"
+                        >
+                          Contextual Bandit
+                        </Badge>
+                      ) : null}
                     </div>
                     {!isResponsive && (
                       <div className="w-[40%] px-2 text-left">

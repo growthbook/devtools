@@ -8,7 +8,7 @@ import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedExperiment,
 } from "@/app/hooks/useGBSandboxEval";
-import { Link, Switch, Tooltip } from "@radix-ui/themes";
+import { Badge, Link, Switch, Tooltip } from "@radix-ui/themes";
 import { PiDesktopFill, PiFlagFill, PiLinkBold, PiXBold } from "react-icons/pi";
 import clsx from "clsx";
 import { MW, NAV_H } from "@/app";
@@ -24,9 +24,11 @@ import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatu
 import { useResponsiveContext } from "../hooks/useResponsive";
 import { TbEyeSearch } from "react-icons/tb";
 import { LogUnionWithSource } from "@/app/utils/logs";
+import { isContextualBandit, ruleVariations } from "@/utils/contextualBandits";
 
 export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
   features?: string[];
+  contextualBanditRef?: string;
   featureTypes?: Record<string, ValueType>;
   isDraft?: boolean;
   isInactive?: boolean;
@@ -51,7 +53,6 @@ export default function ExperimentsTab() {
 
   // de-dupe
   const allExperiments = useMemo(() => {
-
     const merged: ExperimentWithFeatures[] = [
       ...experiments,
       ...featureExperiments,
@@ -315,6 +316,11 @@ export default function ExperimentsTab() {
                 >
                   {types ? (
                     <div className="flex items-center gap-2 pr-0.5">
+                      {types.contextualBandit ? (
+                        <Badge size="1" color="violet" className="text-2xs">
+                          Contextual Bandit
+                        </Badge>
+                      ) : null}
                       {types.redirect ? (
                         <Tooltip content="URL Redirect experiment">
                           <span>
@@ -402,7 +408,12 @@ export type SelectedExperiment = {
   eid: string;
   experiment: ExperimentWithFeatures;
   meta?: any;
-  types: { features?: string[]; redirect?: boolean; visual?: boolean };
+  types: {
+    features?: string[];
+    redirect?: boolean;
+    visual?: boolean;
+    contextualBandit?: boolean;
+  };
   evaluatedExperiment?: EvaluatedExperiment;
   isForced: boolean;
 };
@@ -455,6 +466,7 @@ export function getExperimentTypes(experiment: ExperimentWithFeatures) {
     visual: experiment?.variations?.some(
       (v) => v?.domMutations?.length || v?.css || v?.js,
     ),
+    contextualBandit: isContextualBandit(experiment),
   };
 }
 
@@ -466,13 +478,16 @@ export function getFeatureExperiments(
     const feature = features[fid];
     const details = getFeatureDetails({ fid, features });
     for (const rule of feature.rules || []) {
-      if (rule.variations) {
+      const variations = ruleVariations(rule);
+      if (variations) {
         // @ts-ignore
         experiments.push({
           key: rule.key ?? fid,
           features: [fid],
           featureTypes: { [fid]: details.valueType },
           ...rule,
+          // Contextual bandit rules carry these under contextualVariations
+          variations,
         });
       }
     }

@@ -38,7 +38,11 @@ import useGlobalState from "@/app/hooks/useGlobalState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
 import useTabState from "@/app/hooks/useTabState";
 import { SelectedExperiment } from "@/app/components/ExperimentsTab";
-import { AutoExperimentVariation, FeatureDefinition, isURLTargeted } from "@growthbook/growthbook";
+import {
+  AutoExperimentVariation,
+  FeatureDefinition,
+  isURLTargeted,
+} from "@growthbook/growthbook";
 import clsx from "clsx";
 import DebugLogger, { DebugLogAccordion } from "@/app/components/DebugLogger";
 import { TbEyeSearch } from "react-icons/tb";
@@ -47,6 +51,9 @@ import {
   EvaluationSourceViewer,
 } from "@/app/components/FeatureDetail";
 import { LogUnionWithSource } from "@/app/utils/logs";
+import ContextualBanditDetail, {
+  ContextualBanditBadge,
+} from "@/app/components/ContextualBanditDetail";
 
 export default function ExperimentDetail({
   selectedEid,
@@ -139,8 +146,8 @@ export default function ExperimentDetail({
     const expFeatures = selectedExperiment?.experiment?.features ?? [];
     for (const fid of expFeatures) {
       const rule0 = (features[fid]?.rules ?? [])[0] as any;
-      const holdoutFid = rule0?.parentConditions?.find(
-        (pc: { id?: string }) => pc.id?.startsWith("$holdout:"),
+      const holdoutFid = rule0?.parentConditions?.find((pc: { id?: string }) =>
+        pc.id?.startsWith("$holdout:"),
       )?.id;
       if (!holdoutFid) continue;
       const holdoutExpKey = (features[holdoutFid]?.rules?.[0] as any)?.key;
@@ -257,6 +264,11 @@ export default function ExperimentDetail({
                   {selectedExperiment?.experiment
                     ? getExperimentDisplayName(selectedExperiment.experiment)
                     : selectedEid}
+                  {types?.contextualBandit ? (
+                    <span className="ml-2 align-middle">
+                      <ContextualBanditBadge />
+                    </span>
+                  ) : null}
                 </h2>
                 <IconButton
                   size="3"
@@ -496,6 +508,22 @@ export default function ExperimentDetail({
                 ))}
               </div>
             </>
+          ) : null}
+
+          {types?.contextualBandit && selectedExperiment?.experiment ? (
+            <ContextualBanditDetail
+              experiment={selectedExperiment.experiment}
+              variationNames={(
+                selectedExperiment.experiment.meta ??
+                variations?.map(() => undefined) ??
+                []
+              ).map((m, i) => m?.name ?? `Variation ${i}`)}
+              forcedVariation={
+                selectedEid && selectedEid in forcedVariations
+                  ? forcedVariations[selectedEid]
+                  : undefined
+              }
+            />
           ) : null}
 
           <div className="mt-4 mb-1 text-md font-semibold">
