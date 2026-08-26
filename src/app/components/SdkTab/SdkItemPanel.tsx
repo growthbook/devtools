@@ -23,6 +23,7 @@ import { useResponsiveContext } from "@/app/hooks/useResponsive";
 import { SdkItem } from "./index";
 import useSdkData from "@/app/hooks/useSdkData";
 import { SDKHealthCheckResult } from "devtools";
+import { trackingCallbackParamsAreValid } from "@/utils/sdkCallbacks";
 import { getActiveTabId } from "@/app/hooks/useTabState";
 import { paddedVersionString } from "@growthbook/growthbook";
 
@@ -531,30 +532,28 @@ function trackingCallbackPanel({
 }: SDKHealthCheckResult) {
   return (
     <Text as="div" size="2" weight="regular">
-      {trackingCallbackParams?.length === 2 ? (
-        <>
-          The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code>.
-        </>
-      ) : !hasTrackingCallback ? (
+      {!hasTrackingCallback ? (
         <>
           The SDK is not using a{" "}
           <code className="text-gold-11">trackingCallback</code>. You will need
           to add one to track experiment exposure to your data warehouse.
         </>
+      ) : trackingCallbackParamsAreValid(trackingCallbackParams) ? (
+        <>
+          The SDK is using a{" "}
+          <code className="text-gold-11">trackingCallback</code>.
+        </>
       ) : (
         <>
           The SDK is using a{" "}
           <code className="text-gold-11">trackingCallback</code> with{" "}
-          {trackingCallbackParams?.length ? (
-            <em className="text-amber-600">{trackingCallbackParams.length}</em>
-          ) : (
-            <>
-              an <em className="text-amber-600">unknown</em> number of
-            </>
-          )}{" "}
-          param{trackingCallbackParams?.length !== 1 ? "s" : ""} instead of 2.
-          Please check your implementation.
+          <em className="text-amber-600">
+            {trackingCallbackParams?.length ?? 0}
+          </em>{" "}
+          param{trackingCallbackParams?.length === 1 ? "" : "s"} instead of{" "}
+          <code>(experiment, result)</code> or{" "}
+          <code>(experiment, result, userContext)</code>. Please check your
+          implementation.
         </>
       )}
     </Text>

@@ -9,6 +9,7 @@ import SdkItemPanel from "./SdkItemPanel";
 import useSdkData from "@/app/hooks/useSdkData";
 import { paddedVersionString } from "@growthbook/growthbook";
 import packageJson from "@growthbook/growthbook/package.json";
+import { hasTrackingCallbackIssues } from "@/utils/sdkCallbacks";
 
 const latestSdkVersion = packageJson.version;
 const latestSdkParts = latestSdkVersion.split(".");
@@ -62,18 +63,20 @@ export default function SdkTab() {
     : isRemoteEval
       ? "Remote Eval"
       : "Plain Text";
-  const trackingCallbackStatus =
-    trackingCallbackParams?.length === 2
-      ? "Found"
-      : !hasTrackingCallback
-        ? "None Found"
-        : "Found (issues)";
-  const trackingCallbackStatusColor =
-    trackingCallbackParams?.length === 2
-      ? "green"
-      : !hasTrackingCallback
-        ? "red"
-        : "orange";
+  const trackingCallbackIssues = hasTrackingCallbackIssues({
+    hasTrackingCallback,
+    trackingCallbackParams,
+  });
+  const trackingCallbackStatus = !hasTrackingCallback
+    ? "None Found"
+    : trackingCallbackIssues
+      ? "Found (issues)"
+      : "Found";
+  const trackingCallbackStatusColor = !hasTrackingCallback
+    ? "red"
+    : trackingCallbackIssues
+      ? "orange"
+      : "green";
   const canConnectStatus =
     sdkFound === undefined
       ? "Loading..."
@@ -301,8 +304,7 @@ export function getSdkStatus(
     (!sdkData.canConnect && !numExternalSdks) ||
     (sdkData.canConnect && !sdkData.hasPayload) ||
     (!sdkData.hasTrackingCallback && !numExternalSdks) ||
-    (sdkData.hasTrackingCallback &&
-      sdkData.trackingCallbackParams?.length !== 2) ||
+    hasTrackingCallbackIssues(sdkData) ||
     (sdkData.hasPayload && !sdkData.payloadDecrypted) ||
     (paddedVersionString(sdkData.version) <
       paddedVersionString(latestMinorSdkVersion) &&

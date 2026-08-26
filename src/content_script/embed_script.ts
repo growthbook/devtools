@@ -10,6 +10,7 @@ import type {
 } from "@growthbook/growthbook";
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import { Attributes } from "@growthbook/growthbook";
+import { parseCallbackParams } from "@/utils/sdkCallbacks";
 
 type LogUnionWithSource = LogUnion & { source?: string; clientKey?: string };
 
@@ -458,6 +459,8 @@ function subscribeToSdkChanges(
     const patchedCallBack = (
       experiment: Experiment<any>,
       result: Result<any>,
+      // Newer SDKs pass a third userContext arg - forward whatever we get
+      ...rest: unknown[]
     ) => {
       if (!hasSdkLogSupport) {
         gb.logs!.push({
@@ -473,16 +476,16 @@ function subscribeToSdkChanges(
           { experiment, result },
         ]);
       }
-      callback(experiment, result);
+      (callback as (...args: unknown[]) => unknown)(
+        experiment,
+        result,
+        ...rest,
+      );
     };
     if ("isNoopCallback" in callback && callback.isNoopCallback) {
       patchedCallBack.isNoopCallback = true;
     } else {
-      patchedCallBack.originalParams = callback
-        .toString()
-        .match(/\(([^)]+)\)/)?.[1]
-        .split(",")
-        .map((param: string) => param.trim());
+      patchedCallBack.originalParams = parseCallbackParams(callback);
     }
     _setTrackingCallback?.call(gb, patchedCallBack);
     pushAppUpdates();
@@ -499,7 +502,12 @@ function subscribeToSdkChanges(
 
   // Feature usage callbacks
   // @ts-expect-error Context is private but we still need to write it here
-  gb.context.onFeatureUsage = (key: string, result: FeatureResult<any>) => {
+  gb.context.onFeatureUsage = (
+    key: string,
+    result: FeatureResult<any>,
+    // Newer SDKs pass a third userContext arg - forward whatever we get
+    ...rest: unknown[]
+  ) => {
     if (!hasSdkLogSupport) {
       gb.logs!.push({
         featureKey: key,
@@ -509,7 +517,7 @@ function subscribeToSdkChanges(
       });
     }
     if (typeof onFeatureUsage === "function") {
-      onFeatureUsage(key, result);
+      (onFeatureUsage as (...args: unknown[]) => unknown)(key, result, ...rest);
     }
   };
   if (!onFeatureUsage || typeof onFeatureUsage !== "function") {
