@@ -555,8 +555,7 @@ function trackingCallbackPanel({
           <code className="text-gold-11">trackingCallback</code> with{" "}
           <em className="text-amber-600">2</em> params, but SDK {version} calls
           it as <code>(experiment, result, userContext)</code>. Without the
-          third param you lose the user&rsquo;s attributes, and the tracked
-          experiment and feature keys that come with it. Add{" "}
+          third param you will not get some newer features. Add{" "}
           <code>userContext</code> to your implementation.
         </>
       ) : unusedUserContext ? (
@@ -566,7 +565,8 @@ function trackingCallbackPanel({
           <em className="text-amber-600">3</em> params, but SDK {version} only
           calls it as <code>(experiment, result)</code>, so{" "}
           <code>userContext</code> is always undefined. Upgrade to{" "}
-          {USER_CONTEXT_SDK_VERSION} or later to receive it.
+          {USER_CONTEXT_SDK_VERSION} or later to use the newer features that
+          rely on it.
         </>
       ) : !trackingCallbackParamsAreValid(trackingCallbackParams, version) ? (
         <>
