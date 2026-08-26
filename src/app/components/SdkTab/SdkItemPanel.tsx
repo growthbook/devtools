@@ -538,31 +538,28 @@ function trackingCallbackPanel({
           <code className="text-gold-11">trackingCallback</code>. You will need
           to add one to track experiment exposure to your data warehouse.
         </>
-      ) : trackingCallbackParamsAreValid(trackingCallbackParams) ? (
-        <>
-          The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code>
-          {trackingCallbackParams ? (
-            <>
-              {" "}
-              with {trackingCallbackParams.length} param
-              {trackingCallbackParams.length === 1 ? "" : "s"}:{" "}
-              <code>({trackingCallbackParams.join(", ")})</code>
-            </>
-          ) : null}
-          .
-        </>
-      ) : (
+      ) : !trackingCallbackParamsAreValid(trackingCallbackParams) ? (
         <>
           The SDK is using a{" "}
           <code className="text-gold-11">trackingCallback</code> with{" "}
-          <em className="text-amber-600">
-            {trackingCallbackParams?.length ?? 0}
-          </em>{" "}
+          <em className="text-amber-600">{trackingCallbackParams?.length}</em>{" "}
           param{trackingCallbackParams?.length === 1 ? "" : "s"} instead of{" "}
           <code>(experiment, result)</code> or{" "}
           <code>(experiment, result, userContext)</code>. Please check your
           implementation.
+        </>
+      ) : trackingCallbackParams?.length ? (
+        <>
+          The SDK is using a{" "}
+          <code className="text-gold-11">trackingCallback</code> with{" "}
+          {trackingCallbackParams.length} param
+          {trackingCallbackParams.length === 1 ? "" : "s"}:{" "}
+          <code>({trackingCallbackParams.join(", ")})</code>.
+        </>
+      ) : (
+        <>
+          The SDK is using a{" "}
+          <code className="text-gold-11">trackingCallback</code>.
         </>
       )}
     </Text>

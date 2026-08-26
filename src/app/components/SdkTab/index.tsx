@@ -67,16 +67,18 @@ export default function SdkTab() {
     hasTrackingCallback,
     trackingCallbackParams,
   });
+  // A rest param stands in for any arity, so a count would mislead
+  const trackingCallbackParamCount = trackingCallbackParams?.some((p) =>
+    p.startsWith("..."),
+  )
+    ? undefined
+    : trackingCallbackParams?.length;
   const trackingCallbackStatus = !hasTrackingCallback
     ? "None Found"
     : trackingCallbackIssues
       ? "Found (issues)"
-      : // A rest param stands in for any arity, so a count would mislead
-        trackingCallbackParams?.length &&
-          !trackingCallbackParams.some((p) => p.startsWith("..."))
-        ? `Found (${trackingCallbackParams.length} param${
-            trackingCallbackParams.length === 1 ? "" : "s"
-          })`
+      : trackingCallbackParamCount
+        ? `Found (${trackingCallbackParamCount} param${trackingCallbackParamCount === 1 ? "" : "s"})`
         : "Found";
   const trackingCallbackStatusColor = !hasTrackingCallback
     ? "red"

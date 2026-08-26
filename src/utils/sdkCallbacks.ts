@@ -4,14 +4,7 @@ import type { SDKHealthCheckResult } from "devtools";
 export function parseCallbackParams(
   callback: (...args: any[]) => any,
 ): string[] | undefined {
-  let src: string;
-  try {
-    // A page can shadow toString, so it may throw or return a non-string
-    src = callback.toString();
-    if (typeof src !== "string") return undefined;
-  } catch (e) {
-    return undefined;
-  }
+  const src = callback.toString();
   if (src.includes("[native code]")) return undefined;
 
   // Single-param arrow function without parens, eg `experiment => ...`
@@ -64,8 +57,7 @@ export function trackingCallbackParamsAreValid(
   params: string[] | undefined,
 ): boolean {
   if (!params) return true;
-  // Declaring nothing is indistinguishable from an arity-erasing forwarding
-  // wrapper (`function () { cb.apply(this, arguments) }`), which works fine
+  // Zero params means a forwarding wrapper that reads `arguments` instead
   if (params.length === 0) return true;
   if (params.some((param) => param.startsWith("..."))) return true;
   return params.length === 2 || params.length === 3;

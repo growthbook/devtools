@@ -472,14 +472,12 @@ function subscribeToSdkChanges(
         });
       }
       if ("isNoopCallback" in callback && callback.isNoopCallback) {
-        // Keep `user` - fireDeferredTrackingCalls replays these as
-        // trackingCallback(call.experiment, call.result, call.user)
+        // fireDeferredTrackingCalls replays these with call.user
         gb.setDeferredTrackingCalls?.([
           ...gb.getDeferredTrackingCalls(),
           { experiment, result, user },
         ]);
       }
-      // Returned so the SDK can still await an async trackingCallback
       return callback(experiment, result, user);
     };
     if ("isNoopCallback" in callback && callback.isNoopCallback) {

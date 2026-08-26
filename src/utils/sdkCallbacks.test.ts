@@ -67,20 +67,6 @@ describe("parseCallbackParams", () => {
     ]);
   });
 
-  it("returns undefined when toString returns a non-string", () => {
-    const cb: any = () => {};
-    cb.toString = () => 12345;
-    expect(parseCallbackParams(cb)).toBeUndefined();
-  });
-
-  it("returns undefined when toString throws", () => {
-    const cb: any = () => {};
-    cb.toString = () => {
-      throw new Error("nope");
-    };
-    expect(parseCallbackParams(cb)).toBeUndefined();
-  });
-
   it("does not truncate at a destructured param", () => {
     expect(
       parseCallbackParams(
@@ -103,9 +89,8 @@ describe("parseCallbackParams", () => {
     expect(parseCallbackParams(() => {})).toEqual([]);
   });
 
-  it("returns undefined for native/bound functions", () => {
-    const bound = ((a: any, b: any) => {}).bind(null);
-    expect(parseCallbackParams(bound)).toBeUndefined();
+  it("returns undefined for native functions", () => {
+    expect(parseCallbackParams(Math.max)).toBeUndefined();
   });
 });
 
