@@ -554,7 +554,7 @@ function trackingCallbackPanel({
           The SDK is using a{" "}
           <code className="text-gold-11">trackingCallback</code> with{" "}
           <em className="text-amber-600">2</em> params. Add a third{" "}
-          <code>userContext</code> param to use newer features in SDK {version}.
+          <code>userContext</code> param to use newer features.
         </>
       ) : unusedUserContext ? (
         <>
