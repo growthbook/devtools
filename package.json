@@ -8,6 +8,7 @@
     "clean": "rimraf dist",
     "test": "npx jest",
     "style": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "test-page": "cp node_modules/@growthbook/growthbook/dist/bundles/index.min.js test-page/growthbook.js && cd test-page && python3 -m http.server 8899",
     "build:chrome": "yarn clean && yarn build && cp public/manifest.chrome.json dist/manifest.json && cd dist && rm -f manifest.*.json",
     "build:firefox": "yarn clean && yarn build && cp public/manifest.firefox.json dist/manifest.json && cd dist && rm -f manifest.*.json",
     "package:chrome": "yarn clean && yarn build && cp public/manifest.chrome.json dist/manifest.json && cd dist && rm -f manifest.*.json && zip -r build.chrome.zip . && mv build.chrome.zip ../",
