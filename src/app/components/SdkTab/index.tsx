@@ -71,7 +71,9 @@ export default function SdkTab() {
     ? "None Found"
     : trackingCallbackIssues
       ? "Found (issues)"
-      : "Found";
+      : trackingCallbackParams
+        ? `Found (${trackingCallbackParams.length} params)`
+        : "Found";
   const trackingCallbackStatusColor = !hasTrackingCallback
     ? "red"
     : trackingCallbackIssues

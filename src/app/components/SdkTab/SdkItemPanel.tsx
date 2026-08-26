@@ -541,7 +541,16 @@ function trackingCallbackPanel({
       ) : trackingCallbackParamsAreValid(trackingCallbackParams) ? (
         <>
           The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code>.
+          <code className="text-gold-11">trackingCallback</code>
+          {trackingCallbackParams ? (
+            <>
+              {" "}
+              with {trackingCallbackParams.length} param
+              {trackingCallbackParams.length === 1 ? "" : "s"}:{" "}
+              <code>({trackingCallbackParams.join(", ")})</code>
+            </>
+          ) : null}
+          .
         </>
       ) : (
         <>
