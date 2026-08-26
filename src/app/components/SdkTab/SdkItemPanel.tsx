@@ -23,7 +23,11 @@ import { useResponsiveContext } from "@/app/hooks/useResponsive";
 import { SdkItem } from "./index";
 import useSdkData from "@/app/hooks/useSdkData";
 import { SDKHealthCheckResult } from "devtools";
-import { trackingCallbackParamsAreValid } from "@/utils/sdkCallbacks";
+import {
+  expectsUserContextParam,
+  trackingCallbackParamsAreValid,
+  USER_CONTEXT_SDK_VERSION,
+} from "@/utils/sdkCallbacks";
 import { getActiveTabId } from "@/app/hooks/useTabState";
 import { paddedVersionString } from "@growthbook/growthbook";
 
@@ -529,7 +533,14 @@ function versionPanel({
 function trackingCallbackPanel({
   trackingCallbackParams,
   hasTrackingCallback,
+  version,
 }: SDKHealthCheckResult) {
+  const missingUserContext =
+    expectsUserContextParam(version) && trackingCallbackParams?.length === 2;
+  const unusedUserContext =
+    version &&
+    !expectsUserContextParam(version) &&
+    trackingCallbackParams?.length === 3;
   return (
     <Text as="div" size="2" weight="regular">
       {!hasTrackingCallback ? (
@@ -538,7 +549,26 @@ function trackingCallbackPanel({
           <code className="text-gold-11">trackingCallback</code>. You will need
           to add one to track experiment exposure to your data warehouse.
         </>
-      ) : !trackingCallbackParamsAreValid(trackingCallbackParams) ? (
+      ) : missingUserContext ? (
+        <>
+          The SDK is using a{" "}
+          <code className="text-gold-11">trackingCallback</code> with{" "}
+          <em className="text-amber-600">2</em> params, but SDK {version} calls
+          it as <code>(experiment, result, userContext)</code>. Without the
+          third param you lose the user&rsquo;s attributes, and the tracked
+          experiment and feature keys that come with it. Add{" "}
+          <code>userContext</code> to your implementation.
+        </>
+      ) : unusedUserContext ? (
+        <>
+          The SDK is using a{" "}
+          <code className="text-gold-11">trackingCallback</code> with{" "}
+          <em className="text-amber-600">3</em> params, but SDK {version} only
+          calls it as <code>(experiment, result)</code>, so{" "}
+          <code>userContext</code> is always undefined. Upgrade to{" "}
+          {USER_CONTEXT_SDK_VERSION} or later to receive it.
+        </>
+      ) : !trackingCallbackParamsAreValid(trackingCallbackParams, version) ? (
         <>
           The SDK is using a{" "}
           <code className="text-gold-11">trackingCallback</code> with{" "}

@@ -66,6 +66,7 @@ export default function SdkTab() {
   const trackingCallbackIssues = hasTrackingCallbackIssues({
     hasTrackingCallback,
     trackingCallbackParams,
+    version,
   });
   // A rest param stands in for any arity, so a count would mislead
   const trackingCallbackParamCount = trackingCallbackParams?.some((p) =>

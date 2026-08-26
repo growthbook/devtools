@@ -125,6 +125,34 @@ describe("trackingCallbackParamsAreValid", () => {
   it("rejects too many params", () => {
     expect(trackingCallbackParamsAreValid(["a", "b", "c", "d"])).toBe(false);
   });
+
+  it("rejects 2 params once the SDK passes a userContext", () => {
+    expect(
+      trackingCallbackParamsAreValid(["experiment", "result"], "1.7.0"),
+    ).toBe(false);
+    expect(
+      trackingCallbackParamsAreValid(["experiment", "result"], "1.8.2"),
+    ).toBe(false);
+  });
+
+  it("accepts 2 params on SDKs that never pass a userContext", () => {
+    expect(
+      trackingCallbackParamsAreValid(["experiment", "result"], "1.6.5"),
+    ).toBe(true);
+    expect(
+      trackingCallbackParamsAreValid(["experiment", "result"], "0.36.0"),
+    ).toBe(true);
+  });
+
+  it("rejects 3 params on SDKs that never pass a userContext", () => {
+    const params = ["experiment", "result", "userContext"];
+    expect(trackingCallbackParamsAreValid(params, "1.6.5")).toBe(false);
+    expect(trackingCallbackParamsAreValid(params, "1.7.0")).toBe(true);
+  });
+
+  it("stays lenient when the version is unknown", () => {
+    expect(trackingCallbackParamsAreValid(["experiment", "result"])).toBe(true);
+  });
 });
 
 describe("hasTrackingCallbackIssues", () => {

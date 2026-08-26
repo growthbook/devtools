@@ -1,3 +1,4 @@
+import { paddedVersionString } from "@growthbook/growthbook";
 import type { SDKHealthCheckResult } from "devtools";
 
 // Pull the parameter names off a function's source. Returns undefined when we can't tell, eg native or bound functions
@@ -52,24 +53,42 @@ export function parseCallbackParams(
   return undefined;
 }
 
-// A trackingCallback may be written as `(experiment, result)` or `(experiment, result, userContext)`
+// Before this the SDK only ever called trackingCallback(experiment, result), so
+// a third param was dead weight. From here it passes the userContext too
+export const USER_CONTEXT_SDK_VERSION = "1.7.0";
+
+export function expectsUserContextParam(version?: string): boolean {
+  if (!version) return false;
+  return (
+    paddedVersionString(version) >=
+    paddedVersionString(USER_CONTEXT_SDK_VERSION)
+  );
+}
+
+// A trackingCallback takes `(experiment, result)`, or `(experiment, result, userContext)` on 1.7.0+
 export function trackingCallbackParamsAreValid(
   params: string[] | undefined,
+  version?: string,
 ): boolean {
   if (!params) return true;
   // Zero params means a forwarding wrapper that reads `arguments` instead
   if (params.length === 0) return true;
   if (params.some((param) => param.startsWith("..."))) return true;
-  return params.length === 2 || params.length === 3;
+  // Without a version to compare against, either shape may be right
+  if (!version) return params.length === 2 || params.length === 3;
+  // Omitting userContext drops what it carries, declaring it on an SDK that
+  // never passes one leaves it permanently undefined
+  return params.length === (expectsUserContextParam(version) ? 3 : 2);
 }
 
 export function hasTrackingCallbackIssues({
   hasTrackingCallback,
   trackingCallbackParams,
+  version,
 }: Pick<
   SDKHealthCheckResult,
-  "hasTrackingCallback" | "trackingCallbackParams"
+  "hasTrackingCallback" | "trackingCallbackParams" | "version"
 >): boolean {
   if (!hasTrackingCallback) return false;
-  return !trackingCallbackParamsAreValid(trackingCallbackParams);
+  return !trackingCallbackParamsAreValid(trackingCallbackParams, version);
 }
