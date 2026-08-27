@@ -567,7 +567,7 @@ export default function ExperimentDetail({
             ))}
           </div>
 
-          {/* A bandit's weights are dynamic, so the static ones here mislead */}
+          {/* A bandit's weights are dynamic, so the static ones mislead */}
           {!types?.contextualBandit ? (
             <>
               <div className="mt-6 mb-3 text-md font-semibold">

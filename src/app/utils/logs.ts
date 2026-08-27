@@ -35,7 +35,6 @@ export function reshapeEventLog(evt: LogUnionWithSource): FlattenedLogEvent {
         logType: evt.logType,
         timestamp: evt.timestamp,
         eventInfo: evt.experiment.name || "",
-        // Bandit results only carry these when the user was bucketed in
         isContextualBandit: evt.result?.variationWeights !== undefined,
         details: {
           experiment: evt.experiment,

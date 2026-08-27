@@ -1,12 +1,12 @@
 import type { Experiment, FeatureRule } from "@growthbook/growthbook";
 
-// The SDK declares these but doesn't export them from its entry point
-export type CBContext = {
+// Declared by the SDK but not exported from its entry point
+type CBContext = {
   leafId: number;
   variationWeights: number[];
   banditVersion?: number;
 };
-export type ContextualBanditDefinition = {
+type ContextualBanditDefinition = {
   banditVersion?: number;
   contexts: {
     leafId: number;
@@ -19,20 +19,19 @@ export type ContextualBanditDefinitions = Record<
   ContextualBanditDefinition
 >;
 
-// A contextual bandit rule keeps its variations under `contextualVariations` so
-// that pre-1.7 SDKs skip the rule instead of evaluating it with no weights
+// leafId -1 means no context matched and the SDK used the aggregate weights
+export const FALLBACK_LEAF_ID = -1;
+
+// Bandit rules keep their variations here so pre-1.7 SDKs skip the rule
 export function ruleVariations<T>(
   rule: FeatureRule<T>,
 ): Experiment<T>["variations"] | undefined {
-  // FeatureRule types these as T[], but an experiment needs at least two
   return (rule.contextualVariations ?? rule.variations) as
     | Experiment<T>["variations"]
     | undefined;
 }
 
-// `contextualVariations` is what marks the rule: the backend always emits it in
-// place of `variations`, while `contextualBanditRef` and the payload's
-// `contextualBandits` block only appear once the bandit has trained contexts
+// contextualBanditRef only appears once the bandit has trained contexts
 export function isContextualBandit(
   experiment:
     | { contextualVariations?: unknown[]; contextualBanditRef?: string }
@@ -43,23 +42,11 @@ export function isContextualBandit(
   );
 }
 
-// The SDK only sets `contextualBandit` when the user was actually bucketed in,
-// so its absence on a bandit experiment means the weights aren't live
-export function getContextualBandit(
-  experiment: Experiment<any> | undefined,
-): CBContext | undefined {
-  return experiment?.contextualBandit;
-}
-
-// leafId -1 means no context matched and the SDK fell back to aggregate weights
-export const FALLBACK_LEAF_ID = -1;
-
 export function usedFallbackWeights(cb: CBContext | undefined): boolean {
   return cb?.leafId === FALLBACK_LEAF_ID;
 }
 
-// The attributes a bandit's matched context actually tested - this is the
-// "contextual" part, and the only piece of the definition worth showing
+// The attributes the matched context tested - the "contextual" part
 export function getMatchedContextAttributes(
   definition: ContextualBanditDefinition | undefined,
   cb: CBContext | undefined,
@@ -75,11 +62,8 @@ export function getMatchedContextAttributes(
   return used;
 }
 
-// Pull attribute names out of a mongo-style condition, skipping $and/$or/$not
-// wrappers so nested conditions still report the attributes they test
-export function conditionAttributeKeys(
-  condition: Record<string, unknown>,
-): string[] {
+// Attribute names in a condition, descending through $and/$or wrappers
+function conditionAttributeKeys(condition: Record<string, unknown>): string[] {
   const keys = new Set<string>();
   const walk = (node: unknown) => {
     if (Array.isArray(node)) {

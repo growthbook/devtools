@@ -1,6 +1,7 @@
 import React from "react";
 import { Badge, Text } from "@radix-ui/themes";
 import * as Accordion from "@radix-ui/react-accordion";
+import clsx from "clsx";
 import {
   PiCaretRightFill,
   PiCheckCircleFill,
@@ -21,7 +22,7 @@ import {
   trackingCallbackParamsAreValid,
 } from "@/utils/sdkCallbacks";
 
-// Matches how experiment weights are shown elsewhere, eg Rule.tsx
+// Matches Rule.tsx
 function formatWeight(weight: number) {
   return Math.round(weight * 1000) / 10 + "%";
 }
@@ -72,8 +73,7 @@ export default function ContextualBanditDetail({
     | undefined;
   const definition = banditRef ? definitions?.[banditRef] : undefined;
 
-  // The SDK only applies bandit weights while evaluating the feature rule, so
-  // they land on the feature's experimentResult - never on gb.run() or the raw rule
+  // Bandit weights are applied during feature evaluation, so they land here
   const banditResult = Object.values(evaluatedFeatures)
     .map((f) => f?.result?.experimentResult)
     .find(
@@ -89,15 +89,13 @@ export default function ContextualBanditDetail({
 
   const weights = cb?.variationWeights ?? experiment.weights;
   const isFallback = usedFallbackWeights(cb);
-  // Only call them context weights when a real context actually matched
   const hasContextWeights = !!cb?.variationWeights?.length && !isFallback;
   const context = getMatchedContextAttributes(definition, cb, attributes || {});
   const contextKeys = Object.keys(context || {});
   const isForced = forcedVariation !== undefined;
   const selectedVariation = banditResult?.variationId;
 
-  // Bandit rewards are attributed per context, so the callback must receive
-  // the userContext arg that SDK 1.7+ passes as its third param
+  // Rewards are attributed per context, so userContext has to reach the callback
   const callbackPassesUserContext =
     !!sdkData?.hasTrackingCallback &&
     expectsUserContextParam(sdkData?.version) &&
@@ -169,31 +167,28 @@ export default function ContextualBanditDetail({
                     className="flex items-center gap-2 py-0.5 text-xs"
                   >
                     <div
-                      className={
-                        i === selectedVariation
-                          ? "truncate font-semibold"
-                          : "truncate"
-                      }
+                      className={clsx("truncate", {
+                        "font-semibold": i === selectedVariation,
+                      })}
                       style={{ width: 130 }}
                     >
                       {i} &middot; {variationNames[i] ?? `Variation ${i}`}
                     </div>
                     <div className="flex-1 rounded-full bg-gray-a4 h-1.5 overflow-hidden">
                       <div
-                        className={
+                        className={clsx(
+                          "h-full rounded-full",
                           i === selectedVariation
-                            ? "h-full rounded-full bg-violet-9"
-                            : "h-full rounded-full bg-violet-6"
-                        }
+                            ? "bg-violet-9"
+                            : "bg-violet-6",
+                        )}
                         style={{ width: `${weight * 100}%` }}
                       />
                     </div>
                     <div
-                      className={
-                        i === selectedVariation
-                          ? "text-right font-semibold"
-                          : "text-right"
-                      }
+                      className={clsx("text-right", {
+                        "font-semibold": i === selectedVariation,
+                      })}
                       style={{ width: 52 }}
                     >
                       {formatWeight(weight)}

@@ -1,5 +1,4 @@
 import {
-  conditionAttributeKeys,
   getMatchedContextAttributes,
   isContextualBandit,
   ruleVariations,
@@ -53,26 +52,6 @@ describe("usedFallbackWeights", () => {
   });
 });
 
-describe("conditionAttributeKeys", () => {
-  it("reads plain attribute names", () => {
-    expect(conditionAttributeKeys({ country: "US", device: "mobile" })).toEqual(
-      ["country", "device"],
-    );
-  });
-
-  it("descends through $and / $or wrappers", () => {
-    expect(
-      conditionAttributeKeys({
-        $or: [{ country: "US" }, { $and: [{ plan: "pro" }, { seats: 5 }] }],
-      }),
-    ).toEqual(["country", "plan", "seats"]);
-  });
-
-  it("does not report operators as attributes", () => {
-    expect(conditionAttributeKeys({ age: { $gt: 18 } })).toEqual(["age"]);
-  });
-});
-
 describe("getMatchedContextAttributes", () => {
   const definition = {
     banditVersion: 4,
@@ -115,6 +94,25 @@ describe("getMatchedContextAttributes", () => {
         attributes,
       ),
     ).toBeUndefined();
+  });
+
+  it("descends through $and / $or in a context condition", () => {
+    const nested = {
+      contexts: [
+        {
+          leafId: 0,
+          condition: { $or: [{ country: "US" }, { plan: "pro" }] },
+          weights: [0.5, 0.5],
+        },
+      ],
+    };
+    expect(
+      getMatchedContextAttributes(
+        nested,
+        { leafId: 0, variationWeights: [] },
+        attributes,
+      ),
+    ).toEqual({ country: "US", plan: "pro" });
   });
 
   it("skips attributes the user does not have set", () => {

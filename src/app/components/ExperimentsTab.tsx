@@ -487,7 +487,6 @@ export function getFeatureExperiments(
           features: [fid],
           featureTypes: { [fid]: details.valueType },
           ...rule,
-          // Contextual bandit rules carry these under contextualVariations
           variations,
         });
       }

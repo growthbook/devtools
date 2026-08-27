@@ -22,7 +22,6 @@ export function parseCallbackParams(
   let quote: string | null = null;
   for (let i = open; i < src.length; i++) {
     const char = src[i];
-    // Brackets and commas inside a string default aren't structure
     if (quote) {
       current += char;
       if (char === "\\") current += src[++i] ?? "";
@@ -53,8 +52,7 @@ export function parseCallbackParams(
   return undefined;
 }
 
-// Before this the SDK only ever called trackingCallback(experiment, result), so
-// a third param was dead weight. From here it passes the userContext too
+// From this version the SDK also passes a userContext to trackingCallback
 export const USER_CONTEXT_SDK_VERSION = "1.7.0";
 
 export function expectsUserContextParam(version?: string): boolean {
@@ -74,10 +72,7 @@ export function trackingCallbackParamsAreValid(
   // Zero params means a forwarding wrapper that reads `arguments` instead
   if (params.length === 0) return true;
   if (params.some((param) => param.startsWith("..."))) return true;
-  // Without a version to compare against, either shape may be right
   if (!version) return params.length === 2 || params.length === 3;
-  // Omitting userContext drops what it carries, declaring it on an SDK that
-  // never passes one leaves it permanently undefined
   return params.length === (expectsUserContextParam(version) ? 3 : 2);
 }
 
