@@ -62,7 +62,7 @@ export default function ContextualBanditDetail({
 
   return (
     <>
-      <div className="mt-4 mb-1 text-md font-semibold">Contextual Bandit</div>
+      <div className="label font-semibold mt-3">Contextual Bandit</div>
 
       {banditRef && !definition ? (
         <Text as="div" size="2" color="amber" mb="3">

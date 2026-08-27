@@ -438,6 +438,22 @@ export default function ExperimentDetail({
             customPrismOuterStyle={{ marginTop: 4 }}
           />
 
+          {types?.contextualBandit && selectedExperiment?.experiment ? (
+            <ContextualBanditDetail
+              experiment={selectedExperiment.experiment}
+              variationNames={(
+                selectedExperiment.experiment.meta ??
+                variations?.map(() => undefined) ??
+                []
+              ).map((m, i) => m?.name ?? `Variation ${i}`)}
+              forcedVariation={
+                selectedEid && selectedEid in forcedVariations
+                  ? forcedVariations[selectedEid]
+                  : undefined
+              }
+            />
+          ) : null}
+
           {evaluations.length ? (
             <EvaluationSourceViewer
               evaluations={evaluations}
@@ -508,22 +524,6 @@ export default function ExperimentDetail({
                 ))}
               </div>
             </>
-          ) : null}
-
-          {types?.contextualBandit && selectedExperiment?.experiment ? (
-            <ContextualBanditDetail
-              experiment={selectedExperiment.experiment}
-              variationNames={(
-                selectedExperiment.experiment.meta ??
-                variations?.map(() => undefined) ??
-                []
-              ).map((m, i) => m?.name ?? `Variation ${i}`)}
-              forcedVariation={
-                selectedEid && selectedEid in forcedVariations
-                  ? forcedVariations[selectedEid]
-                  : undefined
-              }
-            />
           ) : null}
 
           <div className="mt-4 mb-1 text-md font-semibold">
