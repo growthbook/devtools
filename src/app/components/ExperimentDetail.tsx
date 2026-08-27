@@ -567,61 +567,66 @@ export default function ExperimentDetail({
             ))}
           </div>
 
-          <div className="mt-6 mb-3 text-md font-semibold">
-            Targeting and Traffic
-          </div>
+          {/* A bandit's weights are dynamic, so the static ones here mislead */}
+          {!types?.contextualBandit ? (
+            <>
+              <div className="mt-6 mb-3 text-md font-semibold">
+                Targeting and Traffic
+              </div>
 
-          {urlPatterns?.length ? (
-            <div className="box mb-4">
-              <div className="text-sm font-bold">URL Targeting</div>
-              <ul className="list-disc ml-4 my-2">
-                {urlPatterns.map((pattern, i) => (
-                  <li className="text-sm leading-5" key={i}>
-                    <div className="break-all">{pattern.pattern}</div>
-                    {pattern.type !== "simple" && (
-                      <div className="text-xs mt-1">
-                        ({pattern.type}
-                        {pattern.include ? ", exclude" : ""})
-                      </div>
-                    )}
-                    <div>
-                      {isURLTargeted(url, [pattern]) ? (
-                        <div className="text-green-900 bg-green-200 dark:text-white dark:bg-green-600/75 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
-                          Current URL targeted
+              {urlPatterns?.length ? (
+                <div className="box mb-4">
+                  <div className="text-sm font-bold">URL Targeting</div>
+                  <ul className="list-disc ml-4 my-2">
+                    {urlPatterns.map((pattern, i) => (
+                      <li className="text-sm leading-5" key={i}>
+                        <div className="break-all">{pattern.pattern}</div>
+                        {pattern.type !== "simple" && (
+                          <div className="text-xs mt-1">
+                            ({pattern.type}
+                            {pattern.include ? ", exclude" : ""})
+                          </div>
+                        )}
+                        <div>
+                          {isURLTargeted(url, [pattern]) ? (
+                            <div className="text-green-900 bg-green-200 dark:text-white dark:bg-green-600/75 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                              Current URL targeted
+                            </div>
+                          ) : (
+                            <div className="text-red-500 bg-red-100 dark:text-white dark:bg-red-700/50 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                              Current URL excluded
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <div className="text-red-500 bg-red-100 dark:text-white dark:bg-red-700/50 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
-                          Current URL excluded
-                        </div>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-
-          <div className="box text-xs">
-            <div className="text-sm font-bold mb-2">Experiment</div>
-
-            <div className="mx-3">
-              {condition || parentConditions ? (
-                <ConditionDisplay
-                  condition={condition}
-                  parentConditions={parentConditions}
-                />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ) : null}
 
-              <ExperimentRule
-                variations={variations}
-                weights={weights}
-                hashAttribute={hashAttribute}
-                coverage={coverage}
-                namespace={namespace}
-                valueType={valueType}
-              />
-            </div>
-          </div>
+              <div className="box text-xs">
+                <div className="text-sm font-bold mb-2">Experiment</div>
+
+                <div className="mx-3">
+                  {condition || parentConditions ? (
+                    <ConditionDisplay
+                      condition={condition}
+                      parentConditions={parentConditions}
+                    />
+                  ) : null}
+
+                  <ExperimentRule
+                    variations={variations}
+                    weights={weights}
+                    hashAttribute={hashAttribute}
+                    coverage={coverage}
+                    namespace={namespace}
+                    valueType={valueType}
+                  />
+                </div>
+              </div>
+            </>
+          ) : null}
 
           {selectedExperiment ? (
             <div className="mt-3 mb-1">
