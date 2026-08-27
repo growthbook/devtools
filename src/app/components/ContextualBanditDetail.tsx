@@ -1,7 +1,11 @@
 import React from "react";
 import { Badge, Text } from "@radix-ui/themes";
 import * as Accordion from "@radix-ui/react-accordion";
-import { PiCaretRightFill } from "react-icons/pi";
+import {
+  PiCaretRightFill,
+  PiCheckCircleFill,
+  PiWarningFill,
+} from "react-icons/pi";
 import { Experiment } from "@growthbook/growthbook";
 import useTabState from "@/app/hooks/useTabState";
 import useSdkData from "@/app/hooks/useSdkData";
@@ -12,19 +16,36 @@ import {
   getMatchedContextAttributes,
   usedFallbackWeights,
 } from "@/utils/contextualBandits";
+import {
+  expectsUserContextParam,
+  trackingCallbackParamsAreValid,
+} from "@/utils/sdkCallbacks";
 
 // Matches how experiment weights are shown elsewhere, eg Rule.tsx
 function formatWeight(weight: number) {
   return Math.round(weight * 1000) / 10 + "%";
 }
 
-function MetaRow({ label, value }: { label: string; value: React.ReactNode }) {
+function Check({
+  ok,
+  children,
+  hint,
+}: {
+  ok: boolean;
+  children: React.ReactNode;
+  hint?: string;
+}) {
   return (
-    <div className="flex items-baseline gap-2 text-xs py-0.5">
-      <div className="text-gray-11" style={{ width: 110 }}>
-        {label}
+    <div className="flex items-start gap-2 text-xs mb-1">
+      {ok ? (
+        <PiCheckCircleFill className="text-green-9 flex-shrink-0 mt-0.5" />
+      ) : (
+        <PiWarningFill className="text-amber-9 flex-shrink-0 mt-0.5" />
+      )}
+      <div>
+        <div>{children}</div>
+        {hint ? <div className="text-gray-11 mt-0.5">{hint}</div> : null}
       </div>
-      <div className="font-semibold break-all">{value}</div>
     </div>
   );
 }
@@ -68,10 +89,22 @@ export default function ContextualBanditDetail({
 
   const weights = cb?.variationWeights ?? experiment.weights;
   const isFallback = usedFallbackWeights(cb);
+  // Only call them context weights when a real context actually matched
+  const hasContextWeights = !!cb?.variationWeights?.length && !isFallback;
   const context = getMatchedContextAttributes(definition, cb, attributes || {});
   const contextKeys = Object.keys(context || {});
   const isForced = forcedVariation !== undefined;
   const selectedVariation = banditResult?.variationId;
+
+  // Bandit rewards are attributed per context, so the callback must receive
+  // the userContext arg that SDK 1.7+ passes as its third param
+  const callbackPassesUserContext =
+    !!sdkData?.hasTrackingCallback &&
+    expectsUserContextParam(sdkData?.version) &&
+    trackingCallbackParamsAreValid(
+      sdkData?.trackingCallbackParams,
+      sdkData?.version,
+    );
 
   const leafLabel = !cb
     ? "No trained contexts in payload"
@@ -83,12 +116,14 @@ export default function ContextualBanditDetail({
     <>
       <div className="label font-semibold mt-3">Contextual Bandit</div>
 
-      <div className="box mb-3">
-        {banditRef ? <MetaRow label="Bandit" value={banditRef} /> : null}
-        <MetaRow label="Current leaf" value={leafLabel} />
-        {cb?.banditVersion !== undefined ? (
-          <MetaRow label="Bandit version" value={cb.banditVersion} />
-        ) : null}
+      <div className="text-xs text-gray-11 mb-2">
+        {[
+          banditRef ? `contextualBanditRef: ${banditRef}` : null,
+          `leaf: ${leafLabel}`,
+          cb?.banditVersion !== undefined ? `v${cb.banditVersion}` : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
       </div>
 
       {isForced ? (
@@ -113,8 +148,15 @@ export default function ContextualBanditDetail({
             <Accordion.Trigger className="trigger mb-0.5">
               <Text size="2" weight="medium">
                 <PiCaretRightFill className="caret mr-0.5" size={12} />
-                Variation Weights
+                {hasContextWeights
+                  ? "Weights for this context"
+                  : "Variation Weights"}
               </Text>
+              {hasContextWeights && !isFallback ? (
+                <Badge size="1" color="gray" className="text-2xs ml-2">
+                  leaf {cb?.leafId}
+                </Badge>
+              ) : null}
               <Text size="1" color="gray" ml="2">
                 {weights.length} variation{weights.length === 1 ? "" : "s"}
               </Text>
@@ -195,6 +237,25 @@ export default function ContextualBanditDetail({
           </Accordion.Item>
         ) : null}
       </Accordion.Root>
+
+      <div className="label font-semibold mt-3">Setup</div>
+      <Check
+        ok={callbackPassesUserContext}
+        hint={
+          callbackPassesUserContext
+            ? undefined
+            : "Bandit rewards can't be attributed without the third userContext param."
+        }
+      >
+        {callbackPassesUserContext
+          ? "trackingCallback passes userContext"
+          : "trackingCallback is missing the userContext param"}
+      </Check>
+      <Check ok={!!definition}>
+        {definition
+          ? "Bandit definition found in payload"
+          : "No bandit definition in payload"}
+      </Check>
     </>
   );
 }
