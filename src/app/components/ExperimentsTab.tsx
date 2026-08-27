@@ -29,6 +29,7 @@ import { isContextualBandit, ruleVariations } from "@/utils/contextualBandits";
 export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
   features?: string[];
   contextualBanditRef?: string;
+  contextualVariations?: unknown[];
   featureTypes?: Record<string, ValueType>;
   isDraft?: boolean;
   isInactive?: boolean;

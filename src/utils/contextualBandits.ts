@@ -30,10 +30,17 @@ export function ruleVariations<T>(
     | undefined;
 }
 
+// `contextualVariations` is what marks the rule: the backend always emits it in
+// place of `variations`, while `contextualBanditRef` and the payload's
+// `contextualBandits` block only appear once the bandit has trained contexts
 export function isContextualBandit(
-  experiment: { contextualBanditRef?: string } | undefined,
+  experiment:
+    | { contextualVariations?: unknown[]; contextualBanditRef?: string }
+    | undefined,
 ): boolean {
-  return !!experiment?.contextualBanditRef;
+  return (
+    !!experiment?.contextualVariations || !!experiment?.contextualBanditRef
+  );
 }
 
 // The SDK only sets `contextualBandit` when the user was actually bucketed in,
