@@ -125,3 +125,36 @@ describe("getMatchedContextAttributes", () => {
     ).toEqual({ country: "US" });
   });
 });
+
+// Result.key is the variation key ("0", "1", …), not the experiment key, so a
+// lookup keyed on it silently finds nothing and the bandit panel goes inert
+describe("finding a bandit result among evaluated features", () => {
+  const evaluatedFeatures = {
+    f1: {
+      result: {
+        experiment: { key: "my-bandit" },
+        experimentResult: {
+          key: "1",
+          variationId: 1,
+          leafId: 3,
+          variationWeights: [0.02, 0.96, 0.02],
+          banditVersion: 9,
+        },
+      },
+    },
+  };
+
+  it("matches on the experiment key, not the result key", () => {
+    const found = Object.values(evaluatedFeatures).find(
+      (f) => f?.result?.experiment?.key === "my-bandit",
+    )?.result?.experimentResult;
+    expect(found?.leafId).toBe(3);
+    expect(found?.variationWeights).toEqual([0.02, 0.96, 0.02]);
+  });
+
+  it("does not match the result key against the experiment key", () => {
+    expect(evaluatedFeatures.f1.result.experimentResult.key).not.toBe(
+      "my-bandit",
+    );
+  });
+});

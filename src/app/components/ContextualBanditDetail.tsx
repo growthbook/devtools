@@ -74,12 +74,10 @@ export default function ContextualBanditDetail({
   const definition = banditRef ? definitions?.[banditRef] : undefined;
 
   // Bandit weights are applied during feature evaluation, so they land here
-  const banditResult = Object.values(evaluatedFeatures)
-    .map((f) => f?.result?.experimentResult)
-    .find(
-      (r) => r?.key === experiment.key && r?.variationWeights !== undefined,
-    );
-  const cb = banditResult
+  const banditResult = Object.values(evaluatedFeatures).find(
+    (f) => f?.result?.experiment?.key === experiment.key,
+  )?.result?.experimentResult;
+  const cb = banditResult?.variationWeights
     ? {
         leafId: banditResult.leafId ?? FALLBACK_LEAF_ID,
         variationWeights: banditResult.variationWeights ?? [],
