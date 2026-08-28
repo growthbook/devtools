@@ -1,4 +1,5 @@
 import { LogUnion } from "@growthbook/growthbook";
+import { appliedContextualBandit } from "@/utils/contextualBandits";
 
 export interface FlattenedLogEvent {
   logType: string;
@@ -35,7 +36,7 @@ export function reshapeEventLog(evt: LogUnionWithSource): FlattenedLogEvent {
         logType: evt.logType,
         timestamp: evt.timestamp,
         eventInfo: evt.experiment.name || "",
-        isContextualBandit: evt.result?.variationWeights !== undefined,
+        isContextualBandit: appliedContextualBandit(evt.experiment),
         details: {
           experiment: evt.experiment,
           result: evt.result,

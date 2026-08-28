@@ -5,12 +5,12 @@ import clsx from "clsx";
 import {
   PiCaretRightFill,
   PiCheckCircleFill,
+  PiInfoBold,
   PiWarningFill,
 } from "react-icons/pi";
-import { Experiment } from "@growthbook/growthbook";
+import { Experiment, Result } from "@growthbook/growthbook";
 import useTabState from "@/app/hooks/useTabState";
 import useSdkData from "@/app/hooks/useSdkData";
-import useGBSandboxEval from "@/app/hooks/useGBSandboxEval";
 import {
   ContextualBanditDefinitions,
   FALLBACK_LEAF_ID,
@@ -29,16 +29,20 @@ function formatWeight(weight: number) {
 
 function Check({
   ok,
+  info,
   children,
   hint,
 }: {
-  ok: boolean;
+  ok?: boolean;
+  info?: boolean;
   children: React.ReactNode;
   hint?: string;
 }) {
   return (
     <div className="flex items-start gap-2 text-xs mb-1">
-      {ok ? (
+      {info ? (
+        <PiInfoBold className="text-gray-9 flex-shrink-0 mt-0.5" />
+      ) : ok ? (
         <PiCheckCircleFill className="text-green-9 flex-shrink-0 mt-0.5" />
       ) : (
         <PiWarningFill className="text-amber-9 flex-shrink-0 mt-0.5" />
@@ -55,6 +59,7 @@ export default function ContextualBanditDetail({
   experiment,
   variationNames,
   forcedVariation,
+  result,
 }: {
   experiment: Experiment<any> & {
     contextualBanditRef?: string;
@@ -62,26 +67,21 @@ export default function ContextualBanditDetail({
   };
   variationNames: string[];
   forcedVariation?: number;
+  result?: Result<any>;
 }) {
   const sdkData = useSdkData();
   const [attributes] = useTabState<Record<string, any>>("attributes", {});
-  const { evaluatedFeatures } = useGBSandboxEval();
-
   const banditRef = experiment.contextualBanditRef;
   const definitions = sdkData?.payload?.contextualBandits as
     | ContextualBanditDefinitions
     | undefined;
   const definition = banditRef ? definitions?.[banditRef] : undefined;
 
-  // Bandit weights are applied during feature evaluation, so they land here
-  const banditResult = Object.values(evaluatedFeatures).find(
-    (f) => f?.result?.experiment?.key === experiment.key,
-  )?.result?.experimentResult;
-  const cb = banditResult?.variationWeights
+  const cb = result?.variationWeights
     ? {
-        leafId: banditResult.leafId ?? FALLBACK_LEAF_ID,
-        variationWeights: banditResult.variationWeights ?? [],
-        banditVersion: banditResult.banditVersion,
+        leafId: result.leafId ?? FALLBACK_LEAF_ID,
+        variationWeights: result.variationWeights,
+        banditVersion: result.banditVersion,
       }
     : undefined;
 
@@ -91,7 +91,7 @@ export default function ContextualBanditDetail({
   const context = getMatchedContextAttributes(definition, cb, attributes || {});
   const contextKeys = Object.keys(context || {});
   const isForced = forcedVariation !== undefined;
-  const selectedVariation = banditResult?.variationId;
+  const selectedVariation = result?.variationId;
 
   // Rewards are attributed per context, so userContext has to reach the callback
   const callbackPassesUserContext =
@@ -102,11 +102,13 @@ export default function ContextualBanditDetail({
       sdkData?.version,
     );
 
-  const leafLabel = !cb
-    ? "No trained contexts in payload"
-    : isFallback
+  const leafLabel = cb
+    ? isFallback
       ? "No matching context"
-      : cb.leafId;
+      : cb.leafId
+    : definition
+      ? "Not applied for this user"
+      : "No trained contexts yet";
 
   return (
     <>
@@ -148,11 +150,7 @@ export default function ContextualBanditDetail({
                   ? "Weights for this context"
                   : "Variation Weights"}
               </Text>
-              {hasContextWeights && !isFallback ? (
-                <Badge size="1" color="gray" className="text-2xs ml-2">
-                  leaf {cb?.leafId}
-                </Badge>
-              ) : null}
+
               <Text size="1" color="gray" ml="2">
                 {weights.length} variation{weights.length === 1 ? "" : "s"}
               </Text>
@@ -232,23 +230,32 @@ export default function ContextualBanditDetail({
       </Accordion.Root>
 
       <div className="label font-semibold mt-3">Setup</div>
-      <Check
-        ok={callbackPassesUserContext}
-        hint={
-          callbackPassesUserContext
-            ? undefined
-            : "Bandit rewards can't be attributed without the third userContext param."
-        }
-      >
-        {callbackPassesUserContext
-          ? "trackingCallback passes userContext"
-          : "trackingCallback is missing the userContext param"}
-      </Check>
-      <Check ok={!!definition}>
-        {definition
-          ? "Bandit definition found in payload"
-          : "No bandit definition in payload"}
-      </Check>
+      {!expectsUserContextParam(sdkData?.version) ? (
+        <Check info>
+          SDK {sdkData?.version ?? "version unknown"} does not pass userContext
+          to trackingCallback
+        </Check>
+      ) : (
+        <Check
+          ok={callbackPassesUserContext}
+          hint={
+            callbackPassesUserContext
+              ? undefined
+              : "Bandit rewards can't be attributed without the third userContext param."
+          }
+        >
+          {callbackPassesUserContext
+            ? "trackingCallback passes userContext"
+            : "trackingCallback is missing the userContext param"}
+        </Check>
+      )}
+      {definition ? (
+        <Check ok>Bandit definition found in payload</Check>
+      ) : banditRef ? (
+        <Check ok={false}>Bandit definition missing from payload</Check>
+      ) : (
+        <Check info>No trained contexts yet, so weights are still even</Check>
+      )}
     </>
   );
 }

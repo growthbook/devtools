@@ -451,6 +451,7 @@ export default function ExperimentDetail({
                   ? forcedVariations[selectedEid]
                   : undefined
               }
+              result={selectedExperiment.evaluatedExperiment?.result}
             />
           ) : null}
 

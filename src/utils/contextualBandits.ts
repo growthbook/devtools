@@ -42,6 +42,13 @@ export function isContextualBandit(
   );
 }
 
+// The runtime experiment only keeps this once bandit weights were applied
+export function appliedContextualBandit(
+  experiment: { contextualBandit?: CBContext } | undefined,
+): boolean {
+  return !!experiment?.contextualBandit;
+}
+
 export function usedFallbackWeights(cb: CBContext | undefined): boolean {
   return cb?.leafId === FALLBACK_LEAF_ID;
 }

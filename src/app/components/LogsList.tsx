@@ -23,6 +23,7 @@ import {
 import ValueField from "./ValueField";
 import clsx from "clsx";
 import { LogUnionWithSource } from "@/app/utils/logs";
+import { ContextualBanditBadge } from "@/app/components/ContextualBanditDetail";
 
 export const HEADER_H = 40;
 
@@ -259,13 +260,9 @@ export default function LogsList({
                     >
                       {evt.eventInfo}
                       {evt.isContextualBandit ? (
-                        <Badge
-                          size="1"
-                          color="violet"
-                          className="text-2xs ml-1.5 flex-shrink-0"
-                        >
-                          Contextual Bandit
-                        </Badge>
+                        <span className="ml-1.5 flex-shrink-0">
+                          <ContextualBanditBadge />
+                        </span>
                       ) : null}
                     </div>
                     {!isResponsive && (

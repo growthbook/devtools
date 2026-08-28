@@ -25,6 +25,7 @@ import { useResponsiveContext } from "../hooks/useResponsive";
 import { TbEyeSearch } from "react-icons/tb";
 import { LogUnionWithSource } from "@/app/utils/logs";
 import { isContextualBandit, ruleVariations } from "@/utils/contextualBandits";
+import { ContextualBanditBadge } from "@/app/components/ContextualBanditDetail";
 
 export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
   features?: string[];
@@ -318,9 +319,7 @@ export default function ExperimentsTab() {
                   {types ? (
                     <div className="flex items-center gap-2 pr-0.5">
                       {types.contextualBandit ? (
-                        <Badge size="1" color="violet" className="text-2xs">
-                          Contextual Bandit
-                        </Badge>
+                        <ContextualBanditBadge />
                       ) : null}
                       {types.redirect ? (
                         <Tooltip content="URL Redirect experiment">

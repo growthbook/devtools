@@ -172,9 +172,22 @@ export default function useGBSandboxEval() {
         };
       }
 
+      // run() skips the feature-rule path, so it never applies bandit weights.
+      // Reuse the feature's own result for those to avoid reporting a variation
+      // the page isn't serving.
+      const banditResults = new Map<string, Result<any>>();
+      for (const fid in evaluatedFeatures) {
+        const featureResult = evaluatedFeatures[fid]?.result;
+        const key = featureResult?.experiment?.key;
+        if (key && featureResult?.experimentResult?.variationWeights) {
+          banditResults.set(key, featureResult.experimentResult);
+        }
+      }
+
       [...experiments, ...featureExperiments].forEach((experiment) => {
+        const banditResult = banditResults.get(experiment.key);
         growthbook.debug = true;
-        const result = growthbook.run(experiment);
+        const result = banditResult ?? growthbook.run(experiment);
         growthbook.debug = false;
         const debug = [...log];
         log = [];
