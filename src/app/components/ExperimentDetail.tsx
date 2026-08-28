@@ -5,6 +5,7 @@ import {
   IconButton,
   Link,
   RadioCards,
+  Select,
   Tooltip,
 } from "@radix-ui/themes";
 import {
@@ -684,6 +685,32 @@ function EditableVariationField({
     }));
 
   if (!variationsMeta || !experiment) return null;
+
+  // Cards stop being scannable past a handful of variations
+  if (variationsMeta.length > 4) {
+    return (
+      <div className="FormRoot">
+        <Select.Root
+          value={value + ""}
+          onValueChange={(s: string) => setValue(parseInt(s))}
+        >
+          <Select.Trigger className="w-full" />
+          <Select.Content position="popper">
+            {variationsMeta.map((meta, i) => (
+              <Select.Item key={meta.key} value={i + ""}>
+                <div className="flex gap-2 items-center">
+                  <VariationIcon i={i} />
+                  <span className="text-xs">
+                    {getVariationSummary({ experiment, i })}
+                  </span>
+                </div>
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select.Root>
+      </div>
+    );
+  }
 
   return (
     <div className="FormRoot">

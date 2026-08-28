@@ -124,7 +124,7 @@ export default function ContextualBanditDetail({
         <div className="text-xs text-gray-11 mb-2">{subline}</div>
       ) : null}
 
-      {isForced ? (
+      {isForced && cb ? (
         <Text as="div" size="2" color="amber" mb="3">
           A forced variation is active, so these weights are overridden and not
           what the bandit would serve.
@@ -250,7 +250,11 @@ export default function ContextualBanditDetail({
         </Check>
       )}
       {definition && !cb ? (
-        <Check info>Bandit weights were not applied for this user</Check>
+        <Check info>
+          {isForced
+            ? "Clear the forced variation to see the live bandit weights"
+            : "Bandit weights were not applied for this user"}
+        </Check>
       ) : definition ? (
         <Check ok>Bandit definition found in payload</Check>
       ) : banditRef ? (
