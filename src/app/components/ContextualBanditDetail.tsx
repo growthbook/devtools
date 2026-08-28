@@ -102,27 +102,27 @@ export default function ContextualBanditDetail({
       sdkData?.version,
     );
 
-  const leafLabel = cb
-    ? isFallback
+  // Only meaningful once bandit weights were actually applied
+  const leafLabel = !cb
+    ? undefined
+    : isFallback
       ? "No matching context"
-      : cb.leafId
-    : definition
-      ? "Not applied for this user"
-      : "No trained contexts yet";
+      : `leaf: ${cb.leafId}`;
+  const subline = [
+    banditRef ? `contextualBanditRef: ${banditRef}` : null,
+    leafLabel,
+    cb?.banditVersion !== undefined ? `v${cb.banditVersion}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <>
       <div className="label font-semibold mt-3">Contextual Bandit</div>
 
-      <div className="text-xs text-gray-11 mb-2">
-        {[
-          banditRef ? `contextualBanditRef: ${banditRef}` : null,
-          `leaf: ${leafLabel}`,
-          cb?.banditVersion !== undefined ? `v${cb.banditVersion}` : null,
-        ]
-          .filter(Boolean)
-          .join(" · ")}
-      </div>
+      {subline ? (
+        <div className="text-xs text-gray-11 mb-2">{subline}</div>
+      ) : null}
 
       {isForced ? (
         <Text as="div" size="2" color="amber" mb="3">
@@ -249,7 +249,9 @@ export default function ContextualBanditDetail({
             : "trackingCallback is missing the userContext param"}
         </Check>
       )}
-      {definition ? (
+      {definition && !cb ? (
+        <Check info>Bandit weights were not applied for this user</Check>
+      ) : definition ? (
         <Check ok>Bandit definition found in payload</Check>
       ) : banditRef ? (
         <Check ok={false}>Bandit definition missing from payload</Check>
