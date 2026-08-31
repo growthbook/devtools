@@ -12,6 +12,7 @@ import {
 import useTabState from "@/app/hooks/useTabState";
 import { DebugLog } from "devtools";
 import { getFeatureExperiments } from "@/app/components/ExperimentsTab";
+import { ruleVariations } from "@/utils/contextualBandits";
 import useSdkData from "./useSdkData";
 import { FeatureDefinitionWithId } from "@/app/components/FeaturesTab";
 import { LogUnionWithSource } from "@/app/utils/logs";
@@ -103,8 +104,14 @@ export default function useGBSandboxEval() {
           ...rule,
           // Stuff rule index + featureId into meta so it survives into exp.meta.
           // featureId is needed for experiment-ref rules where exp.key !== fid.
-          meta: rule.meta
-            ? rule.meta.map((m) => ({ ...m, ruleI: i, featureId: fid }))
+          // Must stay as long as the variations: the SDK indexes meta by
+          // variation and throws on a short array (core.ts getExperimentResult).
+          meta: ruleVariations(rule)?.length
+            ? ruleVariations(rule)!.map((_, vi) => ({
+                ...(rule.meta?.[vi] ?? {}),
+                ruleI: i,
+                featureId: fid,
+              }))
             : [{ ruleI: i, featureId: fid }],
         }));
       }

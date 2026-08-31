@@ -158,3 +158,46 @@ describe("finding a bandit result among evaluated features", () => {
     );
   });
 });
+
+// The sandbox stuffs rule metadata for its debug log. The SDK indexes
+// experiment.meta by variation index and throws on a short array, which took
+// down the whole evaluation and left every experiment showing as inactive.
+describe("stuffed rule meta", () => {
+  const stuff = (rule: any, i = 0, fid = "f1") => ({
+    ...rule,
+    meta: ruleVariations(rule)?.length
+      ? ruleVariations(rule)!.map((_, vi) => ({
+          ...(rule.meta?.[vi] ?? {}),
+          ruleI: i,
+          featureId: fid,
+        }))
+      : [{ ruleI: i, featureId: fid }],
+  });
+
+  it("stays as long as the variations when the rule has no meta", () => {
+    expect(stuff({ variations: ["off", "on"] }).meta).toHaveLength(2);
+  });
+
+  it("stays as long as the variations for a bandit rule", () => {
+    expect(
+      stuff({ contextualVariations: ["a", "b", "c", "d"] }).meta,
+    ).toHaveLength(4);
+  });
+
+  it("keeps existing meta entries", () => {
+    const meta = stuff({
+      variations: ["a", "b"],
+      meta: [
+        { key: "0", name: "A" },
+        { key: "1", name: "B" },
+      ],
+    }).meta;
+    expect(meta[1]).toMatchObject({ key: "1", name: "B", ruleI: 0 });
+  });
+
+  it("still tags a rule with no variations, which the debug log reads", () => {
+    expect(stuff({ force: true }).meta).toEqual([
+      { ruleI: 0, featureId: "f1" },
+    ]);
+  });
+});

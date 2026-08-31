@@ -52,6 +52,7 @@ import {
   EvaluationSourceViewer,
 } from "@/app/components/FeatureDetail";
 import { LogUnionWithSource } from "@/app/utils/logs";
+import { useSelectMenuPortal } from "@/app/SelectMenuPortal";
 import ContextualBanditDetail, {
   ContextualBanditBadge,
 } from "@/app/components/ContextualBanditDetail";
@@ -678,6 +679,7 @@ function EditableVariationField({
   evaluatedValue?: number;
   setValue: (v: any) => void;
 }) {
+  const menuPortalTarget = useSelectMenuPortal();
   let variationsMeta: { key?: string; name?: string }[] | undefined =
     experiment?.meta ??
     experiment?.variations?.map((variation, i) => ({
@@ -695,11 +697,12 @@ function EditableVariationField({
           onValueChange={(s: string) => setValue(parseInt(s))}
         >
           <Select.Trigger className="w-full" />
-          {/* The detail panel sits at z-index 1000, so the portaled menu
-              needs to clear it */}
+          {/* Portal into the app's menu container, as SelectField does -
+              the detail panel's stacking context otherwise hides the menu */}
           <Select.Content
             variant="soft"
             position="popper"
+            container={menuPortalTarget ?? undefined}
             style={{ zIndex: 3000 }}
           >
             {variationsMeta.map((meta, i) => (
