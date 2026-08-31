@@ -56,6 +56,9 @@ import ContextualBanditDetail, {
   ContextualBanditBadge,
 } from "@/app/components/ContextualBanditDetail";
 
+// The panel states these itself, so echoing the SDK log adds nothing
+const REDUNDANT_DEBUG_LOGS = ["In experiment", "Force via dev tools"];
+
 export default function ExperimentDetail({
   selectedEid,
   setSelectedEid,
@@ -327,7 +330,7 @@ export default function ExperimentDetail({
                   Inactive
                 </div>
               )}
-              {lastDebugLog && lastDebugLog !== "In experiment" && (
+              {lastDebugLog && !REDUNDANT_DEBUG_LOGS.includes(lastDebugLog) && (
                 <div className="border border-gray-a3 rounded-sm bg-console pt-1 px-2 mt-1">
                   <DebugLogAccordion
                     log={[lastDebugLog, {}]}
@@ -698,12 +701,19 @@ function EditableVariationField({
             value: i + "",
           }))}
           onChange={(v) => setValue(parseInt(v))}
-          formatOptionLabel={(opt) => (
-            <div className="flex gap-2 items-center">
-              <VariationIcon i={parseInt(opt.value)} />
-              <span className="text-xs">{opt.label}</span>
-            </div>
-          )}
+          formatOptionLabel={(opt) => {
+            // SelectField labels the selected value with the raw value, so
+            // derive the name from the index for the trigger and the menu alike
+            const i = parseInt(opt.value);
+            return (
+              <div className="flex gap-2 items-center">
+                <VariationIcon i={i} />
+                <span className="text-xs">
+                  {getVariationSummary({ experiment, i })}
+                </span>
+              </div>
+            );
+          }}
         />
       </div>
     );
