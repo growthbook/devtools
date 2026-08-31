@@ -91,6 +91,10 @@ export default function ContextualBanditDetail({
   const context = getMatchedContextAttributes(definition, cb, attributes || {});
   const contextKeys = Object.keys(context || {});
   const isForced = forcedVariation !== undefined;
+  // Without a value for the hash attribute the SDK skips the rule outright,
+  // so there is no assignment and no bandit data at all
+  const hashAttribute = experiment.hashAttribute ?? "id";
+  const missingHashValue = !attributes?.[hashAttribute];
   const selectedVariation = result?.variationId;
 
   // Rewards are attributed per context, so userContext has to reach the callback
@@ -259,9 +263,11 @@ export default function ContextualBanditDetail({
       )}
       {definition && !cb ? (
         <Check info>
-          {isForced
-            ? "Clear the forced variation to see the live bandit weights"
-            : "Bandit weights were not applied for this user"}
+          {missingHashValue
+            ? `No value for the "${hashAttribute}" attribute, so the rule is skipped`
+            : isForced
+              ? "Clear the forced variation to see the live bandit weights"
+              : "Bandit weights were not applied for this user"}
         </Check>
       ) : definition ? (
         <Check ok>Bandit definition found in payload</Check>
