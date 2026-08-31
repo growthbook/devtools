@@ -433,11 +433,40 @@ export default function ExperimentDetail({
               </span>
             ) : null}
           </div>
-          <ValueField
-            value={selectedExperiment?.evaluatedExperiment?.result?.value}
-            valueType={valueType}
-            customPrismOuterStyle={{ marginTop: 4 }}
-          />
+          {/* Picking by value beats picking by index when the variations are
+              readable strings, as a bandit's usually are */}
+          {selectedEid &&
+          variations &&
+          variations.length > 1 &&
+          variations.every((v) => v === null || typeof v !== "object") ? (
+            <div className="FormRoot mt-1">
+              <Select.Root
+                value={selectedVariation + ""}
+                onValueChange={(v: string) => {
+                  setForcedVariation(selectedEid, parseInt(v));
+                  setOverrideExperiment(true);
+                }}
+              >
+                <Select.Trigger className="w-full" />
+                <Select.Content variant="soft">
+                  {variations.map((variation, i) => (
+                    <Select.Item key={i} value={i + ""}>
+                      <div className="flex gap-2 items-center">
+                        <VariationIcon i={i} />
+                        <span className="text-xs">{String(variation)}</span>
+                      </div>
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
+            </div>
+          ) : (
+            <ValueField
+              value={selectedExperiment?.evaluatedExperiment?.result?.value}
+              valueType={valueType}
+              customPrismOuterStyle={{ marginTop: 4 }}
+            />
+          )}
 
           {types?.contextualBandit && selectedExperiment?.experiment ? (
             <ContextualBanditDetail
