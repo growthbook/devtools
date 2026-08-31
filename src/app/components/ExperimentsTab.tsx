@@ -8,7 +8,7 @@ import useTabState from "../hooks/useTabState";
 import useGBSandboxEval, {
   EvaluatedExperiment,
 } from "@/app/hooks/useGBSandboxEval";
-import { Badge, Link, Switch, Tooltip } from "@radix-ui/themes";
+import { Link, Switch, Tooltip } from "@radix-ui/themes";
 import { PiDesktopFill, PiFlagFill, PiLinkBold, PiXBold } from "react-icons/pi";
 import clsx from "clsx";
 import { MW, NAV_H } from "@/app";
@@ -292,7 +292,12 @@ export default function ExperimentsTab() {
                 onClick={() => clickExperiment(eid, changeId)}
               >
                 <div
-                  className="title line-clamp-1 pl-2.5 pr-8"
+                  className={clsx("title line-clamp-1 pl-2.5", {
+                    // The badge sits in an absolutely positioned sibling, so
+                    // the name needs room reserved or it runs underneath
+                    "pr-8": !types?.contextualBandit || fullWidthListView,
+                    "pr-28": types?.contextualBandit && !fullWidthListView,
+                  })}
                   style={{ width: fullWidthListView ? col1 : undefined }}
                   title={getExperimentDisplayName(experiment)}
                 >

@@ -36,7 +36,11 @@ export function reshapeEventLog(evt: LogUnionWithSource): FlattenedLogEvent {
         logType: evt.logType,
         timestamp: evt.timestamp,
         eventInfo: evt.experiment.name || "",
-        isContextualBandit: appliedContextualBandit(evt.experiment),
+        // Omitted when false: useSearch matches JSON.stringify(item), so a
+        // literal false makes every row match a search for "bandit"
+        ...(appliedContextualBandit(evt.experiment)
+          ? { isContextualBandit: true }
+          : {}),
         details: {
           experiment: evt.experiment,
           result: evt.result,

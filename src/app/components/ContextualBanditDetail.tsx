@@ -94,8 +94,15 @@ export default function ContextualBanditDetail({
   // Without a value for the hash attribute the SDK skips the rule outright,
   // so there is no assignment and no bandit data at all
   const hashAttribute = experiment.hashAttribute ?? "id";
-  const missingHashValue = !attributes?.[hashAttribute];
-  const selectedVariation = result?.variationId;
+  const fallbackAttribute = experiment.fallbackAttribute;
+  const missingHashValue =
+    !attributes?.[hashAttribute] &&
+    !(fallbackAttribute && attributes?.[fallbackAttribute]);
+  // The SDK clamps a skipped assignment to 0 with inExperiment false, so
+  // without this guard the panel bolds variation 0 for a user it did not serve
+  const selectedVariation = result?.inExperiment
+    ? result.variationId
+    : undefined;
 
   // Rewards are attributed per context, so userContext has to reach the callback
   const callbackPassesUserContext =
@@ -271,13 +278,15 @@ export default function ContextualBanditDetail({
             : "trackingCallback is missing the userContext param"}
         </Check>
       )}
-      {definition && !cb ? (
+      {missingHashValue ? (
+        <Check ok={false}>
+          {`No value for the "${hashAttribute}" attribute, so the rule is skipped`}
+        </Check>
+      ) : definition && !cb ? (
         <Check info>
-          {missingHashValue
-            ? `No value for the "${hashAttribute}" attribute, so the rule is skipped`
-            : isForced
-              ? "Clear the forced variation to see the live bandit weights"
-              : "Bandit weights were not applied for this user"}
+          {isForced
+            ? "Clear the forced variation to see the live bandit weights"
+            : "Bandit weights were not applied for this user"}
         </Check>
       ) : definition ? (
         <Check ok>Bandit definition found in payload</Check>
