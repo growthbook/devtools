@@ -1,5 +1,5 @@
 import React from "react";
-import { Badge, Text } from "@radix-ui/themes";
+import { Badge, Link, Text } from "@radix-ui/themes";
 import * as Accordion from "@radix-ui/react-accordion";
 import clsx from "clsx";
 import {
@@ -149,19 +149,24 @@ export default function ContextualBanditDetail({
       ) : null}
 
       <Accordion.Root
-        className="accordion"
+        className="accordion my-4"
         type="multiple"
         defaultValue={["weights"]}
       >
         {weights?.length ? (
           <Accordion.Item value="weights">
-            <Accordion.Trigger className="trigger mb-0.5">
-              <Text size="2" weight="medium">
+            <Accordion.Trigger className="trigger mb-2">
+              <Link
+                size="2"
+                role="button"
+                className="hover:underline"
+                weight="bold"
+              >
                 <PiCaretRightFill className="caret mr-0.5" size={12} />
                 {hasContextWeights
                   ? "Weights for this context"
                   : "Variation Weights"}
-              </Text>
+              </Link>
 
               <Text size="1" color="gray" ml="2">
                 {weights.length} variation{weights.length === 1 ? "" : "s"}
@@ -210,11 +215,16 @@ export default function ContextualBanditDetail({
 
         {contextKeys.length ? (
           <Accordion.Item value="context">
-            <Accordion.Trigger className="trigger mb-0.5">
-              <Text size="2" weight="medium">
+            <Accordion.Trigger className="trigger mb-2">
+              <Link
+                size="2"
+                role="button"
+                className="hover:underline"
+                weight="bold"
+              >
                 <PiCaretRightFill className="caret mr-0.5" size={12} />
                 Context used for this user
-              </Text>
+              </Link>
               <Text size="1" color="gray" ml="2">
                 {contextKeys.length} attribute
                 {contextKeys.length === 1 ? "" : "s"}
