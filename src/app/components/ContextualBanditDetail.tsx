@@ -155,7 +155,7 @@ export default function ContextualBanditDetail({
       >
         {weights?.length ? (
           <Accordion.Item value="weights">
-            <Accordion.Trigger className="trigger mb-2">
+            <Accordion.Trigger className="trigger mt-3 mb-2">
               <Link
                 size="2"
                 role="button"
@@ -173,7 +173,7 @@ export default function ContextualBanditDetail({
               </Text>
             </Accordion.Trigger>
             <Accordion.Content className="accordionInner overflow-hidden w-full">
-              <div className="overflow-y-auto mt-1" style={{ maxHeight: 220 }}>
+              <div className="overflow-y-auto" style={{ maxHeight: 220 }}>
                 {weights.map((weight, i) => (
                   <div
                     key={i}
@@ -215,7 +215,7 @@ export default function ContextualBanditDetail({
 
         {contextKeys.length ? (
           <Accordion.Item value="context">
-            <Accordion.Trigger className="trigger mb-2">
+            <Accordion.Trigger className="trigger mt-3 mb-2">
               <Link
                 size="2"
                 role="button"
@@ -231,7 +231,7 @@ export default function ContextualBanditDetail({
               </Text>
             </Accordion.Trigger>
             <Accordion.Content className="accordionInner overflow-hidden w-full">
-              <div className="overflow-y-auto mt-1" style={{ maxHeight: 220 }}>
+              <div className="overflow-y-auto" style={{ maxHeight: 220 }}>
                 {contextKeys.map((key) => (
                   <div key={key} className="flex items-baseline gap-2 py-0.5">
                     <div
