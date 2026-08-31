@@ -5,7 +5,6 @@ import {
   IconButton,
   Link,
   RadioCards,
-  Select,
   Tooltip,
 } from "@radix-ui/themes";
 import {
@@ -52,7 +51,7 @@ import {
   EvaluationSourceViewer,
 } from "@/app/components/FeatureDetail";
 import { LogUnionWithSource } from "@/app/utils/logs";
-import { useSelectMenuPortal } from "@/app/SelectMenuPortal";
+import SelectField from "@/app/components/Forms/SelectField";
 import ContextualBanditDetail, {
   ContextualBanditBadge,
 } from "@/app/components/ContextualBanditDetail";
@@ -328,7 +327,7 @@ export default function ExperimentDetail({
                   Inactive
                 </div>
               )}
-              {lastDebugLog !== "In experiment" && (
+              {lastDebugLog && lastDebugLog !== "In experiment" && (
                 <div className="border border-gray-a3 rounded-sm bg-console pt-1 px-2 mt-1">
                   <DebugLogAccordion
                     log={[lastDebugLog, {}]}
@@ -679,7 +678,6 @@ function EditableVariationField({
   evaluatedValue?: number;
   setValue: (v: any) => void;
 }) {
-  const menuPortalTarget = useSelectMenuPortal();
   let variationsMeta: { key?: string; name?: string }[] | undefined =
     experiment?.meta ??
     experiment?.variations?.map((variation, i) => ({
@@ -692,31 +690,21 @@ function EditableVariationField({
   if (variationsMeta.length > 4) {
     return (
       <div className="FormRoot">
-        <Select.Root
+        <SelectField
           value={value + ""}
-          onValueChange={(s: string) => setValue(parseInt(s))}
-        >
-          <Select.Trigger className="w-full" />
-          {/* Portal into the app's menu container, as SelectField does -
-              the detail panel's stacking context otherwise hides the menu */}
-          <Select.Content
-            variant="soft"
-            position="popper"
-            container={menuPortalTarget ?? undefined}
-            style={{ zIndex: 3000 }}
-          >
-            {variationsMeta.map((meta, i) => (
-              <Select.Item key={meta.key} value={i + ""}>
-                <div className="flex gap-2 items-center">
-                  <VariationIcon i={i} />
-                  <span className="text-xs">
-                    {getVariationSummary({ experiment, i })}
-                  </span>
-                </div>
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select.Root>
+          sort={false}
+          options={variationsMeta.map((meta, i) => ({
+            label: getVariationSummary({ experiment, i }),
+            value: i + "",
+          }))}
+          onChange={(v) => setValue(parseInt(v))}
+          formatOptionLabel={(opt) => (
+            <div className="flex gap-2 items-center">
+              <VariationIcon i={parseInt(opt.value)} />
+              <span className="text-xs">{opt.label}</span>
+            </div>
+          )}
+        />
       </div>
     );
   }
