@@ -107,10 +107,9 @@ export default function ContextualBanditDetail({
     ? undefined
     : isFallback
       ? "No matching context"
-      : `leaf: ${cb.leafId}`;
+      : cb.leafId;
   const subline = [
     banditRef ? `contextualBanditRef: ${banditRef}` : null,
-    leafLabel,
     cb?.banditVersion !== undefined ? `v${cb.banditVersion}` : null,
   ]
     .filter(Boolean)
@@ -122,6 +121,15 @@ export default function ContextualBanditDetail({
 
       {subline ? (
         <div className="text-xs text-gray-11 mb-2">{subline}</div>
+      ) : null}
+
+      {leafLabel !== undefined ? (
+        <div className="box mb-3 flex items-baseline gap-2 text-xs">
+          <div className="text-gray-11" style={{ width: 110 }}>
+            Current leaf
+          </div>
+          <div className="font-semibold">{leafLabel}</div>
+        </div>
       ) : null}
 
       {isForced && cb ? (

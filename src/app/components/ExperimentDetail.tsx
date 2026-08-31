@@ -695,7 +695,7 @@ function EditableVariationField({
           onValueChange={(s: string) => setValue(parseInt(s))}
         >
           <Select.Trigger className="w-full" />
-          <Select.Content position="popper">
+          <Select.Content variant="soft">
             {variationsMeta.map((meta, i) => (
               <Select.Item key={meta.key} value={i + ""}>
                 <div className="flex gap-2 items-center">
