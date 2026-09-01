@@ -192,12 +192,14 @@ export default function useGBSandboxEval() {
       }
 
       [...experiments, ...featureExperiments].forEach((experiment) => {
-        const banditResult = banditResults.get(experiment.key);
         growthbook.debug = true;
-        const result = banditResult ?? growthbook.run(experiment);
+        // Always run: run() is what populates the debug log, even when the
+        // bandit's own result is the one we report
+        const ranResult = growthbook.run(experiment);
         growthbook.debug = false;
         const debug = [...log];
         log = [];
+        const result = banditResults.get(experiment.key) ?? ranResult;
 
         evaluatedExperiments.push({
           key: experiment.key,

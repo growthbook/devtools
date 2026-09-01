@@ -15,7 +15,9 @@ import {
   ContextualBanditDefinitions,
   FALLBACK_LEAF_ID,
   getMatchedContextAttributes,
+  sdkSupportsContextualBandits,
   usedFallbackWeights,
+  CONTEXTUAL_BANDIT_SDK_VERSION,
 } from "@/utils/contextualBandits";
 import {
   expectsUserContextParam,
@@ -91,6 +93,9 @@ export default function ContextualBanditDetail({
   const context = getMatchedContextAttributes(definition, cb, attributes || {});
   const contextKeys = Object.keys(context || {});
   const isForced = forcedVariation !== undefined;
+  // DevTools evaluates with its own bundled SDK, so without this the panel
+  // would report a bandit assignment a pre-1.7 page never made
+  const sdkSupported = sdkSupportsContextualBandits(sdkData?.version);
   // Without a value for the hash attribute the SDK skips the rule outright,
   // so there is no assignment and no bandit data at all
   const hashAttribute = experiment.hashAttribute ?? "id";
@@ -126,6 +131,20 @@ export default function ContextualBanditDetail({
     .filter(Boolean)
     .join(" · ");
 
+  if (!sdkSupported) {
+    return (
+      <>
+        <div className="label font-semibold mt-3">Contextual Bandit</div>
+        <Text as="div" size="2" color="amber" mb="3">
+          SDK {sdkData?.version} does not support contextual bandits, so the
+          page skips this rule. Anything shown below would be DevTools&rsquo;
+          own evaluation, not what the page served. Upgrade to{" "}
+          {CONTEXTUAL_BANDIT_SDK_VERSION} or later to run it.
+        </Text>
+      </>
+    );
+  }
+
   return (
     <>
       <div className="label font-semibold mt-3">Contextual Bandit</div>
@@ -143,12 +162,6 @@ export default function ContextualBanditDetail({
         </div>
       ) : null}
 
-      {isForced && cb ? (
-        <Text as="div" size="2" color="amber" mb="3">
-          A forced variation is active, so these weights are overridden and not
-          what the bandit would serve.
-        </Text>
-      ) : null}
       {banditRef && !definition ? (
         <Text as="div" size="2" color="amber" mb="3">
           The bandit <code>{banditRef}</code> is not in the SDK payload.

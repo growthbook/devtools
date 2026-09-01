@@ -1,3 +1,4 @@
+import { paddedVersionString } from "@growthbook/growthbook";
 import type { Experiment, FeatureRule } from "@growthbook/growthbook";
 
 // Declared by the SDK but not exported from its entry point
@@ -21,6 +22,17 @@ export type ContextualBanditDefinitions = Record<
 
 // leafId -1 means no context matched and the SDK used the aggregate weights
 export const FALLBACK_LEAF_ID = -1;
+
+// Contextual bandits arrived in 1.7.0; older SDKs skip the rule entirely
+export const CONTEXTUAL_BANDIT_SDK_VERSION = "1.7.0";
+
+export function sdkSupportsContextualBandits(version?: string): boolean {
+  if (!version) return true;
+  return (
+    paddedVersionString(version) >=
+    paddedVersionString(CONTEXTUAL_BANDIT_SDK_VERSION)
+  );
+}
 
 // Bandit rules keep their variations here so pre-1.7 SDKs skip the rule
 export function ruleVariations<T>(

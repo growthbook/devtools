@@ -2,6 +2,7 @@ import {
   getMatchedContextAttributes,
   isContextualBandit,
   ruleVariations,
+  sdkSupportsContextualBandits,
   usedFallbackWeights,
 } from "./contextualBandits";
 
@@ -199,5 +200,21 @@ describe("stuffed rule meta", () => {
     expect(stuff({ force: true }).meta).toEqual([
       { ruleI: 0, featureId: "f1" },
     ]);
+  });
+});
+
+describe("sdkSupportsContextualBandits", () => {
+  it("is false below 1.7.0, where the SDK skips bandit rules", () => {
+    expect(sdkSupportsContextualBandits("1.6.5")).toBe(false);
+    expect(sdkSupportsContextualBandits("0.36.0")).toBe(false);
+  });
+
+  it("is true from 1.7.0", () => {
+    expect(sdkSupportsContextualBandits("1.7.0")).toBe(true);
+    expect(sdkSupportsContextualBandits("1.8.2")).toBe(true);
+  });
+
+  it("assumes support when the version is unknown", () => {
+    expect(sdkSupportsContextualBandits(undefined)).toBe(true);
   });
 });
