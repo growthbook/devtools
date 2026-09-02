@@ -12,6 +12,7 @@ import {
 import useTabState from "@/app/hooks/useTabState";
 import { DebugLog } from "devtools";
 import { getFeatureExperiments } from "@/app/components/ExperimentsTab";
+import { ruleVariations } from "@/utils/contextualBandits";
 import useSdkData from "./useSdkData";
 import { FeatureDefinitionWithId } from "@/app/components/FeaturesTab";
 import { LogUnionWithSource } from "@/app/utils/logs";
@@ -103,8 +104,14 @@ export default function useGBSandboxEval() {
           ...rule,
           // Stuff rule index + featureId into meta so it survives into exp.meta.
           // featureId is needed for experiment-ref rules where exp.key !== fid.
-          meta: rule.meta
-            ? rule.meta.map((m) => ({ ...m, ruleI: i, featureId: fid }))
+          // Must stay as long as the variations: the SDK indexes meta by
+          // variation and throws on a short array (core.ts getExperimentResult).
+          meta: ruleVariations(rule)?.length
+            ? ruleVariations(rule)!.map((_, vi) => ({
+                ...(rule.meta?.[vi] ?? {}),
+                ruleI: i,
+                featureId: fid,
+              }))
             : [{ ruleI: i, featureId: fid }],
         }));
       }
@@ -172,12 +179,27 @@ export default function useGBSandboxEval() {
         };
       }
 
+      // run() skips the feature-rule path, so it never applies bandit weights.
+      // Reuse the feature's own result for those to avoid reporting a variation
+      // the page isn't serving.
+      const banditResults = new Map<string, Result<any>>();
+      for (const fid in evaluatedFeatures) {
+        const featureResult = evaluatedFeatures[fid]?.result;
+        const key = featureResult?.experiment?.key;
+        if (key && featureResult?.experimentResult?.variationWeights) {
+          banditResults.set(key, featureResult.experimentResult);
+        }
+      }
+
       [...experiments, ...featureExperiments].forEach((experiment) => {
         growthbook.debug = true;
-        const result = growthbook.run(experiment);
+        // Always run: run() is what populates the debug log, even when the
+        // bandit's own result is the one we report
+        const ranResult = growthbook.run(experiment);
         growthbook.debug = false;
         const debug = [...log];
         log = [];
+        const result = banditResults.get(experiment.key) ?? ranResult;
 
         evaluatedExperiments.push({
           key: experiment.key,

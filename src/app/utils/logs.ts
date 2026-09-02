@@ -1,9 +1,11 @@
 import { LogUnion } from "@growthbook/growthbook";
+import { appliedContextualBandit } from "@/utils/contextualBandits";
 
 export interface FlattenedLogEvent {
   logType: string;
   timestamp: string;
   eventInfo: string;
+  isContextualBandit?: boolean;
   details: Record<string, unknown>;
   context: {
     source?: string;
@@ -34,6 +36,11 @@ export function reshapeEventLog(evt: LogUnionWithSource): FlattenedLogEvent {
         logType: evt.logType,
         timestamp: evt.timestamp,
         eventInfo: evt.experiment.name || "",
+        // Omitted when false: useSearch matches JSON.stringify(item), so a
+        // literal false makes every row match a search for "bandit"
+        ...(appliedContextualBandit(evt.experiment)
+          ? { isContextualBandit: true }
+          : {}),
         details: {
           experiment: evt.experiment,
           result: evt.result,

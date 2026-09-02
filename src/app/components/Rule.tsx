@@ -23,10 +23,19 @@ import {
 import { EvaluatedFeature } from "@/app/hooks/useGBSandboxEval";
 import DebugLogger from "@/app/components/DebugLogger";
 import useGlobalState from "@/app/hooks/useGlobalState";
-import { formatExperimentKey, holdoutIdFromFid } from "@/app/components/ExperimentsTab";
+import {
+  formatExperimentKey,
+  holdoutIdFromFid,
+} from "@/app/components/ExperimentsTab";
 import { isDark, Theme } from "@/app";
+import { ruleVariations } from "@/utils/contextualBandits";
 
-type RuleType = "force" | "rollout" | "experiment" | "prerequisite" | "safe-rollout";
+type RuleType =
+  | "force"
+  | "rollout"
+  | "experiment"
+  | "prerequisite"
+  | "safe-rollout";
 
 const RULE_MATCHED_LOGS = [
   "Force",
@@ -102,19 +111,19 @@ export default function Rule({
     condition,
     parentConditions,
     force,
-    variations,
     weights,
     hashAttribute,
     coverage,
     namespace,
   } = rule;
+  // Bandit rules keep theirs under contextualVariations
+  const variations = ruleVariations(rule);
   const key = rule.key ?? fid;
-  let ruleType: RuleType =
-    rule?.key?.startsWith("srk_")
-      ? "safe-rollout"
-      : variations
-        ? "experiment"
-        : "coverage" in rule
+  let ruleType: RuleType = rule?.key?.startsWith("srk_")
+    ? "safe-rollout"
+    : variations
+      ? "experiment"
+      : "coverage" in rule
         ? "rollout"
         : rule?.parentConditions?.some((p) => p.gate)
           ? "prerequisite"
@@ -535,7 +544,11 @@ export function ConditionDisplay({
     </div>
   );
 
-  const renderOrBlock = (branches: Condition[][], blockKey: string, prefix: string) => (
+  const renderOrBlock = (
+    branches: Condition[][],
+    blockKey: string,
+    prefix: string,
+  ) => (
     <React.Fragment key={blockKey}>
       <div className="condition">
         <span className="font-semibold">{prefix} [</span>
@@ -550,7 +563,11 @@ export function ConditionDisplay({
             )}
             <div className="border-l-2 border-gray-a6 pl-2">
               {group.map((cond, i) =>
-                renderCondRow(cond, `${blockKey}-${gi}-${i}`, i > 0 ? "AND" : null),
+                renderCondRow(
+                  cond,
+                  `${blockKey}-${gi}-${i}`,
+                  i > 0 ? "AND" : null,
+                ),
               )}
             </div>
           </React.Fragment>

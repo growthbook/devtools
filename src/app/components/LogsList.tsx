@@ -1,4 +1,12 @@
-import { Box, Checkbox, Flex, Link, Text, Tooltip } from "@radix-ui/themes";
+import {
+  Badge,
+  Box,
+  Checkbox,
+  Flex,
+  Link,
+  Text,
+  Tooltip,
+} from "@radix-ui/themes";
 import React, { ReactNode, useMemo, useState } from "react";
 import useTabState from "../hooks/useTabState";
 import { useSearch } from "../hooks/useSearch";
@@ -15,6 +23,7 @@ import {
 import ValueField from "./ValueField";
 import clsx from "clsx";
 import { LogUnionWithSource } from "@/app/utils/logs";
+import { ContextualBanditBadge } from "@/app/components/ContextualBanditDetail";
 
 export const HEADER_H = 40;
 
@@ -250,6 +259,11 @@ export default function LogsList({
                       )}
                     >
                       {evt.eventInfo}
+                      {evt.isContextualBandit ? (
+                        <span className="ml-1.5 flex-shrink-0">
+                          <ContextualBanditBadge />
+                        </span>
+                      ) : null}
                     </div>
                     {!isResponsive && (
                       <div className="w-[40%] px-2 text-left">

@@ -38,7 +38,11 @@ import useGlobalState from "@/app/hooks/useGlobalState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
 import useTabState from "@/app/hooks/useTabState";
 import { SelectedExperiment } from "@/app/components/ExperimentsTab";
-import { AutoExperimentVariation, FeatureDefinition, isURLTargeted } from "@growthbook/growthbook";
+import {
+  AutoExperimentVariation,
+  FeatureDefinition,
+  isURLTargeted,
+} from "@growthbook/growthbook";
 import clsx from "clsx";
 import DebugLogger, { DebugLogAccordion } from "@/app/components/DebugLogger";
 import { TbEyeSearch } from "react-icons/tb";
@@ -47,6 +51,13 @@ import {
   EvaluationSourceViewer,
 } from "@/app/components/FeatureDetail";
 import { LogUnionWithSource } from "@/app/utils/logs";
+import SelectField from "@/app/components/Forms/SelectField";
+import ContextualBanditDetail, {
+  ContextualBanditBadge,
+} from "@/app/components/ContextualBanditDetail";
+
+// The panel states these itself, so echoing the SDK log adds nothing
+const REDUNDANT_DEBUG_LOGS = ["In experiment", "Force via dev tools"];
 
 export default function ExperimentDetail({
   selectedEid,
@@ -139,8 +150,8 @@ export default function ExperimentDetail({
     const expFeatures = selectedExperiment?.experiment?.features ?? [];
     for (const fid of expFeatures) {
       const rule0 = (features[fid]?.rules ?? [])[0] as any;
-      const holdoutFid = rule0?.parentConditions?.find(
-        (pc: { id?: string }) => pc.id?.startsWith("$holdout:"),
+      const holdoutFid = rule0?.parentConditions?.find((pc: { id?: string }) =>
+        pc.id?.startsWith("$holdout:"),
       )?.id;
       if (!holdoutFid) continue;
       const holdoutExpKey = (features[holdoutFid]?.rules?.[0] as any)?.key;
@@ -257,6 +268,11 @@ export default function ExperimentDetail({
                   {selectedExperiment?.experiment
                     ? getExperimentDisplayName(selectedExperiment.experiment)
                     : selectedEid}
+                  {types?.contextualBandit ? (
+                    <span className="ml-2 align-middle">
+                      <ContextualBanditBadge />
+                    </span>
+                  ) : null}
                 </h2>
                 <IconButton
                   size="3"
@@ -314,7 +330,7 @@ export default function ExperimentDetail({
                   Inactive
                 </div>
               )}
-              {lastDebugLog !== "In experiment" && (
+              {lastDebugLog && !REDUNDANT_DEBUG_LOGS.includes(lastDebugLog) && (
                 <div className="border border-gray-a3 rounded-sm bg-console pt-1 px-2 mt-1">
                   <DebugLogAccordion
                     log={[lastDebugLog, {}]}
@@ -425,6 +441,23 @@ export default function ExperimentDetail({
             valueType={valueType}
             customPrismOuterStyle={{ marginTop: 4 }}
           />
+
+          {types?.contextualBandit && selectedExperiment?.experiment ? (
+            <ContextualBanditDetail
+              experiment={selectedExperiment.experiment}
+              variationNames={(
+                selectedExperiment.experiment.meta ??
+                variations?.map(() => undefined) ??
+                []
+              ).map((m, i) => m?.name ?? `Variation ${i}`)}
+              forcedVariation={
+                selectedEid && selectedEid in forcedVariations
+                  ? forcedVariations[selectedEid]
+                  : undefined
+              }
+              result={selectedExperiment.evaluatedExperiment?.result}
+            />
+          ) : null}
 
           {evaluations.length ? (
             <EvaluationSourceViewer
@@ -539,61 +572,66 @@ export default function ExperimentDetail({
             ))}
           </div>
 
-          <div className="mt-6 mb-3 text-md font-semibold">
-            Targeting and Traffic
-          </div>
+          {/* A bandit's weights are dynamic, so the static ones mislead */}
+          {!types?.contextualBandit ? (
+            <>
+              <div className="mt-6 mb-3 text-md font-semibold">
+                Targeting and Traffic
+              </div>
 
-          {urlPatterns?.length ? (
-            <div className="box mb-4">
-              <div className="text-sm font-bold">URL Targeting</div>
-              <ul className="list-disc ml-4 my-2">
-                {urlPatterns.map((pattern, i) => (
-                  <li className="text-sm leading-5" key={i}>
-                    <div className="break-all">{pattern.pattern}</div>
-                    {pattern.type !== "simple" && (
-                      <div className="text-xs mt-1">
-                        ({pattern.type}
-                        {pattern.include ? ", exclude" : ""})
-                      </div>
-                    )}
-                    <div>
-                      {isURLTargeted(url, [pattern]) ? (
-                        <div className="text-green-900 bg-green-200 dark:text-white dark:bg-green-600/75 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
-                          Current URL targeted
+              {urlPatterns?.length ? (
+                <div className="box mb-4">
+                  <div className="text-sm font-bold">URL Targeting</div>
+                  <ul className="list-disc ml-4 my-2">
+                    {urlPatterns.map((pattern, i) => (
+                      <li className="text-sm leading-5" key={i}>
+                        <div className="break-all">{pattern.pattern}</div>
+                        {pattern.type !== "simple" && (
+                          <div className="text-xs mt-1">
+                            ({pattern.type}
+                            {pattern.include ? ", exclude" : ""})
+                          </div>
+                        )}
+                        <div>
+                          {isURLTargeted(url, [pattern]) ? (
+                            <div className="text-green-900 bg-green-200 dark:text-white dark:bg-green-600/75 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                              Current URL targeted
+                            </div>
+                          ) : (
+                            <div className="text-red-500 bg-red-100 dark:text-white dark:bg-red-700/50 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
+                              Current URL excluded
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <div className="text-red-500 bg-red-100 dark:text-white dark:bg-red-700/50 inline-block capitalize font-normal text-2xs px-1.5 py-0.5 rounded-md">
-                          Current URL excluded
-                        </div>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-
-          <div className="box text-xs">
-            <div className="text-sm font-bold mb-2">Experiment</div>
-
-            <div className="mx-3">
-              {condition || parentConditions ? (
-                <ConditionDisplay
-                  condition={condition}
-                  parentConditions={parentConditions}
-                />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ) : null}
 
-              <ExperimentRule
-                variations={variations}
-                weights={weights}
-                hashAttribute={hashAttribute}
-                coverage={coverage}
-                namespace={namespace}
-                valueType={valueType}
-              />
-            </div>
-          </div>
+              <div className="box text-xs">
+                <div className="text-sm font-bold mb-2">Experiment</div>
+
+                <div className="mx-3">
+                  {condition || parentConditions ? (
+                    <ConditionDisplay
+                      condition={condition}
+                      parentConditions={parentConditions}
+                    />
+                  ) : null}
+
+                  <ExperimentRule
+                    variations={variations}
+                    weights={weights}
+                    hashAttribute={hashAttribute}
+                    coverage={coverage}
+                    namespace={namespace}
+                    valueType={valueType}
+                  />
+                </div>
+              </div>
+            </>
+          ) : null}
 
           {selectedExperiment ? (
             <div className="mt-3 mb-1">
@@ -650,6 +688,36 @@ function EditableVariationField({
     }));
 
   if (!variationsMeta || !experiment) return null;
+
+  // Cards stop being scannable past a handful of variations
+  if (variationsMeta.length > 4) {
+    return (
+      <div className="FormRoot">
+        <SelectField
+          value={value + ""}
+          sort={false}
+          options={variationsMeta.map((meta, i) => ({
+            label: getVariationSummary({ experiment, i }),
+            value: i + "",
+          }))}
+          onChange={(v) => setValue(parseInt(v))}
+          formatOptionLabel={(opt) => {
+            // SelectField labels the selected value with the raw value, so
+            // derive the name from the index for the trigger and the menu alike
+            const i = parseInt(opt.value);
+            return (
+              <div className="flex gap-2 items-center">
+                <VariationIcon i={i} />
+                <span className="text-xs">
+                  {getVariationSummary({ experiment, i })}
+                </span>
+              </div>
+            );
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="FormRoot">

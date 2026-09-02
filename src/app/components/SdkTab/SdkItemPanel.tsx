@@ -23,6 +23,11 @@ import { useResponsiveContext } from "@/app/hooks/useResponsive";
 import { SdkItem } from "./index";
 import useSdkData from "@/app/hooks/useSdkData";
 import { SDKHealthCheckResult } from "devtools";
+import {
+  expectsUserContextParam,
+  trackingCallbackParamsAreValid,
+  USER_CONTEXT_SDK_VERSION,
+} from "@/utils/sdkCallbacks";
 import { getActiveTabId } from "@/app/hooks/useTabState";
 import { paddedVersionString } from "@growthbook/growthbook";
 
@@ -528,33 +533,59 @@ function versionPanel({
 function trackingCallbackPanel({
   trackingCallbackParams,
   hasTrackingCallback,
+  version,
 }: SDKHealthCheckResult) {
+  const missingUserContext =
+    expectsUserContextParam(version) && trackingCallbackParams?.length === 2;
+  const unusedUserContext =
+    version &&
+    !expectsUserContextParam(version) &&
+    trackingCallbackParams?.length === 3;
   return (
     <Text as="div" size="2" weight="regular">
-      {trackingCallbackParams?.length === 2 ? (
-        <>
-          The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code>.
-        </>
-      ) : !hasTrackingCallback ? (
+      {!hasTrackingCallback ? (
         <>
           The SDK is not using a{" "}
           <code className="text-gold-11">trackingCallback</code>. You will need
           to add one to track experiment exposure to your data warehouse.
         </>
-      ) : (
+      ) : missingUserContext ? (
         <>
           The SDK is using a{" "}
           <code className="text-gold-11">trackingCallback</code> with{" "}
-          {trackingCallbackParams?.length ? (
-            <em className="text-amber-600">{trackingCallbackParams.length}</em>
-          ) : (
-            <>
-              an <em className="text-amber-600">unknown</em> number of
-            </>
-          )}{" "}
-          param{trackingCallbackParams?.length !== 1 ? "s" : ""} instead of 2.
-          Please check your implementation.
+          <em className="text-amber-600">2</em> params. Add a third{" "}
+          <code>userContext</code> param to use newer features.
+        </>
+      ) : unusedUserContext ? (
+        <>
+          The SDK is using a{" "}
+          <code className="text-gold-11">trackingCallback</code> with{" "}
+          <em className="text-amber-600">3</em> params, but SDK {version} never
+          passes <code>userContext</code>. Upgrade to {USER_CONTEXT_SDK_VERSION}{" "}
+          or later to use it.
+        </>
+      ) : !trackingCallbackParamsAreValid(trackingCallbackParams, version) ? (
+        <>
+          The SDK is using a{" "}
+          <code className="text-gold-11">trackingCallback</code> with{" "}
+          <em className="text-amber-600">{trackingCallbackParams?.length}</em>{" "}
+          param{trackingCallbackParams?.length === 1 ? "" : "s"} instead of{" "}
+          <code>(experiment, result)</code> or{" "}
+          <code>(experiment, result, userContext)</code>. Please check your
+          implementation.
+        </>
+      ) : trackingCallbackParams?.length ? (
+        <>
+          The SDK is using a{" "}
+          <code className="text-gold-11">trackingCallback</code> with{" "}
+          {trackingCallbackParams.length} param
+          {trackingCallbackParams.length === 1 ? "" : "s"}:{" "}
+          <code>({trackingCallbackParams.join(", ")})</code>.
+        </>
+      ) : (
+        <>
+          The SDK is using a{" "}
+          <code className="text-gold-11">trackingCallback</code>.
         </>
       )}
     </Text>

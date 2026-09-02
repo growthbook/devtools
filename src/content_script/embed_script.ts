@@ -7,9 +7,11 @@ import type {
   Options,
   Result,
   TrackingCallback,
+  TrackingUserContext,
 } from "@growthbook/growthbook";
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import { Attributes } from "@growthbook/growthbook";
+import { parseCallbackParams } from "@/utils/sdkCallbacks";
 
 type LogUnionWithSource = LogUnion & { source?: string; clientKey?: string };
 
@@ -458,6 +460,8 @@ function subscribeToSdkChanges(
     const patchedCallBack = (
       experiment: Experiment<any>,
       result: Result<any>,
+      // SDK 1.7+ passes a third userContext arg
+      user?: TrackingUserContext,
     ) => {
       if (!hasSdkLogSupport) {
         gb.logs!.push({
@@ -468,21 +472,18 @@ function subscribeToSdkChanges(
         });
       }
       if ("isNoopCallback" in callback && callback.isNoopCallback) {
+        // fireDeferredTrackingCalls replays these with call.user
         gb.setDeferredTrackingCalls?.([
           ...gb.getDeferredTrackingCalls(),
-          { experiment, result },
+          { experiment, result, user },
         ]);
       }
-      callback(experiment, result);
+      return callback(experiment, result, user);
     };
     if ("isNoopCallback" in callback && callback.isNoopCallback) {
       patchedCallBack.isNoopCallback = true;
     } else {
-      patchedCallBack.originalParams = callback
-        .toString()
-        .match(/\(([^)]+)\)/)?.[1]
-        .split(",")
-        .map((param: string) => param.trim());
+      patchedCallBack.originalParams = parseCallbackParams(callback);
     }
     _setTrackingCallback?.call(gb, patchedCallBack);
     pushAppUpdates();

@@ -24,9 +24,13 @@ import FeatureExperimentStatusIcon from "@/app/components/FeatureExperimentStatu
 import { useResponsiveContext } from "../hooks/useResponsive";
 import { TbEyeSearch } from "react-icons/tb";
 import { LogUnionWithSource } from "@/app/utils/logs";
+import { isContextualBandit, ruleVariations } from "@/utils/contextualBandits";
+import { ContextualBanditBadge } from "@/app/components/ContextualBanditDetail";
 
 export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
   features?: string[];
+  contextualBanditRef?: string;
+  contextualVariations?: unknown[];
   featureTypes?: Record<string, ValueType>;
   isDraft?: boolean;
   isInactive?: boolean;
@@ -51,7 +55,6 @@ export default function ExperimentsTab() {
 
   // de-dupe
   const allExperiments = useMemo(() => {
-
     const merged: ExperimentWithFeatures[] = [
       ...experiments,
       ...featureExperiments,
@@ -289,7 +292,12 @@ export default function ExperimentsTab() {
                 onClick={() => clickExperiment(eid, changeId)}
               >
                 <div
-                  className="title line-clamp-1 pl-2.5 pr-8"
+                  className={clsx("title line-clamp-1 pl-2.5", {
+                    // The badge sits in an absolutely positioned sibling, so
+                    // the name needs room reserved or it runs underneath
+                    "pr-8": !types?.contextualBandit || fullWidthListView,
+                    "pr-28": types?.contextualBandit && !fullWidthListView,
+                  })}
                   style={{ width: fullWidthListView ? col1 : undefined }}
                   title={getExperimentDisplayName(experiment)}
                 >
@@ -315,6 +323,9 @@ export default function ExperimentsTab() {
                 >
                   {types ? (
                     <div className="flex items-center gap-2 pr-0.5">
+                      {types.contextualBandit ? (
+                        <ContextualBanditBadge />
+                      ) : null}
                       {types.redirect ? (
                         <Tooltip content="URL Redirect experiment">
                           <span>
@@ -402,7 +413,12 @@ export type SelectedExperiment = {
   eid: string;
   experiment: ExperimentWithFeatures;
   meta?: any;
-  types: { features?: string[]; redirect?: boolean; visual?: boolean };
+  types: {
+    features?: string[];
+    redirect?: boolean;
+    visual?: boolean;
+    contextualBandit?: boolean;
+  };
   evaluatedExperiment?: EvaluatedExperiment;
   isForced: boolean;
 };
@@ -455,6 +471,7 @@ export function getExperimentTypes(experiment: ExperimentWithFeatures) {
     visual: experiment?.variations?.some(
       (v) => v?.domMutations?.length || v?.css || v?.js,
     ),
+    contextualBandit: isContextualBandit(experiment),
   };
 }
 
@@ -466,13 +483,15 @@ export function getFeatureExperiments(
     const feature = features[fid];
     const details = getFeatureDetails({ fid, features });
     for (const rule of feature.rules || []) {
-      if (rule.variations) {
+      const variations = ruleVariations(rule);
+      if (variations) {
         // @ts-ignore
         experiments.push({
           key: rule.key ?? fid,
           features: [fid],
           featureTypes: { [fid]: details.valueType },
           ...rule,
+          variations,
         });
       }
     }
