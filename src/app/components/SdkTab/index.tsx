@@ -326,6 +326,7 @@ export default function SdkTab() {
       {selectedItem && (
         <SdkItemPanel
           selectedItem={selectedItem}
+          selectItem={setSelectedItem}
           unsetSelectedItem={() => setSelectedItem(undefined)}
           widthPercent={rightPercent}
           latestSdkVersion={latestSdkVersion}

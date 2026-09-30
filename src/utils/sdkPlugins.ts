@@ -29,3 +29,35 @@ export function customPluginName(name: string): string | undefined {
   if (clean.length <= 2 || clean === "anonymous") return undefined;
   return clean;
 }
+
+// Globals keep their names through minification, so a call on one can't be an SDK method
+const BUILT_IN_GLOBALS = new Set([
+  "console",
+  "window",
+  "document",
+  "globalThis",
+  "self",
+  "navigator",
+  "location",
+  "localStorage",
+  "sessionStorage",
+  "Math",
+  "JSON",
+  "Object",
+  "Array",
+  "Promise",
+  "Date",
+]);
+
+// SDK methods a plugin's code calls. Method names survive minification, and
+// checking against the live instance's methods drops everything else
+export function pluginUses(source: string, sdkMethods: Set<string>): string[] {
+  const uses = new Set<string>();
+  for (const [, object, method] of source.matchAll(
+    /([A-Za-z_$][\w$]*)?\s*\.\s*([A-Za-z_$][\w$]*)\s*\(/g,
+  )) {
+    if (object && BUILT_IN_GLOBALS.has(object)) continue;
+    if (sdkMethods.has(method)) uses.add(method);
+  }
+  return [...uses];
+}

@@ -63,6 +63,7 @@ const panels: Record<
       latestSdkVersion: string;
       latestMinorSdkVersion: string;
       hasPayload: boolean;
+      selectItem?: (item: SdkItem) => void;
     }
   >
 > = {
@@ -99,12 +100,14 @@ const doclinks: Record<SdkItem, string | undefined> = {
 
 export default function SdkItemPanel({
   selectedItem,
+  selectItem,
   unsetSelectedItem,
   widthPercent,
   latestSdkVersion,
   latestMinorSdkVersion,
 }: {
   selectedItem: SdkItem;
+  selectItem: (item: SdkItem) => void;
   unsetSelectedItem: () => void;
   widthPercent: number;
   latestSdkVersion: string;
@@ -164,6 +167,7 @@ export default function SdkItemPanel({
             >
               <ItemPanel
                 selectedItem={selectedItem}
+                selectItem={selectItem}
                 latestSdkVersion={latestSdkVersion}
                 latestMinorSdkVersion={latestMinorSdkVersion}
               />
@@ -189,10 +193,12 @@ export default function SdkItemPanel({
 
 function ItemPanel({
   selectedItem,
+  selectItem,
   latestSdkVersion,
   latestMinorSdkVersion,
 }: {
   selectedItem: SdkItem;
+  selectItem: (item: SdkItem) => void;
   latestSdkVersion: string;
   latestMinorSdkVersion: string;
 }) {
@@ -201,6 +207,7 @@ function ItemPanel({
   return (
     <PanelComponent
       {...sdkData}
+      selectItem={selectItem}
       latestSdkVersion={latestSdkVersion}
       latestMinorSdkVersion={latestMinorSdkVersion}
     />
@@ -508,32 +515,110 @@ function AttributesPanel() {
   );
 }
 
-function pluginsPanel({ plugins }: SDKHealthCheckResult) {
+// SDK methods that an SDK Health item checks, so a plugin can point to the item showing whether it works
+const RELATED_ITEMS: Record<string, SdkItem[]> = {
+  setTrackingCallback: ["trackingCallback"],
+  setEventLogger: ["logEvent", "eventIngestor"],
+  setFeatureUsageCallback: ["onFeatureUsage"],
+  setAttributes: ["attributes"],
+  updateAttributes: ["attributes"],
+  setAttributeOverrides: ["attributes"],
+  setPayload: ["payload"],
+};
+
+function pluginsPanel({
+  plugins,
+  selectItem,
+}: SDKHealthCheckResult & { selectItem?: (item: SdkItem) => void }) {
   return (
     <>
-      <Text as="div" size="2" weight="regular">
-        {plugins?.length ? (
-          <>
-            <ul className="list-disc pl-5 space-y-1.5">
-              {plugins.map((plugin, i) => (
-                <li key={`${plugin.name}_${i}`}>
-                  {plugin.name || (
-                    <em className="text-gray-11">Unnamed plugin</em>
-                  )}
-                  {plugin.appliedAfterSetup ? (
-                    <span className="text-gray-11"> (applied after setup)</span>
-                  ) : null}
-                  {plugin.custom ? (
-                    <CallbackSource source={plugin.source} className="mt-0.5" />
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : (
-          <>No plugins were passed to the SDK constructor.</>
-        )}
-      </Text>
+      {plugins?.length ? (
+        <Accordion.Root className="accordion" type="multiple">
+          {plugins.map((plugin, i) => {
+            const related = [
+              ...new Set(
+                (plugin.uses ?? []).flatMap(
+                  (method) => RELATED_ITEMS[method] ?? [],
+                ),
+              ),
+            ];
+            return (
+              <Accordion.Item
+                key={`${plugin.name}_${i}`}
+                value={`${i}`}
+                className="mb-1.5"
+              >
+                <Accordion.Trigger className="trigger flex items-start gap-1 text-left">
+                  <PiCaretRightFill
+                    className="caret mt-1 flex-shrink-0 text-violet-11"
+                    size={12}
+                  />
+                  <Text size="2">
+                    {plugin.name || (
+                      <em className="text-gray-11">Unnamed plugin</em>
+                    )}
+                    {plugin.appliedAfterSetup ? (
+                      <span className="text-gray-11">
+                        {" "}
+                        (applied after setup)
+                      </span>
+                    ) : null}
+                  </Text>
+                </Accordion.Trigger>
+                <Accordion.Content className="accordionInner overflow-hidden w-full">
+                  <Text as="div" size="1" className="pl-4 pt-1 pb-2">
+                    {plugin.uses?.length ? (
+                      <div>
+                        Uses{" "}
+                        {plugin.uses.map((method, j) => (
+                          <React.Fragment key={method}>
+                            {j ? ", " : null}
+                            <code>{method}</code>
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-gray-11">
+                        Calls no SDK methods directly.
+                      </div>
+                    )}
+                    {related.length && selectItem ? (
+                      <div className="mt-1">
+                        See{" "}
+                        {related.map((item, j) => (
+                          <React.Fragment key={item}>
+                            {j ? " · " : null}
+                            <Link
+                              size="1"
+                              href="#"
+                              role="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                selectItem(item);
+                              }}
+                            >
+                              {panelTitles[item]}
+                            </Link>
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    ) : null}
+                    {plugin.custom && plugin.source ? (
+                      <div className="mt-2">
+                        <SourceCode source={plugin.source} />
+                      </div>
+                    ) : null}
+                  </Text>
+                </Accordion.Content>
+              </Accordion.Item>
+            );
+          })}
+        </Accordion.Root>
+      ) : (
+        <Text as="div" size="2" weight="regular">
+          No plugins were passed to the SDK constructor.
+        </Text>
+      )}
       <Text as="div" size="1" className="mt-3 text-gray-11">
         Lists plugins passed to the SDK constructor. Plugins applied later, eg{" "}
         <code>plugin(gb)</code>, aren&rsquo;t detectable, except the tracking
@@ -634,6 +719,35 @@ function versionPanel({
   );
 }
 
+function SourceCode({ source }: { source: string }) {
+  const [theme, , themeReady] = useGlobalState<Theme>("theme", "system", true);
+  const dark = useMemo(() => isDark(theme), [theme, themeReady]);
+  return (
+    <div className="bg-field border border-gray-a3 rounded-md">
+      <Prism
+        language="javascript"
+        style={!dark ? codeThemeLight : codeThemeDark}
+        customStyle={{
+          padding: "5px",
+          margin: 0,
+          border: "0px none",
+          background: "unset",
+          backgroundColor: "unset",
+          maxHeight: 300,
+          fontFamily: `Consolas, "Bitstream Vera Sans Mono", "Courier New", Courier, monospace`,
+          fontSize: "0.9em",
+          lineHeight: "12px",
+        }}
+        codeTagProps={{
+          className: "text-2xs-important !whitespace-pre-wrap break-all",
+        }}
+      >
+        {source}
+      </Prism>
+    </div>
+  );
+}
+
 function CallbackSource({
   source,
   className = "my-4",
@@ -641,8 +755,6 @@ function CallbackSource({
   source?: string;
   className?: string;
 }) {
-  const [theme, , themeReady] = useGlobalState<Theme>("theme", "system", true);
-  const dark = useMemo(() => isDark(theme), [theme, themeReady]);
   if (!source) return null;
   return (
     <Accordion.Root
@@ -663,28 +775,7 @@ function CallbackSource({
           </Link>
         </Accordion.Trigger>
         <Accordion.Content className="accordionInner overflow-hidden w-full">
-          <div className="bg-field border border-gray-a3 rounded-md">
-            <Prism
-              language="javascript"
-              style={!dark ? codeThemeLight : codeThemeDark}
-              customStyle={{
-                padding: "5px",
-                margin: 0,
-                border: "0px none",
-                background: "unset",
-                backgroundColor: "unset",
-                maxHeight: 300,
-                fontFamily: `Consolas, "Bitstream Vera Sans Mono", "Courier New", Courier, monospace`,
-                fontSize: "0.9em",
-                lineHeight: "12px",
-              }}
-              codeTagProps={{
-                className: "text-2xs-important !whitespace-pre-wrap break-all",
-              }}
-            >
-              {source}
-            </Prism>
-          </div>
+          <SourceCode source={source} />
         </Accordion.Content>
       </Accordion.Item>
     </Accordion.Root>

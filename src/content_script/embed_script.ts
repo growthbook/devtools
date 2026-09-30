@@ -20,6 +20,7 @@ import {
   customPluginName,
   identifyPlugin,
   isThirdPartyTrackingSource,
+  pluginUses,
 } from "@/utils/sdkPlugins";
 import type { DetectedPlugin } from "devtools";
 
@@ -602,6 +603,26 @@ function subscribeToSdkChanges(
   };
 }
 
+// Public methods on the instance and its prototypes, including ones DevTools patched onto it
+function getSdkMethodNames(gb: GrowthBook): Set<string> {
+  const names = new Set<string>();
+  for (
+    let obj: object | null = gb;
+    obj && obj !== Object.prototype;
+    obj = Object.getPrototypeOf(obj)
+  ) {
+    for (const name of Object.getOwnPropertyNames(obj)) {
+      if (name === "constructor" || name.startsWith("_")) continue;
+      if (
+        typeof (gb as unknown as Record<string, unknown>)[name] === "function"
+      ) {
+        names.add(name);
+      }
+    }
+  }
+  return names;
+}
+
 let cachedHostRes: any = undefined;
 let cachedStreamingHostRes: any = undefined;
 async function sdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
@@ -668,31 +689,43 @@ async function sdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       typeof (gbEvents as { push?: unknown }).push === "function");
 
   // Only constructor plugins are kept on the instance; ones applied later leave no record
+  const sdkMethods = getSdkMethodNames(gb);
   const plugins: DetectedPlugin[] = (
     Array.isArray(gbContext?.plugins) ? gbContext.plugins : []
   )
     .filter((plugin: unknown) => typeof plugin === "function")
     .map((plugin: (...args: any[]) => any) => {
-      const name = identifyPlugin(Function.prototype.toString.call(plugin));
+      const source = Function.prototype.toString.call(plugin);
+      const name = identifyPlugin(source);
+      const uses = pluginUses(source, sdkMethods);
       return name
-        ? { name }
+        ? { name, uses }
         : {
             name: customPluginName(plugin.name) ?? "",
             custom: true,
             source: getCallbackSource(plugin),
+            uses,
           };
     });
   // The tracking plugins install recognisable callbacks, so they show up even when applied later
   const listed = new Set(plugins.map((plugin) => plugin.name));
   if (usingGrowthBookTracking && !listed.has("growthbookTrackingPlugin")) {
-    plugins.push({ name: "growthbookTrackingPlugin", appliedAfterSetup: true });
+    plugins.push({
+      name: "growthbookTrackingPlugin",
+      uses: ["setEventLogger"],
+      appliedAfterSetup: true,
+    });
   }
   if (
     trackingCallbackSource &&
     isThirdPartyTrackingSource(trackingCallbackSource) &&
     !listed.has("thirdPartyTrackingPlugin")
   ) {
-    plugins.push({ name: "thirdPartyTrackingPlugin", appliedAfterSetup: true });
+    plugins.push({
+      name: "thirdPartyTrackingPlugin",
+      uses: ["setTrackingCallback"],
+      appliedAfterSetup: true,
+    });
   }
 
   const onFeatureUsage = gbContext?.onFeatureUsage;

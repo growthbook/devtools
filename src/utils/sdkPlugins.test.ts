@@ -6,6 +6,7 @@ import {
 import {
   customPluginName,
   identifyPlugin,
+  pluginUses,
   isThirdPartyTrackingSource,
 } from "./sdkPlugins";
 
@@ -73,5 +74,40 @@ describe("customPluginName", () => {
     expect(customPluginName("")).toBeUndefined();
     expect(customPluginName("e")).toBeUndefined();
     expect(customPluginName("anonymous")).toBeUndefined();
+  });
+});
+
+describe("pluginUses", () => {
+  const sdkMethods = new Set(["setAttributes", "getAttributes", "subscribe"]);
+
+  it("lists the SDK methods a plugin calls, once each", () => {
+    const plugin = (gb: any) => {
+      gb.subscribe(() => gb.setAttributes({ ...gb.getAttributes() }));
+      gb.setAttributes({});
+    };
+    expect(pluginUses(source(plugin), sdkMethods).sort()).toEqual([
+      "getAttributes",
+      "setAttributes",
+      "subscribe",
+    ]);
+  });
+
+  it("ignores calls on built-in globals that share an SDK method's name", () => {
+    const plugin = (gb: any) => {
+      console.log("ready");
+      gb.log("ready");
+    };
+    expect(pluginUses(source(plugin), new Set(["log"]))).toEqual(["log"]);
+    expect(
+      pluginUses(
+        source(() => console.log("ready")),
+        new Set(["log"]),
+      ),
+    ).toEqual([]);
+  });
+
+  it("ignores calls that aren't SDK methods", () => {
+    const plugin = () => document.addEventListener("click", () => {});
+    expect(pluginUses(source(plugin), sdkMethods)).toEqual([]);
   });
 });

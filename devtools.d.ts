@@ -280,6 +280,8 @@ export type DetectedPlugin = {
   name: string;
   custom?: boolean;
   source?: string;
+  // SDK methods its code calls
+  uses?: string[];
   appliedAfterSetup?: boolean;
 };
 

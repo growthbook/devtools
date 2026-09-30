@@ -71,7 +71,7 @@ Some notes
 - SDK Health: view the source of the trackingCallback, onFeatureUsage, and eventLogger callbacks
 - SDK Health: don't flag a missing trackingCallback or onFeatureUsage when an eventLogger is set (Managed Warehouse)
 - SDK Health: new Event Ingestor item showing whether events reach a GrowthBook ingestor (Managed Warehouse, event forwarding), with region, failed requests, and client key mismatches
-- SDK Health: new Plugins item listing the SDK plugins in use, with the source of any custom plugin
+- SDK Health: new Plugins item listing the SDK plugins in use, the SDK methods each one calls, links to the related SDK Health items, and the source of any custom plugin
 - Flag targeting attributes the SDK hasn't set on features the page evaluated: "not set" markers on rules, a callout in the Attributes tab, and an SDK Health item
 - SDK Health: group items into SDK, payload, and tracking sections; combine the SDK version with its connection status, and payload security with the payload
 - Variation dropdown for experiments with more than four variations
