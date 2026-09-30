@@ -26,7 +26,6 @@ export const LEFT_PERCENT = 0.5;
 
 export const sdkItems = [
   "status",
-  "version",
   "plugins",
   "externalSdks",
   "payload",
@@ -153,30 +152,26 @@ export default function SdkTab() {
           onClick={() => setSelectedItem("status")}
         >
           <ItemStatus
-            title="SDK Status"
-            status={canConnectStatus}
-            color={canConnectStatusColor}
+            title="SDK"
+            status={
+              sdkFound ? (
+                <>
+                  <Text color={versionStatusColor}>
+                    {version || "unknown"}
+                    {version && versionStatusColor !== "green"
+                      ? " (outdated)"
+                      : null}
+                  </Text>
+                  <Text color="gray"> · </Text>
+                  {canConnectStatus}
+                </>
+              ) : (
+                canConnectStatus
+              )
+            }
+            color={sdkFound === undefined ? "gray" : canConnectStatusColor}
           />
         </div>
-
-        {sdkFound && (
-          <div
-            key={`sdkTab_sdkItems_version`}
-            className={clsx("itemCard flex items-center justify-between", {
-              selected: selectedItem === "version",
-            })}
-            onClick={() => setSelectedItem("version")}
-          >
-            <ItemStatus
-              title="Version"
-              status={
-                (version ? version : "unknown") +
-                (version && versionStatusColor !== "green" ? " (outdated)" : "")
-              }
-              color={versionStatusColor}
-            />
-          </div>
-        )}
 
         {sdkFound && (
           <div

@@ -46,7 +46,6 @@ const panelTitles: Record<SdkItem, string> = {
   externalSdks: "Back-end SDKs",
   attributes: "Attributes",
   plugins: "Plugins",
-  version: "SDK Version",
   trackingCallback: "Tracking Callback",
   security: "Payload Security",
   stickyBucketing: "Sticky Bucketing",
@@ -67,11 +66,10 @@ const panels: Record<
     }
   >
 > = {
-  status: statusPanel,
+  status: sdkStatusPanel,
   externalSdks: externalSdksPanel,
   attributes: AttributesPanel,
   plugins: pluginsPanel,
-  version: versionPanel,
   trackingCallback: trackingCallbackPanel,
   security: securityPanel,
   stickyBucketing: stickyBucketingPanel,
@@ -89,8 +87,6 @@ const doclinks: Record<SdkItem, string | undefined> = {
     "https://docs.growthbook.io/tools/chrome-extension#back-end-debugging",
   plugins: undefined,
   attributes: undefined,
-  version:
-    "https://github.com/growthbook/growthbook/blob/main/packages/shared/src/sdk-versioning/CAPABILITIES.md",
   trackingCallback:
     "https://docs.growthbook.io/lib/js#experimentation-ab-testing",
   security: "https://docs.growthbook.io/lib/js#remote-evaluation",
@@ -541,6 +537,27 @@ function pluginsPanel({ plugins }: SDKHealthCheckResult) {
         <code>plugin(gb)</code>, aren&rsquo;t detectable, except the tracking
         plugins, which are recognised from the callbacks they install.
       </Text>
+    </>
+  );
+}
+
+// Connection and version share one SDK Status item
+function sdkStatusPanel(
+  props: SDKHealthCheckResult & {
+    latestSdkVersion: string;
+    latestMinorSdkVersion: string;
+  },
+) {
+  const StatusDetails = statusPanel;
+  const VersionDetails = versionPanel;
+  return (
+    <>
+      <StatusDetails {...props} />
+      {props.sdkFound ? (
+        <div className="mt-4">
+          <VersionDetails {...props} />
+        </div>
+      ) : null}
     </>
   );
 }
