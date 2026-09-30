@@ -29,7 +29,6 @@ export const sdkItems = [
   "plugins",
   "externalSdks",
   "payload",
-  "security",
   "attributes",
   "stickyBucketing",
   // "streaming",
@@ -70,12 +69,17 @@ export default function SdkTab() {
 
   const numExternalSdks = Object.keys(externalSdks || {}).length;
 
-  const decryptedStatus = payloadDecrypted ? "Decrypted" : "DecryptionError";
-  const securityStatus = hasDecryptionKey
-    ? decryptedStatus
-    : isRemoteEval
-      ? "Remote Eval"
-      : "Plain Text";
+  // A failed decryption usually leaves no payload, so check it first
+  const decryptionFailed = hasDecryptionKey && !payloadDecrypted;
+  const payloadStatus = decryptionFailed
+    ? "Decryption Error"
+    : !hasPayload
+      ? "No"
+      : hasDecryptionKey
+        ? "Yes (Encrypted)"
+        : isRemoteEval
+          ? "Yes (Remote Eval)"
+          : "Yes";
   const trackingCallbackIssues = hasTrackingCallbackIssues({
     hasTrackingCallback,
     trackingCallbackParams,
@@ -216,22 +220,8 @@ export default function SdkTab() {
             >
               <ItemStatus
                 title="SDK Payload"
-                status={hasPayload}
-                color="gray"
-              />
-            </div>
-
-            <div
-              key={`sdkTab_sdkItems_security`}
-              className={clsx("itemCard flex items-center justify-between", {
-                selected: selectedItem === "security",
-              })}
-              onClick={() => setSelectedItem("security")}
-            >
-              <ItemStatus
-                title="Payload Security"
-                status={securityStatus}
-                color="gray"
+                status={payloadStatus}
+                color={decryptionFailed ? "orange" : "gray"}
               />
             </div>
 

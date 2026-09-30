@@ -47,7 +47,6 @@ const panelTitles: Record<SdkItem, string> = {
   attributes: "Attributes",
   plugins: "Plugins",
   trackingCallback: "Tracking Callback",
-  security: "Payload Security",
   stickyBucketing: "Sticky Bucketing",
   // streaming: "Streaming",
   payload: "SDK Payload",
@@ -71,7 +70,6 @@ const panels: Record<
   attributes: AttributesPanel,
   plugins: pluginsPanel,
   trackingCallback: trackingCallbackPanel,
-  security: securityPanel,
   stickyBucketing: stickyBucketingPanel,
   // streaming: streamingPanel,
   payload: payloadPanel,
@@ -89,7 +87,6 @@ const doclinks: Record<SdkItem, string | undefined> = {
   attributes: undefined,
   trackingCallback:
     "https://docs.growthbook.io/lib/js#experimentation-ab-testing",
-  security: "https://docs.growthbook.io/lib/js#remote-evaluation",
   stickyBucketing: "https://docs.growthbook.io/app/sticky-bucketing",
   // streaming: "https://docs.growthbook.io/lib/js#streaming-updates",
   payload: "https://docs.growthbook.io/lib/js#loading-features-and-experiments",
@@ -753,24 +750,6 @@ function trackingCallbackPanel({
   );
 }
 
-function securityPanel({
-  hasDecryptionKey,
-  payloadDecrypted,
-  isRemoteEval,
-}: SDKHealthCheckResult) {
-  return (
-    <Text as="div" size="2" weight="regular">
-      {hasDecryptionKey
-        ? payloadDecrypted
-          ? "The SDK is using a decryption key and the payload is not being decrypted. Please check you have the correct decryption key."
-          : "The SDK is using a decryption key and the payload is being decrypted."
-        : isRemoteEval
-          ? "The SDK is using remote evaluation."
-          : "The SDK is not using a decryption key nor remote evaluation. The payload is in plain text."}
-    </Text>
-  );
-}
-
 function stickyBucketingPanel({
   usingStickyBucketing,
   stickyBucketAssignmentDocs,
@@ -839,9 +818,33 @@ function stickyBucketingPanel({
 //   );
 // }
 
-function payloadPanel({ hasPayload, payload }: SDKHealthCheckResult) {
+function payloadPanel({
+  hasPayload,
+  payload,
+  hasDecryptionKey,
+  payloadDecrypted,
+  isRemoteEval,
+}: SDKHealthCheckResult) {
   return (
     <>
+      {/* Without a payload there's nothing to describe, unless decryption is why */}
+      {hasPayload || (hasDecryptionKey && !payloadDecrypted) ? (
+        <Text
+          as="div"
+          size="2"
+          weight="regular"
+          mb="3"
+          color={hasDecryptionKey && !payloadDecrypted ? "orange" : undefined}
+        >
+          {hasDecryptionKey
+            ? payloadDecrypted
+              ? "The payload is encrypted, and the SDK decrypted it with its decryption key."
+              : "The SDK has a decryption key but couldn’t decrypt the payload. Check that it’s the right key for this SDK connection."
+            : isRemoteEval
+              ? "The SDK uses remote evaluation, so features are evaluated on the server and the payload holds the results for this user."
+              : "The payload is in plain text: the SDK uses neither a decryption key nor remote evaluation."}
+        </Text>
+      ) : null}
       {!hasPayload ? (
         <>
           <Callout.Root color="amber" size="1" className="mb-4">
@@ -858,7 +861,7 @@ function payloadPanel({ hasPayload, payload }: SDKHealthCheckResult) {
         <ValueField
           value={payload}
           valueType="json"
-          maxHeight={`calc(100vh - ${NAV_H}px - 150px)`}
+          maxHeight={`calc(100vh - ${NAV_H}px - 210px)`}
         />
       )}
     </>

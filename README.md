@@ -73,9 +73,9 @@ Some notes
 - SDK Health: new Event Ingestor item showing whether events reach a GrowthBook ingestor (Managed Warehouse, event forwarding), with region, failed requests, and client key mismatches
 - SDK Health: new Plugins item listing the SDK plugins in use, with the source of any custom plugin
 - Flag targeting attributes the SDK hasn't set on features the page evaluated: "not set" markers on rules, a callout in the Attributes tab, and an SDK Health item
-- SDK Health: group items into SDK, payload, and tracking sections, and show the SDK version and connection status together
+- SDK Health: group items into SDK, payload, and tracking sections; combine the SDK version with its connection status, and payload security with the payload
 - Variation dropdown for experiments with more than four variations
-- Bug fixes (experiments showing as inactive for rules without meta, bandit rules rendering as rollouts in the Features tab)
+- Bug fixes (experiments showing as inactive for rules without meta, bandit rules rendering as rollouts in the Features tab, swapped payload decryption messages)
 - Bump SDK support to 1.8.0 (`$savedGroup` operator)
 
 *1.2.5* (2026-07-19)
