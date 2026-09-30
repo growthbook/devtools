@@ -514,20 +514,19 @@ function pluginsPanel({ plugins }: SDKHealthCheckResult) {
       <Text as="div" size="2" weight="regular">
         {plugins?.length ? (
           <>
-            {plugins.map((plugin, i) => (
-              <div
-                key={`${plugin.name}_${i}`}
-                className="py-2 border-b border-gray-a3 first:pt-0 last:border-b-0"
-              >
-                <code className="text-gold-11">{plugin.name}</code>
-                {plugin.appliedAfterSetup ? (
-                  <span className="text-gray-11"> (applied after setup)</span>
-                ) : null}
-                {plugin.custom ? (
-                  <CallbackSource source={plugin.source} className="mt-1" />
-                ) : null}
-              </div>
-            ))}
+            <ul className="list-disc pl-5 space-y-1.5">
+              {plugins.map((plugin, i) => (
+                <li key={`${plugin.name}_${i}`}>
+                  {plugin.name}
+                  {plugin.appliedAfterSetup ? (
+                    <span className="text-gray-11"> (applied after setup)</span>
+                  ) : null}
+                  {plugin.custom ? (
+                    <CallbackSource source={plugin.source} className="mt-0.5" />
+                  ) : null}
+                </li>
+              ))}
+            </ul>
           </>
         ) : (
           <>No plugins were passed to the SDK constructor.</>
