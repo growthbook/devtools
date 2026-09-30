@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import clsx from "clsx";
 import { Prism } from "react-syntax-highlighter";
 import {
   ghcolors as codeThemeLight,
@@ -514,13 +515,16 @@ function pluginsPanel({ plugins }: SDKHealthCheckResult) {
         {plugins?.length ? (
           <>
             {plugins.map((plugin, i) => (
-              <div key={`${plugin.name}_${i}`}>
+              <div
+                key={`${plugin.name}_${i}`}
+                className="py-2 border-b border-gray-a3 first:pt-0 last:border-b-0"
+              >
                 <code className="text-gold-11">{plugin.name}</code>
                 {plugin.appliedAfterSetup ? (
                   <span className="text-gray-11"> (applied after setup)</span>
                 ) : null}
                 {plugin.custom ? (
-                  <CallbackSource source={plugin.source} />
+                  <CallbackSource source={plugin.source} className="mt-1" />
                 ) : null}
               </div>
             ))}
@@ -629,12 +633,22 @@ function versionPanel({
   );
 }
 
-function CallbackSource({ source }: { source?: string }) {
+function CallbackSource({
+  source,
+  className = "my-4",
+}: {
+  source?: string;
+  className?: string;
+}) {
   const [theme, , themeReady] = useGlobalState<Theme>("theme", "system", true);
   const dark = useMemo(() => isDark(theme), [theme, themeReady]);
   if (!source) return null;
   return (
-    <Accordion.Root className="accordion my-4" type="single" collapsible>
+    <Accordion.Root
+      className={clsx("accordion", className)}
+      type="single"
+      collapsible
+    >
       <Accordion.Item value="source">
         <Accordion.Trigger className="trigger mb-2">
           <Link
