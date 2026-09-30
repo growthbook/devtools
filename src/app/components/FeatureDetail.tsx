@@ -34,7 +34,10 @@ import Rule, {
 import * as Accordion from "@radix-ui/react-accordion";
 import React, { useEffect, useMemo, useState } from "react";
 import { HEADER_H, LEFT_PERCENT, SelectedFeature } from "./FeaturesTab";
-import { formatExperimentKey, holdoutIdFromFid } from "@/app/components/ExperimentsTab";
+import {
+  formatExperimentKey,
+  holdoutIdFromFid,
+} from "@/app/components/ExperimentsTab";
 import useGlobalState from "@/app/hooks/useGlobalState";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "@/app/components/Settings";
 import useTabState, { getActiveTabId } from "@/app/hooks/useTabState";
@@ -44,7 +47,13 @@ import useApi from "@/app/hooks/useApi";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { LogUnionWithSource } from "@/app/utils/logs";
-import { FeatureDefinition, FeatureResult, Result } from "@growthbook/growthbook";
+import useSdkData from "@/app/hooks/useSdkData";
+import { unsetRuleAttributes } from "@/utils/missingAttributes";
+import {
+  FeatureDefinition,
+  FeatureResult,
+  Result,
+} from "@growthbook/growthbook";
 import clsx from "clsx";
 
 export type ApiFeatureWithRevisions = {
@@ -119,6 +128,8 @@ export default function FeatureDetail({
     {},
   );
 
+  const [attributes] = useTabState<Record<string, unknown>>("attributes", {});
+  const { payload: sdkPayload } = useSdkData();
   const [hideInactiveRules, setHideInactiveRules] = useTabState<boolean>(
     "hideInactiveRules",
     true,
@@ -434,6 +445,18 @@ export default function FeatureDetail({
     JSON.stringify(selectedFeature?.evaluatedFeature?.result?.value) ===
     JSON.stringify(selectedFeature?.feature?.defaultValue);
 
+  // These rules are usually skipped, so hiding inactive rules would hide their "not set" markers
+  const rulesWithUnsetAttributes = (
+    selectedFeature?.feature?.rules ?? []
+  ).filter((rule) => {
+    const unset = unsetRuleAttributes(
+      rule,
+      attributes || {},
+      sdkPayload?.savedGroups,
+    );
+    return unset.condition.length > 0 || !!unset.hash;
+  }).length;
+
   const rightPercent = isResponsive ? 1 : 1 - LEFT_PERCENT;
 
   return (
@@ -456,7 +479,9 @@ export default function FeatureDetail({
           {selectedFid && (
             <>
               <div className="flex items-start gap-2">
-                <h2 className="font-bold flex-1">{formatExperimentKey(selectedFid)}</h2>
+                <h2 className="font-bold flex-1">
+                  {formatExperimentKey(selectedFid)}
+                </h2>
                 <IconButton
                   size="3"
                   variant="ghost"
@@ -705,6 +730,26 @@ export default function FeatureDetail({
               />
             ) : null}
           </div>
+
+          {hideInactiveRules && rulesWithUnsetAttributes ? (
+            <div className="mb-2 text-xs text-amber-11">
+              {rulesWithUnsetAttributes === 1
+                ? "1 rule targets"
+                : `${rulesWithUnsetAttributes} rules target`}{" "}
+              attributes the current user doesn&rsquo;t have.{" "}
+              <Link
+                size="1"
+                href="#"
+                role="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setHideInactiveRules(false);
+                }}
+              >
+                Show inactive rules
+              </Link>
+            </div>
+          ) : null}
 
           {!hideInactiveRules || defaultValueStatus === "matches" ? (
             <div

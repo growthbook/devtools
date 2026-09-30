@@ -25,7 +25,7 @@ import { useResponsiveContext } from "../hooks/useResponsive";
 import { TbEyeSearch } from "react-icons/tb";
 import { LogUnionWithSource } from "@/app/utils/logs";
 import { isContextualBandit, ruleVariations } from "@/utils/contextualBandits";
-import { ContextualBanditBadge } from "@/app/components/ContextualBanditDetail";
+import useBanditKeys, { banditLabel } from "@/app/hooks/useBanditKeys";
 
 export type ExperimentWithFeatures = (AutoExperiment | Experiment<any>) & {
   features?: string[];
@@ -99,6 +99,7 @@ export default function ExperimentsTab() {
   >("forcedVariations", {});
 
   const { evaluatedExperiments } = useGBSandboxEval();
+  const banditKeys = useBanditKeys();
 
   const [logEvents] = useTabState<LogUnionWithSource[] | undefined>(
     "logEvents",
@@ -273,6 +274,10 @@ export default function ExperimentsTab() {
                 forcedVariations,
               });
             const value = evaluatedExperiment?.result?.variationId ?? 0;
+            const subtitle = banditLabel(
+              types?.contextualBandit,
+              banditKeys.has(eid),
+            );
 
             if (
               !isForced &&
@@ -292,27 +297,29 @@ export default function ExperimentsTab() {
                 onClick={() => clickExperiment(eid, changeId)}
               >
                 <div
-                  className={clsx("title line-clamp-1 pl-2.5", {
-                    // The badge sits in an absolutely positioned sibling, so
-                    // the name needs room reserved or it runs underneath
-                    "pr-8": !types?.contextualBandit || fullWidthListView,
-                    "pr-28": types?.contextualBandit && !fullWidthListView,
-                  })}
+                  className="title pl-2.5 pr-8"
                   style={{ width: fullWidthListView ? col1 : undefined }}
                   title={getExperimentDisplayName(experiment)}
                 >
-                  <FeatureExperimentStatusIcon
-                    evaluated={pageEvaluatedExperiments.has(eid)}
-                    forced={isForced}
-                    type="experiment"
-                  />
-                  {experiment?.isDraft ? (
-                    <TbEyeSearch
-                      className="inline-block mr-1 opacity-50"
-                      size={12}
+                  <div className="line-clamp-1">
+                    <FeatureExperimentStatusIcon
+                      evaluated={pageEvaluatedExperiments.has(eid)}
+                      forced={isForced}
+                      type="experiment"
                     />
+                    {experiment?.isDraft ? (
+                      <TbEyeSearch
+                        className="inline-block mr-1 opacity-50"
+                        size={12}
+                      />
+                    ) : null}
+                    {getExperimentDisplayName(experiment)}
+                  </div>
+                  {subtitle ? (
+                    <div className="line-clamp-1 pl-5 text-xs font-normal text-gray-11">
+                      {subtitle}
+                    </div>
                   ) : null}
-                  {getExperimentDisplayName(experiment)}
                 </div>
                 <div
                   className={clsx("flex items-center flex-shrink-0 text-sm", {
@@ -323,9 +330,6 @@ export default function ExperimentsTab() {
                 >
                   {types ? (
                     <div className="flex items-center gap-2 pr-0.5">
-                      {types.contextualBandit ? (
-                        <ContextualBanditBadge />
-                      ) : null}
                       {types.redirect ? (
                         <Tooltip content="URL Redirect experiment">
                           <span>

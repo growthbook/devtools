@@ -9,7 +9,13 @@ import SdkItemPanel from "./SdkItemPanel";
 import useSdkData from "@/app/hooks/useSdkData";
 import { paddedVersionString } from "@growthbook/growthbook";
 import packageJson from "@growthbook/growthbook/package.json";
-import { hasTrackingCallbackIssues } from "@/utils/sdkCallbacks";
+import { summarizeIngestor } from "@/utils/ingestor";
+import useMissingAttributes from "@/app/hooks/useMissingAttributes";
+import {
+  eventLoggerReplacesCallbacks,
+  hasTrackingCallbackIssues,
+  isMissingTrackingCallback,
+} from "@/utils/sdkCallbacks";
 
 const latestSdkVersion = packageJson.version;
 const latestSdkParts = latestSdkVersion.split(".");
@@ -20,15 +26,16 @@ export const LEFT_PERCENT = 0.5;
 
 export const sdkItems = [
   "status",
+  "plugins",
   "externalSdks",
-  "version",
-  "trackingCallback",
-  "security",
+  "payload",
+  "attributes",
   "stickyBucketing",
   // "streaming",
-  "payload",
-  "logEvent",
+  "trackingCallback",
   "onFeatureUsage",
+  "logEvent",
+  "eventIngestor",
 ] as const;
 export type SdkItem = (typeof sdkItems)[number];
 
@@ -53,16 +60,26 @@ export default function SdkTab() {
     usingOnFeatureUsage,
     isRemoteEval,
     usingStickyBucketing,
+    ingestor,
+    clientKey,
+    plugins,
   } = useSdkData();
+  const ingestorSummary = summarizeIngestor(ingestor, clientKey);
+  const missingAttributes = useMissingAttributes();
 
   const numExternalSdks = Object.keys(externalSdks || {}).length;
 
-  const decryptedStatus = payloadDecrypted ? "Decrypted" : "DecryptionError";
-  const securityStatus = hasDecryptionKey
-    ? decryptedStatus
-    : isRemoteEval
-      ? "Remote Eval"
-      : "Plain Text";
+  // A failed decryption usually leaves no payload, so check it first
+  const decryptionFailed = hasDecryptionKey && !payloadDecrypted;
+  const payloadStatus = decryptionFailed
+    ? "Decryption Error"
+    : !hasPayload
+      ? "No"
+      : hasDecryptionKey
+        ? "Yes (Encrypted)"
+        : isRemoteEval
+          ? "Yes (Remote Eval)"
+          : "Yes";
   const trackingCallbackIssues = hasTrackingCallbackIssues({
     hasTrackingCallback,
     trackingCallbackParams,
@@ -74,15 +91,20 @@ export default function SdkTab() {
   )
     ? undefined
     : trackingCallbackParams?.length;
+  const callbacksNotNeeded = eventLoggerReplacesCallbacks({ usingLogEvent });
   const trackingCallbackStatus = !hasTrackingCallback
-    ? "None Found"
+    ? callbacksNotNeeded
+      ? "N/A"
+      : "None Found"
     : trackingCallbackIssues
       ? "Found (issues)"
       : trackingCallbackParamCount
-        ? `Found (${trackingCallbackParamCount} param${trackingCallbackParamCount === 1 ? "" : "s"})`
+        ? `${trackingCallbackParamCount} param${trackingCallbackParamCount === 1 ? "" : "s"}`
         : "Found";
   const trackingCallbackStatusColor = !hasTrackingCallback
-    ? "red"
+    ? callbacksNotNeeded
+      ? "gray"
+      : "red"
     : trackingCallbackIssues
       ? "orange"
       : "green";
@@ -134,11 +156,42 @@ export default function SdkTab() {
           onClick={() => setSelectedItem("status")}
         >
           <ItemStatus
-            title="SDK Status"
-            status={canConnectStatus}
-            color={canConnectStatusColor}
+            title="SDK"
+            status={
+              sdkFound ? (
+                <>
+                  <Text color={versionStatusColor}>
+                    {version || "unknown"}
+                    {version && versionStatusColor !== "green"
+                      ? " (outdated)"
+                      : null}
+                  </Text>
+                  <Text color="gray"> · </Text>
+                  {canConnectStatus}
+                </>
+              ) : (
+                canConnectStatus
+              )
+            }
+            color={sdkFound === undefined ? "gray" : canConnectStatusColor}
           />
         </div>
+
+        {sdkFound && (
+          <div
+            key={`sdkTab_sdkItems_plugins`}
+            className={clsx("itemCard flex items-center justify-between", {
+              selected: selectedItem === "plugins",
+            })}
+            onClick={() => setSelectedItem("plugins")}
+          >
+            <ItemStatus
+              title="Plugins"
+              status={plugins?.length ? plugins.length : "None"}
+              color="gray"
+            />
+          </div>
+        )}
 
         <div
           key={`sdkTab_sdkItems_externalSdks`}
@@ -156,50 +209,37 @@ export default function SdkTab() {
 
         {sdkFound && (
           <>
+            <SectionDivider />
+
             <div
-              key={`sdkTab_sdkItems_version`}
+              key={`sdkTab_sdkItems_payload`}
               className={clsx("itemCard flex items-center justify-between", {
-                selected: selectedItem === "version",
+                selected: selectedItem === "payload",
               })}
-              onClick={() => setSelectedItem("version")}
+              onClick={() => setSelectedItem("payload")}
             >
               <ItemStatus
-                title="Version"
+                title="SDK Payload"
+                status={payloadStatus}
+                color={decryptionFailed ? "orange" : "gray"}
+              />
+            </div>
+
+            <div
+              key={`sdkTab_sdkItems_attributes`}
+              className={clsx("itemCard flex items-center justify-between", {
+                selected: selectedItem === "attributes",
+              })}
+              onClick={() => setSelectedItem("attributes")}
+            >
+              <ItemStatus
+                title="Attributes"
                 status={
-                  (version ? version : "unknown") +
-                  (version && versionStatusColor !== "green"
-                    ? " (outdated)"
-                    : "")
+                  missingAttributes.length
+                    ? `${missingAttributes.length} not set`
+                    : "All set"
                 }
-                color={versionStatusColor}
-              />
-            </div>
-
-            <div
-              key={`sdkTab_sdkItems_trackingCallback`}
-              className={clsx("itemCard flex items-center justify-between", {
-                selected: selectedItem === "trackingCallback",
-              })}
-              onClick={() => setSelectedItem("trackingCallback")}
-            >
-              <ItemStatus
-                title="Tracking Callback"
-                status={trackingCallbackStatus}
-                color={trackingCallbackStatusColor}
-              />
-            </div>
-
-            <div
-              key={`sdkTab_sdkItems_security`}
-              className={clsx("itemCard flex items-center justify-between", {
-                selected: selectedItem === "security",
-              })}
-              onClick={() => setSelectedItem("security")}
-            >
-              <ItemStatus
-                title="Payload Security"
-                status={securityStatus}
-                color="gray"
+                color={missingAttributes.length ? "orange" : "gray"}
               />
             </div>
 
@@ -217,16 +257,38 @@ export default function SdkTab() {
               />
             </div>
 
+            <SectionDivider />
+
             <div
-              key={`sdkTab_sdkItems_payload`}
+              key={`sdkTab_sdkItems_trackingCallback`}
               className={clsx("itemCard flex items-center justify-between", {
-                selected: selectedItem === "payload",
+                selected: selectedItem === "trackingCallback",
               })}
-              onClick={() => setSelectedItem("payload")}
+              onClick={() => setSelectedItem("trackingCallback")}
             >
               <ItemStatus
-                title="SDK Payload"
-                status={hasPayload}
+                title="Tracking Callback"
+                status={trackingCallbackStatus}
+                color={trackingCallbackStatusColor}
+              />
+            </div>
+
+            <div
+              key={`sdkTab_sdkItems_onFeatureUsage`}
+              className={clsx("itemCard flex items-center justify-between", {
+                selected: selectedItem === "onFeatureUsage",
+              })}
+              onClick={() => setSelectedItem("onFeatureUsage")}
+            >
+              <ItemStatus
+                title="On Feature Usage Callback"
+                status={
+                  usingOnFeatureUsage
+                    ? "Yes"
+                    : callbacksNotNeeded
+                      ? "N/A"
+                      : "No"
+                }
                 color="gray"
               />
             </div>
@@ -246,16 +308,16 @@ export default function SdkTab() {
             </div>
 
             <div
-              key={`sdkTab_sdkItems_onFeatureUsage`}
+              key={`sdkTab_sdkItems_eventIngestor`}
               className={clsx("itemCard flex items-center justify-between", {
-                selected: selectedItem === "onFeatureUsage",
+                selected: selectedItem === "eventIngestor",
               })}
-              onClick={() => setSelectedItem("onFeatureUsage")}
+              onClick={() => setSelectedItem("eventIngestor")}
             >
               <ItemStatus
-                title="On Feature Usage Callback"
-                status={usingOnFeatureUsage}
-                color="gray"
+                title="Event Ingestor"
+                status={ingestorSummary.status}
+                color={ingestorSummary.color}
               />
             </div>
           </>
@@ -264,6 +326,7 @@ export default function SdkTab() {
       {selectedItem && (
         <SdkItemPanel
           selectedItem={selectedItem}
+          selectItem={setSelectedItem}
           unsetSelectedItem={() => setSelectedItem(undefined)}
           widthPercent={rightPercent}
           latestSdkVersion={latestSdkVersion}
@@ -272,6 +335,10 @@ export default function SdkTab() {
       )}
     </div>
   );
+}
+
+function SectionDivider() {
+  return <div className="mx-4 my-1.5 border-t border-gray-a6" />;
 }
 
 function ItemStatus({
@@ -288,10 +355,10 @@ function ItemStatus({
   }
   return (
     <>
-      <div className="title pl-4 pr-6">{title}</div>
+      <div className="title pl-4 pr-3">{title}</div>
       <div className="flex pr-4 items-center flex-shrink-0 text-sm">
         <Text color={color}>{status}</Text>
-        <PiCaretRight className="ml-5 text-gray-10" />
+        <PiCaretRight className="ml-3 text-gray-10" />
       </div>
     </>
   );
@@ -312,7 +379,7 @@ export function getSdkStatus(
   if (
     (!sdkData.canConnect && !numExternalSdks) ||
     (sdkData.canConnect && !sdkData.hasPayload) ||
-    (!sdkData.hasTrackingCallback && !numExternalSdks) ||
+    (isMissingTrackingCallback(sdkData) && !numExternalSdks) ||
     hasTrackingCallbackIssues(sdkData) ||
     (sdkData.hasPayload && !sdkData.payloadDecrypted) ||
     (paddedVersionString(sdkData.version) <

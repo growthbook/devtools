@@ -274,6 +274,27 @@ export type ExternalSdkInfo = {
   attributes?: Attributes;
 };
 
+// A plugin passed to the SDK constructor, or a tracking plugin recognised from its callback
+export type DetectedPlugin = {
+  // Empty for a custom plugin without a usable function name
+  name: string;
+  custom?: boolean;
+  source?: string;
+  // SDK methods its code calls
+  uses?: string[];
+  appliedAfterSetup?: boolean;
+};
+
+// Requests to a GrowthBook event ingestor seen on the page, via Resource Timing
+export type IngestorHealth = {
+  usingGrowthBookTracking: boolean;
+  requestCount: number;
+  errorCount: number;
+  hosts: string[];
+  clientKeys: string[];
+  lastStatus?: number;
+};
+
 export type SDKHealthCheckResult = {
   canConnect: boolean;
   hasPayload: boolean;
@@ -289,10 +310,15 @@ export type SDKHealthCheckResult = {
   devModeEnabled: boolean;
   hasTrackingCallback?: boolean;
   trackingCallbackParams?: string[];
+  trackingCallbackSource?: string;
   hasDecryptionKey?: boolean;
   payloadDecrypted?: boolean;
   usingLogEvent?: boolean;
+  logEventSource?: string;
   usingOnFeatureUsage?: boolean;
+  onFeatureUsageSource?: string;
+  ingestor?: IngestorHealth;
+  plugins?: DetectedPlugin[];
   isRemoteEval?: boolean;
   usingStickyBucketing?: boolean;
   stickyBucketAssignmentDocs?: Record<string, StickyAssignmentsDocument>;

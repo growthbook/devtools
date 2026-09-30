@@ -2,19 +2,22 @@ import React, { useEffect, useState } from "react";
 import { Attributes } from "@growthbook/growthbook";
 import useTabState from "../hooks/useTabState";
 import useGlobalState from "../hooks/useGlobalState";
-import { Checkbox, Container, Link, Text } from "@radix-ui/themes";
+import { Callout, Checkbox, Container, Link, Text } from "@radix-ui/themes";
 import { Archetype, SDKAttribute } from "../gbTypes";
 import AttributesForm from "./AttributesForm";
 import { useForm } from "react-hook-form";
-import { PiXBold } from "react-icons/pi";
+import { PiWarningFill, PiXBold } from "react-icons/pi";
 import useApi from "../hooks/useApi";
 import { APP_ORIGIN, CLOUD_APP_ORIGIN } from "./Settings";
 import clsx from "clsx";
 import { useResponsiveContext } from "../hooks/useResponsive";
+import useMissingAttributes from "../hooks/useMissingAttributes";
+import { MissingAttributesList } from "./MissingAttributes";
 
 export const HEADER_H = 40;
 
 export default function AttributesTab() {
+  const missingAttributes = useMissingAttributes();
   const { isResponsive } = useResponsiveContext();
   const [attributes, setAttributes] = useTabState<Attributes>("attributes", {});
   const [overriddenAttributes, setOverriddenAttributes] =
@@ -226,7 +229,31 @@ export default function AttributesTab() {
           })}
           style={{ maxWidth: 700 }}
         >
-          <div className="w-full">
+          <div
+            className="w-full"
+            style={{ paddingTop: HEADER_H + (!isResponsive ? 12 : 0) }}
+          >
+            {missingAttributes.length ? (
+              <Callout.Root
+                color="amber"
+                size="1"
+                className={clsx("mb-3", { "mx-2 mt-2": isResponsive })}
+              >
+                <Callout.Icon>
+                  <PiWarningFill />
+                </Callout.Icon>
+                <Callout.Text>
+                  <span className="font-semibold">
+                    Features on this page target{" "}
+                    {missingAttributes.length === 1
+                      ? "an attribute"
+                      : `${missingAttributes.length} attributes`}{" "}
+                    the SDK hasn&rsquo;t set
+                  </span>
+                  <MissingAttributesList missing={missingAttributes} />
+                </Callout.Text>
+              </Callout.Root>
+            ) : null}
             <div
               className={clsx("attributesForm", {
                 "px-3": !isResponsive,
@@ -234,7 +261,6 @@ export default function AttributesTab() {
                 "rounded-none": isResponsive,
                 "px-2": isResponsive,
               })}
-              style={{ marginTop: HEADER_H + (!isResponsive ? 12 : 0) }}
             >
               <Container className="p-3" overflowX="hidden">
                 <AttributesForm

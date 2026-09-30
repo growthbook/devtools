@@ -22,7 +22,10 @@ import {
 } from "@/background/visualEditorHandlers";
 import packageJson from "@growthbook/growthbook/package.json";
 import { paddedVersionString } from "@growthbook/growthbook";
-import { hasTrackingCallbackIssues } from "@/utils/sdkCallbacks";
+import {
+  hasTrackingCallbackIssues,
+  isMissingTrackingCallback,
+} from "@/utils/sdkCallbacks";
 
 const latestSdkVersion = packageJson.version;
 const latestSdkParts = latestSdkVersion.split(".");
@@ -211,7 +214,7 @@ const UpdateTabIconBasedOnSDK = (
           : !data.hasPayload
             ? "No SDK payload\n"
             : "SDK connected\n") +
-        (!data.hasTrackingCallback ? "No tracking callback\n" : "") +
+        (isMissingTrackingCallback(data) ? "No tracking callback\n" : "") +
         (hasTrackingCallbackIssues(data) ? "Tracking callback issues\n" : "") +
         (!data.payloadDecrypted ? "Decryption issues\n" : "") +
         (paddedVersionString(data.version) <
@@ -308,7 +311,7 @@ export function getSdkStatus(
   if (
     (!sdkData.canConnect && !numExternalSdks) ||
     (sdkData.canConnect && !sdkData.hasPayload) ||
-    (!sdkData.hasTrackingCallback && !numExternalSdks) ||
+    (isMissingTrackingCallback(sdkData) && !numExternalSdks) ||
     hasTrackingCallbackIssues(sdkData) ||
     (sdkData.hasPayload && !sdkData.payloadDecrypted) ||
     (paddedVersionString(sdkData.version) <

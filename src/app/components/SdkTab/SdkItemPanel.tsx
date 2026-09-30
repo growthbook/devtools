@@ -1,4 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import clsx from "clsx";
+import { Prism } from "react-syntax-highlighter";
+import {
+  ghcolors as codeThemeLight,
+  a11yDark as codeThemeDark,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
+import useGlobalState from "@/app/hooks/useGlobalState";
 import {
   Button,
   Callout,
@@ -8,7 +15,7 @@ import {
   Text,
 } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
-import { MW, NAV_H } from "@/app";
+import { isDark, MW, NAV_H, Theme } from "@/app";
 import {
   PiArrowsClockwise,
   PiArrowSquareOut,
@@ -25,22 +32,28 @@ import useSdkData from "@/app/hooks/useSdkData";
 import { SDKHealthCheckResult } from "devtools";
 import {
   expectsUserContextParam,
+  eventLoggerReplacesCallbacks,
   trackingCallbackParamsAreValid,
   USER_CONTEXT_SDK_VERSION,
 } from "@/utils/sdkCallbacks";
-import { getActiveTabId } from "@/app/hooks/useTabState";
+import useTabState, { getActiveTabId } from "@/app/hooks/useTabState";
+import useMissingAttributes from "@/app/hooks/useMissingAttributes";
+import { MissingAttributesList } from "@/app/components/MissingAttributes";
+import { ingestorRegion, summarizeIngestor } from "@/utils/ingestor";
+import { isMinifiedName } from "@/utils/sdkPlugins";
 import { paddedVersionString } from "@growthbook/growthbook";
 
 const panelTitles: Record<SdkItem, string> = {
   status: "SDK Status",
   externalSdks: "Back-end SDKs",
-  version: "SDK Version",
+  attributes: "Attributes",
+  plugins: "Plugins",
   trackingCallback: "Tracking Callback",
-  security: "Payload Security",
   stickyBucketing: "Sticky Bucketing",
   // streaming: "Streaming",
   payload: "SDK Payload",
   logEvent: "Log Event Callback",
+  eventIngestor: "Event Ingestor",
   onFeatureUsage: "On Feature Usage Callback",
 };
 
@@ -51,18 +64,20 @@ const panels: Record<
       latestSdkVersion: string;
       latestMinorSdkVersion: string;
       hasPayload: boolean;
+      selectItem?: (item: SdkItem) => void;
     }
   >
 > = {
-  status: statusPanel,
+  status: sdkStatusPanel,
   externalSdks: externalSdksPanel,
-  version: versionPanel,
+  attributes: AttributesPanel,
+  plugins: pluginsPanel,
   trackingCallback: trackingCallbackPanel,
-  security: securityPanel,
   stickyBucketing: stickyBucketingPanel,
   // streaming: streamingPanel,
   payload: payloadPanel,
   logEvent: logEventPanel,
+  eventIngestor: eventIngestorPanel,
   onFeatureUsage: onFeatureUsagePanel,
 };
 
@@ -71,26 +86,29 @@ const doclinks: Record<SdkItem, string | undefined> = {
     "https://docs.growthbook.io/quick-start#step-2-integrate-growthbook-into-your-application",
   externalSdks:
     "https://docs.growthbook.io/tools/chrome-extension#back-end-debugging",
-  version:
-    "https://github.com/growthbook/growthbook/blob/main/packages/shared/src/sdk-versioning/CAPABILITIES.md",
+  plugins: undefined,
+  attributes: undefined,
   trackingCallback:
     "https://docs.growthbook.io/lib/js#experimentation-ab-testing",
-  security: "https://docs.growthbook.io/lib/js#remote-evaluation",
   stickyBucketing: "https://docs.growthbook.io/app/sticky-bucketing",
   // streaming: "https://docs.growthbook.io/lib/js#streaming-updates",
   payload: "https://docs.growthbook.io/lib/js#loading-features-and-experiments",
   logEvent: undefined,
+  eventIngestor:
+    "https://docs.growthbook.io/app/managed-warehouse#sending-events",
   onFeatureUsage: "https://docs.growthbook.io/lib/js#feature-usage-callback",
 };
 
 export default function SdkItemPanel({
   selectedItem,
+  selectItem,
   unsetSelectedItem,
   widthPercent,
   latestSdkVersion,
   latestMinorSdkVersion,
 }: {
   selectedItem: SdkItem;
+  selectItem: (item: SdkItem) => void;
   unsetSelectedItem: () => void;
   widthPercent: number;
   latestSdkVersion: string;
@@ -150,6 +168,7 @@ export default function SdkItemPanel({
             >
               <ItemPanel
                 selectedItem={selectedItem}
+                selectItem={selectItem}
                 latestSdkVersion={latestSdkVersion}
                 latestMinorSdkVersion={latestMinorSdkVersion}
               />
@@ -175,10 +194,12 @@ export default function SdkItemPanel({
 
 function ItemPanel({
   selectedItem,
+  selectItem,
   latestSdkVersion,
   latestMinorSdkVersion,
 }: {
   selectedItem: SdkItem;
+  selectItem: (item: SdkItem) => void;
   latestSdkVersion: string;
   latestMinorSdkVersion: string;
 }) {
@@ -187,6 +208,7 @@ function ItemPanel({
   return (
     <PanelComponent
       {...sdkData}
+      selectItem={selectItem}
       latestSdkVersion={latestSdkVersion}
       latestMinorSdkVersion={latestMinorSdkVersion}
     />
@@ -460,6 +482,180 @@ function externalSdksPanel({ externalSdks }: SDKHealthCheckResult) {
   );
 }
 
+function AttributesPanel() {
+  const missing = useMissingAttributes();
+  const [, setCurrentTab] = useTabState("currentTab", "features");
+  return (
+    <>
+      <Text as="div" size="2" weight="regular">
+        {missing.length ? (
+          <>
+            Features on this page target attributes the SDK hasn&rsquo;t set:
+            <MissingAttributesList missing={missing} />
+          </>
+        ) : (
+          <>Every attribute that features on this page target is set.</>
+        )}
+      </Text>
+      <Text as="div" size="1" className="mt-3 text-gray-11">
+        Checks the features the page has evaluated, using the current
+        user&rsquo;s attributes. A <code>null</code> value counts as set.{" "}
+        <Link
+          href="#"
+          role="button"
+          size="1"
+          onClick={(e) => {
+            e.preventDefault();
+            setCurrentTab("attributes");
+          }}
+        >
+          Open the Attributes tab
+        </Link>
+      </Text>
+    </>
+  );
+}
+
+// SDK methods that an SDK Health item checks, so a plugin can point to the item showing whether it works
+const RELATED_ITEMS: Record<string, SdkItem[]> = {
+  setTrackingCallback: ["trackingCallback"],
+  setEventLogger: ["logEvent", "eventIngestor"],
+  setFeatureUsageCallback: ["onFeatureUsage"],
+  setAttributes: ["attributes"],
+  updateAttributes: ["attributes"],
+  setAttributeOverrides: ["attributes"],
+  setPayload: ["payload"],
+};
+
+function pluginsPanel({
+  plugins,
+  selectItem,
+}: SDKHealthCheckResult & { selectItem?: (item: SdkItem) => void }) {
+  return (
+    <>
+      {plugins?.length ? (
+        <Accordion.Root className="accordion" type="multiple">
+          {plugins.map((plugin, i) => {
+            // A site's own minifier can rename the SDK's private methods, e.g. to "C"
+            const uses = (plugin.uses ?? []).filter(
+              (method) => !isMinifiedName(method),
+            );
+            const minifiedUses = (plugin.uses?.length ?? 0) - uses.length;
+            const related = [
+              ...new Set(uses.flatMap((method) => RELATED_ITEMS[method] ?? [])),
+            ];
+            return (
+              <Accordion.Item
+                key={`${plugin.name}_${i}`}
+                value={`${i}`}
+                className="mb-1.5"
+              >
+                <Accordion.Trigger className="trigger flex items-start gap-1 text-left">
+                  <PiCaretRightFill
+                    className="caret mt-1 flex-shrink-0 text-violet-11"
+                    size={12}
+                  />
+                  <Text size="2">
+                    {plugin.name || (
+                      <em className="text-gray-11">Unnamed plugin</em>
+                    )}
+                    {plugin.appliedAfterSetup ? (
+                      <span className="text-gray-11">
+                        {" "}
+                        (applied after setup)
+                      </span>
+                    ) : null}
+                  </Text>
+                </Accordion.Trigger>
+                <Accordion.Content className="accordionInner overflow-hidden w-full">
+                  <Text as="div" size="1" className="pl-4 pt-1 pb-2">
+                    {uses.length || minifiedUses ? (
+                      <div>
+                        Uses{" "}
+                        {uses.map((method, j) => (
+                          <React.Fragment key={method}>
+                            {j ? ", " : null}
+                            <code>{method}</code>
+                          </React.Fragment>
+                        ))}
+                        {minifiedUses ? (
+                          <span className="text-gray-11">
+                            {uses.length ? ", plus " : null}
+                            {minifiedUses} internal method
+                            {minifiedUses === 1 ? "" : "s"}
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <div className="text-gray-11">
+                        Calls no SDK methods directly.
+                      </div>
+                    )}
+                    {related.length && selectItem ? (
+                      <div className="mt-1">
+                        See{" "}
+                        {related.map((item, j) => (
+                          <React.Fragment key={item}>
+                            {j ? " · " : null}
+                            <Link
+                              size="1"
+                              href="#"
+                              role="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                selectItem(item);
+                              }}
+                            >
+                              {panelTitles[item]}
+                            </Link>
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    ) : null}
+                    {plugin.custom ? (
+                      <CallbackSource source={plugin.source} className="mt-1" />
+                    ) : null}
+                  </Text>
+                </Accordion.Content>
+              </Accordion.Item>
+            );
+          })}
+        </Accordion.Root>
+      ) : (
+        <Text as="div" size="2" weight="regular">
+          No plugins were passed to the SDK constructor.
+        </Text>
+      )}
+      <Text as="div" size="1" className="mt-3 text-gray-11">
+        Lists plugins passed to the SDK constructor. Plugins applied later, eg{" "}
+        <code>plugin(gb)</code>, aren&rsquo;t detectable, except the tracking
+        plugins, which are recognised from the callbacks they install.
+      </Text>
+    </>
+  );
+}
+
+// Connection and version share one SDK Status item
+function sdkStatusPanel(
+  props: SDKHealthCheckResult & {
+    latestSdkVersion: string;
+    latestMinorSdkVersion: string;
+  },
+) {
+  const StatusDetails = statusPanel;
+  const VersionDetails = versionPanel;
+  return (
+    <>
+      <StatusDetails {...props} />
+      {props.sdkFound ? (
+        <div className="mt-4">
+          <VersionDetails {...props} />
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 function versionPanel({
   hasWindowConfig,
   version,
@@ -530,9 +726,74 @@ function versionPanel({
   );
 }
 
+function SourceCode({ source }: { source: string }) {
+  const [theme, , themeReady] = useGlobalState<Theme>("theme", "system", true);
+  const dark = useMemo(() => isDark(theme), [theme, themeReady]);
+  return (
+    <div className="bg-field border border-gray-a3 rounded-md">
+      <Prism
+        language="javascript"
+        style={!dark ? codeThemeLight : codeThemeDark}
+        customStyle={{
+          padding: "5px",
+          margin: 0,
+          border: "0px none",
+          background: "unset",
+          backgroundColor: "unset",
+          maxHeight: 300,
+          fontFamily: `Consolas, "Bitstream Vera Sans Mono", "Courier New", Courier, monospace`,
+          fontSize: "0.9em",
+          lineHeight: "12px",
+        }}
+        codeTagProps={{
+          className: "text-2xs-important !whitespace-pre-wrap break-all",
+        }}
+      >
+        {source}
+      </Prism>
+    </div>
+  );
+}
+
+function CallbackSource({
+  source,
+  className = "my-4",
+}: {
+  source?: string;
+  className?: string;
+}) {
+  if (!source) return null;
+  return (
+    <Accordion.Root
+      className={clsx("accordion", className)}
+      type="single"
+      collapsible
+    >
+      <Accordion.Item value="source">
+        <Accordion.Trigger className="trigger mb-2">
+          <Link
+            size="2"
+            role="button"
+            className="hover:underline"
+            weight="bold"
+          >
+            <PiCaretRightFill className="caret mr-0.5" size={12} />
+            Source
+          </Link>
+        </Accordion.Trigger>
+        <Accordion.Content className="accordionInner overflow-hidden w-full">
+          <SourceCode source={source} />
+        </Accordion.Content>
+      </Accordion.Item>
+    </Accordion.Root>
+  );
+}
+
 function trackingCallbackPanel({
   trackingCallbackParams,
+  trackingCallbackSource,
   hasTrackingCallback,
+  usingLogEvent,
   version,
 }: SDKHealthCheckResult) {
   const missingUserContext =
@@ -542,71 +803,63 @@ function trackingCallbackPanel({
     !expectsUserContextParam(version) &&
     trackingCallbackParams?.length === 3;
   return (
-    <Text as="div" size="2" weight="regular">
-      {!hasTrackingCallback ? (
-        <>
-          The SDK is not using a{" "}
-          <code className="text-gold-11">trackingCallback</code>. You will need
-          to add one to track experiment exposure to your data warehouse.
-        </>
-      ) : missingUserContext ? (
-        <>
-          The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code> with{" "}
-          <em className="text-amber-600">2</em> params. Add a third{" "}
-          <code>userContext</code> param to use newer features.
-        </>
-      ) : unusedUserContext ? (
-        <>
-          The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code> with{" "}
-          <em className="text-amber-600">3</em> params, but SDK {version} never
-          passes <code>userContext</code>. Upgrade to {USER_CONTEXT_SDK_VERSION}{" "}
-          or later to use it.
-        </>
-      ) : !trackingCallbackParamsAreValid(trackingCallbackParams, version) ? (
-        <>
-          The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code> with{" "}
-          <em className="text-amber-600">{trackingCallbackParams?.length}</em>{" "}
-          param{trackingCallbackParams?.length === 1 ? "" : "s"} instead of{" "}
-          <code>(experiment, result)</code> or{" "}
-          <code>(experiment, result, userContext)</code>. Please check your
-          implementation.
-        </>
-      ) : trackingCallbackParams?.length ? (
-        <>
-          The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code> with{" "}
-          {trackingCallbackParams.length} param
-          {trackingCallbackParams.length === 1 ? "" : "s"}:{" "}
-          <code>({trackingCallbackParams.join(", ")})</code>.
-        </>
-      ) : (
-        <>
-          The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code>.
-        </>
-      )}
-    </Text>
-  );
-}
-
-function securityPanel({
-  hasDecryptionKey,
-  payloadDecrypted,
-  isRemoteEval,
-}: SDKHealthCheckResult) {
-  return (
-    <Text as="div" size="2" weight="regular">
-      {hasDecryptionKey
-        ? payloadDecrypted
-          ? "The SDK is using a decryption key and the payload is not being decrypted. Please check you have the correct decryption key."
-          : "The SDK is using a decryption key and the payload is being decrypted."
-        : isRemoteEval
-          ? "The SDK is using remote evaluation."
-          : "The SDK is not using a decryption key nor remote evaluation. The payload is in plain text."}
-    </Text>
+    <>
+      <Text as="div" size="2" weight="regular">
+        {!hasTrackingCallback &&
+        eventLoggerReplacesCallbacks({ usingLogEvent }) ? (
+          <>
+            Not needed. Managed Warehouse uses{" "}
+            <code className="text-gold-11">logEvent</code>: the SDK sends each
+            experiment exposure to it as an Experiment Viewed event.
+          </>
+        ) : !hasTrackingCallback ? (
+          <>
+            The SDK is not using a{" "}
+            <code className="text-gold-11">trackingCallback</code>. You will
+            need to add one to track experiment exposure to your data warehouse.
+          </>
+        ) : missingUserContext ? (
+          <>
+            The SDK is using a{" "}
+            <code className="text-gold-11">trackingCallback</code> with{" "}
+            <em className="text-amber-600">2</em> params. Add a third{" "}
+            <code>userContext</code> param to use newer features.
+          </>
+        ) : unusedUserContext ? (
+          <>
+            The SDK is using a{" "}
+            <code className="text-gold-11">trackingCallback</code> with{" "}
+            <em className="text-amber-600">3</em> params, but SDK {version}{" "}
+            never passes <code>userContext</code>. Upgrade to{" "}
+            {USER_CONTEXT_SDK_VERSION} or later to use it.
+          </>
+        ) : !trackingCallbackParamsAreValid(trackingCallbackParams, version) ? (
+          <>
+            The SDK is using a{" "}
+            <code className="text-gold-11">trackingCallback</code> with{" "}
+            <em className="text-amber-600">{trackingCallbackParams?.length}</em>{" "}
+            param{trackingCallbackParams?.length === 1 ? "" : "s"} instead of{" "}
+            <code>(experiment, result)</code> or{" "}
+            <code>(experiment, result, userContext)</code>. Please check your
+            implementation.
+          </>
+        ) : trackingCallbackParams?.length ? (
+          <>
+            The SDK is using a{" "}
+            <code className="text-gold-11">trackingCallback</code> with{" "}
+            {trackingCallbackParams.length} param
+            {trackingCallbackParams.length === 1 ? "" : "s"}:{" "}
+            <code>({trackingCallbackParams.join(", ")})</code>.
+          </>
+        ) : (
+          <>
+            The SDK is using a{" "}
+            <code className="text-gold-11">trackingCallback</code>.
+          </>
+        )}
+      </Text>
+      <CallbackSource source={trackingCallbackSource} />
+    </>
   );
 }
 
@@ -678,9 +931,33 @@ function stickyBucketingPanel({
 //   );
 // }
 
-function payloadPanel({ hasPayload, payload }: SDKHealthCheckResult) {
+function payloadPanel({
+  hasPayload,
+  payload,
+  hasDecryptionKey,
+  payloadDecrypted,
+  isRemoteEval,
+}: SDKHealthCheckResult) {
   return (
     <>
+      {/* Without a payload there's nothing to describe, unless decryption is why */}
+      {hasPayload || (hasDecryptionKey && !payloadDecrypted) ? (
+        <Text
+          as="div"
+          size="2"
+          weight="regular"
+          mb="3"
+          color={hasDecryptionKey && !payloadDecrypted ? "orange" : undefined}
+        >
+          {hasDecryptionKey
+            ? payloadDecrypted
+              ? "The payload is encrypted, and the SDK decrypted it with its decryption key."
+              : "The SDK has a decryption key but couldn’t decrypt the payload. Check that it’s the right key for this SDK connection."
+            : isRemoteEval
+              ? "The SDK uses remote evaluation, so features are evaluated on the server and the payload holds the results for this user."
+              : "The payload is in plain text: the SDK uses neither a decryption key nor remote evaluation."}
+        </Text>
+      ) : null}
       {!hasPayload ? (
         <>
           <Callout.Root color="amber" size="1" className="mb-4">
@@ -697,48 +974,152 @@ function payloadPanel({ hasPayload, payload }: SDKHealthCheckResult) {
         <ValueField
           value={payload}
           valueType="json"
-          maxHeight={`calc(100vh - ${NAV_H}px - 150px)`}
+          maxHeight={`calc(100vh - ${NAV_H}px - 210px)`}
         />
       )}
     </>
   );
 }
 
-function logEventPanel({ usingLogEvent }: SDKHealthCheckResult) {
+function logEventPanel({
+  usingLogEvent,
+  logEventSource,
+}: SDKHealthCheckResult) {
   return (
-    <Text as="div" size="2" weight="regular">
-      {usingLogEvent ? (
-        <>
-          The SDK is using a <code className="text-gold-11">logEvent</code>{" "}
-          callback.
-        </>
-      ) : (
-        <>
-          The SDK is not using a <code className="text-gold-11">logEvent</code>{" "}
-          callback. This optional callback allows you to track events to a data
-          warehouse directly from the SDK.
-        </>
-      )}
+    <>
+      <Text as="div" size="2" weight="regular">
+        {usingLogEvent ? (
+          <>
+            The SDK is using a <code className="text-gold-11">logEvent</code>{" "}
+            callback.
+          </>
+        ) : (
+          <>
+            The SDK is not using a{" "}
+            <code className="text-gold-11">logEvent</code> callback. This
+            optional callback allows you to track events to a data warehouse
+            directly from the SDK.
+          </>
+        )}
+      </Text>
+      <CallbackSource source={logEventSource} />
+    </>
+  );
+}
+
+function IngestorDetectionNote() {
+  return (
+    <Text as="div" size="1" className="mt-3 text-gray-11">
+      DevTools can only count requests sent after it starts watching the page.
+      On busy pages, requests sent while the page is still loading can be
+      missed, so the count may be low. Later events will still show up here.
     </Text>
   );
 }
 
-function onFeatureUsagePanel({ usingOnFeatureUsage }: SDKHealthCheckResult) {
+function eventIngestorPanel({ ingestor, clientKey }: SDKHealthCheckResult) {
+  const { keyMismatch } = summarizeIngestor(ingestor, clientKey);
+  if (!ingestor?.requestCount) {
+    return (
+      <>
+        <Text as="div" size="2" weight="regular">
+          {ingestor?.usingGrowthBookTracking ? (
+            <>
+              The SDK uses{" "}
+              <code className="text-gold-11">growthbookTrackingPlugin</code>,
+              but no requests to an event ingestor have been seen on this page
+              yet. Events are sent after the first experiment exposure or
+              feature evaluation. If those have happened, the requests may be
+              blocked, for example by an ad blocker or CSP.
+            </>
+          ) : (
+            <>
+              The SDK isn&rsquo;t sending events to a GrowthBook event ingestor.
+              Managed Warehouse and event forwarding need{" "}
+              <code className="text-gold-11">growthbookTrackingPlugin</code>, or{" "}
+              <code className="text-gold-11">
+                data-tracking=&quot;growthbook&quot;
+              </code>{" "}
+              on the script tag.
+            </>
+          )}
+        </Text>
+        {ingestor?.usingGrowthBookTracking ? <IngestorDetectionNote /> : null}
+      </>
+    );
+  }
   return (
-    <Text as="div" size="2" weight="regular">
-      {usingOnFeatureUsage ? (
-        <>
-          The SDK is using an{" "}
-          <code className="text-gold-11">onFeatureUsage</code> callback.
-        </>
-      ) : (
-        <>
-          The SDK is not using a{" "}
-          <code className="text-gold-11">onFeatureUsage</code> callback. This
-          optional callback allows you to track feature flag telemetry to a data
-          warehouse.
-        </>
-      )}
-    </Text>
+    <>
+      <Text as="div" size="2" weight="regular">
+        <div className="mb-1">Sending events to:</div>
+        {ingestor.hosts.map((host) => {
+          const region = ingestorRegion(host);
+          return (
+            <div key={host}>
+              <code className="text-gold-11">{host}</code>{" "}
+              <span className="text-gray-11">
+                ({region ? `${region} ingestor` : "custom host"})
+              </span>
+            </div>
+          );
+        })}
+        <div className="mt-2">
+          {ingestor.requestCount} request
+          {ingestor.requestCount === 1 ? "" : "s"} seen
+          {ingestor.lastStatus
+            ? `, last response ${ingestor.lastStatus}`
+            : null}
+          .
+        </div>
+        {ingestor.errorCount ? (
+          <div className="mt-1 text-amber-600">
+            {ingestor.errorCount} request{ingestor.errorCount === 1 ? "" : "s"}{" "}
+            failed.
+          </div>
+        ) : null}
+        {keyMismatch ? (
+          <div className="mt-1 text-amber-600">
+            Requests use client key{" "}
+            <code>{ingestor.clientKeys.join(", ")}</code>, but the SDK&rsquo;s
+            is <code>{clientKey}</code>. This is expected only if the page runs
+            more than one SDK connection.
+          </div>
+        ) : null}
+      </Text>
+      <IngestorDetectionNote />
+    </>
+  );
+}
+
+function onFeatureUsagePanel({
+  usingOnFeatureUsage,
+  onFeatureUsageSource,
+  usingLogEvent,
+}: SDKHealthCheckResult) {
+  return (
+    <>
+      <Text as="div" size="2" weight="regular">
+        {usingOnFeatureUsage ? (
+          <>
+            The SDK is using an{" "}
+            <code className="text-gold-11">onFeatureUsage</code> callback.
+          </>
+        ) : eventLoggerReplacesCallbacks({ usingLogEvent }) ? (
+          <>
+            Not needed. Managed Warehouse uses{" "}
+            <code className="text-gold-11">logEvent</code>: the SDK sends
+            feature evaluations to it as Feature Evaluated events.
+          </>
+        ) : (
+          <>
+            The SDK is not using a{" "}
+            <code className="text-gold-11">onFeatureUsage</code> callback. This
+            optional callback allows you to track feature flag telemetry to a
+            data warehouse.
+          </>
+        )}
+      </Text>
+      <CallbackSource source={onFeatureUsageSource} />
+    </>
   );
 }

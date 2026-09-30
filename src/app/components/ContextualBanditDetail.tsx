@@ -20,6 +20,7 @@ import {
   CONTEXTUAL_BANDIT_SDK_VERSION,
 } from "@/utils/contextualBandits";
 import {
+  eventLoggerReplacesCallbacks,
   expectsUserContextParam,
   trackingCallbackParamsAreValid,
 } from "@/utils/sdkCallbacks";
@@ -109,6 +110,10 @@ export default function ContextualBanditDetail({
     ? result.variationId
     : undefined;
 
+  // logEvent receives userContext alongside each Experiment Viewed event
+  const eventLoggerTracksExposures =
+    !sdkData?.hasTrackingCallback &&
+    eventLoggerReplacesCallbacks({ usingLogEvent: sdkData?.usingLogEvent });
   // Rewards are attributed per context, so userContext has to reach the callback
   const callbackPassesUserContext =
     !!sdkData?.hasTrackingCallback &&
@@ -134,7 +139,7 @@ export default function ContextualBanditDetail({
   if (!sdkSupported) {
     return (
       <>
-        <div className="label font-semibold mt-3">Contextual Bandit</div>
+        <div className="label font-semibold mt-6">Contextual Bandit</div>
         <Text as="div" size="2" color="amber" mb="3">
           SDK {sdkData?.version} does not support contextual bandits, so the
           page skips this rule. Anything shown below would be DevTools&rsquo;
@@ -147,7 +152,7 @@ export default function ContextualBanditDetail({
 
   return (
     <>
-      <div className="label font-semibold mt-3">Contextual Bandit</div>
+      <div className="label font-semibold mt-6">Contextual Bandit</div>
 
       {subline ? (
         <div className="text-xs text-gray-11 mb-2">{subline}</div>
@@ -169,7 +174,7 @@ export default function ContextualBanditDetail({
       ) : null}
 
       <Accordion.Root
-        className="accordion my-4"
+        className="accordion mb-4"
         type="multiple"
         defaultValue={["weights"]}
       >
@@ -272,7 +277,11 @@ export default function ContextualBanditDetail({
       </Accordion.Root>
 
       <div className="label font-semibold mt-3">Setup</div>
-      {!expectsUserContextParam(sdkData?.version) ? (
+      {eventLoggerTracksExposures ? (
+        <Check ok>
+          Managed Warehouse uses logEvent, which receives userContext
+        </Check>
+      ) : !expectsUserContextParam(sdkData?.version) ? (
         <Check info>
           SDK {sdkData?.version ?? "version unknown"} does not pass userContext
           to trackingCallback
@@ -312,10 +321,10 @@ export default function ContextualBanditDetail({
   );
 }
 
-export function ContextualBanditBadge() {
+export function BanditBadge({ label }: { label: string }) {
   return (
     <Badge size="1" color="violet" className="text-2xs">
-      Contextual Bandit
+      {label}
     </Badge>
   );
 }

@@ -26,3 +26,6 @@ yarn-error.log*
 
 dist/
 tmp/
+
+# firefox source upload for AMO review
+devtools-src*.zip

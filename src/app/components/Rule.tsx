@@ -29,6 +29,10 @@ import {
 } from "@/app/components/ExperimentsTab";
 import { isDark, Theme } from "@/app";
 import { ruleVariations } from "@/utils/contextualBandits";
+import { hasAttribute, hasHashValue } from "@/utils/missingAttributes";
+import { NotSetBadge } from "@/app/components/MissingAttributes";
+
+const HASH_NOT_SET = "No value for the current user, so they can't be bucketed";
 
 type RuleType =
   | "force"
@@ -71,6 +75,7 @@ export default function Rule({
     string | undefined
   >("selectedChangeId", undefined);
   const [currentTab, setCurrentTab] = useTabState("currentTab", "features");
+  const [attributes] = useTabState<Record<string, unknown>>("attributes", {});
   const [jsonMode, setJsonMode] = useState(false);
 
   const debug = evaluatedFeature?.debug || [];
@@ -113,6 +118,7 @@ export default function Rule({
     force,
     weights,
     hashAttribute,
+    fallbackAttribute,
     coverage,
     namespace,
   } = rule;
@@ -197,6 +203,7 @@ export default function Rule({
                   variations={variations}
                   weights={weights}
                   hashAttribute={hashAttribute}
+                  fallbackAttribute={fallbackAttribute}
                   coverage={coverage}
                   namespace={namespace}
                   valueType={valueType}
@@ -209,6 +216,13 @@ export default function Rule({
                   <div className="mt-2 text-xs">
                     <span className="font-semibold">SAMPLE</span> users by{" "}
                     <span className="conditionValue">{hashAttribute}</span>
+                    {!hasHashValue(
+                      attributes || {},
+                      hashAttribute,
+                      fallbackAttribute,
+                    ) ? (
+                      <NotSetBadge reason={HASH_NOT_SET} />
+                    ) : null}
                   </div>
                   <div className="mt-2 mb-3 flex items-center gap-3 text-xs">
                     <span className="font-semibold flex-shrink-0">ROLLOUT</span>
@@ -277,6 +291,7 @@ export function ExperimentRule({
   variations,
   weights,
   hashAttribute,
+  fallbackAttribute,
   coverage,
   namespace,
   valueType = "number",
@@ -286,12 +301,14 @@ export function ExperimentRule({
   variations?: any[];
   weights?: number[];
   hashAttribute?: string;
+  fallbackAttribute?: string;
   coverage?: number;
   namespace?: [string, number, number] | undefined;
   valueType?: ValueType;
   onApply?: (value: any) => void;
   evaluatedFeature?: EvaluatedFeature;
 }) {
+  const [attributes] = useTabState<Record<string, unknown>>("attributes", {});
   const [theme, setTheme, themeReady] = useGlobalState<Theme>(
     "theme",
     "system",
@@ -313,6 +330,9 @@ export function ExperimentRule({
       <div className="mt-2 text-xs">
         <span className="font-semibold">SPLIT</span> users by{" "}
         <span className="conditionValue">{hashAttribute}</span>
+        {!hasHashValue(attributes || {}, hashAttribute, fallbackAttribute) ? (
+          <NotSetBadge reason={HASH_NOT_SET} />
+        ) : null}
         {namespace && (
           <>
             {" "}
@@ -465,6 +485,15 @@ export function ConditionDisplay({
     "selectedFid",
     undefined,
   );
+  const [attributes] = useTabState<Record<string, unknown>>("attributes", {});
+  // $exists checks mean to test absence, so an unset attribute there is expected
+  const isNotSet = (cond: Condition) =>
+    !cond.prereq &&
+    !!cond.field &&
+    !cond.field.startsWith("$") &&
+    cond.operator !== "$exists" &&
+    cond.operator !== "$notExists" &&
+    !hasAttribute(attributes || {}, cond.field);
 
   const conditionJson = condition ? JSON.stringify(condition) : undefined;
   const parsed = conditionJson
@@ -531,6 +560,7 @@ export function ConditionDisplay({
           cond.field
         )}
       </span>
+      {isNotSet(cond) ? <NotSetBadge /> : null}
       <span className="conditionOperator">
         {operatorToText(cond.operator, cond.prereq)}
       </span>

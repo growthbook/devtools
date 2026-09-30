@@ -53,8 +53,9 @@ import {
 import { LogUnionWithSource } from "@/app/utils/logs";
 import SelectField from "@/app/components/Forms/SelectField";
 import ContextualBanditDetail, {
-  ContextualBanditBadge,
+  BanditBadge,
 } from "@/app/components/ContextualBanditDetail";
+import useBanditKeys, { banditLabel } from "@/app/hooks/useBanditKeys";
 
 // The panel states these itself, so echoing the SDK log adds nothing
 const REDUNDANT_DEBUG_LOGS = ["In experiment", "Force via dev tools"];
@@ -208,6 +209,11 @@ export default function ExperimentDetail({
   }, [selectedEid, viewEvaluationSource, evaluations]);
 
   const { types } = selectedExperiment || {};
+  const banditKeys = useBanditKeys();
+  const badgeLabel = banditLabel(
+    types?.contextualBandit,
+    !!selectedEid && banditKeys.has(selectedEid),
+  );
 
   const { variations, weights, hashAttribute, coverage, namespace } =
     selectedExperiment?.experiment || {};
@@ -268,9 +274,9 @@ export default function ExperimentDetail({
                   {selectedExperiment?.experiment
                     ? getExperimentDisplayName(selectedExperiment.experiment)
                     : selectedEid}
-                  {types?.contextualBandit ? (
+                  {badgeLabel ? (
                     <span className="ml-2 align-middle">
-                      <ContextualBanditBadge />
+                      <BanditBadge label={badgeLabel} />
                     </span>
                   ) : null}
                 </h2>
@@ -624,6 +630,9 @@ export default function ExperimentDetail({
                     variations={variations}
                     weights={weights}
                     hashAttribute={hashAttribute}
+                    fallbackAttribute={
+                      selectedExperiment?.experiment?.fallbackAttribute
+                    }
                     coverage={coverage}
                     namespace={namespace}
                     valueType={valueType}
