@@ -630,6 +630,9 @@ export default function ExperimentDetail({
                     variations={variations}
                     weights={weights}
                     hashAttribute={hashAttribute}
+                    fallbackAttribute={
+                      selectedExperiment?.experiment?.fallbackAttribute
+                    }
                     coverage={coverage}
                     namespace={namespace}
                     valueType={valueType}

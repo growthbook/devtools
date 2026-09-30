@@ -35,13 +35,16 @@ import {
   trackingCallbackParamsAreValid,
   USER_CONTEXT_SDK_VERSION,
 } from "@/utils/sdkCallbacks";
-import { getActiveTabId } from "@/app/hooks/useTabState";
+import useTabState, { getActiveTabId } from "@/app/hooks/useTabState";
+import useMissingAttributes from "@/app/hooks/useMissingAttributes";
+import { MissingAttributesList } from "@/app/components/MissingAttributes";
 import { ingestorRegion, summarizeIngestor } from "@/utils/ingestor";
 import { paddedVersionString } from "@growthbook/growthbook";
 
 const panelTitles: Record<SdkItem, string> = {
   status: "SDK Status",
   externalSdks: "Back-end SDKs",
+  attributes: "Attributes",
   plugins: "Plugins",
   version: "SDK Version",
   trackingCallback: "Tracking Callback",
@@ -66,6 +69,7 @@ const panels: Record<
 > = {
   status: statusPanel,
   externalSdks: externalSdksPanel,
+  attributes: AttributesPanel,
   plugins: pluginsPanel,
   version: versionPanel,
   trackingCallback: trackingCallbackPanel,
@@ -84,6 +88,7 @@ const doclinks: Record<SdkItem, string | undefined> = {
   externalSdks:
     "https://docs.growthbook.io/tools/chrome-extension#back-end-debugging",
   plugins: undefined,
+  attributes: undefined,
   version:
     "https://github.com/growthbook/growthbook/blob/main/packages/shared/src/sdk-versioning/CAPABILITIES.md",
   trackingCallback:
@@ -471,6 +476,40 @@ function externalSdksPanel({ externalSdks }: SDKHealthCheckResult) {
           </Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>
+    </>
+  );
+}
+
+function AttributesPanel() {
+  const missing = useMissingAttributes();
+  const [, setCurrentTab] = useTabState("currentTab", "features");
+  return (
+    <>
+      <Text as="div" size="2" weight="regular">
+        {missing.length ? (
+          <>
+            Features on this page target attributes the SDK hasn&rsquo;t set:
+            <MissingAttributesList missing={missing} />
+          </>
+        ) : (
+          <>Every attribute that features on this page target is set.</>
+        )}
+      </Text>
+      <Text as="div" size="1" className="mt-3 text-gray-11">
+        Checks the features the page has evaluated, using the current
+        user&rsquo;s attributes. A <code>null</code> value counts as set.{" "}
+        <Link
+          href="#"
+          role="button"
+          size="1"
+          onClick={(e) => {
+            e.preventDefault();
+            setCurrentTab("attributes");
+          }}
+        >
+          Open the Attributes tab
+        </Link>
+      </Text>
     </>
   );
 }

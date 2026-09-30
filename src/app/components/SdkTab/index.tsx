@@ -10,6 +10,7 @@ import useSdkData from "@/app/hooks/useSdkData";
 import { paddedVersionString } from "@growthbook/growthbook";
 import packageJson from "@growthbook/growthbook/package.json";
 import { summarizeIngestor } from "@/utils/ingestor";
+import useMissingAttributes from "@/app/hooks/useMissingAttributes";
 import {
   eventLoggerReplacesCallbacks,
   hasTrackingCallbackIssues,
@@ -30,6 +31,7 @@ export const sdkItems = [
   "externalSdks",
   "payload",
   "security",
+  "attributes",
   "stickyBucketing",
   // "streaming",
   "trackingCallback",
@@ -65,6 +67,7 @@ export default function SdkTab() {
     plugins,
   } = useSdkData();
   const ingestorSummary = summarizeIngestor(ingestor, clientKey);
+  const missingAttributes = useMissingAttributes();
 
   const numExternalSdks = Object.keys(externalSdks || {}).length;
 
@@ -234,6 +237,24 @@ export default function SdkTab() {
                 title="Payload Security"
                 status={securityStatus}
                 color="gray"
+              />
+            </div>
+
+            <div
+              key={`sdkTab_sdkItems_attributes`}
+              className={clsx("itemCard flex items-center justify-between", {
+                selected: selectedItem === "attributes",
+              })}
+              onClick={() => setSelectedItem("attributes")}
+            >
+              <ItemStatus
+                title="Attributes"
+                status={
+                  missingAttributes.length
+                    ? `${missingAttributes.length} not set`
+                    : "All set"
+                }
+                color={missingAttributes.length ? "orange" : "gray"}
               />
             </div>
 
