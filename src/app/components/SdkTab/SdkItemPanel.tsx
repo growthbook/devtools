@@ -40,6 +40,7 @@ import useTabState, { getActiveTabId } from "@/app/hooks/useTabState";
 import useMissingAttributes from "@/app/hooks/useMissingAttributes";
 import { MissingAttributesList } from "@/app/components/MissingAttributes";
 import { ingestorRegion, summarizeIngestor } from "@/utils/ingestor";
+import { isMinifiedName } from "@/utils/sdkPlugins";
 import { paddedVersionString } from "@growthbook/growthbook";
 
 const panelTitles: Record<SdkItem, string> = {
@@ -535,12 +536,13 @@ function pluginsPanel({
       {plugins?.length ? (
         <Accordion.Root className="accordion" type="multiple">
           {plugins.map((plugin, i) => {
+            // A site's own minifier can rename the SDK's private methods, e.g. to "C"
+            const uses = (plugin.uses ?? []).filter(
+              (method) => !isMinifiedName(method),
+            );
+            const minifiedUses = (plugin.uses?.length ?? 0) - uses.length;
             const related = [
-              ...new Set(
-                (plugin.uses ?? []).flatMap(
-                  (method) => RELATED_ITEMS[method] ?? [],
-                ),
-              ),
+              ...new Set(uses.flatMap((method) => RELATED_ITEMS[method] ?? [])),
             ];
             return (
               <Accordion.Item
@@ -567,15 +569,22 @@ function pluginsPanel({
                 </Accordion.Trigger>
                 <Accordion.Content className="accordionInner overflow-hidden w-full">
                   <Text as="div" size="1" className="pl-4 pt-1 pb-2">
-                    {plugin.uses?.length ? (
+                    {uses.length || minifiedUses ? (
                       <div>
                         Uses{" "}
-                        {plugin.uses.map((method, j) => (
+                        {uses.map((method, j) => (
                           <React.Fragment key={method}>
                             {j ? ", " : null}
                             <code>{method}</code>
                           </React.Fragment>
                         ))}
+                        {minifiedUses ? (
+                          <span className="text-gray-11">
+                            {uses.length ? ", plus " : null}
+                            {minifiedUses} internal method
+                            {minifiedUses === 1 ? "" : "s"}
+                          </span>
+                        ) : null}
                       </div>
                     ) : (
                       <div className="text-gray-11">
@@ -603,10 +612,8 @@ function pluginsPanel({
                         ))}
                       </div>
                     ) : null}
-                    {plugin.custom && plugin.source ? (
-                      <div className="mt-2">
-                        <SourceCode source={plugin.source} />
-                      </div>
+                    {plugin.custom ? (
+                      <CallbackSource source={plugin.source} className="mt-1" />
                     ) : null}
                   </Text>
                 </Accordion.Content>

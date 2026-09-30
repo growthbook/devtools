@@ -22,11 +22,16 @@ export function isThirdPartyTrackingSource(source: string): boolean {
   return source.includes("experiment_viewed") && /["'`]gtm["'`]/.test(source);
 }
 
-// A custom plugin's own function name, when it has a meaningful one. Minifiers shorten names
-// to a letter or two, and functions made with new Function() are called "anonymous"
+// Minifiers shorten names to a letter or two, which say nothing about what they were
+export function isMinifiedName(name: string): boolean {
+  return name.length <= 2;
+}
+
+// A custom plugin's own function name, when it has a meaningful one.
+// Functions made with new Function() are called "anonymous"
 export function customPluginName(name: string): string | undefined {
   const clean = name.replace(/^bound /, "");
-  if (clean.length <= 2 || clean === "anonymous") return undefined;
+  if (isMinifiedName(clean) || clean === "anonymous") return undefined;
   return clean;
 }
 

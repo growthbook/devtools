@@ -6,6 +6,7 @@ import {
 import {
   customPluginName,
   identifyPlugin,
+  isMinifiedName,
   pluginUses,
   isThirdPartyTrackingSource,
 } from "./sdkPlugins";
@@ -109,5 +110,13 @@ describe("pluginUses", () => {
   it("ignores calls that aren't SDK methods", () => {
     const plugin = () => document.addEventListener("click", () => {});
     expect(pluginUses(source(plugin), sdkMethods)).toEqual([]);
+  });
+});
+
+describe("isMinifiedName", () => {
+  it("flags the one- and two-letter names minifiers produce", () => {
+    expect(isMinifiedName("C")).toBe(true);
+    expect(isMinifiedName("Ie")).toBe(true);
+    expect(isMinifiedName("subscribe")).toBe(false);
   });
 });
