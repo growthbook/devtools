@@ -23,7 +23,7 @@ import {
 import ValueField from "./ValueField";
 import clsx from "clsx";
 import { LogUnionWithSource } from "@/app/utils/logs";
-import { ContextualBanditBadge } from "@/app/components/ContextualBanditDetail";
+import useBanditKeys, { banditLabel } from "@/app/hooks/useBanditKeys";
 
 export const HEADER_H = 40;
 
@@ -56,6 +56,7 @@ export default function LogsList({
     "feature",
   ]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const banditKeys = useBanditKeys();
 
   const toggleFilter = (filter: LogType) => {
     if (filters.includes(filter)) {
@@ -190,6 +191,14 @@ export default function LogsList({
                 ? date.toLocaleTimeString(undefined, { hourCycle: "h24" })
                 : date.toLocaleString(undefined, { hourCycle: "h24" });
             const isExpanded = expandedItems.has(i.toString());
+            const experimentKey =
+              evt.logType === "experiment"
+                ? (evt.details.experiment as { key?: string } | undefined)?.key
+                : undefined;
+            const subtitle = banditLabel(
+              evt.isContextualBandit,
+              !!experimentKey && banditKeys.has(experimentKey),
+            );
             return (
               <Accordion.Item key={i} value={i.toString()}>
                 <Accordion.Trigger className="trigger w-full mb-0.5">
@@ -249,20 +258,16 @@ export default function LogsList({
                         `w-[${colWidth}%]`,
                         "px-1",
                         "text-left",
-                        "text-nowrap",
-                        "text-ellipsis",
-                        "line-clamp-1",
                         "overflow-hidden",
                         "flex",
-                        "items-center",
+                        "flex-col",
+                        "justify-center",
                         xsTextSizeClass,
                       )}
                     >
-                      {evt.eventInfo}
-                      {evt.isContextualBandit ? (
-                        <span className="ml-1.5 flex-shrink-0">
-                          <ContextualBanditBadge />
-                        </span>
+                      <div className="truncate">{evt.eventInfo}</div>
+                      {subtitle ? (
+                        <div className="truncate text-gray-11">{subtitle}</div>
                       ) : null}
                     </div>
                     {!isResponsive && (

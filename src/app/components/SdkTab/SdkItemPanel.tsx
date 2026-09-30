@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Prism } from "react-syntax-highlighter";
+import {
+  ghcolors as codeThemeLight,
+  a11yDark as codeThemeDark,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
+import useGlobalState from "@/app/hooks/useGlobalState";
 import {
   Button,
   Callout,
@@ -8,7 +14,7 @@ import {
   Text,
 } from "@radix-ui/themes";
 import ValueField from "@/app/components/ValueField";
-import { MW, NAV_H } from "@/app";
+import { isDark, MW, NAV_H, Theme } from "@/app";
 import {
   PiArrowsClockwise,
   PiArrowSquareOut,
@@ -25,15 +31,18 @@ import useSdkData from "@/app/hooks/useSdkData";
 import { SDKHealthCheckResult } from "devtools";
 import {
   expectsUserContextParam,
+  eventLoggerReplacesCallbacks,
   trackingCallbackParamsAreValid,
   USER_CONTEXT_SDK_VERSION,
 } from "@/utils/sdkCallbacks";
 import { getActiveTabId } from "@/app/hooks/useTabState";
+import { ingestorRegion, summarizeIngestor } from "@/utils/ingestor";
 import { paddedVersionString } from "@growthbook/growthbook";
 
 const panelTitles: Record<SdkItem, string> = {
   status: "SDK Status",
   externalSdks: "Back-end SDKs",
+  plugins: "Plugins",
   version: "SDK Version",
   trackingCallback: "Tracking Callback",
   security: "Payload Security",
@@ -41,6 +50,7 @@ const panelTitles: Record<SdkItem, string> = {
   // streaming: "Streaming",
   payload: "SDK Payload",
   logEvent: "Log Event Callback",
+  eventIngestor: "Event Ingestor",
   onFeatureUsage: "On Feature Usage Callback",
 };
 
@@ -56,6 +66,7 @@ const panels: Record<
 > = {
   status: statusPanel,
   externalSdks: externalSdksPanel,
+  plugins: pluginsPanel,
   version: versionPanel,
   trackingCallback: trackingCallbackPanel,
   security: securityPanel,
@@ -63,6 +74,7 @@ const panels: Record<
   // streaming: streamingPanel,
   payload: payloadPanel,
   logEvent: logEventPanel,
+  eventIngestor: eventIngestorPanel,
   onFeatureUsage: onFeatureUsagePanel,
 };
 
@@ -71,6 +83,7 @@ const doclinks: Record<SdkItem, string | undefined> = {
     "https://docs.growthbook.io/quick-start#step-2-integrate-growthbook-into-your-application",
   externalSdks:
     "https://docs.growthbook.io/tools/chrome-extension#back-end-debugging",
+  plugins: undefined,
   version:
     "https://github.com/growthbook/growthbook/blob/main/packages/shared/src/sdk-versioning/CAPABILITIES.md",
   trackingCallback:
@@ -80,6 +93,8 @@ const doclinks: Record<SdkItem, string | undefined> = {
   // streaming: "https://docs.growthbook.io/lib/js#streaming-updates",
   payload: "https://docs.growthbook.io/lib/js#loading-features-and-experiments",
   logEvent: undefined,
+  eventIngestor:
+    "https://docs.growthbook.io/app/managed-warehouse#sending-events",
   onFeatureUsage: "https://docs.growthbook.io/lib/js#feature-usage-callback",
 };
 
@@ -460,6 +475,37 @@ function externalSdksPanel({ externalSdks }: SDKHealthCheckResult) {
   );
 }
 
+function pluginsPanel({ plugins }: SDKHealthCheckResult) {
+  return (
+    <>
+      <Text as="div" size="2" weight="regular">
+        {plugins?.length ? (
+          <>
+            {plugins.map((plugin, i) => (
+              <div key={`${plugin.name}_${i}`}>
+                <code className="text-gold-11">{plugin.name}</code>
+                {plugin.appliedAfterSetup ? (
+                  <span className="text-gray-11"> (applied after setup)</span>
+                ) : null}
+                {plugin.custom ? (
+                  <CallbackSource source={plugin.source} />
+                ) : null}
+              </div>
+            ))}
+          </>
+        ) : (
+          <>No plugins were passed to the SDK constructor.</>
+        )}
+      </Text>
+      <Text as="div" size="1" className="mt-3 text-gray-11">
+        Lists plugins passed to the SDK constructor. Plugins applied later, eg{" "}
+        <code>plugin(gb)</code>, aren&rsquo;t detectable, except the tracking
+        plugins, which are recognised from the callbacks they install.
+      </Text>
+    </>
+  );
+}
+
 function versionPanel({
   hasWindowConfig,
   version,
@@ -530,9 +576,58 @@ function versionPanel({
   );
 }
 
+function CallbackSource({ source }: { source?: string }) {
+  const [theme, , themeReady] = useGlobalState<Theme>("theme", "system", true);
+  const dark = useMemo(() => isDark(theme), [theme, themeReady]);
+  if (!source) return null;
+  return (
+    <Accordion.Root className="accordion my-4" type="single" collapsible>
+      <Accordion.Item value="source">
+        <Accordion.Trigger className="trigger mb-2">
+          <Link
+            size="2"
+            role="button"
+            className="hover:underline"
+            weight="bold"
+          >
+            <PiCaretRightFill className="caret mr-0.5" size={12} />
+            Source
+          </Link>
+        </Accordion.Trigger>
+        <Accordion.Content className="accordionInner overflow-hidden w-full">
+          <div className="bg-field border border-gray-a3 rounded-md">
+            <Prism
+              language="javascript"
+              style={!dark ? codeThemeLight : codeThemeDark}
+              customStyle={{
+                padding: "5px",
+                margin: 0,
+                border: "0px none",
+                background: "unset",
+                backgroundColor: "unset",
+                maxHeight: 300,
+                fontFamily: `Consolas, "Bitstream Vera Sans Mono", "Courier New", Courier, monospace`,
+                fontSize: "0.9em",
+                lineHeight: "12px",
+              }}
+              codeTagProps={{
+                className: "text-2xs-important !whitespace-pre-wrap break-all",
+              }}
+            >
+              {source}
+            </Prism>
+          </div>
+        </Accordion.Content>
+      </Accordion.Item>
+    </Accordion.Root>
+  );
+}
+
 function trackingCallbackPanel({
   trackingCallbackParams,
+  trackingCallbackSource,
   hasTrackingCallback,
+  usingLogEvent,
   version,
 }: SDKHealthCheckResult) {
   const missingUserContext =
@@ -542,53 +637,63 @@ function trackingCallbackPanel({
     !expectsUserContextParam(version) &&
     trackingCallbackParams?.length === 3;
   return (
-    <Text as="div" size="2" weight="regular">
-      {!hasTrackingCallback ? (
-        <>
-          The SDK is not using a{" "}
-          <code className="text-gold-11">trackingCallback</code>. You will need
-          to add one to track experiment exposure to your data warehouse.
-        </>
-      ) : missingUserContext ? (
-        <>
-          The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code> with{" "}
-          <em className="text-amber-600">2</em> params. Add a third{" "}
-          <code>userContext</code> param to use newer features.
-        </>
-      ) : unusedUserContext ? (
-        <>
-          The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code> with{" "}
-          <em className="text-amber-600">3</em> params, but SDK {version} never
-          passes <code>userContext</code>. Upgrade to {USER_CONTEXT_SDK_VERSION}{" "}
-          or later to use it.
-        </>
-      ) : !trackingCallbackParamsAreValid(trackingCallbackParams, version) ? (
-        <>
-          The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code> with{" "}
-          <em className="text-amber-600">{trackingCallbackParams?.length}</em>{" "}
-          param{trackingCallbackParams?.length === 1 ? "" : "s"} instead of{" "}
-          <code>(experiment, result)</code> or{" "}
-          <code>(experiment, result, userContext)</code>. Please check your
-          implementation.
-        </>
-      ) : trackingCallbackParams?.length ? (
-        <>
-          The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code> with{" "}
-          {trackingCallbackParams.length} param
-          {trackingCallbackParams.length === 1 ? "" : "s"}:{" "}
-          <code>({trackingCallbackParams.join(", ")})</code>.
-        </>
-      ) : (
-        <>
-          The SDK is using a{" "}
-          <code className="text-gold-11">trackingCallback</code>.
-        </>
-      )}
-    </Text>
+    <>
+      <Text as="div" size="2" weight="regular">
+        {!hasTrackingCallback &&
+        eventLoggerReplacesCallbacks({ usingLogEvent }) ? (
+          <>
+            Not needed. Managed Warehouse uses{" "}
+            <code className="text-gold-11">logEvent</code>: the SDK sends each
+            experiment exposure to it as an Experiment Viewed event.
+          </>
+        ) : !hasTrackingCallback ? (
+          <>
+            The SDK is not using a{" "}
+            <code className="text-gold-11">trackingCallback</code>. You will
+            need to add one to track experiment exposure to your data warehouse.
+          </>
+        ) : missingUserContext ? (
+          <>
+            The SDK is using a{" "}
+            <code className="text-gold-11">trackingCallback</code> with{" "}
+            <em className="text-amber-600">2</em> params. Add a third{" "}
+            <code>userContext</code> param to use newer features.
+          </>
+        ) : unusedUserContext ? (
+          <>
+            The SDK is using a{" "}
+            <code className="text-gold-11">trackingCallback</code> with{" "}
+            <em className="text-amber-600">3</em> params, but SDK {version}{" "}
+            never passes <code>userContext</code>. Upgrade to{" "}
+            {USER_CONTEXT_SDK_VERSION} or later to use it.
+          </>
+        ) : !trackingCallbackParamsAreValid(trackingCallbackParams, version) ? (
+          <>
+            The SDK is using a{" "}
+            <code className="text-gold-11">trackingCallback</code> with{" "}
+            <em className="text-amber-600">{trackingCallbackParams?.length}</em>{" "}
+            param{trackingCallbackParams?.length === 1 ? "" : "s"} instead of{" "}
+            <code>(experiment, result)</code> or{" "}
+            <code>(experiment, result, userContext)</code>. Please check your
+            implementation.
+          </>
+        ) : trackingCallbackParams?.length ? (
+          <>
+            The SDK is using a{" "}
+            <code className="text-gold-11">trackingCallback</code> with{" "}
+            {trackingCallbackParams.length} param
+            {trackingCallbackParams.length === 1 ? "" : "s"}:{" "}
+            <code>({trackingCallbackParams.join(", ")})</code>.
+          </>
+        ) : (
+          <>
+            The SDK is using a{" "}
+            <code className="text-gold-11">trackingCallback</code>.
+          </>
+        )}
+      </Text>
+      <CallbackSource source={trackingCallbackSource} />
+    </>
   );
 }
 
@@ -704,41 +809,145 @@ function payloadPanel({ hasPayload, payload }: SDKHealthCheckResult) {
   );
 }
 
-function logEventPanel({ usingLogEvent }: SDKHealthCheckResult) {
+function logEventPanel({
+  usingLogEvent,
+  logEventSource,
+}: SDKHealthCheckResult) {
   return (
-    <Text as="div" size="2" weight="regular">
-      {usingLogEvent ? (
-        <>
-          The SDK is using a <code className="text-gold-11">logEvent</code>{" "}
-          callback.
-        </>
-      ) : (
-        <>
-          The SDK is not using a <code className="text-gold-11">logEvent</code>{" "}
-          callback. This optional callback allows you to track events to a data
-          warehouse directly from the SDK.
-        </>
-      )}
+    <>
+      <Text as="div" size="2" weight="regular">
+        {usingLogEvent ? (
+          <>
+            The SDK is using a <code className="text-gold-11">logEvent</code>{" "}
+            callback.
+          </>
+        ) : (
+          <>
+            The SDK is not using a{" "}
+            <code className="text-gold-11">logEvent</code> callback. This
+            optional callback allows you to track events to a data warehouse
+            directly from the SDK.
+          </>
+        )}
+      </Text>
+      <CallbackSource source={logEventSource} />
+    </>
+  );
+}
+
+function IngestorDetectionNote() {
+  return (
+    <Text as="div" size="1" className="mt-3 text-gray-11">
+      DevTools can only count requests sent after it starts watching the page.
+      On busy pages, requests sent while the page is still loading can be
+      missed, so the count may be low. Later events will still show up here.
     </Text>
   );
 }
 
-function onFeatureUsagePanel({ usingOnFeatureUsage }: SDKHealthCheckResult) {
+function eventIngestorPanel({ ingestor, clientKey }: SDKHealthCheckResult) {
+  const { keyMismatch } = summarizeIngestor(ingestor, clientKey);
+  if (!ingestor?.requestCount) {
+    return (
+      <>
+        <Text as="div" size="2" weight="regular">
+          {ingestor?.usingGrowthBookTracking ? (
+            <>
+              The SDK uses{" "}
+              <code className="text-gold-11">growthbookTrackingPlugin</code>,
+              but no requests to an event ingestor have been seen on this page
+              yet. Events are sent after the first experiment exposure or
+              feature evaluation. If those have happened, the requests may be
+              blocked, for example by an ad blocker or CSP.
+            </>
+          ) : (
+            <>
+              The SDK isn&rsquo;t sending events to a GrowthBook event ingestor.
+              Managed Warehouse and event forwarding need{" "}
+              <code className="text-gold-11">growthbookTrackingPlugin</code>, or{" "}
+              <code className="text-gold-11">
+                data-tracking=&quot;growthbook&quot;
+              </code>{" "}
+              on the script tag.
+            </>
+          )}
+        </Text>
+        {ingestor?.usingGrowthBookTracking ? <IngestorDetectionNote /> : null}
+      </>
+    );
+  }
   return (
-    <Text as="div" size="2" weight="regular">
-      {usingOnFeatureUsage ? (
-        <>
-          The SDK is using an{" "}
-          <code className="text-gold-11">onFeatureUsage</code> callback.
-        </>
-      ) : (
-        <>
-          The SDK is not using a{" "}
-          <code className="text-gold-11">onFeatureUsage</code> callback. This
-          optional callback allows you to track feature flag telemetry to a data
-          warehouse.
-        </>
-      )}
-    </Text>
+    <>
+      <Text as="div" size="2" weight="regular">
+        <div className="mb-1">Sending events to:</div>
+        {ingestor.hosts.map((host) => {
+          const region = ingestorRegion(host);
+          return (
+            <div key={host}>
+              <code className="text-gold-11">{host}</code>{" "}
+              <span className="text-gray-11">
+                ({region ? `${region} ingestor` : "custom host"})
+              </span>
+            </div>
+          );
+        })}
+        <div className="mt-2">
+          {ingestor.requestCount} request
+          {ingestor.requestCount === 1 ? "" : "s"} seen
+          {ingestor.lastStatus
+            ? `, last response ${ingestor.lastStatus}`
+            : null}
+          .
+        </div>
+        {ingestor.errorCount ? (
+          <div className="mt-1 text-amber-600">
+            {ingestor.errorCount} request{ingestor.errorCount === 1 ? "" : "s"}{" "}
+            failed.
+          </div>
+        ) : null}
+        {keyMismatch ? (
+          <div className="mt-1 text-amber-600">
+            Requests use client key{" "}
+            <code>{ingestor.clientKeys.join(", ")}</code>, but the SDK&rsquo;s
+            is <code>{clientKey}</code>. This is expected only if the page runs
+            more than one SDK connection.
+          </div>
+        ) : null}
+      </Text>
+      <IngestorDetectionNote />
+    </>
+  );
+}
+
+function onFeatureUsagePanel({
+  usingOnFeatureUsage,
+  onFeatureUsageSource,
+  usingLogEvent,
+}: SDKHealthCheckResult) {
+  return (
+    <>
+      <Text as="div" size="2" weight="regular">
+        {usingOnFeatureUsage ? (
+          <>
+            The SDK is using an{" "}
+            <code className="text-gold-11">onFeatureUsage</code> callback.
+          </>
+        ) : eventLoggerReplacesCallbacks({ usingLogEvent }) ? (
+          <>
+            Not needed. Managed Warehouse uses{" "}
+            <code className="text-gold-11">logEvent</code>: the SDK sends
+            feature evaluations to it as Feature Evaluated events.
+          </>
+        ) : (
+          <>
+            The SDK is not using a{" "}
+            <code className="text-gold-11">onFeatureUsage</code> callback. This
+            optional callback allows you to track feature flag telemetry to a
+            data warehouse.
+          </>
+        )}
+      </Text>
+      <CallbackSource source={onFeatureUsageSource} />
+    </>
   );
 }

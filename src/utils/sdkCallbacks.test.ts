@@ -1,5 +1,7 @@
 import {
+  getCallbackSource,
   hasTrackingCallbackIssues,
+  isMissingTrackingCallback,
   parseCallbackParams,
   trackingCallbackParamsAreValid,
 } from "./sdkCallbacks";
@@ -178,5 +180,57 @@ describe("hasTrackingCallbackIssues", () => {
         trackingCallbackParams: ["experiment"],
       }),
     ).toBe(true);
+  });
+});
+
+describe("getCallbackSource", () => {
+  it("returns the callback's source", () => {
+    function track(experiment: unknown, result: unknown) {
+      return [experiment, result];
+    }
+    expect(getCallbackSource(track)).toContain("return [experiment, result]");
+  });
+
+  it("returns undefined for bound functions, whose source is native", () => {
+    function track() {}
+    expect(getCallbackSource(track.bind(null))).toBeUndefined();
+  });
+
+  it("ignores a toString the page shadowed", () => {
+    const track = () => "real body";
+    track.toString = () => "fake";
+    expect(getCallbackSource(track)).toContain("real body");
+  });
+
+  it("truncates very large callbacks", () => {
+    const track = new Function(
+      "return '" + "x".repeat(20_000) + "'",
+    ) as () => string;
+    const src = getCallbackSource(track)!;
+    expect(src.length).toBeLessThan(10_100);
+    expect(src).toMatch(/truncated \*\/$/);
+  });
+});
+
+describe("isMissingTrackingCallback", () => {
+  it("flags an SDK with no way to track exposures", () => {
+    expect(isMissingTrackingCallback({ hasTrackingCallback: false })).toBe(
+      true,
+    );
+  });
+
+  it("accepts an event logger in place of a trackingCallback", () => {
+    expect(
+      isMissingTrackingCallback({
+        hasTrackingCallback: false,
+        usingLogEvent: true,
+      }),
+    ).toBe(false);
+  });
+
+  it("accepts a trackingCallback", () => {
+    expect(isMissingTrackingCallback({ hasTrackingCallback: true })).toBe(
+      false,
+    );
   });
 });

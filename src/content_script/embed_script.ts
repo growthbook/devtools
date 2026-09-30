@@ -11,7 +11,13 @@ import type {
 } from "@growthbook/growthbook";
 import type { ErrorMessage, SDKHealthCheckResult } from "devtools";
 import { Attributes } from "@growthbook/growthbook";
-import { parseCallbackParams } from "@/utils/sdkCallbacks";
+import { getCallbackSource, parseCallbackParams } from "@/utils/sdkCallbacks";
+import {
+  GROWTHBOOK_TRACKING_MARKER,
+  parseIngestorRequest,
+} from "@/utils/ingestor";
+import { identifyPlugin, isThirdPartyTrackingSource } from "@/utils/sdkPlugins";
+import type { DetectedPlugin } from "devtools";
 
 type LogUnionWithSource = LogUnion & { source?: string; clientKey?: string };
 
@@ -80,9 +86,56 @@ function onGrowthBookLoad(cb: (gb: GrowthBook) => void) {
   );
 }
 
+const ingestorActivity = {
+  requestCount: 0,
+  errorCount: 0,
+  hosts: new Set<string>(),
+  clientKeys: new Set<string>(),
+  lastStatus: undefined as number | undefined,
+};
+let ingestorUpdateTimer: number | undefined;
+
+// Resource Timing sees the plugin's fetch and sendBeacon calls without patching either
+function watchIngestorRequests() {
+  if (typeof PerformanceObserver === "undefined") return;
+  try {
+    new PerformanceObserver((list) => {
+      let found = false;
+      // responseStatus is newer than this TypeScript's DOM types
+      const entries = list.getEntries() as (PerformanceResourceTiming & {
+        responseStatus?: number;
+      })[];
+      for (const entry of entries) {
+        const request = parseIngestorRequest(entry.name);
+        if (!request) continue;
+        found = true;
+        ingestorActivity.requestCount++;
+        ingestorActivity.hosts.add(request.host);
+        if (request.clientKey)
+          ingestorActivity.clientKeys.add(request.clientKey);
+        // Chrome only; 0 when the browser withholds it, eg for beacons
+        const status = entry.responseStatus;
+        if (status) {
+          ingestorActivity.lastStatus = status;
+          if (status >= 400) ingestorActivity.errorCount++;
+        }
+      }
+      if (!found) return;
+      window.clearTimeout(ingestorUpdateTimer);
+      ingestorUpdateTimer = window.setTimeout(
+        () => onGrowthBookLoad((gb) => pushSdkHealthUpdate(gb)),
+        1000,
+      );
+    }).observe({ type: "resource", buffered: true });
+  } catch (e) {
+    // Resource Timing observers unsupported
+  }
+}
+
 // Send a refresh message back to content script
 function init() {
   setupListeners();
+  watchIngestorRequests();
 
   // reset the state cookie - will be repopulated if devtools has state set
   writeStateToCookie({}, true);
@@ -409,6 +462,15 @@ function subscribeToSdkChanges(
     writeStateToCookie({ experiments });
   };
 
+  // growthbookTrackingPlugin can be applied after load, eg once an app's env is ready
+  const _setEventLogger = gb.setEventLogger;
+  if (_setEventLogger) {
+    gb.setEventLogger = (logger) => {
+      _setEventLogger.call(gb, logger);
+      pushAppUpdates();
+    };
+  }
+
   const _setPayload = gb.setPayload;
   if (!_setPayload) {
     // legacy SDK, start polling
@@ -484,6 +546,7 @@ function subscribeToSdkChanges(
       patchedCallBack.isNoopCallback = true;
     } else {
       patchedCallBack.originalParams = parseCallbackParams(callback);
+      patchedCallBack.originalSource = getCallbackSource(callback);
     }
     _setTrackingCallback?.call(gb, patchedCallBack);
     pushAppUpdates();
@@ -516,6 +579,10 @@ function subscribeToSdkChanges(
   if (!onFeatureUsage || typeof onFeatureUsage !== "function") {
     // @ts-expect-error
     gb.context.onFeatureUsage.isNoopCallback = true;
+  } else {
+    // @ts-expect-error
+    gb.context.onFeatureUsage.originalSource =
+      getCallbackSource(onFeatureUsage);
   }
 
   // Watch for incoming log events and send to tabstate
@@ -575,12 +642,61 @@ async function sdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
   const trackingCallbackParams = hasTrackingCallback
     ? _trackingCallback.originalParams
     : undefined;
+  const trackingCallbackSource: string | undefined = hasTrackingCallback
+    ? _trackingCallback.originalSource
+    : undefined;
 
   const usingLogEvent = typeof gbContext?.eventLogger === "function";
+  // DevTools never wraps eventLogger, so its source can be read directly
+  const logEventSource = usingLogEvent
+    ? getCallbackSource(gbContext.eventLogger)
+    : undefined;
+
+  // growthbookTrackingPlugin installs the eventLogger and swaps the window.gbEvents array for a { push } object
+  const gbEvents = (window as { gbEvents?: unknown }).gbEvents;
+  const usingGrowthBookTracking =
+    (usingLogEvent &&
+      Function.prototype.toString
+        .call(gbContext.eventLogger)
+        .includes(GROWTHBOOK_TRACKING_MARKER)) ||
+    (!!gbEvents &&
+      !Array.isArray(gbEvents) &&
+      typeof (gbEvents as { push?: unknown }).push === "function");
+
+  // Only constructor plugins are kept on the instance; ones applied later leave no record
+  const plugins: DetectedPlugin[] = (
+    Array.isArray(gbContext?.plugins) ? gbContext.plugins : []
+  )
+    .filter((plugin: unknown) => typeof plugin === "function")
+    .map((plugin: (...args: any[]) => any) => {
+      const name = identifyPlugin(Function.prototype.toString.call(plugin));
+      return name
+        ? { name }
+        : {
+            name: "Custom plugin",
+            custom: true,
+            source: getCallbackSource(plugin),
+          };
+    });
+  // The tracking plugins install recognisable callbacks, so they show up even when applied later
+  const listed = new Set(plugins.map((plugin) => plugin.name));
+  if (usingGrowthBookTracking && !listed.has("growthbookTrackingPlugin")) {
+    plugins.push({ name: "growthbookTrackingPlugin", appliedAfterSetup: true });
+  }
+  if (
+    trackingCallbackSource &&
+    isThirdPartyTrackingSource(trackingCallbackSource) &&
+    !listed.has("thirdPartyTrackingPlugin")
+  ) {
+    plugins.push({ name: "thirdPartyTrackingPlugin", appliedAfterSetup: true });
+  }
 
   const onFeatureUsage = gbContext?.onFeatureUsage;
   const usingOnFeatureUsage =
     typeof onFeatureUsage === "function" && !onFeatureUsage.isNoopCallback;
+  const onFeatureUsageSource: string | undefined = usingOnFeatureUsage
+    ? onFeatureUsage.originalSource
+    : undefined;
 
   const isRemoteEval = !!gb.isRemoteEval?.();
 
@@ -639,10 +755,22 @@ async function sdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
     payload,
     hasTrackingCallback,
     trackingCallbackParams,
+    trackingCallbackSource,
     hasDecryptionKey,
     payloadDecrypted,
     usingLogEvent,
+    logEventSource,
     usingOnFeatureUsage,
+    onFeatureUsageSource,
+    ingestor: {
+      usingGrowthBookTracking,
+      requestCount: ingestorActivity.requestCount,
+      errorCount: ingestorActivity.errorCount,
+      hosts: [...ingestorActivity.hosts],
+      clientKeys: [...ingestorActivity.clientKeys],
+      lastStatus: ingestorActivity.lastStatus,
+    },
+    plugins,
     isRemoteEval,
     usingStickyBucketing,
     stickyBucketAssignmentDocs,

@@ -52,6 +52,18 @@ export function parseCallbackParams(
   return undefined;
 }
 
+const MAX_SOURCE_LENGTH = 10_000;
+
+// A callback's source for display. Uses the prototype's toString since a page can shadow the function's own
+export function getCallbackSource(
+  callback: (...args: any[]) => any,
+): string | undefined {
+  const src = Function.prototype.toString.call(callback);
+  if (src.includes("[native code]")) return undefined;
+  if (src.length <= MAX_SOURCE_LENGTH) return src;
+  return src.slice(0, MAX_SOURCE_LENGTH) + "\n/* … truncated */";
+}
+
 // From this version the SDK also passes a userContext to trackingCallback
 export const USER_CONTEXT_SDK_VERSION = "1.7.0";
 
@@ -74,6 +86,25 @@ export function trackingCallbackParamsAreValid(
   if (params.some((param) => param.startsWith("..."))) return true;
   if (!version) return params.length === 2 || params.length === 3;
   return params.length === (expectsUserContextParam(version) ? 3 : 2);
+}
+
+// The SDK sends Experiment Viewed and Feature Evaluated events to eventLogger itself, which is all Managed Warehouse needs
+export function eventLoggerReplacesCallbacks({
+  usingLogEvent,
+}: Pick<SDKHealthCheckResult, "usingLogEvent">): boolean {
+  return !!usingLogEvent;
+}
+
+export function isMissingTrackingCallback({
+  hasTrackingCallback,
+  usingLogEvent,
+}: Pick<
+  SDKHealthCheckResult,
+  "hasTrackingCallback" | "usingLogEvent"
+>): boolean {
+  return (
+    !hasTrackingCallback && !eventLoggerReplacesCallbacks({ usingLogEvent })
+  );
 }
 
 export function hasTrackingCallbackIssues({

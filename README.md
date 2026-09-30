@@ -64,6 +64,19 @@ Some notes
 
 ## Changelog
 
+*1.2.6* (2026-09-30)
+- Support contextual bandits: shown in the Experiments tab and Event Logs, with applied weights, matched context, and setup checks
+- Label multi-armed bandits in the Experiments tab and Event Logs (requires an API key)
+- SDK Health: validate trackingCallback params against the SDK version (1.7.0+ passes a third userContext param)
+- SDK Health: view the source of the trackingCallback, onFeatureUsage, and eventLogger callbacks
+- SDK Health: don't flag a missing trackingCallback or onFeatureUsage when an eventLogger is set (Managed Warehouse)
+- SDK Health: new Event Ingestor item showing whether events reach a GrowthBook ingestor (Managed Warehouse, event forwarding), with region, failed requests, and client key mismatches
+- SDK Health: new Plugins item listing the SDK plugins in use, with the source of any custom plugin
+- SDK Health: group items into SDK, payload, and tracking sections
+- Variation dropdown for experiments with more than four variations
+- Bug fixes (experiments showing as inactive for rules without meta, bandit rules rendering as rollouts in the Features tab)
+- Bump SDK support to 1.8.0 (`$savedGroup` operator)
+
 *1.2.5* (2026-07-19)
 - GrowthBook is moving to a new and separate visual editor extension. This change makes the old visual editor work nicely with the new.
 
