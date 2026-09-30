@@ -216,8 +216,9 @@
     height: 0;
   }
 }
+/* No fill-mode on open: holding the measured height would clip nested accordions that open later */
 .accordion .accordionInner[data-state="open"] {
-  animation: slideDown 150ms cubic-bezier(0.87, 0, 0.13, 1) forwards;
+  animation: slideDown 150ms cubic-bezier(0.87, 0, 0.13, 1);
 }
 .accordion .accordionInner[data-state="closed"] {
   animation: slideUp 150ms cubic-bezier(0.87, 0, 0.13, 1) forwards;
