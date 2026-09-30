@@ -276,6 +276,7 @@ export type ExternalSdkInfo = {
 
 // A plugin passed to the SDK constructor, or a tracking plugin recognised from its callback
 export type DetectedPlugin = {
+  // Empty for a custom plugin without a usable function name
   name: string;
   custom?: boolean;
   source?: string;

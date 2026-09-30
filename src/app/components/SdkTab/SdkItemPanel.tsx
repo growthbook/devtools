@@ -517,7 +517,9 @@ function pluginsPanel({ plugins }: SDKHealthCheckResult) {
             <ul className="list-disc pl-5 space-y-1.5">
               {plugins.map((plugin, i) => (
                 <li key={`${plugin.name}_${i}`}>
-                  {plugin.name}
+                  {plugin.name || (
+                    <em className="text-gray-11">Unnamed plugin</em>
+                  )}
                   {plugin.appliedAfterSetup ? (
                     <span className="text-gray-11"> (applied after setup)</span>
                   ) : null}

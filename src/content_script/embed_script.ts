@@ -16,7 +16,11 @@ import {
   GROWTHBOOK_TRACKING_MARKER,
   parseIngestorRequest,
 } from "@/utils/ingestor";
-import { identifyPlugin, isThirdPartyTrackingSource } from "@/utils/sdkPlugins";
+import {
+  customPluginName,
+  identifyPlugin,
+  isThirdPartyTrackingSource,
+} from "@/utils/sdkPlugins";
 import type { DetectedPlugin } from "devtools";
 
 type LogUnionWithSource = LogUnion & { source?: string; clientKey?: string };
@@ -673,7 +677,7 @@ async function sdkHealthCheck(gb?: GrowthBook): Promise<SDKHealthCheckResult> {
       return name
         ? { name }
         : {
-            name: "Custom plugin",
+            name: customPluginName(plugin.name) ?? "",
             custom: true,
             source: getCallbackSource(plugin),
           };

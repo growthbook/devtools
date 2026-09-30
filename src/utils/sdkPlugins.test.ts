@@ -3,7 +3,11 @@ import {
   growthbookTrackingPlugin,
   thirdPartyTrackingPlugin,
 } from "@growthbook/growthbook/plugins";
-import { identifyPlugin, isThirdPartyTrackingSource } from "./sdkPlugins";
+import {
+  customPluginName,
+  identifyPlugin,
+  isThirdPartyTrackingSource,
+} from "./sdkPlugins";
 
 const source = (fn: (...args: any[]) => any) =>
   Function.prototype.toString.call(fn);
@@ -53,5 +57,21 @@ describe("isThirdPartyTrackingSource", () => {
         experiment_id: e.key,
       });
     expect(isThirdPartyTrackingSource(source(custom))).toBe(false);
+  });
+});
+
+describe("customPluginName", () => {
+  it("uses a plugin's own function name", () => {
+    function sessionPlugin() {}
+    expect(customPluginName(sessionPlugin.name)).toBe("sessionPlugin");
+    expect(customPluginName(sessionPlugin.bind(null).name)).toBe(
+      "sessionPlugin",
+    );
+  });
+
+  it("treats anonymous and minified names as unnamed", () => {
+    expect(customPluginName("")).toBeUndefined();
+    expect(customPluginName("e")).toBeUndefined();
+    expect(customPluginName("anonymous")).toBeUndefined();
   });
 });

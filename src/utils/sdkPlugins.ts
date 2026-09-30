@@ -21,3 +21,11 @@ export function identifyPlugin(source: string): string | undefined {
 export function isThirdPartyTrackingSource(source: string): boolean {
   return source.includes("experiment_viewed") && /["'`]gtm["'`]/.test(source);
 }
+
+// A custom plugin's own function name, when it has a meaningful one. Minifiers shorten names
+// to a letter or two, and functions made with new Function() are called "anonymous"
+export function customPluginName(name: string): string | undefined {
+  const clean = name.replace(/^bound /, "");
+  if (clean.length <= 2 || clean === "anonymous") return undefined;
+  return clean;
+}
