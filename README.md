@@ -46,9 +46,10 @@ To build and use this extension locally:
 
 ### Firefox (addons.mozilla.org):
 1. Same as above, but for `public/manifest.firefox.json`
-2. Run `yarn package:firefox` to create a `build.firefox.zip` file
-3. Upload to [addons.mozilla.org](https://addons.mozilla.org)
-4. Etc...
+2. Run `yarn package:firefox` to create `build.firefox.zip` and `devtools-src-firefox.zip`
+3. Upload `build.firefox.zip` to [addons.mozilla.org](https://addons.mozilla.org)
+4. When asked for source code, upload `devtools-src-firefox.zip`. It holds the project files used for the build (no `node_modules`, `dist`, or build zips), so reviewers can rebuild with the steps above. `yarn package:firefox-src` regenerates it on its own
+5. Add the changelog entry and submit for review
 
 ## Developing the Visual Editor
 

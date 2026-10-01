@@ -11,7 +11,8 @@
     "build:chrome": "yarn clean && yarn build && cp public/manifest.chrome.json dist/manifest.json && cd dist && rm -f manifest.*.json",
     "build:firefox": "yarn clean && yarn build && cp public/manifest.firefox.json dist/manifest.json && cd dist && rm -f manifest.*.json",
     "package:chrome": "yarn clean && yarn build && cp public/manifest.chrome.json dist/manifest.json && cd dist && rm -f manifest.*.json && zip -r build.chrome.zip . && mv build.chrome.zip ../",
-    "package:firefox": "yarn clean && yarn build && cp public/manifest.firefox.json dist/manifest.json && cd dist && rm -f manifest.*.json && zip -r build.firefox.zip . && mv build.firefox.zip ../"
+    "package:firefox": "yarn clean && yarn build && cp public/manifest.firefox.json dist/manifest.json && cd dist && rm -f manifest.*.json && zip -r build.firefox.zip . && mv build.firefox.zip ../ && cd .. && yarn package:firefox-src",
+    "package:firefox-src": "rm -f devtools-src-firefox.zip && git ls-files --cached --others --exclude-standard | while read -r f; do [ -f \"$f\" ] && echo \"$f\"; done | zip -q -@ devtools-src-firefox.zip -x 'build*.zip' 'devtools-src*.zip'"
   },
   "license": "MIT",
   "repository": {
