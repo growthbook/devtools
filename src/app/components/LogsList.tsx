@@ -201,7 +201,18 @@ export default function LogsList({
             );
             return (
               <Accordion.Item key={i} value={i.toString()}>
-                <Accordion.Trigger className="trigger w-full mb-0.5">
+                <Accordion.Trigger
+                  className="trigger w-full mb-0.5"
+                  onClick={(e) => {
+                    const selection = window.getSelection();
+                    if (!selection?.toString()) return;
+                    if (selection.containsNode(e.target as Node, true)) {
+                      e.preventDefault();
+                    } else if (selection.containsNode(e.currentTarget, true)) {
+                      selection.removeAllRanges();
+                    }
+                  }}
+                >
                   <Flex
                     className={clsx("w-full py-1", {
                       "border-t border-t-gray-4": i > 0,
@@ -265,7 +276,16 @@ export default function LogsList({
                         xsTextSizeClass,
                       )}
                     >
-                      <div className="truncate">{evt.eventInfo}</div>
+                      <div
+                        className={
+                          isExpanded
+                            ? "break-words select-text cursor-text"
+                            : "truncate"
+                        }
+                        title={isExpanded ? undefined : evt.eventInfo}
+                      >
+                        {evt.eventInfo}
+                      </div>
                       {subtitle ? (
                         <div className="truncate text-gray-11">{subtitle}</div>
                       ) : null}
