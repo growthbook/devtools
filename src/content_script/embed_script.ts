@@ -24,6 +24,8 @@ import {
 } from "@/utils/sdkPlugins";
 import type { DetectedPlugin } from "devtools";
 
+import { mergePayloadPatch } from "./payload";
+
 type LogUnionWithSource = LogUnion & { source?: string; clientKey?: string };
 
 type StateObj = {
@@ -362,22 +364,11 @@ function setPayload(data: FeatureApiResponse) {
 function patchPayload(data: FeatureApiResponse) {
   if (!data) return;
   onGrowthBookLoad((gb) => {
-    const payload = gb.getDecryptedPayload?.() || {
+    const currentPayload = gb.getDecryptedPayload?.() || {
       features: gb.getFeatures?.(),
       experiments: gb.getExperiments?.(),
     };
-    Object.keys(data).forEach((key) => {
-      const k = key as keyof FeatureApiResponse;
-      if (!payload[k]) {
-        // @ts-ignore
-        payload[k] = data[k];
-      } else {
-        if (typeof payload[k] === "object") {
-          // @ts-ignore
-          payload[k] = { ...payload[k], ...data[k] };
-        }
-      }
-    });
+    const payload = mergePayloadPatch(currentPayload, data);
 
     if (gb.setPayload) {
       gb.setPayload(payload);
