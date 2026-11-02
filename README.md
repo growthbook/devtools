@@ -65,6 +65,9 @@ Some notes
 
 ## Changelog
 
+*1.3.0* (2026-11-02)
+- Bump SDK support to 2.0.0: rules evaluate with SDK 2.0.0's stricter type matching, and Remote Saved Group checks
+
 *1.2.6* (2026-09-30)
 - Support contextual bandits
 - SDK Health: new checks for events sent to the GrowthBook ingestor, SDK plugins, and targeting attributes that aren't set
