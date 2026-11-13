@@ -83,7 +83,12 @@ function getState(property: string): { state?: any; success: boolean } {
     return { success: false };
   }
 }
-function setState(property: string, value: any, skipPostMessage?: boolean) {
+function setState(
+  property: string,
+  value: any,
+  skipPostMessage?: boolean,
+  writeId?: string,
+) {
   state[property] = value;
   window.sessionStorage.setItem(
     SESSION_STORAGE_TAB_STATE_KEY,
@@ -95,6 +100,7 @@ function setState(property: string, value: any, skipPostMessage?: boolean) {
       property,
       value,
       tabId,
+      writeId,
     });
   }
   // send custom messages to Embed script for specific properties so that the Embed script can update the GB SDK
@@ -146,7 +152,7 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
       sendResponse({ success: true });
     }
     if (message.type === "setTabState") {
-      setState(message.property, message.value); // Update the state property
+      setState(message.property, message.value, false, message.writeId);
       sendResponse({ success: true });
     }
   } catch (error) {

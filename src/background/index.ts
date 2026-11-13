@@ -59,6 +59,7 @@ async function setState(
   property: string,
   value: any,
   persist: boolean = false,
+  writeId?: string,
 ) {
   if (persist) {
     await chrome.storage.sync.set({ [property]: value });
@@ -69,6 +70,7 @@ async function setState(
     type: "globalStateChanged",
     property,
     value,
+    writeId,
   });
 }
 
@@ -96,7 +98,12 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
         sendResponse({ success: true });
       }
       if (message.type === "setGlobalState") {
-        await setState(message.property, message.value, message.persist);
+        await setState(
+          message.property,
+          message.value,
+          message.persist,
+          message.writeId,
+        );
         sendResponse({ success: true });
       }
 

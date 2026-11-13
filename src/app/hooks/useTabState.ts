@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { createWriteTracker } from "@/app/hooks/writeTracker";
+
+const writes = createWriteTracker();
 
 type UseStateReturn<T> = [T, (value: T) => void, boolean];
 
@@ -72,7 +75,10 @@ export default function useTabState<T>(
         message.property === property
       ) {
         // Missing value indicates no state found in tab store, keep default value
-        if ("value" in message) {
+        if (
+          "value" in message &&
+          writes.shouldApply(property, message.writeId)
+        ) {
           setState(message.value);
         }
         setReady(true);
@@ -88,23 +94,20 @@ export default function useTabState<T>(
   const setTabState = async (value: T) => {
     if (!property) return;
     setState(value); // Optimistic update
+    const writeId = writes.begin(property);
     const activeTabId = await getActiveTabId();
-    if (!activeTabId) return;
+    if (!activeTabId) {
+      writes.abandon(property, writeId);
+      return;
+    }
     try {
-      if (chrome?.tabs) {
-        await chrome.tabs.sendMessage(activeTabId, {
-          type: "setTabState",
-          property,
-          value,
-        });
-      } else {
-        await chrome.runtime.sendMessage({
-          type: "setTabState",
-          property,
-          value,
-        });
-      }
+      const message = { type: "setTabState", property, value, writeId };
+      const response = chrome?.tabs
+        ? await chrome.tabs.sendMessage(activeTabId, message)
+        : await chrome.runtime.sendMessage(message);
+      if (response?.success === false) writes.abandon(property, writeId);
     } catch (error) {
+      writes.abandon(property, writeId);
       console.error("Error setting tab state in content script", error);
     }
   };
