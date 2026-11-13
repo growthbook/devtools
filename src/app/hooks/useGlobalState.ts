@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { createWriteTracker } from "@/app/hooks/writeTracker";
+
+const writes = createWriteTracker();
 
 type UseStateReturn<T> = [T, (value: T) => void, boolean];
 
@@ -36,7 +39,10 @@ export default function useGlobalState<T>(
         message.property === property
       ) {
         // Missing value indicates no state found in global store, keep default value
-        if ("value" in message) {
+        if (
+          "value" in message &&
+          writes.shouldApply(property, message.writeId)
+        ) {
           setState(message.value);
         }
         setReady(true);
@@ -51,14 +57,18 @@ export default function useGlobalState<T>(
   // Setter for state: updates state in the background worker
   const setGlobalState = async (value: any) => {
     setState(value); // Optimistic update
+    const writeId = writes.begin(property);
     try {
-      await chrome.runtime.sendMessage({
+      const response = await chrome.runtime.sendMessage({
         type: "setGlobalState",
         property,
         value,
         persist,
+        writeId,
       });
+      if (response?.success === false) writes.abandon(property, writeId);
     } catch (error) {
+      writes.abandon(property, writeId);
       console.error("Error setting global state in background worker", error);
     }
   };
